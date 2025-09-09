@@ -1,34 +1,33 @@
-// app/components/Hero.tsx
-"use client";
+// app/components/hero.tsx
+import CTA from "./ui/CTA";
+import { Compass } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="min-h-[70vh] grid place-items-center bg-slate-950 text-slate-100 relative overflow-hidden">
-      {/* fondo sutil */}
-      <div className="pointer-events-none absolute inset-0 opacity-20 [background:radial-gradient(circle_at_center,rgba(56,189,248,.25),transparent_60%)]" />
+    <section className="container py-24">
+      <div className="relative map-surface hero-halo rounded-3xl fade-border px-6 py-14 sm:py-20 text-center">
+        {/* Coordenadas tipo “mapa” */}
+        <div className="absolute left-4 top-4 pill hidden sm:inline-flex items-center gap-2 z-10">
+          <Compass className="h-4 w-4 opacity-80" />
+          <span className="text-xs opacity-80">N 19.43° · W 99.13°</span>
+        </div>
 
-      <div className="relative z-10 max-w-2xl text-center px-6">
-        <div className="text-6xl mb-3">👻</div>
-        <h1 className="text-3xl md:text-5xl font-semibold tracking-tight">
-          Nómada Fantasma
-        </h1>
-        <p className="mt-4 text-slate-300">
-          Barco pirata tecnológico para explorar mapas y datos.
-        </p>
+        {/* Contenido principal sobre la superficie de mapa */}
+        <div className="relative z-10">
+          <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-neon-gradient">
+            Nómada Fantasma
+          </h1>
+          <p className="mt-4 text-lg text-muted-foreground">
+            Cartógrafo de lo imposible
+          </p>
 
-        <div className="mt-8 flex items-center justify-center gap-3">
-          <a
-            href="#"
-            className="rounded-xl px-4 py-2 bg-sky-500/90 hover:bg-sky-500 transition shadow"
-          >
-            Explorar mapa
-          </a>
-          <a
-            href="#"
-            className="rounded-xl px-4 py-2 border border-slate-700 hover:bg-slate-900 transition"
-          >
-            Hablar con la IA
-          </a>
+          <CTA />
+
+          <ul className="mt-12 space-y-3 text-muted-foreground">
+            <li>🪐 Explora destinos únicos</li>
+            <li>🕯️ Descubre rutas secretas</li>
+            <li>⚓ Navegar sin límites</li>
+          </ul>
         </div>
       </div>
     </section>

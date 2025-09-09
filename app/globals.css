@@ -17,6 +17,9 @@
   --primary: 199 89% 53%;
   --primary-foreground: 210 40% 98%;
 
+  --accent: 292 85% 62%;
+  --accent-foreground: 222 47% 8%;
+
   --border: 214 32% 91%;
   --muted: 210 40% 96%;
   --muted-foreground: 215 16% 47%;
@@ -25,13 +28,18 @@
   --card-foreground: 222 47% 11%;
 }
 
-/* Modo oscuro — look principal */
+/* Modo oscuro — look principal (AQUA + NEÓN) */
 .dark {
   --background: 222 47% 8%;
   --foreground: 210 40% 96%;
 
-  --primary: 199 89% 53%;
+  /* AQUA principal */
+  --primary: 187 92% 52%;
   --primary-foreground: 222 47% 8%;
+
+  /* Acento secundario (magenta violáceo sutil) */
+  --accent: 292 85% 62%;
+  --accent-foreground: 222 47% 8%;
 
   --border: 217 33% 20%;
   --muted: 222 47% 10%;
@@ -56,16 +64,16 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    /* Degradado sutil de fondo (tecnológico, etéreo) */
+    /* Fondo etéreo con halo Aqua + acento */
     background-image:
-      radial-gradient(60% 40% at 25% 5%, hsl(199 89% 53% / 0.10), transparent 55%),
-      radial-gradient(40% 30% at 80% 0%, hsl(280 80% 60% / 0.08), transparent 70%),
+      radial-gradient(60% 40% at 25% 5%, hsl(var(--primary) / 0.10), transparent 55%),
+      radial-gradient(40% 30% at 80% 0%, hsl(var(--accent) / 0.08), transparent 70%),
       linear-gradient(180deg, hsl(222 47% 8%), hsl(222 47% 8%));
     background-attachment: fixed;
     min-height: 100dvh;
   }
 
-  /* Tipografía base (Inter se aplica desde layout) */
+  /* Tipografía base (Inter desde layout) */
   h1 { @apply text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight; }
   h2 { @apply text-2xl sm:text-3xl font-semibold tracking-tight; }
   h3 { @apply text-xl sm:text-2xl font-medium; }
@@ -74,7 +82,7 @@
 
   /* Selección de texto */
   ::selection {
-    background: hsl(199 89% 53% / 0.25);
+    background: hsl(var(--primary) / 0.25);
     color: hsl(var(--foreground));
   }
 
@@ -91,7 +99,7 @@
   /* Accesibilidad: ring consistente */
   :focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px hsl(199 89% 53% / 0.35);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.35);
     border-radius: 10px;
   }
 }
@@ -111,7 +119,10 @@
 @layer components {
   /* Superficies con glassmorphism */
   .card-glass {
-    @apply bg-card/60 backdrop-blur-xs border rounded-2xl shadow-[0_1px_0_0_hsl(0_0%_100%_/_.05)_inset,0_10px_20px_hsl(222_47%_8%_/_0.35)];
+    @apply bg-card/60 backdrop-blur-xs border rounded-2xl;
+    box-shadow:
+      0 1px 0 0 hsl(0 0% 100% / 0.05) inset,
+      0 10px 20px hsl(222 47% 8% / 0.35);
   }
 
   /* Pastillas (navbar, badges, etc.) */
@@ -123,24 +134,32 @@
   .btn {
     @apply inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium border transition-all select-none;
   }
+
+  /* Botón principal AQUA con brillo controlado */
   .btn-primary {
-    @apply btn text-primary-foreground border-transparent;
-    background-image: linear-gradient(180deg, hsl(199 89% 58%), hsl(199 89% 48%));
+    @apply btn text-[hsl(var(--primary-foreground))] border-0;
+    background-image: linear-gradient(180deg, hsl(var(--primary)), hsl(187 92% 44%));
     box-shadow:
-      0 0 0 1px hsl(199 89% 53% / 0.25),
-      0 8px 30px hsl(199 89% 53% / 0.20);
+      0 0 0 1px hsl(var(--primary) / 0.30),
+      0 8px 28px hsl(var(--primary) / 0.22);
   }
+
+  /* Botón fantasma */
   .btn-ghost {
     @apply btn bg-card/55 text-foreground border-border;
-    box-shadow: 0 1px 0 0 hsl(0 0% 100% / 0.05) inset, 0 8px 20px hsl(222 47% 8% / 0.25);
+    box-shadow:
+      0 1px 0 0 hsl(0 0% 100% / 0.05) inset,
+      0 8px 20px hsl(222 47% 8% / 0.25);
   }
+
+  /* CTA grande (opcional para hero) */
   .btn-cta {
     @apply inline-flex items-center justify-center gap-2 rounded-3xl px-5 py-3 text-base font-medium border-0;
-    background-image: linear-gradient(180deg, hsl(199 89% 58%), hsl(199 89% 48%));
+    background-image: linear-gradient(180deg, hsl(var(--primary)), hsl(187 92% 44%));
     color: hsl(var(--primary-foreground));
     box-shadow:
-      0 0 0 1px hsl(199 89% 53% / 0.25),
-      0 10px 36px hsl(199 89% 53% / 0.25);
+      0 0 0 1px hsl(var(--primary) / 0.30),
+      0 10px 36px hsl(var(--primary) / 0.25);
   }
   .btn-cta:active { transform: translateY(1px); }
 }
@@ -149,28 +168,96 @@
    Utilities
    ========================================= */
 @layer utilities {
-  /* Halo azul amplio para la sección hero */
+  /* Halo azul/aqua para secciones destacadas (Hero) */
   .hero-halo {
     background:
-      radial-gradient(120% 120% at 10% 0%, hsl(199 89% 53% / 0.35), transparent 45%),
-      radial-gradient(80% 60% at 80% 0%, hsl(280 80% 60% / 0.15), transparent 55%),
+      radial-gradient(120% 120% at 12% -5%, hsl(var(--primary) / 0.42), transparent 46%),
+      radial-gradient(80% 60% at 88% -10%, hsl(var(--accent) / 0.18), transparent 58%),
       linear-gradient(180deg, hsl(222 47% 8%), hsl(222 47% 8%));
   }
 
-  /* Sombra/borde suave interno */
+  /* Sombra/borde interno suave */
   .fade-border {
     box-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.06);
   }
 
-  /* Gradiente fantasma genérico para bloques */
+  /* Gradiente “fantasma” genérico para bloques */
   .ghost-gradient {
     background:
-      radial-gradient(80% 60% at 50% 0%, hsl(199 89% 53% / 0.12), transparent 55%),
+      radial-gradient(80% 60% at 50% 0%, hsl(var(--primary) / 0.12), transparent 55%),
       linear-gradient(180deg, hsl(222 47% 8% / 0.00), hsl(222 47% 8% / 0.6));
+  }
+
+  /* Glow AQUA controlado (para botones/links destacados) */
+  .glow-aqua {
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.35),
+      0 10px 36px hsl(var(--primary) / 0.25);
+  }
+
+  /* Borde neón sutil (pills activas) */
+  .neon-border {
+    box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.45);
+  }
+
+  /* Texto degradado aqua → acento */
+  .text-neon-gradient {
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   /* Sutileza al pasar el cursor sobre superficies */
   .surface-hover {
     transition: background-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+  }
+
+  /* === Mapa: rejilla + curvas de nivel para el hero === */
+  .map-surface { position: relative; z-index: 0; overflow: hidden; }
+
+  .map-surface::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    pointer-events: none;
+    z-index: 0;
+
+    /* 4 capas:
+       1-2) rejilla (horizontal/vertical)
+       3-4) “curvas de nivel” (anillos irregulares aqua y acento)
+    */
+    background-image:
+      /* grid */
+      linear-gradient(to bottom, hsl(215 16% 65% / 0.08) 1px, transparent 1px),
+      linear-gradient(to right,  hsl(215 16% 65% / 0.08) 1px, transparent 1px),
+      /* contours aqua */
+      repeating-radial-gradient(circle at 18% 28%,
+        transparent 0 14px, hsl(var(--primary) / 0.06) 14px 16px),
+      /* contours accent */
+      repeating-radial-gradient(circle at 82% 12%,
+        transparent 0 20px, hsl(var(--accent) / 0.05) 20px 22px);
+
+    background-size:
+      24px 24px, 24px 24px,        /* grid cell size */
+      220px 220px, 320px 320px;    /* ring spacing */
+    background-repeat: repeat, repeat, no-repeat, no-repeat;
+    background-position: center center, center center, 10% 0%, 85% 0%;
+
+    /* desvanecer en bordes para que no distraiga */
+    -webkit-mask-image: radial-gradient(160% 120% at 50% -10%, black 55%, transparent 85%);
+            mask-image: radial-gradient(160% 120% at 50% -10%, black 55%, transparent 85%);
+
+    opacity: .45;
+  }
+
+  /* en móvil, menos densidad */
+  @media (max-width: 640px) {
+    .map-surface::before {
+      background-size:
+        32px 32px, 32px 32px,
+        260px 260px, 360px 360px;
+      opacity: .35;
+    }
   }
 }
