@@ -9,7 +9,7 @@ export default function Page() {
         </h1>
         <p className="mt-4 text-slate-300">
           Barco pirata tecnológico navegando mapas y datos. Esta es la base limpia
-          para empezar a construir el Hero y el resto de la app.
+          para empezar a construir el Hero y el resto de la app!!.
         </p>
         <div className="mt-8 flex items-center justify-center gap-3">
           <a
