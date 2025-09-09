@@ -1,26 +1,176 @@
-@import "tailwindcss";
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* =========================================
+   NÓMADA FANTASMA — Design Tokens (HSL)
+   ========================================= */
+
+/* Modo claro (disponible, pero el default es dark) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 14px;
+
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+
+  --primary: 199 89% 53%;
+  --primary-foreground: 210 40% 98%;
+
+  --border: 214 32% 91%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Modo oscuro — look principal */
+.dark {
+  --background: 222 47% 8%;
+  --foreground: 210 40% 96%;
+
+  --primary: 199 89% 53%;
+  --primary-foreground: 222 47% 8%;
+
+  --border: 217 33% 20%;
+  --muted: 222 47% 10%;
+  --muted-foreground: 215 20% 70%;
+
+  --card: 222 47% 10%;
+  --card-foreground: 210 40% 96%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* =========================================
+   Base / Reset
+   ========================================= */
+@layer base {
+  *, *::before, *::after {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* Degradado sutil de fondo (tecnológico, etéreo) */
+    background-image:
+      radial-gradient(60% 40% at 25% 5%, hsl(199 89% 53% / 0.10), transparent 55%),
+      radial-gradient(40% 30% at 80% 0%, hsl(280 80% 60% / 0.08), transparent 70%),
+      linear-gradient(180deg, hsl(222 47% 8%), hsl(222 47% 8%));
+    background-attachment: fixed;
+    min-height: 100dvh;
+  }
+
+  /* Tipografía base (Inter se aplica desde layout) */
+  h1 { @apply text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight; }
+  h2 { @apply text-2xl sm:text-3xl font-semibold tracking-tight; }
+  h3 { @apply text-xl sm:text-2xl font-medium; }
+
+  a { @apply transition-opacity hover:opacity-90; }
+
+  /* Selección de texto */
+  ::selection {
+    background: hsl(199 89% 53% / 0.25);
+    color: hsl(var(--foreground));
+  }
+
+  /* Scrollbar discreto (WebKit) */
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-thumb {
+    background: hsl(215 16% 35% / 0.6);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-track { background: transparent; }
+
+  /* Accesibilidad: ring consistente */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px hsl(199 89% 53% / 0.35);
+    border-radius: 10px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Reduce motion si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================
+   Component Primitives
+   ========================================= */
+@layer components {
+  /* Superficies con glassmorphism */
+  .card-glass {
+    @apply bg-card/60 backdrop-blur-xs border rounded-2xl shadow-[0_1px_0_0_hsl(0_0%_100%_/_.05)_inset,0_10px_20px_hsl(222_47%_8%_/_0.35)];
+  }
+
+  /* Pastillas (navbar, badges, etc.) */
+  .pill {
+    @apply rounded-2xl border bg-card/40 px-3 py-1 text-sm;
+  }
+
+  /* Botonera base */
+  .btn {
+    @apply inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium border transition-all select-none;
+  }
+  .btn-primary {
+    @apply btn text-primary-foreground border-transparent;
+    background-image: linear-gradient(180deg, hsl(199 89% 58%), hsl(199 89% 48%));
+    box-shadow:
+      0 0 0 1px hsl(199 89% 53% / 0.25),
+      0 8px 30px hsl(199 89% 53% / 0.20);
+  }
+  .btn-ghost {
+    @apply btn bg-card/55 text-foreground border-border;
+    box-shadow: 0 1px 0 0 hsl(0 0% 100% / 0.05) inset, 0 8px 20px hsl(222 47% 8% / 0.25);
+  }
+  .btn-cta {
+    @apply inline-flex items-center justify-center gap-2 rounded-3xl px-5 py-3 text-base font-medium border-0;
+    background-image: linear-gradient(180deg, hsl(199 89% 58%), hsl(199 89% 48%));
+    color: hsl(var(--primary-foreground));
+    box-shadow:
+      0 0 0 1px hsl(199 89% 53% / 0.25),
+      0 10px 36px hsl(199 89% 53% / 0.25);
+  }
+  .btn-cta:active { transform: translateY(1px); }
+}
+
+/* =========================================
+   Utilities
+   ========================================= */
+@layer utilities {
+  /* Halo azul amplio para la sección hero */
+  .hero-halo {
+    background:
+      radial-gradient(120% 120% at 10% 0%, hsl(199 89% 53% / 0.35), transparent 45%),
+      radial-gradient(80% 60% at 80% 0%, hsl(280 80% 60% / 0.15), transparent 55%),
+      linear-gradient(180deg, hsl(222 47% 8%), hsl(222 47% 8%));
+  }
+
+  /* Sombra/borde suave interno */
+  .fade-border {
+    box-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.06);
+  }
+
+  /* Gradiente fantasma genérico para bloques */
+  .ghost-gradient {
+    background:
+      radial-gradient(80% 60% at 50% 0%, hsl(199 89% 53% / 0.12), transparent 55%),
+      linear-gradient(180deg, hsl(222 47% 8% / 0.00), hsl(222 47% 8% / 0.6));
+  }
+
+  /* Sutileza al pasar el cursor sobre superficies */
+  .surface-hover {
+    transition: background-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+  }
 }
