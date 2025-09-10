@@ -1,262 +1,303 @@
-/* app/globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* =========================================
-   NÓMADA FANTASMA — PALETA V2 (Aqua + Neon)
-   ========================================= */
-
-/* Tema CLARO — “papel de niebla” con mapa visible */
-:root {
-  --radius: 14px;
-
-  /* Base y texto */
-  --background: 218 24% 91%;        /* gris frío suave (menos brillante) */
-  --foreground: 223 47% 14%;
-
-  /* Acentos */
-  --primary: 189 88% 52%;            /* aqua */
-  --primary-foreground: 223 47% 8%;
-  --accent: 268 83% 66%;             /* violeta neón armónico */
-  --accent-foreground: 223 47% 8%;
-
-  /* Superficies */
-  --card: 218 24% 97%;
-  --card-foreground: 223 47% 14%;
-  --border: 220 16% 78%;
-  --muted: 220 18% 96%;
-  --muted-foreground: 223 12% 38%;
-
-  /* Mapa (CLARO) */
-  --grid-line: 215 20% 36%;
-  --map-grid-opacity: .22;       /* rejilla */
-  --map-contour-aqua: .16;       /* curvas aqua */
-  --map-contour-accent: .12;     /* curvas violeta */
-  --map-overlay-opacity: .56;    /* presencia total del mapa */
-  --map-vignette: .18;           /* viñeta */
-  --paper-noise: .03;            /* grano */
-}
-
-/* Tema OSCURO — “noche” con mapa notorio */
-.dark {
-  --background: 223 45% 9%;         /* casi negro azulado */
-  --foreground: 210 40% 96%;
-
-  --primary: 189 92% 56%;
-  --primary-foreground: 223 47% 8%;
-  --accent: 268 90% 68%;
-  --accent-foreground: 223 47% 8%;
-
-  --card: 223 43% 12%;
-  --card-foreground: 210 40% 96%;
-  --border: 220 26% 20%;
-  --muted: 223 33% 12%;
-  --muted-foreground: 215 20% 70%;
-
-  /* Mapa (OSCURO) */
-  --grid-line: 215 18% 70%;
-  --map-grid-opacity: .18;
-  --map-contour-aqua: .18;
-  --map-contour-accent: .14;
-  --map-overlay-opacity: .62;
-  --map-vignette: .36;
-  --paper-noise: .055;
-}
-
-/* =========================================
-   Base / Reset
-   ========================================= */
-@layer base {
-  *, *::before, *::after { @apply border-border; }
-
-  html {
-    -webkit-tap-highlight-color: transparent;
-    text-rendering: optimizeLegibility;
-  }
-
-  body {
-    @apply bg-background text-foreground antialiased;
-    /* Fondo que RESPONDE al tema */
-    background-image:
-      radial-gradient(60% 40% at 25% 5%, hsl(var(--primary) / 0.10), transparent 55%),
-      radial-gradient(40% 30% at 80% 0%, hsl(var(--accent) / 0.08), transparent 70%),
-      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
-    background-attachment: fixed;
-    min-height: 100dvh;
-  }
-
-  /* Tipografía base (Inter desde layout) */
-  h1 { @apply text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight; }
-  h2 { @apply text-2xl sm:text-3xl font-semibold tracking-tight; }
-  h3 { @apply text-xl sm:text-2xl font-medium; }
-
-  a { @apply transition-opacity hover:opacity-90; }
-
-  ::selection { background: hsl(var(--primary) / 0.25); color: hsl(var(--foreground)); }
-
-  /* Scrollbar (WebKit) */
-  *::-webkit-scrollbar { width: 10px; height: 10px; }
-  *::-webkit-scrollbar-thumb {
-    background: hsl(215 16% 35% / 0.6);
-    border-radius: 9999px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-  }
-  *::-webkit-scrollbar-track { background: transparent; }
-
-  /* Accesibilidad: ring consistente */
-  :focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.35);
-    border-radius: 10px;
-  }
-}
-
-/* Reduce motion si el usuario lo prefiere */
-@media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-}
-
-/* =========================================
-   Component Primitives
-   ========================================= */
-@layer components {
-  /* Superficies con glassmorphism */
-  .card-glass {
-    @apply bg-card/60 backdrop-blur-xs border rounded-2xl;
-    box-shadow:
-      0 1px 0 0 hsl(0 0% 100% / 0.05) inset,
-      0 10px 20px hsl(222 47% 8% / 0.35);
-  }
-
-  /* Pastillas (navbar, badges, etc.) */
-  .pill { @apply rounded-2xl border bg-card/40 px-3 py-1 text-sm; }
-
-  /* Botonera base */
-  .btn { @apply inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium border transition-all select-none; }
-
-  /* Botón principal AQUA con brillo controlado */
-  .btn-primary {
-    @apply btn text-[hsl(var(--primary-foreground))] border-0;
-    background-image: linear-gradient(180deg, hsl(var(--primary)), hsl(187 92% 44%));
-    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.30), 0 8px 28px hsl(var(--primary) / 0.22);
-  }
-
-  /* Botón fantasma */
-  .btn-ghost {
-    @apply btn bg-card/55 text-foreground border-border;
-    box-shadow:
-      0 1px 0 0 hsl(0 0% 100% / 0.05) inset,
-      0 8px 20px hsl(222 47% 8% / 0.25);
-  }
-
-  /* CTA grande (para hero) */
-  .btn-cta {
-    @apply inline-flex items-center justify-center gap-2 rounded-3xl px-5 py-3 text-base font-medium border-0;
-    background-image: linear-gradient(180deg, hsl(var(--primary)), hsl(187 92% 44%));
-    color: hsl(var(--primary-foreground));
-    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.30), 0 10px 36px hsl(var(--primary) / 0.25);
-  }
-  .btn-cta:active { transform: translateY(1px); }
-}
-
-/* =========================================
-   Utilities
-   ========================================= */
-@layer utilities {
-  /* Base del Hero por tema */
-  .hero-halo {
-    background:
-      radial-gradient(120% 120% at 12% -5%, hsl(var(--primary) / 0.42), transparent 46%),
-      radial-gradient(80% 60% at 88% -10%, hsl(var(--accent) / 0.18), transparent 58%),
-      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
-  }
-
-  /* Sombra/borde interno suave */
-  .fade-border { box-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.06); }
-
-  /* Gradiente “fantasma” genérico */
-  .ghost-gradient {
-    background:
-      radial-gradient(80% 60% at 50% 0%, hsl(var(--primary) / 0.12), transparent 55%),
-      linear-gradient(180deg, hsl(var(--background) / 0.00), hsl(var(--background) / 0.6));
-  }
-
-  /* Glow AQUA controlado (para botones/links destacados) */
-  .glow-aqua { box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35), 0 10px 36px hsl(var(--primary) / 0.25); }
-
-  /* Borde neón sutil (pills activas) */
-  .neon-border { box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.45); }
-
-  /* Texto degradado aqua → violeta */
-  .text-neon-gradient {
-    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* Suavidad al pasar el cursor sobre superficies */
-  .surface-hover { transition: background-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease; }
-
-  /* === Superficie de “mapa” visible en ambos temas === */
-  .map-surface { position: relative; z-index: 0; overflow: hidden; }
-
-  /* Capa de rejilla + curvas (debajo del contenido) */
-  .map-surface::before {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    pointer-events: none;
-    z-index: 0;
-
-    background-image:
-      /* grid (usa token y opacidad por tema) */
-      linear-gradient(to bottom, hsl(var(--grid-line) / var(--map-grid-opacity)) 1px, transparent 1px),
-      linear-gradient(to right,  hsl(var(--grid-line) / var(--map-grid-opacity)) 1px, transparent 1px),
-      /* contours: aqua + accent */
-      repeating-radial-gradient(circle at 18% 28%, transparent 0 14px, hsl(var(--primary) / var(--map-contour-aqua)) 14px 16px),
-      repeating-radial-gradient(circle at 82% 12%, transparent 0 20px, hsl(var(--accent) / var(--map-contour-accent)) 20px 22px);
-
-    background-size: 24px 24px, 24px 24px, 220px 220px, 320px 320px;
-    background-repeat: repeat, repeat, no-repeat, no-repeat;
-    background-position: center center, center center, 10% 0%, 85% 0%;
-
-    -webkit-mask-image: radial-gradient(160% 120% at 50% -10%, black 55%, transparent 85%);
-            mask-image: radial-gradient(160% 120% at 50% -10%, black 55%, transparent 85%);
-
-    opacity: var(--map-overlay-opacity);
-  }
-
-  /* Capa de “papel” + viñeta/grano (encima del mapa, debajo del contenido) */
-  .map-surface::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    background:
-      /* grano fino */
-      repeating-linear-gradient( 0deg,  hsl(0 0% 100% / var(--paper-noise)) 0 2px, transparent 2px 4px),
-      repeating-linear-gradient(90deg,  hsl(0 0% 100% / var(--paper-noise)) 0 2px, transparent 2px 4px),
-      /* viñeta */
-      radial-gradient(140% 80% at 50% 0%, transparent 55%, hsl(0 0% 0% / var(--map-vignette)) 100%);
-    mix-blend-mode: multiply;
-    border-radius: inherit;
-  }
-
-  /* Ajustes móviles: menos densidad/opacidad */
-  @media (max-width: 640px) {
-    .map-surface::before {
-      background-size: 32px 32px, 32px 32px, 260px 260px, 360px 360px;
-      opacity: calc(var(--map-overlay-opacity) - .06);
-    }
-    .map-surface::after {
-      background:
-        repeating-linear-gradient( 0deg,  hsl(0 0% 100% / calc(var(--paper-noise) + .01)) 0 2px, transparent 2px 4px),
-        repeating-linear-gradient(90deg,  hsl(0 0% 100% / calc(var(--paper-noise) + .01)) 0 2px, transparent 2px 4px),
-        radial-gradient(140% 80% at 50% 0%, transparent 55%, hsl(0 0% 0% / calc(var(--map-vignette) + .06)) 100%);
-    }
-  }
-}
+/* -------------------------------------------------------
+   NÓMADA FANTASMA — GLOBAL STYLES (Cartografía ↔ Sonar)
+   v6: ondas visibles en claro + cartografía legible en oscuro
+   -----------------------------------------------------*/
+   @tailwind base;
+   @tailwind components;
+   @tailwind utilities;
+   
+   /* =========================
+      VARIABLES / PALETA
+      ========================= */
+   :root {
+     --radius: 16px;
+   
+     /* LIGHT — Cartografía (papel frío atlántico) */
+     --background: 216 20% 82%;
+     --foreground: 222 50% 16%;
+   
+     --primary: 193 88% 44%;   /* aqua oceánico */
+     --primary-foreground: 222 60% 8%;
+     --accent: 268 80% 60%;    /* violeta tenue */
+   
+     --card: 216 18% 90%;
+     --card-foreground: 222 50% 16%;
+     --border: 216 22% 62%;
+     --muted: 214 16% 92%;
+     --muted-foreground: 222 12% 34%;
+   
+     /* CARTOGRAFÍA (LIGHT) más visible */
+     --carto-grid-h: 216 30% 20%;
+     --carto-grid-alpha: .40;
+     --carto-contour-aqua: .26;
+     --carto-contour-accent: .18;
+     --carto-overlay: .78;
+     --carto-vignette: .06;
+     --carto-noise: .016;
+   
+     /* Ondas visibles en claro */
+     --nf-wave-stroke-1: rgba(56,189,248,0.96);
+     --nf-wave-stroke-2: rgba(168,85,247,0.86);
+     --nf-wave-glow-1:   rgba(56,189,248,0.56);
+     --nf-wave-glow-2:   rgba(168,85,247,0.36);
+   
+     /* Halo del hero (light) */
+     --halo-p: .18;
+     --halo-a: .06;
+   
+     /* Glass */
+     --glass-bg:        255 255 255 / 0.68;
+     --glass-border:    15 23 42 / 0.12;
+     --glass-shadow:    0 10px 28px -12px rgba(2,6,23,.24);
+   }
+   
+   /* DARK — Pirata cyberpunk (abismo + neón aqua/magenta) */
+   .dark {
+     --background: 220 50% 8%;
+     --foreground: 210 40% 97%;
+   
+     --primary: 189 100% 58%;
+     --primary-foreground: 220 60% 8%;
+     --accent: 295 92% 70%;
+   
+     --card: 224 40% 12%;
+     --card-foreground: 210 40% 97%;
+     --border: 220 26% 20%;
+     --muted: 224 34% 12%;
+     --muted-foreground: 215 18% 74%;
+   
+     /* SONAR HUD y ondas potentes */
+     --nf-wave-stroke-1: rgba(125,211,252,0.98);
+     --nf-wave-stroke-2: rgba(216,180,254,0.95);
+     --nf-wave-glow-1:   rgba(56,189,248,0.62);
+     --nf-wave-glow-2:   rgba(168,85,247,0.42);
+     --sonar-grid:       0 0% 100%;
+     --sonar-grid-alpha: .28;
+     --sonar-sweep:      189 100% 58%;
+   
+     --halo-p: .40;
+     --halo-a: .22;
+   
+     --glass-bg:        3 6 18 / 0.52;
+     --glass-border:    255 255 255 / 0.14;
+     --glass-shadow:    0 16px 34px -16px rgba(0,0,0,.65);
+   
+     /* ✅ CARTOGRAFÍA (DARK) — retícula/contornos legibles en fondo oscuro */
+     --carto-dark-grid-h: 215 18% 78%;
+     --carto-dark-grid-alpha: .26;
+     --carto-dark-contour-aqua: .20;
+     --carto-dark-contour-accent: .14;
+     --carto-dark-overlay: .38;
+     --carto-dark-vignette: .00;
+   }
+   
+   /* =========================
+      BASE / RESET
+      ========================= */
+   @layer base {
+     *, *::before, *::after { @apply border-border; }
+   
+     html {
+       color-scheme: light dark;
+       -webkit-tap-highlight-color: transparent;
+       text-rendering: optimizeLegibility;
+     }
+   
+     body {
+       @apply bg-background text-foreground antialiased;
+       /* CLARO: papel frío con manchas de tinta */
+       background-image:
+         radial-gradient(60% 40% at 22% 4%, hsl(var(--primary) / 0.12), transparent 56%),
+         radial-gradient(40% 30% at 80% 0%, hsl(var(--accent) / 0.08), transparent 72%),
+         linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
+       background-attachment: fixed;
+       min-height: 100dvh;
+     }
+     /* OSCURO: abismo con halo cian/magenta */
+     :root.dark body {
+       background-image:
+         radial-gradient(120% 90% at 50% -12%, hsl(var(--primary) / 0.12), transparent 62%),
+         radial-gradient(140% 80% at 100% -20%, hsl(var(--accent) / 0.08), transparent 70%),
+         linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
+     }
+   
+     h1 { @apply text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight; }
+     h2 { @apply text-2xl sm:text-3xl font-semibold tracking-tight; }
+     h3 { @apply text-xl sm:text-2xl font-medium; }
+   
+     a { @apply transition-opacity hover:opacity-90; }
+     ::selection { background: hsl(var(--primary) / 0.28); color: hsl(var(--foreground)); }
+   
+     *::-webkit-scrollbar { width: 10px; height: 10px; }
+     *::-webkit-scrollbar-thumb {
+       background: hsl(215 16% 35% / 0.6);
+       border-radius: 9999px; border: 2px solid transparent; background-clip: padding-box;
+     }
+     *::-webkit-scrollbar-track { background: transparent; }
+   
+     :focus-visible {
+       outline: none;
+       box-shadow: 0 0 0 3px hsl(var(--primary) / 0.38);
+       border-radius: 10px;
+     }
+   }
+   
+   @media (prefers-reduced-motion: reduce) {
+     * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+   }
+   
+   /* =========================
+      COMPONENT PRIMITIVES
+      ========================= */
+   @layer components {
+     .card-glass {
+       background-color: hsl(var(--card) / 0.60);
+       -webkit-backdrop-filter: blur(9px);
+       backdrop-filter: blur(9px);
+       border: 1px solid hsl(var(--border));
+       border-radius: 1.25rem;
+       box-shadow:
+         0 1px 0 0 hsl(0 0% 100% / 0.05) inset,
+         var(--glass-shadow);
+     }
+   
+     .pill { @apply rounded-2xl border bg-card/40 px-3 py-1 text-sm; }
+     .btn  { @apply inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium border select-none transition-all; }
+   
+     .btn-primary {
+       @apply btn text-[hsl(var(--primary-foreground))] border-0;
+       background-image: linear-gradient(180deg, hsl(var(--primary)), hsl(187 92% 44%));
+       box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35), 0 10px 32px hsl(var(--primary) / 0.25);
+     }
+   
+     .btn-ghost {
+       @apply btn bg-card/55 text-foreground border-border;
+       box-shadow:
+         0 1px 0 0 hsl(0 0% 100% / 0.05) inset,
+         0 8px 22px hsl(222 47% 8% / 0.25);
+     }
+   
+     .btn-cta {
+       @apply inline-flex items-center justify-center gap-2 rounded-3xl px-5 py-3 text-base font-medium border-0;
+       background-image: linear-gradient(180deg, hsl(var(--primary)), hsl(187 92% 44%));
+       color: hsl(var(--primary-foreground));
+       box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35), 0 12px 38px hsl(var(--primary) / 0.28);
+     }
+     .btn-cta:active { transform: translateY(1px); }
+   }
+   
+   /* =========================
+      UTILITIES
+      ========================= */
+   @layer utilities {
+     .text-balance { text-wrap: balance; }
+     .text-pretty  { text-wrap: pretty;  }
+     .visually-hidden {
+       position: absolute !important; height:1px; width:1px;
+       overflow:hidden; clip: rect(1px,1px,1px,1px);
+       white-space:nowrap; border:0; padding:0; margin:-1px;
+     }
+   
+     /* Aura del hero (parametrizada) */
+     .hero-halo {
+       background:
+         radial-gradient(120% 120% at 12% -5%, hsl(var(--primary) / var(--halo-p)), transparent 46%),
+         radial-gradient(80% 60% at 88% -10%, hsl(var(--accent) / var(--halo-a)), transparent 58%),
+         linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
+     }
+   
+     /* Degradado de título */
+     .text-neon-gradient {
+       background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
+       -webkit-background-clip: text; background-clip: text; color: transparent;
+     }
+   
+     .glow-aqua { box-shadow: 0 0 0 1px hsl(var(--primary) / 0.38), 0 12px 38px hsl(var(--primary) / 0.28); }
+   
+     /* Mostrar/ocultar capas por tema:
+        ✅ Sonar (ondas/HUD) visible en ambos.
+        ✅ Cartografía visible también en dark (no la ocultamos). */
+     /* No escondemos .theme--sonar en light ni .theme--carto en dark. */
+   
+     /* ====== CARTOGRAFÍA (LIGHT) ====== */
+     .map-surface { position: relative; z-index: 0; overflow: hidden; border-radius: var(--radius); }
+     .map-surface::before {
+       content:""; position:absolute; inset:-1px; pointer-events:none; z-index:0; border-radius: inherit;
+       background-image:
+         /* rejilla lat/long */
+         linear-gradient(to bottom, hsl(var(--carto-grid-h) / var(--carto-grid-alpha)) 1px, transparent 1px),
+         linear-gradient(to right,  hsl(var(--carto-grid-h) / var(--carto-grid-alpha)) 1px, transparent 1px),
+         /* curvas de nivel (aqua + violeta) */
+         repeating-radial-gradient(circle at 18% 28%, transparent 0 14px, hsl(var(--primary) / var(--carto-contour-aqua)) 14px 16px),
+         repeating-radial-gradient(circle at 82% 12%, transparent 0 20px, hsl(var(--accent) / var(--carto-contour-accent)) 20px 22px);
+       background-size: 28px 28px, 28px 28px, 220px 220px, 320px 320px;
+       background-position: center center, center center, 10% 0%, 85% 0%;
+       background-repeat: repeat, repeat, no-repeat, no-repeat;
+       -webkit-mask-image: radial-gradient(160% 120% at 50% -10%, black 55%, transparent 85%);
+               mask-image: radial-gradient(160% 120% at 50% -10%, black 55%, transparent 85%);
+       opacity: var(--carto-overlay);
+       mix-blend-mode: multiply; /* tinta en papel */
+     }
+     .map-surface::after {
+       content:""; position:absolute; inset:0; pointer-events:none; z-index:1; border-radius: inherit;
+       background:
+         repeating-linear-gradient(0deg,  hsl(0 0% 100% / var(--carto-noise)) 0 2px, transparent 2px 4px),
+         repeating-linear-gradient(90deg, hsl(0 0% 100% / var(--carto-noise)) 0 2px, transparent 2px 4px),
+         radial-gradient(140% 80% at 50% 0%, transparent 55%, hsl(0 0% 0% / var(--carto-vignette)) 100%);
+       mix-blend-mode: multiply;
+     }
+   
+     /* ====== CARTOGRAFÍA (DARK) — overrides luminosos ====== */
+     html.dark .map-surface::before {
+       background-image:
+         linear-gradient(to bottom, hsl(var(--carto-dark-grid-h) / var(--carto-dark-grid-alpha)) 1px, transparent 1px),
+         linear-gradient(to right,  hsl(var(--carto-dark-grid-h) / var(--carto-dark-grid-alpha)) 1px, transparent 1px),
+         repeating-radial-gradient(circle at 18% 28%, transparent 0 16px, hsl(var(--primary) / var(--carto-dark-contour-aqua)) 16px 18px),
+         repeating-radial-gradient(circle at 82% 12%, transparent 0 22px, hsl(var(--accent)  / var(--carto-dark-contour-accent)) 22px 24px);
+       background-size: 28px 28px, 28px 28px, 260px 260px, 360px 360px;
+       background-position: center center, center center, 10% 0%, 85% 0%;
+       background-repeat: repeat, repeat, no-repeat, no-repeat;
+       mix-blend-mode: screen;             /* suma luz en oscuro */
+       opacity: var(--carto-dark-overlay);
+     }
+     html.dark .map-surface::after {
+       background: radial-gradient(120% 80% at 50% 0%, transparent 60%, rgba(255,255,255,0.04) 100%);
+       mix-blend-mode: screen;             /* leve “neblina marina” */
+     }
+   
+     /* ====== SONAR HUD (DARK) ====== */
+     .sonar-hud { position: relative; z-index: 0; overflow: hidden; border-radius: var(--radius); }
+     .sonar-hud::before {
+       content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+       background-image:
+         linear-gradient(to right, hsl(var(--sonar-grid) / var(--sonar-grid-alpha)) 1px, transparent 1px),
+         linear-gradient(to bottom, hsl(var(--sonar-grid) / var(--sonar-grid-alpha)) 1px, transparent 1px),
+         radial-gradient(circle at 46% 40%, hsl(var(--sonar-grid) / .12) 2px, transparent 3px);
+       background-size: 48px 48px, 48px 48px, 14px 14px;
+       background-position: center, center, center;
+       mix-blend-mode: screen;
+     }
+     .sonar-hud::after {
+       content:""; position:absolute; inset:-20%; pointer-events:none; z-index:1;
+       background: conic-gradient(from -30deg at 46% 40%, hsl(var(--sonar-sweep) / .18), transparent 35%);
+       filter: blur(10px); mix-blend-mode: screen;
+     }
+   
+     /* ====== HERO helpers ====== */
+     .nf-grid {
+       position: absolute; inset: 0;
+       background-image:
+         linear-gradient(to right, hsl(var(--carto-grid-h) / 0.30) 1px, transparent 1px),
+         linear-gradient(to bottom, hsl(var(--carto-grid-h) / 0.30) 1px, transparent 1px);
+       background-size: 48px 48px, 48px 48px;
+       opacity: .26;
+     }
+     @media (max-width:1024px){ .nf-grid{ background-size:40px 40px, 40px 40px; } }
+     @media (max-width:640px){ .nf-grid{ background-size:32px 32px, 32px 32px; } }
+   
+     .nf-vignette {
+       background: radial-gradient(80% 60% at 50% 40%, rgba(0,0,0,0) 0%, rgba(0,0,0,.07) 100%);
+       mix-blend-mode: normal;
+     }
+   }
+   
