@@ -17,11 +17,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className="dark" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <body className={`${inter.className} bg-background text-foreground antialiased min-h-screen flex flex-col`}>
         <Navbar />
         <main className="flex-1">{children}</main>
-        <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
+        <footer className="bg-background border-t border-border py-6 text-center text-sm text-muted-foreground">
           © {new Date().getFullYear()} Nómada Fantasma — Cartógrafo de lo imposible
         </footer>
       </body>

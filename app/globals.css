@@ -4,58 +4,71 @@
 @tailwind utilities;
 
 /* =========================================
-   NÓMADA FANTASMA — Design Tokens (HSL)
+   NÓMADA FANTASMA — PALETA V2 (Aqua + Neon)
    ========================================= */
 
-/* Modo claro (disponible, pero el default es dark) */
+/* Tema CLARO — “papel de niebla” con mapa visible */
 :root {
   --radius: 14px;
 
-  --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
+  /* Base y texto */
+  --background: 218 24% 91%;        /* gris frío suave (menos brillante) */
+  --foreground: 223 47% 14%;
 
-  --primary: 199 89% 53%;
-  --primary-foreground: 210 40% 98%;
+  /* Acentos */
+  --primary: 189 88% 52%;            /* aqua */
+  --primary-foreground: 223 47% 8%;
+  --accent: 268 83% 66%;             /* violeta neón armónico */
+  --accent-foreground: 223 47% 8%;
 
-  --accent: 292 85% 62%;
-  --accent-foreground: 222 47% 8%;
+  /* Superficies */
+  --card: 218 24% 97%;
+  --card-foreground: 223 47% 14%;
+  --border: 220 16% 78%;
+  --muted: 220 18% 96%;
+  --muted-foreground: 223 12% 38%;
 
-  --border: 214 32% 91%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  /* Mapa (CLARO) */
+  --grid-line: 215 20% 36%;
+  --map-grid-opacity: .22;       /* rejilla */
+  --map-contour-aqua: .16;       /* curvas aqua */
+  --map-contour-accent: .12;     /* curvas violeta */
+  --map-overlay-opacity: .56;    /* presencia total del mapa */
+  --map-vignette: .18;           /* viñeta */
+  --paper-noise: .03;            /* grano */
 }
 
-/* Modo oscuro — look principal (AQUA + NEÓN) */
+/* Tema OSCURO — “noche” con mapa notorio */
 .dark {
-  --background: 222 47% 8%;
+  --background: 223 45% 9%;         /* casi negro azulado */
   --foreground: 210 40% 96%;
 
-  /* AQUA principal */
-  --primary: 187 92% 52%;
-  --primary-foreground: 222 47% 8%;
+  --primary: 189 92% 56%;
+  --primary-foreground: 223 47% 8%;
+  --accent: 268 90% 68%;
+  --accent-foreground: 223 47% 8%;
 
-  /* Acento secundario (magenta violáceo sutil) */
-  --accent: 292 85% 62%;
-  --accent-foreground: 222 47% 8%;
-
-  --border: 217 33% 20%;
-  --muted: 222 47% 10%;
+  --card: 223 43% 12%;
+  --card-foreground: 210 40% 96%;
+  --border: 220 26% 20%;
+  --muted: 223 33% 12%;
   --muted-foreground: 215 20% 70%;
 
-  --card: 222 47% 10%;
-  --card-foreground: 210 40% 96%;
+  /* Mapa (OSCURO) */
+  --grid-line: 215 18% 70%;
+  --map-grid-opacity: .18;
+  --map-contour-aqua: .18;
+  --map-contour-accent: .14;
+  --map-overlay-opacity: .62;
+  --map-vignette: .36;
+  --paper-noise: .055;
 }
 
 /* =========================================
    Base / Reset
    ========================================= */
 @layer base {
-  *, *::before, *::after {
-    @apply border-border;
-  }
+  *, *::before, *::after { @apply border-border; }
 
   html {
     -webkit-tap-highlight-color: transparent;
@@ -64,11 +77,11 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    /* Fondo etéreo con halo Aqua + acento */
+    /* Fondo que RESPONDE al tema */
     background-image:
       radial-gradient(60% 40% at 25% 5%, hsl(var(--primary) / 0.10), transparent 55%),
       radial-gradient(40% 30% at 80% 0%, hsl(var(--accent) / 0.08), transparent 70%),
-      linear-gradient(180deg, hsl(222 47% 8%), hsl(222 47% 8%));
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
     background-attachment: fixed;
     min-height: 100dvh;
   }
@@ -80,13 +93,9 @@
 
   a { @apply transition-opacity hover:opacity-90; }
 
-  /* Selección de texto */
-  ::selection {
-    background: hsl(var(--primary) / 0.25);
-    color: hsl(var(--foreground));
-  }
+  ::selection { background: hsl(var(--primary) / 0.25); color: hsl(var(--foreground)); }
 
-  /* Scrollbar discreto (WebKit) */
+  /* Scrollbar (WebKit) */
   *::-webkit-scrollbar { width: 10px; height: 10px; }
   *::-webkit-scrollbar-thumb {
     background: hsl(215 16% 35% / 0.6);
@@ -106,11 +115,7 @@
 
 /* Reduce motion si el usuario lo prefiere */
 @media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 
 /* =========================================
@@ -126,22 +131,16 @@
   }
 
   /* Pastillas (navbar, badges, etc.) */
-  .pill {
-    @apply rounded-2xl border bg-card/40 px-3 py-1 text-sm;
-  }
+  .pill { @apply rounded-2xl border bg-card/40 px-3 py-1 text-sm; }
 
   /* Botonera base */
-  .btn {
-    @apply inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium border transition-all select-none;
-  }
+  .btn { @apply inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium border transition-all select-none; }
 
   /* Botón principal AQUA con brillo controlado */
   .btn-primary {
     @apply btn text-[hsl(var(--primary-foreground))] border-0;
     background-image: linear-gradient(180deg, hsl(var(--primary)), hsl(187 92% 44%));
-    box-shadow:
-      0 0 0 1px hsl(var(--primary) / 0.30),
-      0 8px 28px hsl(var(--primary) / 0.22);
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.30), 0 8px 28px hsl(var(--primary) / 0.22);
   }
 
   /* Botón fantasma */
@@ -152,14 +151,12 @@
       0 8px 20px hsl(222 47% 8% / 0.25);
   }
 
-  /* CTA grande (opcional para hero) */
+  /* CTA grande (para hero) */
   .btn-cta {
     @apply inline-flex items-center justify-center gap-2 rounded-3xl px-5 py-3 text-base font-medium border-0;
     background-image: linear-gradient(180deg, hsl(var(--primary)), hsl(187 92% 44%));
     color: hsl(var(--primary-foreground));
-    box-shadow:
-      0 0 0 1px hsl(var(--primary) / 0.30),
-      0 10px 36px hsl(var(--primary) / 0.25);
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.30), 0 10px 36px hsl(var(--primary) / 0.25);
   }
   .btn-cta:active { transform: translateY(1px); }
 }
@@ -168,39 +165,31 @@
    Utilities
    ========================================= */
 @layer utilities {
-  /* Halo azul/aqua para secciones destacadas (Hero) */
+  /* Base del Hero por tema */
   .hero-halo {
     background:
       radial-gradient(120% 120% at 12% -5%, hsl(var(--primary) / 0.42), transparent 46%),
       radial-gradient(80% 60% at 88% -10%, hsl(var(--accent) / 0.18), transparent 58%),
-      linear-gradient(180deg, hsl(222 47% 8%), hsl(222 47% 8%));
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
   /* Sombra/borde interno suave */
-  .fade-border {
-    box-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.06);
-  }
+  .fade-border { box-shadow: inset 0 0 0 1px hsl(0 0% 100% / 0.06); }
 
-  /* Gradiente “fantasma” genérico para bloques */
+  /* Gradiente “fantasma” genérico */
   .ghost-gradient {
     background:
       radial-gradient(80% 60% at 50% 0%, hsl(var(--primary) / 0.12), transparent 55%),
-      linear-gradient(180deg, hsl(222 47% 8% / 0.00), hsl(222 47% 8% / 0.6));
+      linear-gradient(180deg, hsl(var(--background) / 0.00), hsl(var(--background) / 0.6));
   }
 
   /* Glow AQUA controlado (para botones/links destacados) */
-  .glow-aqua {
-    box-shadow:
-      0 0 0 1px hsl(var(--primary) / 0.35),
-      0 10px 36px hsl(var(--primary) / 0.25);
-  }
+  .glow-aqua { box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35), 0 10px 36px hsl(var(--primary) / 0.25); }
 
   /* Borde neón sutil (pills activas) */
-  .neon-border {
-    box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.45);
-  }
+  .neon-border { box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.45); }
 
-  /* Texto degradado aqua → acento */
+  /* Texto degradado aqua → violeta */
   .text-neon-gradient {
     background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
     -webkit-background-clip: text;
@@ -208,14 +197,13 @@
     color: transparent;
   }
 
-  /* Sutileza al pasar el cursor sobre superficies */
-  .surface-hover {
-    transition: background-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
-  }
+  /* Suavidad al pasar el cursor sobre superficies */
+  .surface-hover { transition: background-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease; }
 
-  /* === Mapa: rejilla + curvas de nivel para el hero === */
+  /* === Superficie de “mapa” visible en ambos temas === */
   .map-surface { position: relative; z-index: 0; overflow: hidden; }
 
+  /* Capa de rejilla + curvas (debajo del contenido) */
   .map-surface::before {
     content: "";
     position: absolute;
@@ -223,41 +211,52 @@
     pointer-events: none;
     z-index: 0;
 
-    /* 4 capas:
-       1-2) rejilla (horizontal/vertical)
-       3-4) “curvas de nivel” (anillos irregulares aqua y acento)
-    */
     background-image:
-      /* grid */
-      linear-gradient(to bottom, hsl(215 16% 65% / 0.08) 1px, transparent 1px),
-      linear-gradient(to right,  hsl(215 16% 65% / 0.08) 1px, transparent 1px),
-      /* contours aqua */
-      repeating-radial-gradient(circle at 18% 28%,
-        transparent 0 14px, hsl(var(--primary) / 0.06) 14px 16px),
-      /* contours accent */
-      repeating-radial-gradient(circle at 82% 12%,
-        transparent 0 20px, hsl(var(--accent) / 0.05) 20px 22px);
+      /* grid (usa token y opacidad por tema) */
+      linear-gradient(to bottom, hsl(var(--grid-line) / var(--map-grid-opacity)) 1px, transparent 1px),
+      linear-gradient(to right,  hsl(var(--grid-line) / var(--map-grid-opacity)) 1px, transparent 1px),
+      /* contours: aqua + accent */
+      repeating-radial-gradient(circle at 18% 28%, transparent 0 14px, hsl(var(--primary) / var(--map-contour-aqua)) 14px 16px),
+      repeating-radial-gradient(circle at 82% 12%, transparent 0 20px, hsl(var(--accent) / var(--map-contour-accent)) 20px 22px);
 
-    background-size:
-      24px 24px, 24px 24px,        /* grid cell size */
-      220px 220px, 320px 320px;    /* ring spacing */
+    background-size: 24px 24px, 24px 24px, 220px 220px, 320px 320px;
     background-repeat: repeat, repeat, no-repeat, no-repeat;
     background-position: center center, center center, 10% 0%, 85% 0%;
 
-    /* desvanecer en bordes para que no distraiga */
     -webkit-mask-image: radial-gradient(160% 120% at 50% -10%, black 55%, transparent 85%);
             mask-image: radial-gradient(160% 120% at 50% -10%, black 55%, transparent 85%);
 
-    opacity: .45;
+    opacity: var(--map-overlay-opacity);
   }
 
-  /* en móvil, menos densidad */
+  /* Capa de “papel” + viñeta/grano (encima del mapa, debajo del contenido) */
+  .map-surface::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background:
+      /* grano fino */
+      repeating-linear-gradient( 0deg,  hsl(0 0% 100% / var(--paper-noise)) 0 2px, transparent 2px 4px),
+      repeating-linear-gradient(90deg,  hsl(0 0% 100% / var(--paper-noise)) 0 2px, transparent 2px 4px),
+      /* viñeta */
+      radial-gradient(140% 80% at 50% 0%, transparent 55%, hsl(0 0% 0% / var(--map-vignette)) 100%);
+    mix-blend-mode: multiply;
+    border-radius: inherit;
+  }
+
+  /* Ajustes móviles: menos densidad/opacidad */
   @media (max-width: 640px) {
     .map-surface::before {
-      background-size:
-        32px 32px, 32px 32px,
-        260px 260px, 360px 360px;
-      opacity: .35;
+      background-size: 32px 32px, 32px 32px, 260px 260px, 360px 360px;
+      opacity: calc(var(--map-overlay-opacity) - .06);
+    }
+    .map-surface::after {
+      background:
+        repeating-linear-gradient( 0deg,  hsl(0 0% 100% / calc(var(--paper-noise) + .01)) 0 2px, transparent 2px 4px),
+        repeating-linear-gradient(90deg,  hsl(0 0% 100% / calc(var(--paper-noise) + .01)) 0 2px, transparent 2px 4px),
+        radial-gradient(140% 80% at 50% 0%, transparent 55%, hsl(0 0% 0% / calc(var(--map-vignette) + .06)) 100%);
     }
   }
 }
