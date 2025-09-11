@@ -1,15 +1,7 @@
 // app/mapa/page.tsx
 import type { Metadata } from "next";
-import {
-  Wifi,
-  Bed,
-  Coffee,
-  CreditCard,
-  Anchor,
-  MapPin,
-  Compass,
-  Filter,
-} from "lucide-react";
+import { Wifi, Bed, Coffee, CreditCard, Anchor, Filter } from "lucide-react";
+import MapCanvas from "./MapCanvas"; // ⬅️ Import directo del Client Component
 
 export const metadata: Metadata = {
   title: "Mapa | Nómada Fantasma",
@@ -22,9 +14,7 @@ export default function MapaPage() {
     <section className="container py-12 md:py-16">
       {/* Encabezado */}
       <header className="mb-6 md:mb-8 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-          Mapa
-        </h1>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Mapa</h1>
         <p className="mt-2 text-muted-foreground">
           Encuentra Wi-Fi, hospedaje, cowork, bancos y puertos — con el estilo
           náutico-tecnológico del Nómada Fantasma.
@@ -60,43 +50,13 @@ export default function MapaPage() {
         </span>
       </div>
 
-      {/* Contenedor del mapa (placeholder visual) */}
-      <div className="relative rounded-3xl overflow-hidden fade-border map-surface h-[60vh] min-h-[420px]">
-        {/* Placeholder mientras integramos el mapa real */}
-        <div className="absolute inset-0 grid place-items-center">
-          <div className="text-center">
-            <div className="mx-auto mb-3 h-10 w-10 grid place-items-center rounded-full ring-1 ring-border/60">
-              <Compass className="h-5 w-5 opacity-80" />
-            </div>
-            <h2 className="text-lg font-medium">Mapa interactivo</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              En el siguiente paso cargaremos el mapa real con React Leaflet,
-              filtros y marcadores.
-            </p>
-          </div>
-        </div>
-
-        {/* Base estética para mantener coherencia con el Hero */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-25 dark:opacity-30"
-          style={{
-            background:
-              "radial-gradient(800px 400px at 50% 35%, hsl(var(--primary) / .18), transparent 60%)",
-          }}
-        />
-
-        {/* Marca de centro aproximado (solo estética por ahora) */}
-        <div className="absolute right-4 bottom-4 pill inline-flex items-center gap-2 text-xs">
-          <MapPin className="h-4 w-4" />
-          Centro: 14.62°N · 90.56°W
-        </div>
-      </div>
+      {/* Mapa real */}
+      <MapCanvas />
 
       {/* Nota siguiente paso */}
       <p className="mt-4 text-xs text-muted-foreground text-center">
-        <strong>Siguiente paso:</strong> instalar la librería del mapa y
-        reemplazar este placeholder por el mapa real con marcadores e iconos.
+        <strong>Siguiente paso:</strong> marcadores reales, filtros y control de
+        capas.
       </p>
     </section>
   );
