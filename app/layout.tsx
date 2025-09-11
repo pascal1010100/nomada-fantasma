@@ -5,7 +5,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import ChatBotton from "./components/chatBotton";
 
-
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 
@@ -24,16 +23,14 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        {/* CSS de Leaflet para el mapa (necesario para los tiles y controles) */}
+        {/* CSS de Leaflet para el mapa (necesario para tiles/controles) */}
         <link rel="preconnect" href="https://unpkg.com" />
         <link
           rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity=""
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossOrigin=""
         />
-        {/* Si usas un ThemeProvider propio, déjalo manejar el tema.
-            Si no, más adelante te paso un snippet anti-FOUC si lo necesitas. */}
       </head>
       <body
         className={`${inter.variable} min-h-dvh bg-background text-foreground antialiased`}
