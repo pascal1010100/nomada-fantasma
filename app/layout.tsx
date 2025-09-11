@@ -1,7 +1,10 @@
 // app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
+
 import { Inter } from "next/font/google";
+import ChatBotton from "./components/chatBotton";
+
 
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
@@ -37,6 +40,7 @@ export default function RootLayout({
       >
         <Navbar />
         <main>{children}</main>
+        <ChatBotton variant="ghost" />
         <Footer />
       </body>
     </html>
