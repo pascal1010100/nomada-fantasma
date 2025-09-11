@@ -305,3 +305,18 @@
   }
   html.dark .compass-rose::after{ color: hsl(0 0% 100% / .55); }
 }
+/* === Floating Action Button (FAB) utils === */
+.fab{
+  position: fixed;
+  z-index: 60;
+  right: calc(env(safe-area-inset-right) + 16px);
+  bottom: calc(env(safe-area-inset-bottom) + 16px);
+}
+@media (min-width:768px){
+  .fab{
+    right: calc(env(safe-area-inset-right) + 24px);
+    bottom: calc(env(safe-area-inset-bottom) + 24px);
+  }
+}
+.fab-sm{ width:56px; height:56px; }
+.fab-lg{ width:64px; height:64px; }
