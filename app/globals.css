@@ -320,3 +320,28 @@
 }
 .fab-sm{ width:56px; height:56px; }
 .fab-lg{ width:64px; height:64px; }
+/* Oculta el zoom nativo si quedara por cache/SSR */
+.leaflet-control-zoom { display: none !important; }
+
+/* Suavizado y fade-in de tiles */
+.leaflet-tile { filter: saturate(0.85) contrast(0.98) brightness(1.01); opacity: 0; transition: opacity .35s ease; }
+.leaflet-tile-loaded { opacity: 1; }
+html.dark .leaflet-tile { filter: saturate(0.80) contrast(0.95) brightness(0.98); }
+
+/* Icono con pulso para “mi ubicación” */
+.nf-pulse-icon { transform: translate(-50%, -50%); }
+.nf-pulse {
+  position: relative; display: block; width: 12px; height: 12px; border-radius: 9999px;
+  background: hsl(189 100% 58%);
+  box-shadow: 0 0 0 1px hsl(189 100% 58% / .35), 0 0 24px hsl(189 100% 58% / .35);
+}
+.nf-pulse::after {
+  content: ""; position: absolute; inset: -6px; border-radius: 9999px;
+  border: 2px solid hsl(189 100% 58% / .45);
+  animation: nf-ping 1.8s cubic-bezier(0.2,0.9,0.2,1) infinite;
+}
+@keyframes nf-ping {
+  0% { transform: scale(0.7); opacity: .9; }
+  70% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
