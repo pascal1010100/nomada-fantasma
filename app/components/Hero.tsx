@@ -7,21 +7,32 @@ import {
 } from "framer-motion";
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
+import { useId, useMemo } from "react";
 
 export default function Hero(): JSX.Element {
   const reduce = useReducedMotion();
 
-  // Fade base para el contenido
+  // IDs únicos para gradientes/filtros del SVG
+  const uid = useId();
+  const ids = useMemo(() => {
+    const safe = uid.replace(/[^a-zA-Z0-9_-]/g, "");
+    return {
+      stroke: `nf-stroke-${safe}`,
+      glow: `nf-glow-${safe}`,
+      soft: `nf-soft-${safe}`,
+    };
+  }, [uid]);
+
+  // Fade base
   const base = {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
   } as const;
 
-  // Easing seguro para TS (equiv. a easeOut, pero con bezier)
   const easeOutBezier: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-  /** Ondas sonar — mismas curvas, tipadas como MotionProps */
+  // Ondas (sonar)
   const ring = (delay = 0): MotionProps => ({
     initial: { opacity: 0.42, scale: 0.58 },
     animate: reduce
@@ -50,13 +61,18 @@ export default function Hero(): JSX.Element {
     },
   });
 
-  /** Animación sutil del mapa (cartografía) */
+  // Cartografía sutil
   const mapAnimProps: MotionProps = reduce
     ? {}
     : {
         animate: { scale: [1.02, 1, 1.02], x: [-4, 0, -4], y: [0, -2, 0] },
         transition: { duration: 16, repeat: Infinity, ease: "easeInOut" },
       };
+
+  // Rosa náutica (rotación lenta)
+  const compassAnim: MotionProps = reduce
+    ? {}
+    : { animate: { rotate: [0, 10, 0] }, transition: { duration: 80, repeat: Infinity, ease: "linear" } };
 
   return (
     <section className="px-4 sm:px-6">
@@ -66,65 +82,62 @@ export default function Hero(): JSX.Element {
           border bg-card/70 hero-halo min-h-[540px]
         "
       >
-        {/* GRID y VIÑETA (base) */}
+        {/* GRID y VIÑETA */}
         <div className="nf-grid pointer-events-none absolute inset-0 z-0" />
         <div className="nf-vignette pointer-events-none absolute inset-0 z-10" />
 
-        {/* CARTOGRAFÍA (light + visible en dark) — debajo del HUD */}
+        {/* CARTOGRAFÍA */}
         <motion.div
           className="theme--carto map-surface absolute inset-0 z-[18] will-change-transform"
           aria-hidden="true"
           {...mapAnimProps}
         />
 
-        {/* HUD SONAR (dark) */}
+        {/* HUD SONAR */}
         <div className="theme--sonar sonar-hud absolute inset-0 z-20" aria-hidden="true" />
 
-        {/* ONDAS — visibles en ambos temas */}
+        {/* ➕ Rosa náutica (debajo de las ondas, integrada) */}
+        <motion.div
+          className="compass-rose rose-tr absolute z-[24] pointer-events-none"
+          aria-hidden="true"
+          {...compassAnim}
+        />
+
+        {/* ONDAS */}
         <div className="theme--sonar pointer-events-none absolute inset-0 z-30" aria-hidden="true">
-          <svg
-            className="h-full w-full"
-            viewBox="0 0 1400 700"
-            preserveAspectRatio="xMidYMid slice"
-          >
+          <svg className="h-full w-full" viewBox="0 0 1400 700" preserveAspectRatio="xMidYMid slice">
             <defs>
-              <radialGradient id="nf-stroke" cx="50%" cy="45%" r="65%">
+              <radialGradient id={ids.stroke} cx="50%" cy="45%" r="65%">
                 <stop offset="0%" stopColor="var(--nf-wave-stroke-1)" />
                 <stop offset="68%" stopColor="var(--nf-wave-stroke-2)" />
                 <stop offset="100%" stopColor="rgba(0,0,0,0)" />
               </radialGradient>
-              <radialGradient id="nf-glow" cx="50%" cy="45%" r="70%">
+              <radialGradient id={ids.glow} cx="50%" cy="45%" r="70%">
                 <stop offset="0%" stopColor="var(--nf-wave-glow-1)" />
                 <stop offset="72%" stopColor="var(--nf-wave-glow-2)" />
                 <stop offset="100%" stopColor="rgba(0,0,0,0)" />
               </radialGradient>
-              <filter id="nf-soft">
-                <feGaussianBlur stdDeviation="7" />
-              </filter>
+              <filter id={ids.soft}><feGaussianBlur stdDeviation="7" /></filter>
             </defs>
 
-            {/* Emisor levemente a la izquierda para dramatismo */}
             <g transform="translate(520 270)">
-              {/* glows grandes */}
-              <motion.circle r={160} fill="url(#nf-glow)" filter="url(#nf-soft)" {...glow(0.1)} />
-              <motion.circle r={235} fill="url(#nf-glow)" filter="url(#nf-soft)" {...glow(1.0)} />
-              <motion.circle r={320} fill="url(#nf-glow)" filter="url(#nf-soft)" {...glow(2.1)} />
+              {/* glows */}
+              <motion.circle r={160} fill={`url(#${ids.glow})`} filter={`url(#${ids.soft})`} {...glow(0.1)} />
+              <motion.circle r={235} fill={`url(#${ids.glow})`} filter={`url(#${ids.soft})`} {...glow(1.0)} />
+              <motion.circle r={320} fill={`url(#${ids.glow})`} filter={`url(#${ids.soft})`} {...glow(2.1)} />
 
-              {/* anillos (más y más lejos) */}
-              <motion.circle r={160} fill="none" stroke="url(#nf-stroke)" strokeWidth={1.8} {...ring(0.0)} />
-              <motion.circle r={235} fill="none" stroke="url(#nf-stroke)" strokeWidth={1.6} {...ring(0.9)} />
-              <motion.circle r={320} fill="none" stroke="url(#nf-stroke)" strokeWidth={1.5} {...ring(1.8)} />
-              <motion.circle r={410} fill="none" stroke="url(#nf-stroke)" strokeWidth={1.3} {...ring(2.7)} />
+              {/* anillos */}
+              <motion.circle r={160} fill="none" stroke={`url(#${ids.stroke})`} strokeWidth={1.8} {...ring(0.0)} />
+              <motion.circle r={235} fill="none" stroke={`url(#${ids.stroke})`} strokeWidth={1.6} {...ring(0.9)} />
+              <motion.circle r={320} fill="none" stroke={`url(#${ids.stroke})`} strokeWidth={1.5} {...ring(1.8)} />
+              <motion.circle r={410} fill="none" stroke={`url(#${ids.stroke})`} strokeWidth={1.3} {...ring(2.7)} />
             </g>
           </svg>
         </div>
 
         {/* CONTENIDO */}
         <div className="relative z-40 mx-auto grid max-w-3xl gap-6 px-6 py-16 text-center sm:py-24">
-          <motion.h1
-            className="text-neon-gradient text-4xl font-extrabold tracking-tight sm:text-6xl md:text-7xl"
-            {...base}
-          >
+          <motion.h1 className="text-neon-gradient text-4xl font-extrabold tracking-tight sm:text-6xl md:text-7xl" {...base}>
             Nómada Fantasma
           </motion.h1>
 
@@ -141,9 +154,7 @@ export default function Hero(): JSX.Element {
             {...base}
             transition={{ ...base.transition, delay: 0.1 }}
           >
-            <Link href="/mapa" className="btn-cta">
-              🧭 Explorar mapa
-            </Link>
+            <Link href="/mapa" className="btn-cta">🧭 Explorar mapa</Link>
             <Link href="/chat" className="btn-ghost">
               <span className="inline-flex items-center gap-2">
                 <MessageCircle className="h-4 w-4" />
