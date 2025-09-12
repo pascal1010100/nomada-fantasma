@@ -1,7 +1,4 @@
-/* app/globals.css
-   NÓMADA FANTASMA — GLOBAL STYLES (Cartografía ↔ Sonar)
-   v7.2
-*/
+/* app/globals.css — versión con ajustes NF para mapa/atribución */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -320,13 +317,14 @@
 }
 .fab-sm{ width:56px; height:56px; }
 .fab-lg{ width:64px; height:64px; }
-/* Oculta el zoom nativo si quedara por cache/SSR */
+
+/* Oculta el zoom nativo si usas controles custom */
 .leaflet-control-zoom { display: none !important; }
 
 /* Suavizado y fade-in de tiles */
 .leaflet-tile { filter: saturate(0.85) contrast(0.98) brightness(1.01); opacity: 0; transition: opacity .35s ease; }
 .leaflet-tile-loaded { opacity: 1; }
-html.dark .leaflet-tile { filter: saturate(0.80) contrast(0.95) brightness(0.98); }
+html.dark .leaflet-tile { filter: saturate(0.82) contrast(0.93) brightness(0.96); }
 
 /* Icono con pulso para “mi ubicación” */
 .nf-pulse-icon { transform: translate(-50%, -50%); }
@@ -344,4 +342,66 @@ html.dark .leaflet-tile { filter: saturate(0.80) contrast(0.95) brightness(0.98)
   0% { transform: scale(0.7); opacity: .9; }
   70% { transform: scale(1.6); opacity: 0; }
   100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* === Leaflet base === */
+.leaflet-container { background: transparent; }
+.leaflet-control-attribution { opacity: .7; }
+
+/* Atribución segura (no la tapa el FAB) */
+.leaflet-bottom.leaflet-right{
+  margin-right: calc(env(safe-area-inset-right) + 88px);
+  margin-bottom: calc(env(safe-area-inset-bottom) + 8px);
+}
+@media (max-width: 640px){
+  .leaflet-bottom.leaflet-right{
+    margin-right: calc(env(safe-area-inset-right) + 76px);
+  }
+}
+
+/* === Overlay HUD fijo (coherente con hero) === */
+.nf-map-overlay{
+  border-radius: inherit;
+  background-image:
+    /* grid */
+    linear-gradient(to right, hsl(var(--carto-grid-h) / .28) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--carto-grid-h) / .28) 1px, transparent 1px),
+    /* leves isobaras */
+    radial-gradient(60% 40% at 12% -10%, hsl(var(--primary) / .06), transparent 60%),
+    radial-gradient(60% 40% at 102% -16%, hsl(var(--accent) / .05), transparent 70%);
+  background-size: 48px 48px, 48px 48px, 100% 100%, 100% 100%;
+  mix-blend-mode: multiply;
+  opacity: .55;
+}
+html.dark .nf-map-overlay{
+  background-image:
+    linear-gradient(to right, hsl(var(--carto-dark-grid-h) / .26) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--carto-dark-grid-h) / .26) 1px, transparent 1px),
+    radial-gradient(60% 40% at 12% -10%, hsl(var(--primary) / .08), transparent 60%),
+    radial-gradient(60% 40% at 102% -16%, hsl(var(--accent) / .06), transparent 70%);
+  mix-blend-mode: screen;
+  opacity: .38;
+}
+
+/* Vignette suave para “enmarcar” el mapa */
+.nf-map-vignette{
+  border-radius: inherit;
+  background: radial-gradient(80% 60% at 50% 40%, transparent 60%, rgba(0,0,0,.10) 100%);
+}
+html.dark .nf-map-vignette{
+  background: radial-gradient(80% 60% at 50% 40%, transparent 58%, rgba(255,255,255,.05) 100%);
+}
+
+/* === Pin neón (si usas el de CSS) === */
+@keyframes nf-pulse { 0%{transform:scale(.8);opacity:.45;}70%{transform:scale(1.25);opacity:0;}100%{transform:scale(1.25);opacity:0;} }
+.nf-pin{ position:relative;width:22px;height:22px; }
+.nf-pin-dot{
+  position:absolute; inset:0; margin:auto; width:12px; height:12px; border-radius:9999px;
+  background: radial-gradient(circle at 38% 38%, hsl(var(--primary)) 0%, hsl(var(--primary)) 55%, hsl(var(--accent)) 100%);
+  box-shadow: 0 0 0 1px hsl(var(--primary) / .38), 0 6px 18px hsl(var(--primary) / .32);
+}
+.nf-pin-glow{
+  position:absolute; inset:0; margin:auto; width:18px; height:18px; border-radius:9999px;
+  background: radial-gradient(circle, hsl(var(--primary) / .28), transparent 60%);
+  animation: nf-pulse 2.4s ease-out infinite;
 }

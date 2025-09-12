@@ -1,242 +1,239 @@
+// app/mapa/MapCanvas.tsx
 "use client";
 
-import {
-  MapContainer,
-  TileLayer,
-  CircleMarker,
-  Tooltip,
-  ScaleControl,
-  useMap,
-  Marker,
-} from "react-leaflet";
 import { useEffect, useMemo, useState } from "react";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
-import { Plus, Minus, LocateFixed, RefreshCcw } from "lucide-react";
+import type { Point } from "./points";
+import { Plus, Minus, Ship, Skull } from "lucide-react";
 
-/* Elimina el control nativo si Leaflet lo montó */
-function KillDefaultZoom(): null {
-  const map = useMap();
+type MapCanvasProps = {
+  /** Puntos a pintar (puede venir vacío) */
+  points?: Point[];
+};
+
+function useThemeDark(): boolean {
+  const [isDark, setIsDark] = useState(false);
   useEffect(() => {
-   
-    if (map?.zoomControl?.remove) map.zoomControl.remove();
-  }, [map]);
-  return null;
+    const root = document.documentElement;
+    const update = () => setIsDark(root.classList.contains("dark"));
+    update();
+
+    const obs = new MutationObserver(update);
+    obs.observe(root, { attributes: true, attributeFilter: ["class"] });
+
+    const mq = window.matchMedia?.("(prefers-color-scheme: dark)");
+    const onChange = () => update();
+    mq?.addEventListener?.("change", onChange);
+
+    return () => {
+      obs.disconnect();
+      mq?.removeEventListener?.("change", onChange);
+    };
+  }, []);
+  return isDark;
 }
 
-/* Controles custom: zoom + locate + reset */
-function ZoomControls({
-  setUserPos,
-  defaultCenter,
-  defaultZoom,
-}: {
-  setUserPos: React.Dispatch<React.SetStateAction<[number, number] | null>>;
-  defaultCenter: [number, number];
-  defaultZoom: number;
-}): JSX.Element {
+/** Controles modernos (zoom + recenter) */
+function ZoomUI() {
   const map = useMap();
-
-  const locate = () => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        const pos: [number, number] = [coords.latitude, coords.longitude];
-        setUserPos(pos);
-        map.flyTo(pos, Math.max(map.getZoom(), 12), { duration: 0.8 });
-      },
-      () => {
-        // si falla la geo, no hacemos nada (UX silenciosa por ahora)
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
-  };
-
-  const reset = () => map.flyTo(defaultCenter, defaultZoom, { duration: 0.8 });
-
   return (
     <div
       className="
-        absolute
-        left-[calc(env(safe-area-inset-left)+12px)]
-        top-[calc(env(safe-area-inset-top)+12px)]
-        z-[1100] flex flex-col gap-2
+        absolute z-[1100] flex flex-col gap-2
+        left-[calc(env(safe-area-inset-left)+14px)]
+        top-[calc(env(safe-area-inset-top)+14px)]
       "
     >
       <button
         type="button"
         aria-label="Acercar mapa"
         onClick={() => map.zoomIn()}
-        className="btn-ghost h-10 w-10 p-0 rounded-2xl grid place-items-center focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary)/0.35)] transition-transform hover:scale-[1.03] active:scale-[0.98]"
+        className="btn-ghost h-11 w-11 md:h-12 md:w-12 rounded-full bg-card/70 border border-border backdrop-blur shadow-md hover:scale-[1.03] active:scale-[0.98] transition-transform glow-aqua"
+        title="Acercar"
       >
-        <Plus className="h-5 w-5" />
+        <Plus className="h-5 w-5 md:h-6 md:w-6" />
       </button>
       <button
         type="button"
         aria-label="Alejar mapa"
         onClick={() => map.zoomOut()}
-        className="btn-ghost h-10 w-10 p-0 rounded-2xl grid place-items-center focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary)/0.35)] transition-transform hover:scale-[1.03] active:scale-[0.98]"
+        className="btn-ghost h-11 w-11 md:h-12 md:w-12 rounded-full bg-card/70 border border-border backdrop-blur shadow-md hover:scale-[1.03] active:scale-[0.98] transition-transform glow-aqua"
+        title="Alejar"
       >
-        <Minus className="h-5 w-5" />
-      </button>
-
-      {/* separador óptico */}
-      <div className="mx-auto h-0.5 w-6 rounded-full bg-border/50" />
-
-      <button
-        type="button"
-        aria-label="Ubicarme"
-        onClick={locate}
-        className="btn-ghost h-10 w-10 p-0 rounded-2xl grid place-items-center focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary)/0.35)] transition-transform hover:scale-[1.03] active:scale-[0.98]"
-      >
-        <LocateFixed className="h-5 w-5" />
+        <Minus className="h-5 w-5 md:h-6 md:w-6" />
       </button>
       <button
         type="button"
-        aria-label="Resetear vista"
-        onClick={reset}
-        className="btn-ghost h-10 w-10 p-0 rounded-2xl grid place-items-center focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary)/0.35)] transition-transform hover:scale-[1.03] active:scale-[0.98]"
+        aria-label="Recentrar"
+        onClick={() => map.setView([14.62, -90.56], 5, { animate: true })}
+        className="btn-ghost h-11 w-11 md:h-12 md:w-12 rounded-full bg-card/70 border border-border backdrop-blur shadow-md hover:scale-[1.03] active:scale-[0.98] transition-transform"
+        title="Volver al inicio"
       >
-        <RefreshCcw className="h-5 w-5" />
+        <Ship className="h-5 w-5 md:h-6 md:w-6" />
       </button>
     </div>
   );
 }
 
-export default function MapCanvas(): JSX.Element {
-  const defaultCenter: [number, number] = [14.62, -90.56];
-  const defaultZoom = 5;
+export default function MapCanvas({ points = [] }: MapCanvasProps) {
+  const isDark = useThemeDark();
 
-  const [isDark, setIsDark] = useState(false);
-  const [userPos, setUserPos] = useState<[number, number] | null>(null);
+  // Basemaps: claro ↔ oscuro (noWrap para evitar "mundo repetido")
+  const tileUrl = isDark
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
-  // tema
-  useEffect(() => {
-    const root = document.documentElement;
-    const sync = () => setIsDark(root.classList.contains("dark"));
-    sync();
-    const obs = new MutationObserver(sync);
-    obs.observe(root, { attributes: true, attributeFilter: ["class"] });
-    return () => obs.disconnect();
-  }, []);
+  const tileAttrib = isDark
+    ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    : "&copy; OpenStreetMap contributors";
 
-  // tiles minimal (CARTO sin labels)
-  const lightUrl =
-    "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png";
-  const darkUrl =
-    "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
-  const attribution =
-    '&copy; OpenStreetMap contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+  // Límites del mundo para que no se desborde
+  const worldBounds = useMemo(
+    () => L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180)),
+    []
+  );
 
-  // ícono con pulso para "mi ubicación"
-  const pulseIcon = useMemo(
+  // Pin neón (tu diseño original)
+  const pinNeon = useMemo(
     () =>
       L.divIcon({
-        className: "nf-pulse-icon",
-        html: `<span class="nf-pulse"></span>`,
-        iconSize: [20, 20],
-        iconAnchor: [10, 10],
+        className: "",
+        html: `
+          <div style="position:relative;width:16px;height:16px;transform:translate(-50%,-50%);">
+            <style>
+              @keyframes nfPulse { 0%{transform:scale(.9);opacity:.9} 70%{transform:scale(1.35);opacity:0} 100%{opacity:0} }
+            </style>
+            <div style="
+              position:absolute;inset:0;border-radius:9999px;
+              background: radial-gradient(40% 40% at 50% 50%, rgba(56,189,248,1), rgba(56,189,248,.22) 60%, rgba(56,189,248,0) 70%);
+              box-shadow: 0 0 0 1px rgba(56,189,248,.42), 0 6px 18px rgba(56,189,248,.32);
+            "></div>
+            <div style="
+              position:absolute;inset:-6px;border-radius:9999px;filter:blur(4px);
+              background: radial-gradient(50% 50% at 50% 50%, rgba(56,189,248,.22), rgba(168,85,247,.14) 60%, rgba(168,85,247,0) 70%);
+              animation: nfPulse 2.4s ease-out infinite;
+            "></div>
+          </div>
+        `,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
       }),
     []
   );
 
+  // Recalcular tamaño del mapa al cambiar de tema o al montar
+  useEffect(() => {
+    // Leaflet se reajusta automáticamente, pero invalidamos por si acaso
+    setTimeout(() => {
+      const panes = document.querySelectorAll(".leaflet-container");
+      panes.forEach((el: any) => el._leaflet_id && (el as any).dispatchEvent(new Event("resize")));
+    }, 50);
+  }, [isDark]);
+
   return (
-    <div className="relative rounded-3xl overflow-hidden map-surface h-[60vh] min-h-[420px]">
-      <MapContainer
-        center={defaultCenter}
-        zoom={defaultZoom}
-        scrollWheelZoom
-        className="h-full w-full"
-        zoomControl={false}
-      >
-        <TileLayer url={isDark ? darkUrl : lightUrl} attribution={attribution} />
-        <ScaleControl position="bottomleft" />
+    <div className="relative overflow-hidden rounded-3xl fade-border h-[60vh] min-h-[420px] bg-background">
+      {/* === Estética “barco fantasma digital” (capas visuales) === */}
+      <style>{`
+        @keyframes nfSweepRotate { to { transform: rotate(360deg); } }
+        @keyframes scanDrift {
+          0% { background-position: 0 0, 0 0, 0 0; }
+          100% { background-position: 0 8px, 0 0, 0 0; }
+        }
+        .nf-grid{
+          position:absolute; inset:0; pointer-events:none;
+          opacity:.18;
+          background-image:
+            repeating-linear-gradient(0deg, color-mix(in oklab, var(--foreground) 16%, transparent) 0 1px, transparent 1px 28px),
+            repeating-linear-gradient(90deg, color-mix(in oklab, var(--foreground) 16%, transparent) 0 1px, transparent 1px 28px);
+        }
+        .dark .nf-grid{ opacity:.12; }
 
-        <KillDefaultZoom />
-        <ZoomControls
-          setUserPos={setUserPos}
-          defaultCenter={defaultCenter}
-          defaultZoom={defaultZoom}
-        />
+        .nf-vignette{
+          position:absolute; inset:0; pointer-events:none;
+          background: radial-gradient(120% 80% at 50% 0%, transparent 60%, rgba(0,0,0,0.25) 100%);
+          mix-blend-mode: multiply;
+        }
 
-        {/* Marcador base (referencia del centro) */}
-        <CircleMarker
-          center={defaultCenter}
-          radius={8}
-          pathOptions={{ color: "hsl(189 100% 58%)", fillOpacity: 0.35 }}
+        .nf-scanlines{
+          position:absolute; inset:0; pointer-events:none;
+          background:
+            repeating-linear-gradient(180deg, rgba(255,255,255,.03) 0 1px, transparent 1px 3px),
+            radial-gradient(100% 60% at 50% -10%, rgba(56,189,248,.08), transparent 60%);
+          animation: scanDrift 6s linear infinite;
+          mix-blend-mode: overlay;
+          opacity:.35;
+        }
+
+        .nf-sonar-sweep{
+          position:absolute; inset:-20%;
+          pointer-events:none;
+          background: conic-gradient(from -60deg at 46% 40%, hsl(var(--primary) / .16), transparent 35%);
+          filter: blur(12px);
+          mix-blend-mode: screen;
+          animation: nfSweepRotate 12s linear infinite;
+        }
+        html:not(.dark) .nf-sonar-sweep{ mix-blend-mode: plus-lighter; filter: blur(10px); }
+      `}</style>
+
+      {/* Cuadrícula detrás del mapa para continuidad con la página */}
+      <div aria-hidden className="nf-grid" />
+      <div className="absolute inset-0 z-[20]">
+        <MapContainer
+          center={[14.62, -90.56]}
+          zoom={5}
+          minZoom={2}
+          maxZoom={18}
+          maxBounds={worldBounds}
+          maxBoundsViscosity={0.9}
+          worldCopyJump={false}
+          zoomControl={false}
+          scrollWheelZoom
+          attributionControl
+          preferCanvas
+          className="h-full w-full"
         >
-          <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-            Centro aproximado
-          </Tooltip>
-        </CircleMarker>
+          <TileLayer
+            url={tileUrl}
+            attribution={tileAttrib}
+            noWrap
+            updateInterval={100}
+            keepBuffer={2}
+            detectRetina
+          />
 
-        {/* Mi ubicación (si el usuario lo permite) */}
-        {userPos && (
-          <Marker position={userPos} icon={pulseIcon}>
-            <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
-              Tu ubicación aproximada
-            </Tooltip>
-          </Marker>
-        )}
-      </MapContainer>
+          {points.map((p, i) => (
+            <Marker
+              key={(p as any).id ?? `${p.lat}-${p.lng}-${i}`}
+              position={[p.lat, p.lng]}
+              icon={pinNeon}
+            />
+          ))}
 
-      {/* Overlays Nómada: grid mayor + batimetría + halo + rosa + viñeta */}
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ zIndex: 401 }}>
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, hsl(var(--carto-grid-h,216 30% 20%) / ${isDark ? "0.12" : "0.16"}) 1px, transparent 1px),
-              linear-gradient(to bottom, hsl(var(--carto-grid-h,216 30% 20%) / ${isDark ? "0.12" : "0.16"}) 1px, transparent 1px),
-              linear-gradient(to right, hsl(var(--carto-grid-h,216 30% 20%) / ${isDark ? "0.22" : "0.28"}) 1px, transparent 1px),
-              linear-gradient(to bottom, hsl(var(--carto-grid-h,216 30% 20%) / ${isDark ? "0.22" : "0.28"}) 1px, transparent 1px)
-            `,
-            backgroundSize: "40px 40px, 40px 40px, 200px 200px, 200px 200px",
-            mixBlendMode: isDark ? ("screen" as const) : ("multiply" as const),
-          }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              repeating-linear-gradient(135deg,
-                ${isDark ? "rgba(125,211,252,.05)" : "rgba(56,189,248,.06)"} 0 28px,
-                transparent 28px 56px
-              ),
-              repeating-linear-gradient(315deg,
-                ${isDark ? "rgba(216,180,254,.04)" : "rgba(168,85,247,.05)"} 0 36px,
-                transparent 36px 72px
-              )
-            `,
-            mixBlendMode: isDark ? ("screen" as const) : ("multiply" as const),
-            opacity: isDark ? 0.18 : 0.14,
-          }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `radial-gradient(700px 360px at 50% 48%,
-              ${isDark ? "hsl(189 100% 58% / .10)" : "hsl(193 88% 44% / .10)"} 0%,
-              transparent 60%)`,
-            mixBlendMode: isDark ? ("screen" as const) : ("multiply" as const),
-          }}
-        />
-        <svg className="absolute right-6 top-6 w-24 h-24 opacity-35 dark:opacity-28" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="26" fill="none" stroke="hsl(var(--accent) / .22)" strokeWidth="1" />
-          {[...Array(16)].map((_, i) => {
-            const a = (i * 22.5 * Math.PI) / 180;
-            const x1 = 50 + Math.cos(a) * 16;
-            const y1 = 50 + Math.sin(a) * 16;
-            const x2 = 50 + Math.cos(a) * 26;
-            const y2 = 50 + Math.sin(a) * 26;
-            return (
-              <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
-                stroke="hsl(var(--accent) / .20)" strokeWidth={i % 4 === 0 ? 1.2 : 0.8} />
-            );
-          })}
-          <text x="50" y="12" textAnchor="middle" fontSize="8" fill="hsl(var(--accent) / .42)">N</text>
-        </svg>
-        <div className="absolute inset-0"
-          style={{ background: "radial-gradient(80% 60% at 50% 50%, rgba(0,0,0,0) 65%, rgba(0,0,0,.08) 100%)" }}
-        />
+          <ZoomUI />
+        </MapContainer>
+      </div>
+
+      {/* Capas HUD */}
+      <div aria-hidden className="nf-vignette absolute inset-0 z-[1000]" />
+      <div aria-hidden className="nf-scanlines absolute inset-0 z-[1025]" />
+      <div aria-hidden className="nf-sonar-sweep absolute inset-0 z-[1050]" />
+
+      {/* Marca y brújula */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute bottom-3 left-3 z-[1200] opacity-75"
+        title="Rumbo Norte"
+      >
+        <div className="rounded-full bg-card/70 border border-border px-2 py-1 text-xs backdrop-blur">
+          N
+        </div>
+      </div>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute right-3 bottom-3 z-[1200] opacity-15"
+      >
+        <Skull className="h-8 w-8" />
       </div>
     </div>
   );
