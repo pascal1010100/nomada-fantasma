@@ -455,3 +455,31 @@ html.dark .nf-map-vignette{
   background: radial-gradient(circle, hsl(var(--primary) / .28), transparent 60%);
   animation: nf-pulse 2.4s ease-out infinite;
 }
+/* ===== Cuadrícula náutica (ligera y elegante) ===== */
+.nf-map-grid {
+  /* celdas pequeñas */
+  background-image:
+    linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px),
+    /* líneas mayor cada 5 celdas */
+    linear-gradient(to right, var(--grid-strong) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-strong) 1px, transparent 1px);
+  background-size:
+    32px 32px,
+    32px 32px,
+    160px 160px,
+    160px 160px;
+  opacity: .95;
+}
+
+/* Modo claro: líneas más oscuras y sutiles */
+:root:not(.dark) .nf-map-grid {
+  --grid-color: rgba(2, 6, 23, 0.08);      /* casi negro a 8% */
+  --grid-strong: rgba(2, 6, 23, 0.12);     /* mayor un poco más fuerte */
+}
+
+/* Modo oscuro: líneas claras */
+:root.dark .nf-map-grid {
+  --grid-color: rgba(248, 250, 252, 0.10); /* casi blanco a 10% */
+  --grid-strong: rgba(248, 250, 252, 0.16);
+}

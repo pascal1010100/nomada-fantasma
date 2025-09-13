@@ -2,7 +2,15 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Tooltip, Popup, useMap, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Tooltip,
+  Popup,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import L from "leaflet";
 import useSupercluster from "use-supercluster";
 import type { Point } from "./points";
@@ -58,7 +66,7 @@ type CategoryKey = (typeof CATEGORIES)[number]["key"];
 const categoryColor = (cat?: string) =>
   CATEGORIES.find((c) => c.key === cat)?.color ?? "#38BDF8";
 
-/** Pin neón por color */
+/** Pin neón por color (fábrica) */
 const usePinNeonByColor = () =>
   useMemo(
     () => (hex = "#38BDF8") =>
@@ -148,7 +156,22 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
   const mapRef = useRef<L.Map | null>(null);
   const pinNeonByColor = usePinNeonByColor();
 
-  // Recalcular tamaño al cambiar tema
+  // Cache de iconos por color (perf)
+  const iconCacheRef = useRef<Map<string, L.DivIcon>>(new Map());
+  const getIconByColor = useCallback(
+    (hex: string) => {
+      const cache = iconCacheRef.current;
+      let ic = cache.get(hex);
+      if (!ic) {
+        ic = pinNeonByColor(hex);
+        cache.set(hex, ic);
+      }
+      return ic;
+    },
+    [pinNeonByColor]
+  );
+
+  // Invalida tamaño al cambiar tema
   useEffect(() => {
     const t = setTimeout(() => mapRef.current?.invalidateSize(), 60);
     return () => clearTimeout(t);
@@ -209,25 +232,16 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
   const [bounds, setBounds] = useState<[number, number, number, number]>(WORLD_BOUNDS_ARR);
   const [zoom, setZoom] = useState(HOME_ZOOM);
 
-  // 🔧 Handler MEMOIZADO para evitar bucles de render
-  const handleViewChange = useCallback(
-    (b: [number, number, number, number], z: number) => {
-      // Evitar sets redundantes
-      setBounds((prev) => {
-        if (
-          prev[0] === b[0] &&
-          prev[1] === b[1] &&
-          prev[2] === b[2] &&
-          prev[3] === b[3]
-        ) {
-          return prev;
-        }
-        return b;
-      });
-      setZoom((prev) => (prev === z ? prev : z));
-    },
-    []
-  );
+  // Handler MEMOIZADO para evitar bucles de render
+  const handleViewChange = useCallback((b: [number, number, number, number], z: number) => {
+    setBounds((prev) => {
+      if (prev[0] === b[0] && prev[1] === b[1] && prev[2] === b[2] && prev[3] === b[3]) {
+        return prev;
+      }
+      return b;
+    });
+    setZoom((prev) => (prev === z ? prev : z));
+  }, []);
 
   // Clustering
   const { clusters, supercluster } = useSupercluster({
@@ -254,10 +268,11 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
           scrollWheelZoom
           attributionControl
           className="h-full w-full"
+          preferCanvas
         >
           <TileLayer url={tileUrl} attribution={tileAttrib} />
 
-          {/* 🔁 Sincroniza bounds/zoom del mapa con el estado (handler memoizado) */}
+          {/* sincroniza bounds/zoom del mapa con el estado */}
           <SyncViewToState onChange={handleViewChange} />
 
           {/* Clusters + puntos */}
@@ -266,7 +281,7 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
             const { cluster: isCluster, point_count: pointCount } = c.properties;
 
             if (isCluster) {
-              const clusterId = c.id ?? c.properties?.cluster_id;
+              const clusterId = (c.id ?? c.properties?.cluster_id) as number | undefined;
               return (
                 <Marker
                   key={`cluster-${clusterId ?? i}`}
@@ -274,10 +289,11 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
                   icon={clusterIcon(pointCount)}
                   eventHandlers={{
                     click: () => {
-                      const expansionZoom = Math.min(
-                        supercluster?.getClusterExpansionZoom(clusterId) ?? (zoom + 2),
-                        18
-                      );
+                      const target =
+                        clusterId != null && supercluster
+                          ? supercluster.getClusterExpansionZoom(clusterId)
+                          : undefined;
+                      const expansionZoom = Math.min(target ?? zoom + 2, 18);
                       mapRef.current?.flyTo([lat, lng], expansionZoom, { animate: true });
                     },
                   }}
@@ -287,21 +303,20 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
 
             const name = c.properties?.name as string | undefined;
             const cat = (c.properties?.category as CategoryKey) ?? "wifi";
-            const icon = pinNeonByColor(categoryColor(cat));
+            const icon = getIconByColor(categoryColor(cat));
             return (
               <Marker
                 key={c.properties?.id ?? `pt-${lat}-${lng}-${i}`}
                 position={[lat, lng]}
                 icon={icon}
+                title={name ?? `Punto ${cat}`}
               >
                 <Tooltip direction="top" offset={[0, -6]} opacity={0.95}>
                   {name ?? "Punto sin nombre"}
                 </Tooltip>
                 <Popup>
                   <div className="space-y-1">
-                    <div className="text-sm font-medium">
-                      {name ?? "Punto sin nombre"}
-                    </div>
+                    <div className="text-sm font-medium">{name ?? "Punto sin nombre"}</div>
                     <div className="text-xs opacity-80">
                       Categoría: <span className="font-medium">{cat}</span>
                     </div>
@@ -391,9 +406,11 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
                 group flex items-center gap-1 rounded-full px-3 py-1.5 text-xs
                 transition-all backdrop-blur
                 border
-                ${active
-                  ? "bg-white/10 dark:bg-white/10 border-white/30 text-white"
-                  : "bg-[color:var(--card,rgba(17,24,39,0.55))] border-[color:var(--border,#334155)] text-slate-200/80"}
+                ${
+                  active
+                    ? "bg-white/10 dark:bg-white/10 border-white/30 text-white"
+                    : "bg-[color:var(--card,rgba(17,24,39,0.55))] border-[color:var(--border,#334155)] text-slate-200/80"
+                }
                 hover:scale-[1.02] active:scale-95
                 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60
               `}
