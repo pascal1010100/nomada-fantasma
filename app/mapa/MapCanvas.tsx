@@ -1,14 +1,28 @@
 // app/mapa/MapCanvas.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import L from "leaflet";
 import type { Point } from "./points";
-import { Plus, Minus, Ship, Skull } from "lucide-react";
+import {
+  Plus,
+  Minus,
+  Crosshair,
+  RotateCcw,
+  Skull,
+  Wifi,
+  Bed,
+  Coffee,
+  CreditCard,
+  Anchor,
+} from "lucide-react";
 
+/**
+ * Espera que cada Point tenga (id, lat, lng, category?: 'wifi'|'stay'|'coffee'|'atm'|'harbor')
+ * Si no tiene category, cae en 'wifi' por defecto.
+ */
 type MapCanvasProps = {
-  /** Puntos a pintar (puede venir vacío) */
   points?: Point[];
 };
 
@@ -18,14 +32,11 @@ function useThemeDark(): boolean {
     const root = document.documentElement;
     const update = () => setIsDark(root.classList.contains("dark"));
     update();
-
     const obs = new MutationObserver(update);
     obs.observe(root, { attributes: true, attributeFilter: ["class"] });
-
     const mq = window.matchMedia?.("(prefers-color-scheme: dark)");
     const onChange = () => update();
     mq?.addEventListener?.("change", onChange);
-
     return () => {
       obs.disconnect();
       mq?.removeEventListener?.("change", onChange);
@@ -34,69 +45,47 @@ function useThemeDark(): boolean {
   return isDark;
 }
 
-/** Controles modernos (zoom + recenter) */
-function ZoomUI() {
-  const map = useMap();
-  return (
-    <div
-      className="
-        absolute z-[1100] flex flex-col gap-2
-        left-[calc(env(safe-area-inset-left)+14px)]
-        top-[calc(env(safe-area-inset-top)+14px)]
-      "
-    >
-      <button
-        type="button"
-        aria-label="Acercar mapa"
-        onClick={() => map.zoomIn()}
-        className="btn-ghost h-11 w-11 md:h-12 md:w-12 rounded-full bg-card/70 border border-border backdrop-blur shadow-md hover:scale-[1.03] active:scale-[0.98] transition-transform glow-aqua"
-        title="Acercar"
-      >
-        <Plus className="h-5 w-5 md:h-6 md:w-6" />
-      </button>
-      <button
-        type="button"
-        aria-label="Alejar mapa"
-        onClick={() => map.zoomOut()}
-        className="btn-ghost h-11 w-11 md:h-12 md:w-12 rounded-full bg-card/70 border border-border backdrop-blur shadow-md hover:scale-[1.03] active:scale-[0.98] transition-transform glow-aqua"
-        title="Alejar"
-      >
-        <Minus className="h-5 w-5 md:h-6 md:w-6" />
-      </button>
-      <button
-        type="button"
-        aria-label="Recentrar"
-        onClick={() => map.setView([14.62, -90.56], 5, { animate: true })}
-        className="btn-ghost h-11 w-11 md:h-12 md:w-12 rounded-full bg-card/70 border border-border backdrop-blur shadow-md hover:scale-[1.03] active:scale-[0.98] transition-transform"
-        title="Volver al inicio"
-      >
-        <Ship className="h-5 w-5 md:h-6 md:w-6" />
-      </button>
-    </div>
-  );
-}
+const HOME_CENTER: L.LatLngExpression = [14.62, -90.56];
+const HOME_ZOOM = 5;
+const WORLD_BOUNDS = L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180));
+
+const CATEGORIES = [
+  { key: "wifi", label: "Wi-Fi", icon: Wifi, color: "#00E5FF" },     // azul neón
+  { key: "hospedaje", label: "Hospedaje", icon: Bed, color: "#FACC15" }, // dorado farol
+  { key: "cowork", label: "Cowork", icon: Coffee, color: "#E879F9" }, // magenta
+  { key: "banco", label: "Banco/ATM", icon: CreditCard, color: "#34D399" }, // verde tesoro
+  { key: "puerto", label: "Puerto", icon: Anchor, color: "#EF4444" }, // rojo faro/peligro
+] as const;
+
+
+type CategoryKey = (typeof CATEGORIES)[number]["key"];
+
+const categoryColor = (cat?: string) => {
+  const found = CATEGORIES.find((c) => c.key === cat);
+  return found?.color ?? "#38BDF8";
+};
 
 export default function MapCanvas({ points = [] }: MapCanvasProps) {
   const isDark = useThemeDark();
+  const mapRef = useRef<L.Map | null>(null);
 
-  // Basemaps: claro ↔ oscuro (noWrap para evitar "mundo repetido")
+  // Invalida tamaño cuando cambia el tema
+  useEffect(() => {
+    const t = setTimeout(() => mapRef.current?.invalidateSize(), 60);
+    return () => clearTimeout(t);
+  }, [isDark]);
+
+  // Tiles
   const tileUrl = isDark
     ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-    : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+    : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 
-  const tileAttrib = isDark
-    ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | &copy; <a href="https://carto.com/attributions">CARTO</a>'
-    : "&copy; OpenStreetMap contributors";
+  const tileAttrib =
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
-  // Límites del mundo para que no se desborde
-  const worldBounds = useMemo(
-    () => L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180)),
-    []
-  );
-
-  // Pin neón (tu diseño original)
-  const pinNeon = useMemo(
-    () =>
+  // DivIcon neón por categoría
+  const pinNeonByColor = useMemo(
+    () => (hex = "#38BDF8") =>
       L.divIcon({
         className: "",
         html: `
@@ -106,12 +95,12 @@ export default function MapCanvas({ points = [] }: MapCanvasProps) {
             </style>
             <div style="
               position:absolute;inset:0;border-radius:9999px;
-              background: radial-gradient(40% 40% at 50% 50%, rgba(56,189,248,1), rgba(56,189,248,.22) 60%, rgba(56,189,248,0) 70%);
-              box-shadow: 0 0 0 1px rgba(56,189,248,.42), 0 6px 18px rgba(56,189,248,.32);
+              background: radial-gradient(40% 40% at 50% 50%, ${hex}, ${hex}36 60%, ${hex}00 70%);
+              box-shadow: 0 0 0 1px ${hex}6B, 0 6px 18px ${hex}52;
             "></div>
             <div style="
               position:absolute;inset:-6px;border-radius:9999px;filter:blur(4px);
-              background: radial-gradient(50% 50% at 50% 50%, rgba(56,189,248,.22), rgba(168,85,247,.14) 60%, rgba(168,85,247,0) 70%);
+              background: radial-gradient(50% 50% at 50% 50%, ${hex}33, ${hex}24 60%, ${hex}00 70%);
               animation: nfPulse 2.4s ease-out infinite;
             "></div>
           </div>
@@ -122,118 +111,173 @@ export default function MapCanvas({ points = [] }: MapCanvasProps) {
     []
   );
 
-  // Recalcular tamaño del mapa al cambiar de tema o al montar
-  useEffect(() => {
-    // Leaflet se reajusta automáticamente, pero invalidamos por si acaso
-    setTimeout(() => {
-      const panes = document.querySelectorAll(".leaflet-container");
-      panes.forEach((el: any) => el._leaflet_id && (el as any).dispatchEvent(new Event("resize")));
-    }, 50);
-  }, [isDark]);
+  // UI Actions
+  const zoomIn = () => mapRef.current?.zoomIn();
+  const zoomOut = () => mapRef.current?.zoomOut();
+  const recenter = () =>
+    mapRef.current?.setView(HOME_CENTER, HOME_ZOOM, { animate: true });
+  const locate = () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const ll: L.LatLngExpression = [pos.coords.latitude, pos.coords.longitude];
+        mapRef.current?.flyTo(ll, Math.max(12, mapRef.current?.getZoom() ?? 12));
+      },
+      () => recenter(),
+      { enableHighAccuracy: true, timeout: 5000 }
+    );
+  };
+
+  // === FILTROS DE CATEGORÍA ===
+  const [activeCats, setActiveCats] = useState<Set<CategoryKey>>(
+    () => new Set(CATEGORIES.map((c) => c.key))
+  );
+
+  const toggleCat = (key: CategoryKey) =>
+    setActiveCats((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+
+  const filteredPoints = useMemo(
+    () =>
+      points.filter((p) =>
+        activeCats.has(((p as any).category as CategoryKey) ?? "wifi")
+      ),
+    [points, activeCats]
+  );
 
   return (
-    <div className="relative overflow-hidden rounded-3xl fade-border h-[60vh] min-h-[420px] bg-background">
-      {/* === Estética “barco fantasma digital” (capas visuales) === */}
-      <style>{`
-        @keyframes nfSweepRotate { to { transform: rotate(360deg); } }
-        @keyframes scanDrift {
-          0% { background-position: 0 0, 0 0, 0 0; }
-          100% { background-position: 0 8px, 0 0, 0 0; }
-        }
-        .nf-grid{
-          position:absolute; inset:0; pointer-events:none;
-          opacity:.18;
-          background-image:
-            repeating-linear-gradient(0deg, color-mix(in oklab, var(--foreground) 16%, transparent) 0 1px, transparent 1px 28px),
-            repeating-linear-gradient(90deg, color-mix(in oklab, var(--foreground) 16%, transparent) 0 1px, transparent 1px 28px);
-        }
-        .dark .nf-grid{ opacity:.12; }
-
-        .nf-vignette{
-          position:absolute; inset:0; pointer-events:none;
-          background: radial-gradient(120% 80% at 50% 0%, transparent 60%, rgba(0,0,0,0.25) 100%);
-          mix-blend-mode: multiply;
-        }
-
-        .nf-scanlines{
-          position:absolute; inset:0; pointer-events:none;
-          background:
-            repeating-linear-gradient(180deg, rgba(255,255,255,.03) 0 1px, transparent 1px 3px),
-            radial-gradient(100% 60% at 50% -10%, rgba(56,189,248,.08), transparent 60%);
-          animation: scanDrift 6s linear infinite;
-          mix-blend-mode: overlay;
-          opacity:.35;
-        }
-
-        .nf-sonar-sweep{
-          position:absolute; inset:-20%;
-          pointer-events:none;
-          background: conic-gradient(from -60deg at 46% 40%, hsl(var(--primary) / .16), transparent 35%);
-          filter: blur(12px);
-          mix-blend-mode: screen;
-          animation: nfSweepRotate 12s linear infinite;
-        }
-        html:not(.dark) .nf-sonar-sweep{ mix-blend-mode: plus-lighter; filter: blur(10px); }
-      `}</style>
-
-      {/* Cuadrícula detrás del mapa para continuidad con la página */}
-      <div aria-hidden className="nf-grid" />
+    <div className="relative rounded-3xl overflow-hidden h-[62vh] min-h-[420px]">
+      {/* MAPA */}
       <div className="absolute inset-0 z-[20]">
         <MapContainer
-          center={[14.62, -90.56]}
-          zoom={5}
+          ref={mapRef}
+          center={HOME_CENTER}
+          zoom={HOME_ZOOM}
           minZoom={2}
           maxZoom={18}
-          maxBounds={worldBounds}
+          maxBounds={WORLD_BOUNDS}
           maxBoundsViscosity={0.9}
           worldCopyJump={false}
           zoomControl={false}
           scrollWheelZoom
           attributionControl
-          preferCanvas
           className="h-full w-full"
         >
-          <TileLayer
-            url={tileUrl}
-            attribution={tileAttrib}
-            noWrap
-            updateInterval={100}
-            keepBuffer={2}
-            detectRetina
-          />
-
-          {points.map((p, i) => (
-            <Marker
-              key={(p as any).id ?? `${p.lat}-${p.lng}-${i}`}
-              position={[p.lat, p.lng]}
-              icon={pinNeon}
-            />
-          ))}
-
-          <ZoomUI />
+          <TileLayer url={tileUrl} attribution={tileAttrib} />
+          {filteredPoints.map((p, i) => {
+            const cat = ((p as any).category as CategoryKey) ?? "wifi";
+            const icon = pinNeonByColor(categoryColor(cat));
+            return (
+              <Marker
+                key={p.id ?? `${p.lat}-${p.lng}-${i}`}
+                position={[p.lat, p.lng]}
+                icon={icon}
+              />
+            );
+          })}
         </MapContainer>
       </div>
 
-      {/* Capas HUD */}
-      <div aria-hidden className="nf-vignette absolute inset-0 z-[1000]" />
-      <div aria-hidden className="nf-scanlines absolute inset-0 z-[1025]" />
-      <div aria-hidden className="nf-sonar-sweep absolute inset-0 z-[1050]" />
+      {/* Overlays HUD (no bloquean eventos) */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-[1000] nf-map-overlay" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-[1100] nf-map-vignette" />
 
-      {/* Marca y brújula */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-3 left-3 z-[1200] opacity-75"
-        title="Rumbo Norte"
-      >
-        <div className="rounded-full bg-card/70 border border-border px-2 py-1 text-xs backdrop-blur">
-          N
-        </div>
-      </div>
+      {/* Rosa náutica y marca fantasma */}
+      <div aria-hidden className="compass-rose rose-tr absolute z-[1200]" />
       <div
         aria-hidden
         className="pointer-events-none absolute right-3 bottom-3 z-[1200] opacity-15"
       >
         <Skull className="h-8 w-8" />
+      </div>
+
+      {/* Norte */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute bottom-4 left-4 z-[1200] opacity-60"
+        title="Rumbo Norte"
+      >
+        <div className="rounded-full bg-[color:var(--card,rgba(17,24,39,0.7))] border border-[color:var(--border,#334155)] px-2 py-1 text-xs backdrop-blur">
+          N
+        </div>
+      </div>
+
+      {/* CONTROLES */}
+      <div
+        className="
+          absolute z-[1100] flex flex-col gap-2
+          left-[calc(env(safe-area-inset-left)+14px)]
+          top-[calc(env(safe-area-inset-top)+14px)]
+        "
+      >
+        {[
+          { label: "Acercar", Icon: Plus, onClick: zoomIn },
+          { label: "Alejar", Icon: Minus, onClick: zoomOut },
+          { label: "Mi ubicación", Icon: Crosshair, onClick: locate },
+          { label: "Volver al inicio", Icon: RotateCcw, onClick: recenter },
+        ].map(({ label, Icon, onClick }) => (
+          <button
+            key={label}
+            type="button"
+            aria-label={label}
+            onClick={onClick}
+            className="
+              h-10 w-10 rounded-full
+              bg-[color:var(--card,rgba(17,24,39,0.7))]
+              border border-[color:var(--border,#334155)]
+              backdrop-blur shadow-md
+              hover:scale-[1.03] active:scale-95 transition-transform
+              ring-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60
+              text-slate-100/90
+            "
+            title={label}
+          >
+            <Icon className="h-5 w-5 mx-auto" />
+          </button>
+        ))}
+      </div>
+
+      {/* FILTROS DE CATEGORÍAS */}
+      <div
+        className="
+          absolute z-[1150] right-[calc(env(safe-area-inset-right)+14px)]
+          top-[calc(env(safe-area-inset-top)+14px)]
+          flex items-center gap-2 flex-wrap
+          max-w-[72vw]
+        "
+      >
+        {CATEGORIES.map(({ key, label, icon: Icon, color }) => {
+          const active = activeCats.has(key);
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => toggleCat(key)}
+              className={`
+                group flex items-center gap-1 rounded-full px-3 py-1.5 text-xs
+                transition-all backdrop-blur
+                border
+                ${active
+                  ? "bg-white/10 dark:bg-white/10 border-white/30 text-white"
+                  : "bg-[color:var(--card,rgba(17,24,39,0.55))] border-[color:var(--border,#334155)] text-slate-200/80"}
+                hover:scale-[1.02] active:scale-95
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60
+              `}
+              title={label}
+            >
+              <span
+                className="inline-block h-2.5 w-2.5 rounded-full"
+                style={{ background: active ? color : "#64748B" }}
+              />
+              <Icon className="h-3.5 w-3.5 opacity-90" />
+              <span className="opacity-90">{label}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
