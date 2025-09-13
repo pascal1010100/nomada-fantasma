@@ -30,25 +30,23 @@ export default function HeaderHero() {
       className="
         relative overflow-hidden rounded-2xl border border-border/60
         bg-background/80 backdrop-blur mb-8 md:mb-10
-        mt-6 md:mt-8   /* ← separación del navbar */
+        mt-8 md:mt-10   /* separación del navbar */
       "
     >
-      {/* === Fondo: cuadrícula + halo neon === */}
-      <style>{`
-        @keyframes glowPulse { 0%{opacity:.25} 50%{opacity:.55} 100%{opacity:.25} }
-      `}</style>
-
-      {/* Grid */}
+      {/* === Fondo: cuadrícula sincronizada con --nf-grid-step + halo neón === */}
+      {/* Grid (usa var(--nf-grid-step) igual que el mapa) */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.18] dark:opacity-[0.14]"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(0deg, rgba(255,255,255,0.18) 0 1px, transparent 1px 28px), repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0 1px, transparent 1px 28px)",
+            `repeating-linear-gradient(0deg, rgba(255,255,255,0.18) 0 1px, transparent 1px var(--nf-grid-step)),
+             repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0 1px, transparent 1px var(--nf-grid-step))`,
+          mixBlendMode: "multiply",
         }}
       />
-
       {/* Halo neon respirando */}
+      <style>{`@keyframes glowPulse{0%{opacity:.25}50%{opacity:.55}100%{opacity:.25}}`}</style>
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -59,7 +57,6 @@ export default function HeaderHero() {
           animation: "glowPulse 5s ease-in-out infinite",
         }}
       />
-
       {/* Bruma inferior para legibilidad */}
       <div
         aria-hidden
@@ -71,10 +68,11 @@ export default function HeaderHero() {
         }}
       />
 
+      {/* === Contenido === */}
       <div className="relative z-10 px-6 py-8 md:px-10 md:py-10 text-center">
         {/* Brújula con glow */}
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
+          initial={{ scale: 0.92, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.35, delay: 0.05 }}
           className="
@@ -103,7 +101,7 @@ export default function HeaderHero() {
             color: "transparent",
             WebkitTextFillColor: "transparent",
             textShadow:
-              "0 0 16px rgba(56,189,248,.35), 0 0 28px rgba(168,85,247,.22)",
+              "0 0 20px rgba(56,189,248,.45), 0 0 40px rgba(168,85,247,.30)",
           }}
         >
           Carta Fantasma · Mapa Nómada
@@ -125,10 +123,10 @@ export default function HeaderHero() {
           animate={{ scaleX: 1 }}
           transition={{ duration: 0.5, delay: 0.22 }}
           className="mx-auto mt-4 h-[2px] w-40 origin-left rounded-full
-                     bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--accent))] opacity-70"
+                     bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--accent))] opacity-80"
         />
 
-        {/* Pills con micro-animación y glow */}
+        {/* Pills con glow */}
         <motion.div
           className="mt-5 flex flex-wrap items-center justify-center gap-2 md:gap-3"
           initial="hidden"
@@ -153,7 +151,7 @@ export default function HeaderHero() {
               className="pill inline-flex items-center gap-2 bg-card/55 border"
               style={{
                 boxShadow:
-                  "0 0 0 1px hsla(189,100%,58%,.28), 0 10px 26px hsla(189,100%,58%,.18)",
+                  "0 0 0 1px hsla(189,100%,58%,.26), 0 12px 30px hsla(189,100%,58%,.16)",
               }}
             >
               <Icon className="h-4 w-4 md:h-5 md:w-5" />

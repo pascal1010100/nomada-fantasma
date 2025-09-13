@@ -46,7 +46,14 @@
   --glass-bg:        255 255 255 / 0.68;
   --glass-border:    15 23 42 / 0.12;
   --glass-shadow:    0 10px 28px -12px rgba(2,6,23,.24);
+
+  /* Tamaño de celda unificado (hero + mapa) */
+  --nf-grid-step: 40px;
 }
+
+/* Breakpoints para el paso de cuadrícula */
+@media (max-width:1024px){ :root { --nf-grid-step: 36px; } }
+@media (max-width:640px){  :root { --nf-grid-step: 32px; } }
 
 /* DARK */
 .dark {
@@ -169,6 +176,7 @@
     box-shadow: 0 1px 0 0 hsl(0 0% 100% / 0.05) inset, 0 8px 22px hsl(222 47% 8% / 0.25);
   }
 
+  /* CTA */
   .btn-cta {
     @apply inline-flex items-center justify-center gap-2 rounded-3xl px-5 py-3 text-base font-medium border-0;
     background-image: linear-gradient(180deg, hsl(var(--primary)), hsl(187 92% 44%));
@@ -176,7 +184,43 @@
     box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35), 0 12px 38px hsl(var(--primary) / 0.28);
   }
   .btn-cta:active { transform: translateY(1px); }
+
+  /* ====== NUEVO: Pills con glow consistente ====== */
+  .pill-neon {
+    @apply pill bg-card/55 border transition-all;
+    box-shadow:
+      0 0 0 1px hsla(189,100%,58%,.26),
+      0 12px 30px hsla(189,100%,58%,.16);
+  }
+  .pill-neon:hover { transform: translateY(-1px) scale(1.02); }
+  .pill-neon:active { transform: translateY(0) scale(0.99); }
+  .pill-neon:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px hsl(var(--primary) / .45),
+      0 0 0 1px hsla(189,100%,58%,.26),
+      0 12px 30px hsla(189,100%,58%,.16);
+  }
+
+  /* ====== NUEVO: Botones del mapa con mejor contraste ====== */
+  .btn-ghost-map {
+    @apply rounded-full;
+    box-shadow:
+      0 0 0 1px hsla(189,100%,58%,.24),
+      0 10px 26px hsla(189,100%,58%,.16);
+  }
+  .btn-ghost-map:hover { transform: scale(1.03); }
+  .btn-ghost-map:active { transform: scale(0.98); }
+  .btn-ghost-map:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 3px hsl(var(--primary) / .38),
+      0 0 0 1px hsla(189,100%,58%,.26),
+      0 10px 26px hsla(189,100%,58%,.16);
+  }
 }
+/* refuerzo de contraste en tema claro para .btn-ghost */
+:root .btn-ghost { background-color: hsl(var(--card) / 0.72); border-color: hsl(var(--border)); }
 
 /* =========================
    UTILITIES
@@ -238,7 +282,9 @@
       linear-gradient(to right, hsl(var(--sonar-grid) / var(--sonar-grid-alpha)) 1px, transparent 1px),
       linear-gradient(to bottom, hsl(var(--sonar-grid) / var(--sonar-grid-alpha)) 1px, transparent 1px),
       radial-gradient(circle at 46% 40%, hsl(var(--sonar-grid) / .12) 2px, transparent 3px);
-    background-size: 48px 48px, 48px 48px, 14px 14px;
+    background-size: var(--nf-grid-step) var(--nf-grid-step),
+                     var(--nf-grid-step) var(--nf-grid-step),
+                     14px 14px;
     background-position: center, center, center;
     mix-blend-mode: screen;
   }
@@ -254,12 +300,11 @@
     background-image:
       linear-gradient(to right, hsl(var(--carto-grid-h) / 0.30) 1px, transparent 1px),
       linear-gradient(to bottom, hsl(var(--carto-grid-h) / 0.30) 1px, transparent 1px);
-    background-size: 48px 48px, 48px 48px;
+    background-size: var(--nf-grid-step) var(--nf-grid-step),
+                     var(--nf-grid-step) var(--nf-grid-step);
     opacity: .26;
   }
   html.dark .nf-grid { opacity: .32; }
-  @media (max-width:1024px){ .nf-grid{ background-size:40px 40px, 40px 40px; } }
-  @media (max-width:640px){ .nf-grid{ background-size:32px 32px, 32px 32px; } }
 
   .nf-vignette {
     background: radial-gradient(80% 60% at 50% 40%, rgba(0,0,0,0) 0%, rgba(0,0,0,.07) 100%);
@@ -369,7 +414,9 @@ html.dark .leaflet-tile { filter: saturate(0.82) contrast(0.93) brightness(0.96)
     /* leves isobaras */
     radial-gradient(60% 40% at 12% -10%, hsl(var(--primary) / .06), transparent 60%),
     radial-gradient(60% 40% at 102% -16%, hsl(var(--accent) / .05), transparent 70%);
-  background-size: 48px 48px, 48px 48px, 100% 100%, 100% 100%;
+  background-size: var(--nf-grid-step) var(--nf-grid-step),
+                   var(--nf-grid-step) var(--nf-grid-step),
+                   100% 100%, 100% 100%;
   mix-blend-mode: multiply;
   opacity: .55;
 }
@@ -379,6 +426,9 @@ html.dark .nf-map-overlay{
     linear-gradient(to bottom, hsl(var(--carto-dark-grid-h) / .26) 1px, transparent 1px),
     radial-gradient(60% 40% at 12% -10%, hsl(var(--primary) / .08), transparent 60%),
     radial-gradient(60% 40% at 102% -16%, hsl(var(--accent) / .06), transparent 70%);
+  background-size: var(--nf-grid-step) var(--nf-grid-step),
+                   var(--nf-grid-step) var(--nf-grid-step),
+                   100% 100%, 100% 100%;
   mix-blend-mode: screen;
   opacity: .38;
 }

@@ -1,9 +1,10 @@
-// app/mapa/MapCanvas.tsx
+// app/mapa/MapCanvasCluster.tsx
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MapContainer, TileLayer, Marker, Tooltip, Popup, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
+import useSupercluster from "use-supercluster";
 import type { Point } from "./points";
 import {
   Plus,
@@ -18,13 +19,7 @@ import {
   Anchor,
 } from "lucide-react";
 
-/**
- * Espera que cada Point tenga (id, lat, lng, category?: 'wifi'|'stay'|'coffee'|'atm'|'harbor')
- * Si no tiene category, cae en 'wifi' por defecto.
- */
-type MapCanvasProps = {
-  points?: Point[];
-};
+type MapCanvasProps = { points?: Point[] };
 
 function useThemeDark(): boolean {
   const [isDark, setIsDark] = useState(false);
@@ -48,43 +43,24 @@ function useThemeDark(): boolean {
 const HOME_CENTER: L.LatLngExpression = [14.62, -90.56];
 const HOME_ZOOM = 5;
 const WORLD_BOUNDS = L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180));
+const WORLD_BOUNDS_ARR: [number, number, number, number] = [-180, -85, 180, 85];
 
+/** Paleta/categorías */
 const CATEGORIES = [
-  { key: "wifi", label: "Wi-Fi", icon: Wifi, color: "#00E5FF" },     // azul neón
-  { key: "hospedaje", label: "Hospedaje", icon: Bed, color: "#FACC15" }, // dorado farol
-  { key: "cowork", label: "Cowork", icon: Coffee, color: "#E879F9" }, // magenta
-  { key: "banco", label: "Banco/ATM", icon: CreditCard, color: "#34D399" }, // verde tesoro
-  { key: "puerto", label: "Puerto", icon: Anchor, color: "#EF4444" }, // rojo faro/peligro
+  { key: "wifi", label: "Wi-Fi", icon: Wifi, color: "#00E5FF" },
+  { key: "hospedaje", label: "Hospedaje", icon: Bed, color: "#FACC15" },
+  { key: "cowork", label: "Cowork", icon: Coffee, color: "#E879F9" },
+  { key: "banco", label: "Banco/ATM", icon: CreditCard, color: "#34D399" },
+  { key: "puerto", label: "Puerto", icon: Anchor, color: "#EF4444" },
 ] as const;
-
-
 type CategoryKey = (typeof CATEGORIES)[number]["key"];
 
-const categoryColor = (cat?: string) => {
-  const found = CATEGORIES.find((c) => c.key === cat);
-  return found?.color ?? "#38BDF8";
-};
+const categoryColor = (cat?: string) =>
+  CATEGORIES.find((c) => c.key === cat)?.color ?? "#38BDF8";
 
-export default function MapCanvas({ points = [] }: MapCanvasProps) {
-  const isDark = useThemeDark();
-  const mapRef = useRef<L.Map | null>(null);
-
-  // Invalida tamaño cuando cambia el tema
-  useEffect(() => {
-    const t = setTimeout(() => mapRef.current?.invalidateSize(), 60);
-    return () => clearTimeout(t);
-  }, [isDark]);
-
-  // Tiles
-  const tileUrl = isDark
-    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-    : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-
-  const tileAttrib =
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | &copy; <a href="https://carto.com/attributions">CARTO</a>';
-
-  // DivIcon neón por categoría
-  const pinNeonByColor = useMemo(
+/** Pin neón por color */
+const usePinNeonByColor = () =>
+  useMemo(
     () => (hex = "#38BDF8") =>
       L.divIcon({
         className: "",
@@ -111,7 +87,81 @@ export default function MapCanvas({ points = [] }: MapCanvasProps) {
     []
   );
 
-  // UI Actions
+/** Icono de cluster (burbuja con contador y glow) */
+const clusterIcon = (count: number) =>
+  L.divIcon({
+    className: "",
+    html: `
+      <div style="position:relative;transform:translate(-50%,-50%);">
+        <style>
+          @keyframes pulse { 0%{transform:scale(.95);opacity:.9} 70%{transform:scale(1.25);opacity:0} 100%{opacity:0} }
+        </style>
+        <div style="
+          width:36px;height:36px;border-radius:9999px;
+          background: radial-gradient(50% 50% at 50% 50%, #0ff, #0ff2 60%, #0ff0 70%);
+          box-shadow: 0 0 0 1px #0ff7, 0 8px 24px #0ff5, inset 0 0 18px #0ff6;
+          display:flex;align-items:center;justify-content:center;
+          color:#001018;font-weight:700;font-size:13px;
+        ">${count}</div>
+        <div style="
+          position:absolute;inset:-8px;border-radius:9999px;filter:blur(6px);
+          background: radial-gradient(50% 50%, #0ff3, #a855f74d 60%, transparent 70%);
+          animation:pulse 2.2s ease-out infinite;
+        "></div>
+      </div>
+    `,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+  });
+
+/** Mantiene zoom/bounds sincronizados con el estado */
+function SyncViewToState({
+  onChange,
+}: {
+  onChange: (b: [number, number, number, number], z: number) => void;
+}) {
+  const map = useMap();
+
+  // set inicial al montar
+  useEffect(() => {
+    const b = map.getBounds();
+    onChange([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], map.getZoom());
+  }, [map, onChange]);
+
+  // actualizar en cada movimiento / fin de zoom
+  useMapEvents({
+    moveend: () => {
+      const b = map.getBounds();
+      onChange([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], map.getZoom());
+    },
+    zoomend: () => {
+      const b = map.getBounds();
+      onChange([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], map.getZoom());
+    },
+  });
+
+  return null;
+}
+
+export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
+  const isDark = useThemeDark();
+  const mapRef = useRef<L.Map | null>(null);
+  const pinNeonByColor = usePinNeonByColor();
+
+  // Recalcular tamaño al cambiar tema
+  useEffect(() => {
+    const t = setTimeout(() => mapRef.current?.invalidateSize(), 60);
+    return () => clearTimeout(t);
+  }, [isDark]);
+
+  // Tiles
+  const tileUrl = isDark
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+  const tileAttrib =
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
+  // Acciones UI
   const zoomIn = () => mapRef.current?.zoomIn();
   const zoomOut = () => mapRef.current?.zoomOut();
   const recenter = () =>
@@ -128,26 +178,64 @@ export default function MapCanvas({ points = [] }: MapCanvasProps) {
     );
   };
 
-  // === FILTROS DE CATEGORÍA ===
+  // Filtros por categoría
   const [activeCats, setActiveCats] = useState<Set<CategoryKey>>(
     () => new Set(CATEGORIES.map((c) => c.key))
   );
-
   const toggleCat = (key: CategoryKey) =>
     setActiveCats((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
+      next.has(key) ? next.delete(key) : next.add(key);
       return next;
     });
 
   const filteredPoints = useMemo(
-    () =>
-      points.filter((p) =>
-        activeCats.has(((p as any).category as CategoryKey) ?? "wifi")
-      ),
+    () => points.filter((p) => activeCats.has(p.category as CategoryKey)),
     [points, activeCats]
   );
+
+  // GeoJSON para clustering
+  const geoPoints = useMemo(
+    () =>
+      filteredPoints.map((p) => ({
+        type: "Feature" as const,
+        properties: { id: p.id, category: p.category, name: p.name },
+        geometry: { type: "Point" as const, coordinates: [p.lng, p.lat] },
+      })),
+    [filteredPoints]
+  );
+
+  // Estado de bounds/zoom (inicia amplio para primer render)
+  const [bounds, setBounds] = useState<[number, number, number, number]>(WORLD_BOUNDS_ARR);
+  const [zoom, setZoom] = useState(HOME_ZOOM);
+
+  // 🔧 Handler MEMOIZADO para evitar bucles de render
+  const handleViewChange = useCallback(
+    (b: [number, number, number, number], z: number) => {
+      // Evitar sets redundantes
+      setBounds((prev) => {
+        if (
+          prev[0] === b[0] &&
+          prev[1] === b[1] &&
+          prev[2] === b[2] &&
+          prev[3] === b[3]
+        ) {
+          return prev;
+        }
+        return b;
+      });
+      setZoom((prev) => (prev === z ? prev : z));
+    },
+    []
+  );
+
+  // Clustering
+  const { clusters, supercluster } = useSupercluster({
+    points: geoPoints as any,
+    bounds,
+    zoom,
+    options: { radius: 60, maxZoom: 18 },
+  });
 
   return (
     <div className="relative rounded-3xl overflow-hidden h-[62vh] min-h-[420px]">
@@ -168,25 +256,67 @@ export default function MapCanvas({ points = [] }: MapCanvasProps) {
           className="h-full w-full"
         >
           <TileLayer url={tileUrl} attribution={tileAttrib} />
-          {filteredPoints.map((p, i) => {
-            const cat = ((p as any).category as CategoryKey) ?? "wifi";
+
+          {/* 🔁 Sincroniza bounds/zoom del mapa con el estado (handler memoizado) */}
+          <SyncViewToState onChange={handleViewChange} />
+
+          {/* Clusters + puntos */}
+          {clusters.map((c: any, i: number) => {
+            const [lng, lat] = c.geometry.coordinates;
+            const { cluster: isCluster, point_count: pointCount } = c.properties;
+
+            if (isCluster) {
+              const clusterId = c.id ?? c.properties?.cluster_id;
+              return (
+                <Marker
+                  key={`cluster-${clusterId ?? i}`}
+                  position={[lat, lng]}
+                  icon={clusterIcon(pointCount)}
+                  eventHandlers={{
+                    click: () => {
+                      const expansionZoom = Math.min(
+                        supercluster?.getClusterExpansionZoom(clusterId) ?? (zoom + 2),
+                        18
+                      );
+                      mapRef.current?.flyTo([lat, lng], expansionZoom, { animate: true });
+                    },
+                  }}
+                />
+              );
+            }
+
+            const name = c.properties?.name as string | undefined;
+            const cat = (c.properties?.category as CategoryKey) ?? "wifi";
             const icon = pinNeonByColor(categoryColor(cat));
             return (
               <Marker
-                key={p.id ?? `${p.lat}-${p.lng}-${i}`}
-                position={[p.lat, p.lng]}
+                key={c.properties?.id ?? `pt-${lat}-${lng}-${i}`}
+                position={[lat, lng]}
                 icon={icon}
-              />
+              >
+                <Tooltip direction="top" offset={[0, -6]} opacity={0.95}>
+                  {name ?? "Punto sin nombre"}
+                </Tooltip>
+                <Popup>
+                  <div className="space-y-1">
+                    <div className="text-sm font-medium">
+                      {name ?? "Punto sin nombre"}
+                    </div>
+                    <div className="text-xs opacity-80">
+                      Categoría: <span className="font-medium">{cat}</span>
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
             );
           })}
         </MapContainer>
       </div>
 
-      {/* Overlays HUD (no bloquean eventos) */}
+      {/* Overlays/branding */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-[1000] nf-map-overlay" />
       <div aria-hidden className="pointer-events-none absolute inset-0 z-[1100] nf-map-vignette" />
 
-      {/* Rosa náutica y marca fantasma */}
       <div aria-hidden className="compass-rose rose-tr absolute z-[1200]" />
       <div
         aria-hidden
@@ -206,7 +336,7 @@ export default function MapCanvas({ points = [] }: MapCanvasProps) {
         </div>
       </div>
 
-      {/* CONTROLES */}
+      {/* Controles */}
       <div
         className="
           absolute z-[1100] flex flex-col gap-2
@@ -241,7 +371,7 @@ export default function MapCanvas({ points = [] }: MapCanvasProps) {
         ))}
       </div>
 
-      {/* FILTROS DE CATEGORÍAS */}
+      {/* Filtros de categorías */}
       <div
         className="
           absolute z-[1150] right-[calc(env(safe-area-inset-right)+14px)]
