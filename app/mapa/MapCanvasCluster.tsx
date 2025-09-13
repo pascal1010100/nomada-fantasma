@@ -13,6 +13,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import useSupercluster from "use-supercluster";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { Point } from "./points";
 import {
   Plus,
@@ -62,6 +63,7 @@ const CATEGORIES = [
   { key: "puerto", label: "Puerto", icon: Anchor, color: "#EF4444" },
 ] as const;
 type CategoryKey = (typeof CATEGORIES)[number]["key"];
+const ALL_CATS: CategoryKey[] = CATEGORIES.map((c) => c.key);
 
 const categoryColor = (cat?: string) =>
   CATEGORIES.find((c) => c.key === cat)?.color ?? "#38BDF8";
@@ -130,13 +132,11 @@ function SyncViewToState({
 }) {
   const map = useMap();
 
-  // set inicial al montar
   useEffect(() => {
     const b = map.getBounds();
     onChange([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], map.getZoom());
   }, [map, onChange]);
 
-  // actualizar en cada movimiento / fin de zoom
   useMapEvents({
     moveend: () => {
       const b = map.getBounds();
@@ -151,10 +151,28 @@ function SyncViewToState({
   return null;
 }
 
+/** Helpers URL <-> Set (sin tipos raros) */
+type SearchParamsLike = { get(name: string): string | null };
+
+const parseCatsFromParams = (sp: SearchParamsLike) => {
+  const v = sp.get("cats");
+  if (v == null) return new Set<CategoryKey>(ALL_CATS); // sin param => todas activas
+  if (v.trim() === "") return new Set<CategoryKey>();   // cats= => ninguna
+  const raw = v.split(",").map((s) => s.trim());
+  const valid = raw.filter((k): k is CategoryKey => (ALL_CATS as string[]).includes(k));
+  return new Set<CategoryKey>(valid);
+};
+
+const setToSortedArray = (s: Set<CategoryKey>) => ALL_CATS.filter((k) => s.has(k));
+
 export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
   const isDark = useThemeDark();
   const mapRef = useRef<L.Map | null>(null);
   const pinNeonByColor = usePinNeonByColor();
+
+  // Router/params para persistir filtros
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Cache de iconos por color (perf)
   const iconCacheRef = useRef<Map<string, L.DivIcon>>(new Map());
@@ -184,33 +202,47 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
   const tileAttrib =
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
-  // Acciones UI
-  const zoomIn = () => mapRef.current?.zoomIn();
-  const zoomOut = () => mapRef.current?.zoomOut();
-  const recenter = () =>
-    mapRef.current?.setView(HOME_CENTER, HOME_ZOOM, { animate: true });
-  const locate = () => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const ll: L.LatLngExpression = [pos.coords.latitude, pos.coords.longitude];
-        mapRef.current?.flyTo(ll, Math.max(12, mapRef.current?.getZoom() ?? 12));
-      },
-      () => recenter(),
-      { enableHighAccuracy: true, timeout: 5000 }
-    );
-  };
+  // Filtros por categoría — inicial desde URL
+  const [activeCats, setActiveCats] = useState<Set<CategoryKey>>(() => {
+    if (typeof window === "undefined") return new Set(ALL_CATS);
+    return parseCatsFromParams(new URLSearchParams(window.location.search));
+  });
 
-  // Filtros por categoría
-  const [activeCats, setActiveCats] = useState<Set<CategoryKey>>(
-    () => new Set(CATEGORIES.map((c) => c.key))
-  );
+  // Cuando cambien los params de la URL (navegación externa), sincroniza estado
+  useEffect(() => {
+    const next = parseCatsFromParams(searchParams);
+    const same =
+      next.size === activeCats.size &&
+      setToSortedArray(next).every((k, i) => k === setToSortedArray(activeCats)[i]);
+    if (!same) setActiveCats(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // 🛠️ Toggle SIN efectos colaterales (solo cambia estado)
   const toggleCat = (key: CategoryKey) =>
     setActiveCats((prev) => {
       const next = new Set(prev);
       next.has(key) ? next.delete(key) : next.add(key);
       return next;
     });
+
+  // ✍️ Efecto: escribe los filtros en la URL cuando `activeCats` cambie
+  useEffect(() => {
+    const current = parseCatsFromParams(searchParams);
+    const same =
+      current.size === activeCats.size &&
+      setToSortedArray(current).every((k, i) => k === setToSortedArray(activeCats)[i]);
+    if (same) return; // ya coincide la URL, no tocar
+
+    const params = new URLSearchParams(searchParams.toString());
+    const arr = setToSortedArray(activeCats);
+    if (arr.length === ALL_CATS.length) params.delete("cats");
+    else params.set("cats", arr.join(","));
+
+    const pathname = typeof window !== "undefined" ? window.location.pathname : "/mapa";
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [activeCats, router, searchParams]);
 
   const filteredPoints = useMemo(
     () => points.filter((p) => activeCats.has(p.category as CategoryKey)),
@@ -228,16 +260,13 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
     [filteredPoints]
   );
 
-  // Estado de bounds/zoom (inicia amplio para primer render)
+  // Estado de bounds/zoom
   const [bounds, setBounds] = useState<[number, number, number, number]>(WORLD_BOUNDS_ARR);
   const [zoom, setZoom] = useState(HOME_ZOOM);
 
-  // Handler MEMOIZADO para evitar bucles de render
   const handleViewChange = useCallback((b: [number, number, number, number], z: number) => {
     setBounds((prev) => {
-      if (prev[0] === b[0] && prev[1] === b[1] && prev[2] === b[2] && prev[3] === b[3]) {
-        return prev;
-      }
+      if (prev[0] === b[0] && prev[1] === b[1] && prev[2] === b[2] && prev[3] === b[3]) return prev;
       return b;
     });
     setZoom((prev) => (prev === z ? prev : z));
@@ -251,8 +280,16 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
     options: { radius: 60, maxZoom: 18 },
   });
 
+  // (Opcional) encuadrar cuando cambien filtros
+  // useEffect(() => {
+  //   const map = mapRef.current;
+  //   if (!map || !filteredPoints.length) return;
+  //   const b = L.latLngBounds(filteredPoints.map((p) => L.latLng(p.lat, p.lng)));
+  //   map.fitBounds(b, { padding: [40, 40], maxZoom: 13, animate: true });
+  // }, [filteredPoints]);
+
   return (
-    <div className="relative rounded-3xl overflow-hidden h-[62vh] min-h-[420px]">
+    <div className="relative rounded-3xl overflow-hidden h-[62vh] min-h-[420px] nf-map-skin">
       {/* MAPA */}
       <div className="absolute inset-0 z-[20]">
         <MapContainer
@@ -328,6 +365,9 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
         </MapContainer>
       </div>
 
+      {/* Cuadrícula náutica (encima de tiles, debajo de overlays) */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-[900] nf-map-grid" />
+
       {/* Overlays/branding */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-[1000] nf-map-overlay" />
       <div aria-hidden className="pointer-events-none absolute inset-0 z-[1100] nf-map-vignette" />
@@ -360,10 +400,28 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
         "
       >
         {[
-          { label: "Acercar", Icon: Plus, onClick: zoomIn },
-          { label: "Alejar", Icon: Minus, onClick: zoomOut },
-          { label: "Mi ubicación", Icon: Crosshair, onClick: locate },
-          { label: "Volver al inicio", Icon: RotateCcw, onClick: recenter },
+          { label: "Acercar", Icon: Plus, onClick: () => mapRef.current?.zoomIn() },
+          { label: "Alejar", Icon: Minus, onClick: () => mapRef.current?.zoomOut() },
+          {
+            label: "Mi ubicación",
+            Icon: Crosshair,
+            onClick: () => {
+              if (!navigator.geolocation) return;
+              navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                  const ll: L.LatLngExpression = [pos.coords.latitude, pos.coords.longitude];
+                  mapRef.current?.flyTo(ll, Math.max(12, mapRef.current?.getZoom() ?? 12));
+                },
+                () => mapRef.current?.setView(HOME_CENTER, HOME_ZOOM, { animate: true }),
+                { enableHighAccuracy: true, timeout: 5000 }
+              );
+            },
+          },
+          {
+            label: "Volver al inicio",
+            Icon: RotateCcw,
+            onClick: () => mapRef.current?.setView(HOME_CENTER, HOME_ZOOM, { animate: true }),
+          },
         ].map(({ label, Icon, onClick }) => (
           <button
             key={label}
