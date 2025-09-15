@@ -1,15 +1,13 @@
 "use client";
 
-import {
-  motion,
-  type MotionProps,
-  useReducedMotion,
-} from "framer-motion";
+import { motion, type MotionProps, useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import { MessageCircle } from "lucide-react";
-import { useId, useMemo } from "react";
+import { Compass, MapPin, Anchor, Wifi, Coffee, Home, Map, MessageCircle } from "lucide-react";
+import { useId, useMemo, useState } from "react";
+import ChatModal from "./ChatModal";
 
 export default function Hero(): JSX.Element {
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const reduce = useReducedMotion();
 
   // IDs únicos para gradientes/filtros del SVG
@@ -154,33 +152,71 @@ export default function Hero(): JSX.Element {
             {...base}
             transition={{ ...base.transition, delay: 0.1 }}
           >
-            <Link href="/mapa" className="btn-cta">🧭 Explorar mapa</Link>
-            <Link href="/chat" className="btn-ghost">
-              <span className="inline-flex items-center gap-2">
-                <MessageCircle className="h-4 w-4" />
-                Hablar con la IA
-              </span>
+            <Link href="/mapa" className="btn-cta">
+              <Compass className="h-4 w-4" />
+              <span>Explorar mapa</span>
             </Link>
+            <button 
+              onClick={() => setIsChatOpen(true)}
+              className="btn-ghost inline-flex items-center gap-2"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span>Hablar con la IA</span>
+            </button>
           </motion.div>
 
           <motion.ul
-            className="mx-auto mt-6 w-full max-w-md space-y-2 text-sm text-slate-600 dark:text-slate-300"
+            className="mx-auto mt-8 w-full max-w-md space-y-2 text-sm"
             {...base}
             transition={{ ...base.transition, delay: 0.14 }}
           >
             {[
-              { icon: "🕯️", text: "Explora destinos únicos" },
-              { icon: "🗺️", text: "Descubre rutas secretas" },
-              { icon: "⚓", text: "Navegar sin límites" },
+              { 
+                icon: <Compass className="h-5 w-5 text-cyan-400" />, 
+                text: "Explora destinos únicos" 
+              },
+              { 
+                icon: <MapPin className="h-5 w-5 text-purple-400" />, 
+                text: "Descubre rutas secretas" 
+              },
+              { 
+                icon: <Anchor className="h-5 w-5 text-amber-400" />, 
+                text: "Navegar sin límites" 
+              },
+              { 
+                icon: <Wifi className="h-5 w-5 text-emerald-400" />, 
+                text: "Conexiones confiables" 
+              },
+              { 
+                icon: <Coffee className="h-5 w-5 text-rose-400" />, 
+                text: "Lugares con encanto" 
+              },
             ].map((item, i) => (
-              <li key={i} className="grid grid-cols-[1.25rem_1fr] items-center gap-2 opacity-95">
-                <span className="text-base leading-none">{item.icon}</span>
-                <span className="leading-6">{item.text}</span>
-              </li>
+              <motion.li 
+                key={i} 
+                className="group flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-card/50"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 + (i * 0.05) }}
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-card p-1.5 group-hover:scale-110 transition-transform">
+                  {item.icon}
+                </span>
+                <span className="text-sm font-medium text-foreground/90 group-hover:text-foreground transition-colors">
+                  {item.text}
+                </span>
+              </motion.li>
             ))}
           </motion.ul>
         </div>
       </div>
+      
+      {/* Chat Modal */}
+      <ChatModal 
+        open={isChatOpen} 
+        onClose={() => setIsChatOpen(false)}
+        variant="ghost"
+      />
     </section>
   );
 }

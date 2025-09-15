@@ -4,16 +4,71 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import {
-  Ghost,
-  Map,
+import { 
   MessageCircle,
+  Mail,
+  Phone as PhoneIcon,
+  Clock as ClockIcon,
+  Globe as GlobeIcon,
+  Send,
+  CheckCircle2,
+  AlertCircle,
+  MessageSquare,
+  User,
+  Navigation,
+  Map as MapIcon,
   Github,
   Twitter,
   Instagram,
-  Mail,
-  Compass,
 } from "lucide-react";
+
+// Animation variants
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
+const ContactCard = ({ 
+  icon: Icon, 
+  title, 
+  description, 
+  action, 
+  className = "" 
+}: { 
+  icon: React.ComponentType<{ className?: string }>,
+  title: string,
+  description: string,
+  action: React.ReactNode,
+  className?: string 
+}) => (
+  <motion.div 
+    variants={item}
+    className={`group relative overflow-hidden rounded-2xl border border-border bg-card/50 p-6 transition-all hover:bg-card/70 hover:shadow-md ${className}`}
+  >
+    <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-primary/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+    <div className="relative z-10">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <Icon className="h-6 w-6" />
+      </div>
+      <h3 className="mb-2 text-lg font-semibold">{title}</h3>
+      <p className="mb-4 text-sm text-muted-foreground">{description}</p>
+      <div className="mt-auto">
+        {action}
+      </div>
+    </div>
+  </motion.div>
+);
 
 // Newsletter (extraída del footer, mejorada)
 function NewsletterSubscribe() {
@@ -99,125 +154,301 @@ function NewsletterSubscribe() {
 }
 
 export default function ContactoClient() {
+  const [formStatus, setFormStatus] = useState<null | 'sending' | 'success' | 'error'>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormStatus('sending');
+    // Simulate form submission
+    setTimeout(() => {
+      setFormStatus('success');
+      setFormData({ name: '', email: '', message: '' });
+    }, 1500);
+  };
+
   return (
     <section className="container py-12 md:py-16">
-      {/* Header */}
-      <header className="mb-8 text-center">
+      {/* Hero Section */}
+      <motion.header 
+        className="mb-16 text-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <motion.div
-          className="inline-flex items-center gap-2 pill"
+          className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
+          transition={{ duration: 0.4, delay: 0.1 }}
         >
-          <Compass className="h-4 w-4" />
-          <span>Sección</span> · <strong>Contacto</strong>
+          <MessageCircle className="h-4 w-4" />
+          <span>Contacto</span>
         </motion.div>
 
         <motion.h1
-          className="mt-3 text-3xl md:text-4xl font-bold tracking-tight text-neon-gradient"
+          className="mt-4 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl md:text-6xl"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
         >
-          Hablemos
+          Conecta con Nuestro Equipo
         </motion.h1>
 
         <motion.p
-          className="mt-2 text-muted-foreground"
-          initial={{ opacity: 0, y: 8 }}
+          className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground"
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.1 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
         >
-          Aquí tienes todo: suscripción, enlaces rápidos, navegación y redes.
+          ¿Tienes preguntas, sugerencias o necesitas asistencia? Estamos aquí para ayudarte en tu viaje nómada digital.
         </motion.p>
-      </header>
+      </motion.header>
 
-      {/* Grid principal */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Marca + CTAs (antes estaba en el footer) */}
-        <motion.section
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: "easeOut" }}
-          className="relative overflow-hidden rounded-3xl card-glass p-6 md:p-8"
-        >
-          <div aria-hidden className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-sky-400/60 to-transparent opacity-80" />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl opacity-25"
-            style={{
-              background:
-                "radial-gradient(circle at center, var(--nf-wave-glow-1), transparent 65%)",
-            }}
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full blur-3xl opacity-20"
-            style={{
-              background:
-                "radial-gradient(circle at center, var(--nf-wave-glow-2), transparent 65%)",
-            }}
-          />
+      {/* Contact Methods Grid */}
+      <motion.div 
+        className="mb-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
+        <ContactCard
+          icon={MessageCircle}
+          title="Chatea con Nosotros"
+          description="Obtén respuestas rápidas de nuestro equipo de soporte en tiempo real."
+          action={
+            <Link href="/chat" className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+              Abrir chat <Send className="ml-1 h-4 w-4" />
+            </Link>
+          }
+          className="hover:border-primary/30"
+        />
 
-          <div className="relative z-10 flex items-start gap-3">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/70">
-              <Ghost className="h-5 w-5" />
-            </span>
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-neon-gradient">
-                Nómada Fantasma
-              </h2>
-              <p className="mt-1 max-w-prose text-sm text-muted-foreground">
-                Cartógrafo de lo imposible. Señal, refugio y rutas con estética
-                náutica y guía inteligente.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-3">
-                <Link href="/chat" className="btn-cta">
-                  <MessageCircle className="h-4 w-4" />
-                  Hablar con la IA
-                </Link>
-                <Link href="/mapa" className="btn-ghost">
-                  <Map className="h-4 w-4" />
-                  Explorar mapa
-                </Link>
+        <ContactCard
+          icon={Mail}
+          title="Correo Electrónico"
+          description="Escríbenos a nuestro equipo y te responderemos en menos de 24 horas."
+          action={
+            <a 
+              href="mailto:hola@nomadafantasma.com" 
+              className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              hola@nomadafantasma.com <Mail className="ml-1 h-4 w-4" />
+            </a>
+          }
+          className="hover:border-amber-500/30"
+        />
+
+        <ContactCard
+          icon={MapIcon}
+          title="Visítanos"
+          description="¿Eres nómada digital? Conoce nuestros espacios de trabajo recomendados."
+          action={
+            <Link 
+              href="/mapa" 
+              className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              Ver en el mapa <Navigation className="ml-1 h-4 w-4" />
+            </Link>
+          }
+          className="hover:border-emerald-500/30"
+        />
+      </motion.div>
+
+      {/* Contact Form Section */}
+      <motion.div 
+        className="mb-16"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <div className="mx-auto max-w-3xl rounded-3xl border border-border bg-card/50 p-8 shadow-sm">
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-bold tracking-tight">Envíanos un Mensaje</h2>
+            <p className="mt-2 text-muted-foreground">
+              Completa el formulario y nos pondremos en contacto contigo lo antes posible.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div>
+                <label htmlFor="name" className="mb-2 block text-sm font-medium">
+                  Nombre Completo
+                </label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <User className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <input
+                    type="text"
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="block w-full rounded-lg border border-border bg-background/50 py-3 pl-10 pr-4 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    placeholder="Tu nombre"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="email" className="mb-2 block text-sm font-medium">
+                  Correo Electrónico
+                </label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <input
+                    type="email"
+                    id="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="block w-full rounded-lg border border-border bg-background/50 py-3 pl-10 pr-4 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    placeholder="tu@email.com"
+                    required
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </motion.section>
 
-        {/* Newsletter (movida desde footer) */}
-        <NewsletterSubscribe />
-      </div>
+            <div>
+              <label htmlFor="message" className="mb-2 block text-sm font-medium">
+                Tu Mensaje
+              </label>
+              <div className="relative">
+                <div className="pointer-events-none absolute left-0 top-0 flex p-3">
+                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <textarea
+                  id="message"
+                  rows={5}
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                  className="block w-full rounded-lg border border-border bg-background/50 py-3 pl-10 pr-4 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  placeholder="¿En qué podemos ayudarte?"
+                  required
+                />
+              </div>
+            </div>
 
-      {/* Navegación / Proyecto / Redes (todo lo que estaba abajo en el footer) */}
-      <motion.div
-        className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        initial={{ opacity: 0, y: 14 }}
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                {formStatus === 'success' ? (
+                  <div className="flex items-center text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 className="mr-2 h-5 w-5" />
+                    ¡Mensaje enviado con éxito!
+                  </div>
+                ) : formStatus === 'error' ? (
+                  <div className="flex items-center text-rose-600 dark:text-rose-400">
+                    <AlertCircle className="mr-2 h-5 w-5" />
+                    Hubo un error al enviar el mensaje
+                  </div>
+                ) : null}
+              </div>
+              <button
+                type="submit"
+                disabled={formStatus === 'sending'}
+                className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {formStatus === 'sending' ? (
+                  <>
+                    <svg className="-ml-1 mr-2 h-4 w-4 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    <Send className="-ml-1 mr-2 h-4 w-4" />
+                    Enviar Mensaje
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </motion.div>
+
+      {/* Newsletter Section */}
+      <motion.div 
+        className="mb-16"
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
+        transition={{ delay: 0.4 }}
       >
-        <section className="rounded-2xl border border-border bg-card/55 p-4">
-          <h3 className="text-sm font-semibold">Navegación</h3>
-          <ul className="mt-3 space-y-2">
-            {[
-              { href: "/", label: "Inicio", icon: Compass },
-              { href: "/mapa", label: "Mapa", icon: Map },
-              { href: "/contacto", label: "Contacto", icon: MessageCircle },
-            ].map(({ href, label, icon: Icon }) => (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className="surface-hover inline-flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-card/50"
-                >
-                  <Icon className="h-4 w-4" />
-                  <span className="text-sm">{label}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <NewsletterSubscribe />
+      </motion.div>
 
-        <section className="rounded-2xl border border-border bg-card/55 p-4">
+      {/* Contact Info */}
+      <motion.div 
+        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
+        <ContactCard
+          icon={PhoneIcon}
+          title="Llámanos"
+          description="Disponibles de lunes a viernes de 9:00 a 18:00 (GMT-6)"
+          action={
+            <a 
+              href="tel:+50212345678" 
+              className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              +502 1234 5678
+            </a>
+          }
+          className="hover:border-blue-500/30"
+        />
+
+        <ContactCard
+          icon={ClockIcon}
+          title="Horario de Atención"
+          description="Lunes a Viernes: 9:00 - 18:00\nSábados: 10:00 - 14:00"
+          action={
+            <span className="text-sm text-muted-foreground">
+              GMT-6 (Guatemala)
+            </span>
+          }
+          className="hover:border-purple-500/30"
+        />
+
+        <ContactCard
+          icon={GlobeIcon}
+          title="Redes Sociales"
+          description="Síguenos para estar al día con las últimas actualizaciones"
+          action={
+            <div className="mt-2 flex gap-3">
+              <a href="https://twitter.com/nomadafantasma" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-twitter transition-colors">
+                <Twitter className="h-5 w-5" />
+                <span className="sr-only">Twitter</span>
+              </a>
+              <a href="https://instagram.com/nomadafantasma" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-instagram transition-colors">
+                <Instagram className="h-5 w-5" />
+                <span className="sr-only">Instagram</span>
+              </a>
+              <a href="https://github.com/nomadafantasma" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Github className="h-5 w-5" />
+                <span className="sr-only">GitHub</span>
+              </a>
+            </div>
+          }
+          className="hover:border-rose-500/30"
+        />
+      </motion.div>
+      
+      {/* Add any additional sections here if needed */}
+      
+      {/* Footer with additional links and social media */}
+      <footer className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="rounded-2xl border border-border bg-card/55 p-6">
           <h3 className="text-sm font-semibold">Proyecto</h3>
           <ul className="mt-3 space-y-2">
             {[
@@ -236,37 +467,37 @@ export default function ContactoClient() {
               </li>
             ))}
           </ul>
-        </section>
+        </div>
 
-        <section className="rounded-2xl border border-border bg-card/55 p-4">
+        <div className="rounded-2xl border border-border bg-card/55 p-6">
           <h3 className="text-sm font-semibold">Síguenos</h3>
           <div className="mt-3 flex flex-wrap gap-2">
             <a
-              href="https://github.com/"
+              href="https://github.com/nomadafantasma"
               target="_blank"
               rel="noreferrer"
               aria-label="GitHub"
-              className="pill surface-hover inline-flex items-center gap-2"
+              className="pill surface-hover inline-flex items-center gap-2 rounded-full border border-border bg-card/50 px-4 py-2 text-sm transition-colors hover:bg-card/80"
             >
               <Github className="h-4 w-4" />
-              <span className="text-sm">GitHub</span>
+              <span>GitHub</span>
             </a>
             <a
-              href="https://twitter.com/"
+              href="https://twitter.com/nomadafantasma"
               target="_blank"
               rel="noreferrer"
               aria-label="Twitter"
-              className="pill surface-hover inline-flex items-center gap-2"
+              className="pill surface-hover inline-flex items-center gap-2 rounded-full border border-border bg-card/50 px-4 py-2 text-sm transition-colors hover:bg-card/80"
             >
               <Twitter className="h-4 w-4" />
-              <span className="text-sm">Twitter</span>
+              <span>Twitter</span>
             </a>
             <a
-              href="https://instagram.com/"
+              href="https://instagram.com/nomadafantasma"
               target="_blank"
               rel="noreferrer"
               aria-label="Instagram"
-              className="pill surface-hover inline-flex items-center gap-2"
+              className="pill surface-hover mt-2 inline-flex items-center gap-2 rounded-full border border-border bg-card/50 px-4 py-2 text-sm transition-colors hover:bg-card/80"
             >
               <Instagram className="h-4 w-4" />
               <span className="text-sm">Instagram</span>
@@ -274,14 +505,14 @@ export default function ContactoClient() {
             <a
               href="mailto:hola@nomadafantasma.io"
               aria-label="Email"
-              className="pill surface-hover inline-flex items-center gap-2"
+              className="pill surface-hover mt-2 inline-flex items-center gap-2 rounded-full border border-border bg-card/50 px-4 py-2 text-sm transition-colors hover:bg-card/80"
             >
               <Mail className="h-4 w-4" />
-              <span className="text-sm">Contacto</span>
+              <span>Contacto</span>
             </a>
           </div>
-        </section>
-      </motion.div>
+        </div>
+      </footer>
 
       {/* Barra inferior (opcional, mantiene coherencia) */}
       <motion.div
