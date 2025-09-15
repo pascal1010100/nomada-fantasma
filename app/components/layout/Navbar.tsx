@@ -96,9 +96,9 @@ export default function Navbar() {
       </a>
 
       <div
-        className={`mx-auto mt-3 w-[min(1200px,96%)] rounded-2xl transition-all ${
-          scrolled ? "card-glass" : "bg-card/50 border border-border backdrop-blur-xs shadow-sm"
-        }`}
+        className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
+        scrolled ? "card-glass" : "bg-card/50 border border-border backdrop-blur-xs shadow-sm"
+      }`}
       >
         <nav aria-label="Principal" className="flex items-center justify-between px-4 py-2.5">
           <Link href="/" className="group inline-flex items-center gap-2">

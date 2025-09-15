@@ -50,7 +50,7 @@ export default function ChatBotton({
         aria-label={label}
         onClick={() => setOpen(true)}
         className="
-          z-[60]
+          fixed right-6 bottom-6 z-50
           h-14 w-14 md:h-16 md:w-16
           rounded-full shadow-xl border-0 relative
           flex items-center justify-center

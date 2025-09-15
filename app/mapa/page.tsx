@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 
 export default function MapaPage() {
   return (
-    <section className="container py-10 md:py-14">
+    <section className="container relative z-0 py-10 md:py-14">
       <HeaderHero />
-      <div className="relative overflow-hidden rounded-2xl border border-border/60 shadow-md bg-background">
+      <div className="relative z-0 overflow-hidden rounded-2xl border border-border/60 shadow-md bg-background">
         <MapClient points={samplePoints} />
       </div>
       <p className="mt-4 text-center text-xs text-muted-foreground">

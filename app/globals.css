@@ -1,29 +1,143 @@
-/* app/globals.css — versión con ajustes NF para mapa/atribución */
+/* app/globals.css — Tema Cyberpunk Nómada Fantasma */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* =========================
-   VARIABLES / PALETA
+   VARIABLES / PALETA CYBERPUNK
    ========================= */
 :root {
   --radius: 16px;
-
-  /* LIGHT */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  
+  /* LIGHT THEME (BASE) */
   --background: 216 20% 82%;
   --foreground: 222 50% 16%;
-
+  
   --primary: 193 88% 44%;
   --primary-foreground: 222 60% 8%;
   --accent: 268 80% 60%;
-
+  
   --card: 216 18% 90%;
   --card-foreground: 222 50% 16%;
   --border: 216 22% 62%;
   --muted: 214 16% 92%;
   --muted-foreground: 222 12% 34%;
+  
+  /* Efectos especiales */
+  --neon-glow: 0 0 10px theme('colors.neonPink'),
+               0 0 20px theme('colors.neonPink'),
+               0 0 30px theme('colors.neonPink');
+  --cyber-blue-glow: 0 0 10px theme('colors.electricBlue'),
+                    0 0 20px theme('colors.electricBlue'),
+                    0 0 30px theme('colors.electricBlue');
+  
+  /* Tipografía */
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  font-weight: 400;
+  
+  /* Suavizado de fuentes */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Mejora de tipografía */
+  text-rendering: optimizeLegibility;
+  font-synthesis: none;
+}
 
-  /* CARTOGRAFÍA (LIGHT) */
+/* DARK THEME */
+.dark {
+  --background: 224 71% 4%;
+  --foreground: 213 31% 91%;
+  
+  --primary: 199 89% 53%;
+  --primary-foreground: 222 47% 8%;
+  --accent: 268 80% 60%;
+  
+  --card: 222 47% 8%;
+  --card-foreground: 213 31% 91%;
+  --border: 216 34% 17%;
+  --muted: 223 47% 11%;
+  --muted-foreground: 215.4 16.3% 56.9%;
+  
+  /* Efectos de neón más intensos en modo oscuro */
+  --neon-glow: 0 0 15px theme('colors.neonPink'),
+               0 0 30px theme('colors.neonPink'),
+               0 0 45px theme('colors.neonPink');
+  --cyber-blue-glow: 0 0 15px theme('colors.electricBlue'),
+                    0 0 30px theme('colors.electricBlue'),
+                    0 0 45px theme('colors.electricBlue');
+}
+
+/* Estilos base */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Estilos de selección de texto */
+  ::selection {
+    @apply bg-primary/20 text-primary-foreground;
+  }
+  
+  /* Scrollbar personalizada */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30;
+  }
+}
+
+/* Clases de utilidad */
+@layer utilities {
+  /* Efecto de texto neón */
+  .text-neon {
+    @apply text-neonPink drop-shadow-neon-glow;
+  }
+  
+  .text-cyber-blue {
+    @apply text-electricBlue drop-shadow-cyber-blue-glow;
+  }
+  
+  /* Efecto de borde neón */
+  .border-neon {
+    @apply border-neonPink shadow-neon-glow;
+  }
+  
+  .border-cyber-blue {
+    @apply border-electricBlue shadow-cyber-blue-glow;
+  }
+  
+  /* Gradientes */
+  .bg-cyber-gradient {
+    @apply bg-gradient-to-r from-cyberPurple via-electricBlue to-matrixGreen;
+  }
+  
+  /* Animaciones */
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+/* CARTOGRAFÍA (LIGHT) */
+:root {
   --carto-grid-h: 216 30% 20%;
   --carto-grid-alpha: .40;
   --carto-contour-aqua: .26;
