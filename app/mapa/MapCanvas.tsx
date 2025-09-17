@@ -150,9 +150,9 @@ export default function MapCanvas({ points = [] }: MapCanvasProps) {
   );
 
   return (
-    <div className="relative rounded-3xl overflow-hidden h-[62vh] min-h-[420px]">
+    <div className="relative rounded-3xl overflow-hidden h-[62vh] min-h-[420px] z-0">
       {/* MAPA */}
-      <div className="absolute inset-0 z-[20]">
+      <div className="absolute inset-0 z-0">
         <MapContainer
           ref={mapRef}
           center={HOME_CENTER}
@@ -183,14 +183,14 @@ export default function MapCanvas({ points = [] }: MapCanvasProps) {
       </div>
 
       {/* Overlays HUD (no bloquean eventos) */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 z-[1000] nf-map-overlay" />
-      <div aria-hidden className="pointer-events-none absolute inset-0 z-[1100] nf-map-vignette" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-10 nf-map-overlay" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-10 nf-map-vignette" />
 
       {/* Rosa náutica y marca fantasma */}
-      <div aria-hidden className="compass-rose rose-tr absolute z-[1200]" />
+      <div aria-hidden className="compass-rose rose-tr absolute z-20" />
       <div
         aria-hidden
-        className="pointer-events-none absolute right-3 bottom-3 z-[1200] opacity-15"
+        className="pointer-events-none absolute right-3 bottom-3 z-[40] opacity-15"
       >
         <Skull className="h-8 w-8" />
       </div>
@@ -198,7 +198,7 @@ export default function MapCanvas({ points = [] }: MapCanvasProps) {
       {/* Norte */}
       <div
         aria-hidden
-        className="pointer-events-none absolute bottom-4 left-4 z-[1200] opacity-60"
+        className="pointer-events-none absolute bottom-4 left-4 z-[40] opacity-60"
         title="Rumbo Norte"
       >
         <div className="rounded-full bg-[color:var(--card,rgba(17,24,39,0.7))] border border-[color:var(--border,#334155)] px-2 py-1 text-xs backdrop-blur">
@@ -209,7 +209,7 @@ export default function MapCanvas({ points = [] }: MapCanvasProps) {
       {/* CONTROLES */}
       <div
         className="
-          absolute z-[1100] flex flex-col gap-2
+          absolute z-[30] flex flex-col gap-2
           left-[calc(env(safe-area-inset-left)+14px)]
           top-[calc(env(safe-area-inset-top)+14px)]
         "
@@ -244,7 +244,7 @@ export default function MapCanvas({ points = [] }: MapCanvasProps) {
       {/* FILTROS DE CATEGORÍAS */}
       <div
         className="
-          absolute z-[1150] right-[calc(env(safe-area-inset-right)+14px)]
+          absolute z-[30] right-[calc(env(safe-area-inset-right)+14px)]
           top-[calc(env(safe-area-inset-top)+14px)]
           flex items-center gap-2 flex-wrap
           max-w-[72vw]

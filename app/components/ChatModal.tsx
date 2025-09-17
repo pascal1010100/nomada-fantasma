@@ -38,7 +38,7 @@ export default function ChatModal({
         <>
           <motion.div
             key="overlay"
-            className="fixed inset-0 z-[70] bg-black/35 backdrop-blur-[2px]"
+            className="fixed inset-0 z-40 bg-black/35 backdrop-blur-[2px]"
             onClick={onClose}
             {...overlayAnim}
           />

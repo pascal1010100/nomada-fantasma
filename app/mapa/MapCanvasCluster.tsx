@@ -28,7 +28,10 @@ import {
   Anchor,
 } from "lucide-react";
 
-type MapCanvasProps = { points?: Point[] };
+type MapCanvasProps = { 
+  points?: Point[];
+  initialCenter?: [number, number];
+};
 
 function useThemeDark(): boolean {
   const [isDark, setIsDark] = useState(false);
@@ -165,7 +168,7 @@ const parseCatsFromParams = (sp: SearchParamsLike) => {
 
 const setToSortedArray = (s: Set<CategoryKey>) => ALL_CATS.filter((k) => s.has(k));
 
-export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
+export default function MapCanvasCluster({ points = [], initialCenter }: MapCanvasProps) {
   const isDark = useThemeDark();
   const mapRef = useRef<L.Map | null>(null);
   const pinNeonByColor = usePinNeonByColor();
@@ -258,6 +261,11 @@ export default function MapCanvasCluster({ points = [] }: MapCanvasProps) {
         geometry: { type: "Point" as const, coordinates: [p.lng, p.lat] },
       })),
     [filteredPoints]
+  );
+
+  // Centro inicial del mapa
+  const [mapCenter, setMapCenter] = useState<[number, number]>(
+    initialCenter || [14.6349, -90.5069] // Usar initialCenter o Guatemala City por defecto
   );
 
   // Estado de bounds/zoom

@@ -4,7 +4,10 @@
 import dynamic from "next/dynamic";
 import type { Point } from "./points";
 
-type Props = { points?: Point[] };
+type Props = { 
+  points?: Point[];
+  initialCenter?: [number, number];
+};
 
 const LeafletMap = dynamic(() => import("./MapCanvasCluster"), {
   ssr: false,
@@ -15,6 +18,6 @@ const LeafletMap = dynamic(() => import("./MapCanvasCluster"), {
   ),
 });
 
-export default function MapClient({ points = [] }: Props) {
-  return <LeafletMap points={points} />;
+export default function MapClient({ points = [], initialCenter }: Props) {
+  return <LeafletMap points={points} initialCenter={initialCenter} />;
 }
