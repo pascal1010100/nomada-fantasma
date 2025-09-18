@@ -133,81 +133,118 @@ export default function Hero(): JSX.Element {
           </svg>
         </div>
 
-        {/* CONTENIDO */}
-        <div className="relative z-40 mx-auto grid max-w-3xl gap-6 px-6 py-16 text-center sm:py-24">
-          <motion.h1 className="text-neon-gradient text-4xl font-extrabold tracking-tight sm:text-6xl md:text-7xl" {...base}>
-            Nómada Fantasma
-          </motion.h1>
-
-          <motion.p
-            className="mx-auto max-w-xl text-pretty text-sm text-slate-700 dark:text-slate-300 sm:text-base"
-            {...base}
-            transition={{ ...base.transition, delay: 0.06 }}
-          >
-            Cartógrafo de lo imposible
-          </motion.p>
-
-          <motion.div
-            className="mx-auto mt-2 flex flex-wrap items-center justify-center gap-3"
-            {...base}
-            transition={{ ...base.transition, delay: 0.1 }}
-          >
-            <Link href="/mapa" className="btn-cta">
-              <Compass className="h-4 w-4" />
-              <span>Explorar mapa</span>
-            </Link>
-            <button 
-              onClick={() => setIsChatOpen(true)}
-              className="btn-ghost inline-flex items-center gap-2"
+        {/* Enhanced Hero Content */}
+        <div className="relative z-40 mx-auto w-full max-w-5xl px-6 py-16 text-center sm:py-24">
+          <div className="mx-auto max-w-4xl">
+            {/* Badge */}
+            <motion.div 
+              className="mb-6 inline-flex items-center rounded-full border border-cyberPurple/30 bg-cyberPurple/10 px-4 py-1.5 text-sm font-medium text-cyberPurple backdrop-blur-sm"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <MessageCircle className="h-4 w-4" />
-              <span>Hablar con la IA</span>
-            </button>
-          </motion.div>
+              <span className="relative flex h-2 w-2 mr-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-electricBlue opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-electricBlue"></span>
+              </span>
+              <span className="tracking-wider">PLATAFORMA PARA NÓMADAS DIGITALES</span>
+            </motion.div>
 
-          <motion.ul
-            className="mx-auto mt-8 w-full max-w-md space-y-2 text-sm"
-            {...base}
-            transition={{ ...base.transition, delay: 0.14 }}
-          >
-            {[
-              { 
-                icon: <Compass className="h-5 w-5 text-cyan-400" />, 
-                text: "Explora destinos únicos" 
-              },
-              { 
-                icon: <MapPin className="h-5 w-5 text-purple-400" />, 
-                text: "Descubre rutas secretas" 
-              },
-              { 
-                icon: <Anchor className="h-5 w-5 text-amber-400" />, 
-                text: "Navegar sin límites" 
-              },
-              { 
-                icon: <Wifi className="h-5 w-5 text-emerald-400" />, 
-                text: "Conexiones confiables" 
-              },
-              { 
-                icon: <Coffee className="h-5 w-5 text-rose-400" />, 
-                text: "Lugares con encanto" 
-              },
-            ].map((item, i) => (
-              <motion.li 
-                key={i} 
-                className="group flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-card/50"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 + (i * 0.05) }}
+            {/* Main Heading */}
+            <motion.h1 
+              className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl md:text-7xl lg:text-8xl" 
+              {...base}
+            >
+              <span className="block font-display bg-gradient-to-r from-gray-900 via-gray-700 to-gray-500 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                Nómada
+              </span>
+              <span className="mt-2 block bg-gradient-to-r from-[#BC13FE] via-[#8A2BE2] to-[#05D9E8] bg-clip-text text-transparent">
+                Fantasma
+              </span>
+            </motion.h1>
+
+            {/* Subheading */}
+            <motion.p
+              className="mx-auto mt-6 max-w-2xl text-lg font-medium leading-relaxed text-gray-600 dark:text-gray-300 sm:text-xl"
+              {...base}
+              transition={{ ...base.transition, delay: 0.06 }}
+            >
+              La plataforma definitiva para nómadas digitales que buscan los mejores destinos, conexiones y experiencias alrededor del mundo.
+            </motion.p>
+
+            {/* Stats */}
+            <motion.div 
+              className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              {[
+                { value: '500+', label: 'Destinos' },
+                { value: '24/7', label: 'Soporte' },
+                { value: '1M+', label: 'Miembros' },
+                { value: '4.9/5', label: 'Valoración' }
+              ].map((stat, index) => (
+                <div key={index} className="rounded-xl bg-white/5 p-4 backdrop-blur-sm">
+                  <div className="text-2xl font-bold text-cyberPurple sm:text-3xl">{stat.value}</div>
+                  <div className="mt-1 text-xs font-medium uppercase tracking-wider text-gray-500">{stat.label}</div>
+                </div>
+              ))}
+            </motion.div>
+
+            {/* CTA Buttons */}
+            <motion.div
+              className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <Link 
+                href="/mapa" 
+                className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-cyberPurple to-electricBlue px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-cyberPurple/30 transition-all duration-300 hover:shadow-xl hover:shadow-cyberPurple/40 sm:w-auto"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-card p-1.5 group-hover:scale-110 transition-transform">
-                  {item.icon}
-                </span>
-                <span className="text-sm font-medium text-foreground/90 group-hover:text-foreground transition-colors">
-                  {item.text}
-                </span>
-              </motion.li>
-            ))}
-          </motion.ul>
+                <Compass className="h-5 w-5" />
+                <span>Explorar destinos</span>
+                <span className="absolute right-4 transition-transform duration-300 group-hover:translate-x-1">→</span>
+              </Link>
+              
+              <button 
+                onClick={() => setIsChatOpen(true)}
+                className="group flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white/10 px-8 py-4 text-sm font-medium text-gray-700 backdrop-blur-sm transition-all duration-300 hover:bg-white/20 hover:text-white dark:border-gray-600 dark:text-gray-200 sm:w-auto"
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span>Chatear con IA</span>
+              </button>
+            </motion.div>
+
+            {/* Trust Badges */}
+            <motion.div 
+              className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-8 w-8 rounded-full border-2 border-white bg-gray-200 dark:border-gray-800 dark:bg-gray-700"></div>
+                  ))}
+                </div>
+                <span>+10,000 nómadas felices</span>
+              </div>
+              <div className="hidden h-4 w-px bg-gray-300 sm:block"></div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <svg key={i} className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <span>4.9/5 en valoraciones</span>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </div>
       
