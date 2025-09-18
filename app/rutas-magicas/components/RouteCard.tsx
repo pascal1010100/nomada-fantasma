@@ -1,9 +1,11 @@
 'use client';
 
+import { useRef } from 'react';
 import Link from 'next/link';
 import { Route } from '../lib/types';
-import { motion } from 'framer-motion';
-import { Star, MapPin, Calendar, ArrowRight, Users, Zap } from 'lucide-react';
+import { motion, useInView } from 'framer-motion';
+import { Star, MapPin, Calendar, ArrowRight, Users, Zap, Heart } from 'lucide-react';
+import { cn } from '../../../lib/utils';
 
 interface RouteCardProps {
   route: Route;
@@ -22,81 +24,190 @@ const getRegionFlag = (region: string) => {
   }
 };
 
+import type { Variants } from 'framer-motion';
+
+const fadeIn: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { 
+      duration: 0.6, 
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
+      staggerChildren: 0.1
+    }
+  }
+};
+
 export default function RouteCard({ route }: RouteCardProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
+  
   return (
     <motion.div 
-      className="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 transition-all duration-300 hover:shadow-lg hover:shadow-gray-100 dark:hover:shadow-gray-900/20"
-      whileHover={{ y: -4 }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+      ref={ref}
+      className={cn(
+        "group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800",
+        "border border-gray-100 dark:border-gray-700/50",
+        "transition-all duration-500 hover:shadow-xl hover:shadow-gray-100/50 dark:hover:shadow-gray-900/20",
+        "ring-1 ring-transparent hover:ring-electricBlue/30 dark:hover:ring-cyberPurple/30"
+      )}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={fadeIn}
+      whileHover={{ y: -8, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
       {/* Image with overlay */}
-      <div className="relative h-48 overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+      <div className="relative h-52 overflow-hidden">
+        <motion.div 
+          className="absolute inset-0 bg-cover bg-center"
           style={{ 
             backgroundImage: `url(${route.coverImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
+          initial={{ scale: 1 }}
+          whileHover={{ 
+            scale: 1.1,
+            transition: { duration: 6, ease: [0.16, 1, 0.3, 1] }
+          }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-gray-900/20 to-transparent" />
-        </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/10 to-transparent" />
+        </motion.div>
         
         {/* Top badges */}
-        <div className="absolute top-4 left-4 right-4 flex justify-between z-10">
-          <div className="px-3 py-1 rounded-full bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm text-gray-800 dark:text-gray-200 text-xs font-medium border border-gray-100 dark:border-gray-700/50">
+        <motion.div 
+          className="absolute top-4 left-4 right-4 flex justify-between z-10"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+        >
+          <motion.div 
+            className="px-3 py-1 rounded-full bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm text-gray-800 dark:text-gray-200 text-xs font-medium border border-gray-100 dark:border-gray-700/50"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             {getRegionFlag(route.region)} {route.region.charAt(0).toUpperCase() + route.region.slice(1)}
-          </div>
-          <div className="px-3 py-1 rounded-full bg-gradient-to-r from-electricBlue to-cyberPurple text-white text-xs font-bold">
+          </motion.div>
+          <motion.div 
+            className="px-3 py-1 rounded-full bg-gradient-to-r from-electricBlue to-cyberPurple text-white text-xs font-bold shadow-lg shadow-electricBlue/20"
+            whileHover={{ scale: 1.05, rotate: [0, -2, 2, -2, 0] }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          >
             ${route.price.toLocaleString()}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
         
-        {/* Rating */}
-        <div className="absolute top-4 right-4 z-10 flex items-center bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm px-2 py-1 rounded-full">
-          <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 mr-1" />
-          <span className="text-xs font-medium text-gray-800 dark:text-gray-200">
-            {route.rating.toFixed(1)}
-          </span>
+        {/* Rating and Favorite */}
+        <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+          <motion.div 
+            className="flex items-center bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm px-2 py-1 rounded-full"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 mr-1" />
+            <span className="text-xs font-medium text-gray-800 dark:text-gray-200">
+              {route.rating.toFixed(1)}
+            </span>
+          </motion.div>
+          <motion.button 
+            className="p-1.5 bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm rounded-full shadow-md"
+            whileHover={{ scale: 1.1, color: '#ec4899' }}
+            whileTap={{ scale: 0.9 }}
+            aria-label="Añadir a favoritos"
+          >
+            <Heart className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+          </motion.button>
         </div>
       </div>
       
       {/* Content */}
       <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1.5 line-clamp-1">
+        <motion.h3 
+          className="text-lg font-bold text-gray-900 dark:text-white mb-1.5 line-clamp-1"
+          whileHover={{ color: 'var(--electricBlue)' }}
+          transition={{ duration: 0.3 }}
+        >
           {route.title}
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-4">
+        </motion.h3>
+        <motion.p 
+          className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-4"
+          initial={{ opacity: 0.8 }}
+          whileHover={{ opacity: 1 }}
+        >
           {route.summary}
-        </p>
+        </motion.p>
         
         {/* Meta info */}
-        <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 space-x-4 mb-4">
-          <div className="flex items-center">
-            <MapPin className="w-3.5 h-3.5 mr-1.5" />
-            <span>{route.region.charAt(0).toUpperCase() + route.region.slice(1)}</span>
-          </div>
-          <div className="flex items-center">
-            <Calendar className="w-3.5 h-3.5 mr-1.5" />
-            <span>{route.durationDays} {route.durationDays === 1 ? 'day' : 'days'}</span>
-          </div>
-        </div>
+        <motion.div 
+          className="flex items-center text-xs text-gray-500 dark:text-gray-400 space-x-4 mb-4"
+          variants={{
+            hidden: { opacity: 0, y: 10 },
+            visible: { 
+              opacity: 1, 
+              y: 0,
+              transition: { delay: 0.2 }
+            }
+          }}
+        >
+          <motion.div 
+            className="flex items-center group"
+            whileHover={{ scale: 1.05 }}
+          >
+            <MapPin className="w-3.5 h-3.5 mr-1.5 text-electricBlue dark:text-cyberPurple" />
+            <span className="group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
+              {route.region.charAt(0).toUpperCase() + route.region.slice(1)}
+            </span>
+          </motion.div>
+          <motion.div 
+            className="flex items-center group"
+            whileHover={{ scale: 1.05 }}
+          >
+            <Calendar className="w-3.5 h-3.5 mr-1.5 text-electricBlue dark:text-cyberPurple" />
+            <span className="group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
+              {route.durationDays} {route.durationDays === 1 ? 'día' : 'días'}
+            </span>
+          </motion.div>
+        </motion.div>
         
         {/* Action button */}
-        <div className="relative pt-3 mt-4 border-t border-gray-100 dark:border-gray-700/50">
+        <motion.div 
+          className="relative pt-4 mt-4 border-t border-gray-100 dark:border-gray-700/50"
+          variants={{
+            hidden: { opacity: 0, y: 10 },
+            visible: { 
+              opacity: 1, 
+              y: 0,
+              transition: { delay: 0.3 }
+            }
+          }}
+        >
           <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-              Desde <span className="text-electricBlue dark:text-cyberPurple text-base font-bold">${route.price.toLocaleString()}</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 block mt-0.5">por persona</span>
-            </div>
+            <motion.div 
+              className="text-sm font-medium text-gray-900 dark:text-gray-100"
+              whileHover={{ x: 4 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+            >
+              <span className="opacity-70">Desde</span>{' '}
+              <span className="text-electricBlue dark:text-cyberPurple text-base font-bold">
+                ${route.price.toLocaleString()}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 block mt-0.5">
+                por persona
+              </span>
+            </motion.div>
             <motion.div
-              className="relative overflow-hidden"
+              className="relative overflow-hidden group/button"
               whileHover="hover"
+              whileTap={{ scale: 0.95 }}
               initial={false}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-electricBlue/10 to-cyberPurple/10 rounded-lg scale-0 group-hover:scale-105 transition-transform duration-300" />
+              <motion.div 
+                className="absolute inset-0 bg-gradient-to-r from-electricBlue/20 to-cyberPurple/20 rounded-lg scale-0 group-hover/button:scale-105"
+                transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+              />
               <Link 
                 href={`/rutas-magicas/${route.id}`}
                 className="relative z-10 inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-electricBlue to-cyberPurple rounded-lg hover:shadow-lg hover:shadow-electricBlue/20 dark:shadow-cyberPurple/10 transition-all duration-300 group/button"
@@ -140,7 +251,7 @@ export default function RouteCard({ route }: RouteCardProps) {
               Compartir
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
       
       {/* Additional Info */}
