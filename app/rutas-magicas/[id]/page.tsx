@@ -137,10 +137,13 @@ export default function RouteDetailPage({ params }: { params: { id: string } }) 
                   </div>
                 </div>
                 
-                <button className="mt-8 w-full bg-gradient-to-r from-electricBlue to-cyberPurple hover:from-electricBlue/90 hover:to-cyberPurple/90 text-white font-medium py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl hover:shadow-electricBlue/20">
+                <Link 
+                  href="/reservar"
+                  className="mt-8 w-full bg-gradient-to-r from-electricBlue to-cyberPurple hover:from-electricBlue/90 hover:to-cyberPurple/90 text-white font-medium py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl hover:shadow-electricBlue/20"
+                >
                   Reservar ahora
                   <ArrowRight className="w-4 h-4 ml-2" />
-                </button>
+                </Link>
                 
                 <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
                   Cancelación gratuita hasta 24 horas antes
