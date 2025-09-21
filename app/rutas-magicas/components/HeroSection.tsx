@@ -107,10 +107,11 @@ export default function HeroSection() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link 
-              href="#como-funciona" 
-              className="px-8 py-3.5 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              href="/sobre-nosotros" 
+              className="px-8 py-3.5 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-2"
             >
-              Cómo funciona
+              <span>¿Cómo funciona?</span>
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </motion.div>
         </div>

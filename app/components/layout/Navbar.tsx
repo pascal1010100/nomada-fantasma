@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Menu, X, Map, MessageCircle, Home, ChevronRight, Ghost, Search } from "lucide-react";
+import { Menu, X, Map, MessageCircle, Home, ChevronRight, Ghost, Search, Info } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import ThemeToggle from "../ui/ThemeToggle";
 
@@ -14,6 +14,7 @@ const LINKS: LinkItem[] = [
   { href: "/", label: "Inicio", icon: Home },
   { href: "/mapa", label: "Mapa", icon: Map },
   { href: "/rutas-magicas", label: "Rutas Mágicas", icon: Search },
+  { href: "/sobre-nosotros", label: "Cómo funciona", icon: Info },
   { href: "/contacto", label: "Contacto", icon: MessageCircle },
 ];
 
