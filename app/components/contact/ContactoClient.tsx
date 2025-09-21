@@ -174,40 +174,57 @@ export default function ContactoClient() {
   return (
     <section className="container py-12 md:py-16">
       {/* Hero Section */}
-      <motion.header 
-        className="mb-16 text-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div className="relative mx-auto mb-16 max-w-6xl overflow-hidden rounded-[28px] border bg-card/70 hero-halo min-h-[320px] flex flex-col items-center justify-center py-12">
+        {/* GRID y VIÑETA */}
+        <div className="nf-grid pointer-events-none absolute inset-0 z-0" />
+        <div className="nf-vignette pointer-events-none absolute inset-0 z-10" />
+        
+        {/* CARTOGRAFÍA */}
         <motion.div
-          className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary"
-          initial={{ opacity: 0, y: 10 }}
+          className="theme--carto map-surface absolute inset-0 z-[18] will-change-transform"
+          aria-hidden="true"
+          animate={{ scale: [1.02, 1, 1.02], x: [-4, 0, -4], y: [0, -2, 0] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+        />
+
+        <motion.div 
+          className="relative z-40 w-full max-w-4xl px-6 text-center"
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
+          transition={{ duration: 0.5 }}
         >
-          <MessageCircle className="h-4 w-4" />
-          <span>Contacto</span>
+          <motion.div 
+            className="mb-6 inline-flex items-center rounded-full border border-cyberPurple/30 bg-cyberPurple/10 px-4 py-1.5 text-sm font-medium text-cyberPurple backdrop-blur-sm"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <span className="relative flex h-2 w-2 mr-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-electricBlue opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-electricBlue"></span>
+            </span>
+            <span>CONTACTO</span>
+          </motion.div>
+
+          <motion.h1
+            className="mt-4 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl md:text-6xl"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.15 }}
+          >
+            Conecta con Nuestro Equipo
+          </motion.h1>
+
+          <motion.p
+            className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            ¿Tienes preguntas, sugerencias o necesitas asistencia? Estamos aquí para ayudarte en tu viaje nómada digital.
+          </motion.p>
         </motion.div>
-
-        <motion.h1
-          className="mt-4 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl md:text-6xl"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.15 }}
-        >
-          Conecta con Nuestro Equipo
-        </motion.h1>
-
-        <motion.p
-          className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-        >
-          ¿Tienes preguntas, sugerencias o necesitas asistencia? Estamos aquí para ayudarte en tu viaje nómada digital.
-        </motion.p>
-      </motion.header>
+      </div>
 
       {/* Contact Methods Grid */}
       <motion.div 
