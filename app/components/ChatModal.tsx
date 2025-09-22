@@ -2,21 +2,26 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Ghost, Ship, X, Send } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 type ChatModalProps = {
   open: boolean;
   onClose: () => void;
   variant?: "ghost" | "ship";
+  panelId?: string; // for aria-controls from the toggle button
 };
 
 export default function ChatModal({
   open,
   onClose,
   variant = "ghost",
+  panelId,
 }: ChatModalProps): JSX.Element {
   const reduce = useReducedMotion();
   const Icon = useMemo(() => (variant === "ship" ? Ship : Ghost), [variant]);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const titleId = `${panelId ?? "chat"}-label`;
 
   const overlayAnim = {
     initial: { opacity: 0 },
@@ -29,8 +34,39 @@ export default function ChatModal({
     initial: { opacity: 0, y: 20, scale: 0.98 },
     animate: { opacity: 1, y: 0, scale: 1 },
     exit: { opacity: 0, y: 12, scale: 0.98 },
-    transition: { duration: reduce ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] as any },
+    transition: { duration: reduce ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
   } as const;
+
+  // Autofocus the input when opening
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
+
+  // Basic focus trap inside panel with Tab/Shift+Tab
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const root = panelRef.current;
+      if (!root) return;
+      const focusables = root.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open]);
 
   return (
     <AnimatePresence>
@@ -44,8 +80,11 @@ export default function ChatModal({
           />
           <motion.div
             key="panel"
+            ref={panelRef}
+            id={panelId}
             role="dialog"
             aria-modal="true"
+            aria-labelledby={titleId}
             aria-label="Chat Nómada IA"
             className="
               fixed z-[75]
@@ -62,7 +101,7 @@ export default function ChatModal({
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--primary)/0.18)] text-[hsl(var(--primary))]">
                     <Icon className="h-4 w-4" />
                   </span>
-                  <div className="text-sm font-medium">Nómada IA</div>
+                  <div id={titleId} className="text-sm font-medium">Nómada IA</div>
                 </div>
                 <button
                   type="button"
@@ -75,7 +114,7 @@ export default function ChatModal({
               </div>
 
               {/* Mensajes (placeholder) */}
-              <div className="bg-background/70 px-4 py-3">
+              <div className="bg-background/70 px-4 py-3" aria-live="polite">
                 <div className="text-xs text-slate-600 dark:text-slate-300 opacity-80">
                   Bienvenido al puerto. Pronto conectaremos la IA.
                 </div>
@@ -97,6 +136,7 @@ export default function ChatModal({
                 }}
               >
                 <input
+                  ref={inputRef}
                   type="text"
                   placeholder="Escribe un mensaje…"
                   className="

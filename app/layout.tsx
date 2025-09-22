@@ -3,7 +3,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/app/providers/theme-provider";
-import ChatBotton from "./components/chatBotton";
+import ChatButton from "./components/ChatButton";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 
@@ -100,7 +100,7 @@ export default function RootLayout({
             </main>
             <Footer />
           </div>
-          <ChatBotton />
+          <ChatButton />
         </ThemeProvider>
       </body>
     </html>
