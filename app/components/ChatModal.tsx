@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Ghost, Ship, X, Send } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type ChatModalProps = {
   open: boolean;
@@ -22,6 +22,10 @@ export default function ChatModal({
   const panelRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const titleId = `${panelId ?? "chat"}-label`;
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  type Msg = { role: "user" | "assistant"; content: string };
+  const [messages, setMessages] = useState<Msg[]>([]);
 
   const overlayAnim = {
     initial: { opacity: 0 },
@@ -120,25 +124,111 @@ export default function ChatModal({
                 </div>
               </div>
 
-              <div className="px-4 py-3 space-y-2 max-h-[48vh] overflow-auto">
-                <div className="text-sm text-slate-700 dark:text-slate-200">
-                  <span className="opacity-70">💬</span>{" "}
-                  ¿En qué ruta te ayudo hoy?
-                </div>
+              <div className="px-4 py-3 space-y-3 max-h-[48vh] overflow-auto">
+                {messages.length === 0 ? (
+                  <div className="text-sm text-slate-700 dark:text-slate-200">
+                    <span className="opacity-70">💬</span>{" "}
+                    ¿En qué ruta te ayudo hoy?
+                  </div>
+                ) : (
+                  messages.map((m, idx) => (
+                    <div
+                      key={idx}
+                      className={
+                        m.role === "user"
+                          ? "self-end max-w-[85%] rounded-xl px-3 py-2 text-sm bg-[hsl(var(--primary)/0.10)] border border-[hsl(var(--primary)/0.35)]"
+                          : "self-start max-w-[85%] rounded-xl px-3 py-2 text-sm bg-card/70 border border-border/60"
+                      }
+                    >
+                      {m.content}
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* Input */}
               <form
                 className="flex items-center gap-2 px-3 pb-3 pt-2 bg-card/60 border-t border-border/60"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
-                  // Aquí conectaremos la IA en la siguiente fase
+                  const text = input.trim();
+                  if (!text || loading) return;
+                  setLoading(true);
+
+                  // snapshot indices to update assistant message during stream
+                  const userMsg: Msg = { role: "user", content: text };
+                  const assistantMsg: Msg = { role: "assistant", content: "" };
+                  const startIndex = messages.length;
+                  setMessages((prev) => [...prev, userMsg, assistantMsg]);
+                  setInput("");
+
+                  try {
+                    const res = await fetch("/api/chat", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ message: text }),
+                    });
+                    if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = "";
+                    let done = false;
+                    while (!done) {
+                      const { value, done: d } = await reader.read();
+                      done = d ?? false;
+                      if (value) buffer += decoder.decode(value, { stream: true });
+                      let idx;
+                      while ((idx = buffer.indexOf("\n\n")) !== -1) {
+                        const chunk = buffer.slice(0, idx).trim();
+                        buffer = buffer.slice(idx + 2);
+                        if (!chunk) continue;
+                        // multiple lines possible; handle lines starting with data:
+                        const lines = chunk.split("\n");
+                        for (const line of lines) {
+                          const prefix = "data: ";
+                          if (!line.startsWith(prefix)) continue;
+                          const json = line.slice(prefix.length);
+                          try {
+                            const evt = JSON.parse(json) as { type: string; text?: string };
+                            if (evt.type === "delta" && evt.text) {
+                              setMessages((prev) => {
+                                const next = [...prev];
+                                const a = next[startIndex + 1];
+                                if (a && a.role === "assistant") {
+                                  next[startIndex + 1] = { ...a, content: a.content + evt.text };
+                                }
+                                return next;
+                              });
+                            }
+                            // type: start/end ignored for UI for now
+                          } catch {
+                            // ignore malformed lines
+                          }
+                        }
+                      }
+                    }
+                  } catch (err) {
+                    // On error, append a minimal assistant error message
+                    setMessages((prev) => {
+                      const next = [...prev];
+                      const a = next[startIndex + 1];
+                      const msg = "⚠️ Ocurrió un problema al conectar. Intenta de nuevo.";
+                      next[startIndex + 1] = a && a.role === "assistant" ? { ...a, content: a.content || msg } : { role: "assistant", content: msg };
+                      return next;
+                    });
+                  } finally {
+                    setLoading(false);
+                  }
                 }}
               >
                 <input
                   ref={inputRef}
                   type="text"
                   placeholder="Escribe un mensaje…"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  aria-disabled={loading}
                   className="
                     flex-1 rounded-xl border bg-background/70 px-3 py-2 text-sm outline-none
                     focus:ring-2 focus:ring-[hsl(var(--primary)/0.35)]
@@ -146,11 +236,12 @@ export default function ChatModal({
                 />
                 <button
                   type="submit"
+                  disabled={loading}
                   className="
                     inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm
                     text-[hsl(var(--primary-foreground))] border-0
                     bg-[linear-gradient(180deg,hsl(var(--primary)),hsl(187_92%_44%))]
-                    shadow-md hover:opacity-95 active:translate-y-px
+                    shadow-md hover:opacity-95 active:translate-y-px disabled:opacity-60 disabled:cursor-not-allowed
                   "
                 >
                   <Send className="h-4 w-4" />
