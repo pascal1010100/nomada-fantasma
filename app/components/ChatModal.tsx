@@ -21,6 +21,7 @@ export default function ChatModal({
   const Icon = useMemo(() => (variant === "ship" ? Ship : Ghost), [variant]);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const titleId = `${panelId ?? "chat"}-label`;
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -70,6 +71,15 @@ export default function ChatModal({
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
+  }, [open]);
+
+  // Abort any in-flight streaming when closing the modal
+  useEffect(() => {
+    if (!open && abortRef.current) {
+      try { abortRef.current.abort(); } catch {}
+      abortRef.current = null;
+      setLoading(false);
+    }
   }, [open]);
 
   return (
@@ -144,6 +154,11 @@ export default function ChatModal({
                     </div>
                   ))
                 )}
+                {loading && (
+                  <div className="self-start max-w-[85%] rounded-xl px-3 py-2 text-xs bg-card/60 border border-border/50 text-slate-500" aria-live="polite">
+                    Aletheia está escribiendo…
+                  </div>
+                )}
               </div>
 
               {/* Input */}
@@ -163,10 +178,14 @@ export default function ChatModal({
                   setInput("");
 
                   try {
+                    // setup abort controller to allow stopping the stream
+                    const controller = new AbortController();
+                    abortRef.current = controller;
                     const res = await fetch("/api/chat", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ message: text }),
+                      signal: controller.signal,
                     });
                     if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
 
@@ -219,6 +238,7 @@ export default function ChatModal({
                     });
                   } finally {
                     setLoading(false);
+                    abortRef.current = null;
                   }
                 }}
               >
@@ -246,6 +266,19 @@ export default function ChatModal({
                 >
                   <Send className="h-4 w-4" />
                 </button>
+                {loading && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try { abortRef.current?.abort(); } catch {}
+                      abortRef.current = null;
+                      setLoading(false);
+                    }}
+                    className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs border bg-background/70 hover:bg-background"
+                  >
+                    Detener
+                  </button>
+                )}
               </form>
             </div>
           </motion.div>
