@@ -48,9 +48,11 @@ export default function RouteCard({ route }: RouteCardProps) {
       ref={ref}
       className={cn(
         "group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800",
-        "border border-gray-100 dark:border-gray-700/50",
-        "transition-all duration-500 hover:shadow-xl hover:shadow-gray-100/50 dark:hover:shadow-gray-900/20",
-        "ring-1 ring-transparent hover:ring-electricBlue/30 dark:hover:ring-cyberPurple/30"
+        route.slug === 'lago-atitlan' 
+          ? "border-2 border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/20" 
+          : "border border-gray-100 dark:border-gray-700/50 hover:shadow-xl hover:shadow-gray-100/50 dark:hover:shadow-gray-900/20",
+        "transition-all duration-500 ring-1 ring-transparent hover:ring-electricBlue/30 dark:hover:ring-cyberPurple/30",
+        "relative"
       )}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
@@ -83,6 +85,18 @@ export default function RouteCard({ route }: RouteCardProps) {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.4 }}
         >
+          {route.slug === 'lago-atitlan' && (
+            <motion.div 
+              className="absolute -top-3 left-1/2 -translate-x-1/2 z-20"
+              initial={{ y: -10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <span className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-gray-900 text-xs font-bold shadow-lg shadow-amber-500/30">
+                🌟 Recomendado
+              </span>
+            </motion.div>
+          )}
           <motion.div 
             className="px-3 py-1 rounded-full bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm text-gray-800 dark:text-gray-200 text-xs font-medium border border-gray-100 dark:border-gray-700/50"
             whileHover={{ scale: 1.05 }}
@@ -209,7 +223,7 @@ export default function RouteCard({ route }: RouteCardProps) {
                 transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
               />
               <Link 
-                href={`/rutas-magicas/${route.id}`}
+                href={`/rutas-magicas/${route.slug}`}
                 className="relative z-10 inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-electricBlue to-cyberPurple rounded-lg hover:shadow-lg hover:shadow-electricBlue/20 dark:shadow-cyberPurple/10 transition-all duration-300 group/button"
               >
                 <span className="relative z-10 flex items-center">

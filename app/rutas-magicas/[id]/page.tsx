@@ -1,28 +1,57 @@
 import { notFound } from 'next/navigation';
 import { mockRoutes } from '../mocks/routes';
-import { ArrowLeft, ArrowRight, MapPin, Calendar, Users, Wifi, Star, Zap, CheckCircle } from 'lucide-react';
+import { atitlanInfo, pueblosAtitlan } from '../mocks/atitlanData';
+import { ArrowLeft, ArrowRight, MapPin, Calendar, Users, Wifi, Star, Zap, CheckCircle, Map } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import RouteCard from '../components/RouteCard';
 
 export default function RouteDetailPage({ params }: { params: { id: string } }) {
-  const route = mockRoutes.find(r => r.id === params.id);
+  // Verificar si es la página del Lago de Atitlán
+  const isAtitlanPage = params.id === 'lago-atitlan' || params.id === '1';
+  
+  // Si es la página del Lago de Atitlán, usar los datos específicos con valores por defecto
+  // Si no, buscar en las rutas generales
+  const route = isAtitlanPage 
+    ? { 
+        ...atitlanInfo, 
+        id: '1', 
+        slug: 'lago-atitlan',
+        region: 'america' as const,
+        durationDays: 3,
+        groupSize: { min: 1, max: 12 },
+        wifiRating: 4,
+        priceTier: 'standard' as const,
+        price: 0,
+        rating: 4.9,
+        highlights: atitlanInfo.highlights || []
+      } 
+    : mockRoutes.find(r => r.slug === params.id) || 
+      mockRoutes.find(r => r.id === params.id);
   
   if (!route) {
     notFound();
   }
+  
+  // Obtener los pueblos solo si es la página de Atitlán
+  const pueblos = isAtitlanPage ? pueblosAtitlan : [];
 
   // Función para renderizar estrellas de rating
-  const renderRatingStars = (rating: number) => {
+  const renderRatingStars = (rating: number, small = false) => {
+    const size = small ? 'w-4 h-4' : 'w-5 h-5';
     return (
-      <div className="flex items-center">
+      <div className={`flex items-center ${small ? 'space-x-0.5' : 'space-x-1'}`}>
         {[1, 2, 3, 4, 5].map((star) => (
           <Star 
             key={star} 
-            className={`w-5 h-5 ${star <= Math.round(route.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} 
+            className={`${size} ${star <= Math.round(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} 
           />
         ))}
-        <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
-          {route.rating.toFixed(1)} ({Math.floor(Math.random() * 100) + 20} reseñas)
-        </span>
+        {!small && (
+          <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
+            {rating.toFixed(1)} ({Math.floor(Math.random() * 100) + 20} reseñas)
+          </span>
+        )}
       </div>
     );
   };
@@ -173,6 +202,22 @@ export default function RouteDetailPage({ params }: { params: { id: string } }) 
         </div>
       </div>
       
+      {/* Sección de pueblos alrededor del lago */}
+      {isAtitlanPage && (
+        <div className="py-16 bg-white dark:bg-gray-900">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Pueblos alrededor del lago</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {pueblos.map((pueblo) => (
+                <div key={pueblo.id} className="group">
+                  <RouteCard route={pueblo} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sección de recomendaciones */}
       <div className="bg-gray-50 dark:bg-gray-900/50 py-16">
         <div className="container mx-auto px-4">
