@@ -1,5 +1,24 @@
 import { Tour } from './types';
 
+// Función auxiliar para generar fechas disponibles (solo miércoles, viernes y domingos)
+const generateAvailableDays = (daysAhead: number): string[] => {
+  const result: string[] = [];
+  const today = new Date();
+  
+  for (let i = 0; i < daysAhead; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dayOfWeek = date.getDay();
+    
+    // 0 = Domingo, 3 = Miércoles, 5 = Viernes
+    if ([0, 3, 5].includes(dayOfWeek)) {
+      result.push(date.toISOString().split('T')[0]);
+    }
+  }
+  
+  return result;
+};
+
 const tours: Tour[] = [
   {
     id: 'tour-sp-001',
@@ -97,12 +116,13 @@ const tours: Tour[] = [
       'Usar protector solar antes de comenzar',
       'Llevar snacks energéticos'
     ],
+    // Configuración de capacidad, días y horarios
     capacity: {
       min: 2,
       max: 10
     },
-    availableDays: ['Lunes', 'Miércoles', 'Viernes', 'Domingo'],
-    startTimes: ['04:30 AM']
+    availableDays: generateAvailableDays(60), // Próximos 60 días
+    startTimes: ['04:30', '05:00'] // Horarios de inicio en formato 24h
   },
   {
     id: 'tour-sp-002',

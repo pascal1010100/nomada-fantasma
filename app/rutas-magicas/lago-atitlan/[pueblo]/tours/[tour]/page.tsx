@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 import { getTourBySlug, getToursByPueblo } from '@/app/rutas-magicas/mocks/tours';
-import { Clock, Users, MapPin, ArrowLeft, Calendar, CheckCircle2, XCircle } from 'lucide-react';
+import { Clock, Users, MapPin, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import ReservationFormWrapper from '@/app/rutas-magicas/components/ReservationFormWrapper';
 
 // Type for the route params
 type RouteParams = {
@@ -150,51 +151,14 @@ export default async function TourDetailPage({ params }: RouteParams) {
           <div className="space-y-6">
             {/* Tarjeta de reserva */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 sticky top-6">
-              <div className="mb-6">
-                <span className="text-3xl font-bold text-gray-900 dark:text-white">${tour.price.adult}</span>
-                <span className="text-gray-500 dark:text-gray-400"> / persona</span>
-                {tour.price.child && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Niños: ${tour.price.child}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Fecha
-                  </label>
-                  <select className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white p-3 text-sm">
-                    {tour.availableDays.map((day, index) => (
-                      <option key={index} value={day}>
-                        {day} - {tour.startTimes[0]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Participantes
-                  </label>
-                  <select className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white p-3 text-sm">
-                    {Array.from({ length: tour.capacity.max }, (_, i) => i + 1).map(num => (
-                      <option key={num} value={num}>
-                        {num} {num === 1 ? 'persona' : 'personas'}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <button className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
-                  Reservar ahora
-                </button>
-
-                <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
-                  Cancelación gratuita hasta 24 horas antes
-                </p>
-              </div>
+              <ReservationFormWrapper 
+                tourId={tour.id}
+                price={tour.price.adult}
+                childPrice={tour.price.child}
+                maxCapacity={tour.capacity.max}
+                availableDays={tour.availableDays}
+                startTimes={tour.startTimes}
+              />
             </div>
 
             {/* Información adicional */}
