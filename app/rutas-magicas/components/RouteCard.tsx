@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Route } from '../lib/types';
 import { motion, useInView } from 'framer-motion';
 import { Star, MapPin, Calendar, ArrowRight, Users, Zap, Heart } from 'lucide-react';
@@ -40,40 +40,69 @@ const fadeIn: Variants = {
 };
 
 export default function RouteCard({ route }: RouteCardProps) {
+  const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
+  
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const isAtitlanTown = route.region === 'america' && 
+      (route.slug.includes('san-') || route.slug === 'santiago-atitlan');
+    
+    const path = isAtitlanTown
+      ? `/rutas-magicas/lago-atitlan/${route.slug}`
+      : `/rutas-magicas/${route.slug}`;
+      
+    router.push(path);
+  };
+  
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      const isAtitlanTown = route.region === 'america' && 
+        (route.slug.includes('san-') || route.slug === 'santiago-atitlan');
+      
+      const path = isAtitlanTown
+        ? `/rutas-magicas/lago-atitlan/${route.slug}`
+        : `/rutas-magicas/${route.slug}`;
+        
+      router.push(path);
+    }
+  };
   
   return (
     <motion.div 
       ref={ref}
       className={cn(
-        "group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800",
-        "border border-gray-100 dark:border-gray-700/50",
-        "transition-all duration-500 hover:shadow-xl hover:shadow-gray-100/50 dark:hover:shadow-gray-900/20",
-        "ring-1 ring-transparent hover:ring-electricBlue/30 dark:hover:ring-cyberPurple/30"
+        "group relative overflow-hidden rounded-2xl bg-white/80 dark:bg-gray-900/80",
+        "border border-gray-200/50 dark:border-cyberPurple/30",
+        "transform hover:-translate-y-1 transition-all duration-300",
+        "h-full flex flex-col cursor-pointer backdrop-blur-sm",
+        "hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:border-cyberPurple/50",
+        "hover:shadow-cyberPurple/20 dark:hover:shadow-cyberPurple/30",
+        route.isRecommended && "border-2 border-cyberPurple/50 shadow-lg shadow-cyberPurple/10",
+        "cyber-card"
       )}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
       variants={fadeIn}
-      whileHover={{ y: -8, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`Ver detalles de ${route.title}`}
     >
       {/* Image with overlay */}
-      <div className="relative h-52 overflow-hidden">
+      <div className="relative h-52 overflow-hidden group">
         <motion.div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
           style={{ 
             backgroundImage: `url(${route.coverImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
-          initial={{ scale: 1 }}
-          whileHover={{ 
-            scale: 1.1,
-            transition: { duration: 6, ease: [0.16, 1, 0.3, 1] }
-          }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         </motion.div>
         
         {/* Top badges */}
@@ -83,6 +112,18 @@ export default function RouteCard({ route }: RouteCardProps) {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.4 }}
         >
+          {route.slug === 'lago-atitlan' && (
+            <motion.div 
+              className="absolute -top-3 left-1/2 -translate-x-1/2 z-20"
+              initial={{ y: -10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <span className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-gray-900 text-xs font-bold shadow-lg shadow-amber-500/30">
+                🌟 Recomendado
+              </span>
+            </motion.div>
+          )}
           <motion.div 
             className="px-3 py-1 rounded-full bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm text-gray-800 dark:text-gray-200 text-xs font-medium border border-gray-100 dark:border-gray-700/50"
             whileHover={{ scale: 1.05 }}
@@ -124,21 +165,34 @@ export default function RouteCard({ route }: RouteCardProps) {
       </div>
       
       {/* Content */}
-      <div className="p-5">
-        <motion.h3 
-          className="text-lg font-bold text-gray-900 dark:text-white mb-1.5 line-clamp-1"
-          whileHover={{ color: 'var(--electricBlue)' }}
-          transition={{ duration: 0.3 }}
-        >
-          {route.title}
-        </motion.h3>
-        <motion.p 
-          className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-4"
-          initial={{ opacity: 0.8 }}
-          whileHover={{ opacity: 1 }}
-        >
-          {route.summary}
-        </motion.p>
+      <div className="flex-1 p-5 flex flex-col">
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-cyberPurple bg-clip-text text-transparent">
+              {route.title}
+            </h3>
+            <span className="text-sm px-2 py-1 rounded-full bg-cyberPurple/10 text-cyberPurple font-medium">
+              {getRegionFlag(route.region)}
+            </span>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+            {route.summary}
+          </p>
+          
+          {/* Highlights */}
+          {route.highlights && route.highlights.length > 0 && (
+            <div className="mt-3 space-y-1">
+              {route.highlights.slice(0, 3).map((highlight, i) => (
+                <div key={i} className="flex items-start">
+                  <svg className="h-4 w-4 text-cyberPurple mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{highlight}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         
         {/* Meta info */}
         <motion.div 
@@ -208,16 +262,19 @@ export default function RouteCard({ route }: RouteCardProps) {
                 className="absolute inset-0 bg-gradient-to-r from-electricBlue/20 to-cyberPurple/20 rounded-lg scale-0 group-hover/button:scale-105"
                 transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
               />
-              <Link 
-                href={`/rutas-magicas/${route.id}`}
-                className="relative z-10 inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-electricBlue to-cyberPurple rounded-lg hover:shadow-lg hover:shadow-electricBlue/20 dark:shadow-cyberPurple/10 transition-all duration-300 group/button"
+              <button 
+                className="relative z-10 inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-cyan-400 to-cyberPurple rounded-lg hover:shadow-lg hover:shadow-cyan-400/20 dark:shadow-cyberPurple/10 transition-all duration-300 group/button glow-on-hover"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClick(e);
+                }}
               >
                 <span className="relative z-10 flex items-center">
-                  <span className="group-hover/button:translate-x-0.5 transition-transform">Ver detalles</span>
+                  <span className="group-hover/button:translate-x-0.5 transition-transform text-sm font-medium tracking-wide">Explorar</span>
                   <ArrowRight className="w-4 h-4 ml-1.5 group-hover/button:translate-x-1 transition-transform" />
                 </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-electricBlue/0 via-cyberPurple/30 to-electricBlue/0 opacity-0 group-hover/button:opacity-100 transition-opacity duration-500" />
-              </Link>
+                <span className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyberPurple/30 to-cyan-400/0 opacity-0 group-hover/button:opacity-100 transition-opacity duration-500" />
+              </button>
             </motion.div>
           </div>
           
