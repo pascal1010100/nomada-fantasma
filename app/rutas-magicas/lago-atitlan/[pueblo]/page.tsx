@@ -12,6 +12,7 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import ToursSection from '../../components/ToursSection';
 
 // Definición de tipos para los componentes
 interface CyberCardProps {
@@ -295,6 +296,9 @@ export default function PuebloDetailPage({ params }: PageProps) {
                 ))}
               </ul>
             </section>
+
+            {/* Sección de Tours */}
+            <ToursSection puebloSlug={puebloSlug} />
 
             {/* Horarios de transporte */}
             <section>
