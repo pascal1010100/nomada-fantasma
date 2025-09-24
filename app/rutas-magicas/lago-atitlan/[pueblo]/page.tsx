@@ -1,6 +1,3 @@
-'use client';
-
-import React from 'react';
 import { notFound } from 'next/navigation';
 import { pueblosAtitlan } from '../../../../app/rutas-magicas/mocks/atitlanData';
 import { 
@@ -108,12 +105,14 @@ interface NearbyTown {
 }
 
 interface PageProps {
-  params: Promise<{ pueblo: string }>;
+  params: { 
+    pueblo: string;
+  };
 }
 
-export default function PuebloDetailPage({ params }: PageProps) {
-  // Desenvolver la promesa de params
-  const { pueblo: puebloSlug } = React.use(params);
+export default async function PuebloDetailPage({ params }: PageProps) {
+  // Obtener el slug del pueblo de los parámetros
+  const { pueblo: puebloSlug } = params;
   
   // Buscar el pueblo por slug
   const pueblo = pueblosAtitlan.find(p => p.slug === puebloSlug);

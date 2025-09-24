@@ -43,4 +43,7 @@ export interface Tour {
   capacity: Capacity;
   availableDays: string[];
   startTimes: string[];
+  isPopular?: boolean;
+  rating?: number;
+  availability?: string;
 }
