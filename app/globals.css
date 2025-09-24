@@ -472,6 +472,100 @@
   }
   html.dark .compass-rose::after{ color: hsl(0 0% 100% / .55); }
 }
+/* ========================
+   ESTILOS PARA TOURS
+   ======================== */
+
+/* Efecto de hover para las tarjetas de tour */
+.tour-card {
+  @apply transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg;
+}
+
+/* Estilos para el precio en las tarjetas */
+.tour-price {
+  @apply text-xl font-bold text-cyan-600 dark:text-cyan-400;
+}
+
+/* Estilos para los botones de acción */
+.tour-button {
+  @apply bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+/* Estilos para las etiquetas de dificultad */
+.tour-difficulty {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+/* Estilos para la galería de imágenes */
+.tour-gallery {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-4 my-6;
+}
+
+.tour-gallery img {
+  @apply rounded-lg shadow-md w-full h-48 object-cover hover:opacity-90 transition-opacity;
+}
+
+/* Estilos para la sección de itinerario */
+.tour-itinerary {
+  @apply space-y-6 relative;
+}
+
+.tour-itinerary::before {
+  content: '';
+  @apply absolute left-5 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700 -ml-px;
+}
+
+.tour-itinerary-item {
+  @apply flex relative;
+}
+
+.tour-itinerary-bullet {
+  @apply w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/50 flex items-center justify-center flex-shrink-0 mr-4 relative z-10;
+}
+
+.tour-itinerary-content {
+  @apply flex-1 pb-6;
+}
+
+/* Estilos para la sección de preguntas frecuentes */
+.tour-faq-item {
+  @apply border-b border-gray-200 dark:border-gray-700 pb-4 mb-4;
+}
+
+.tour-faq-question {
+  @apply font-semibold text-gray-800 dark:text-gray-200 cursor-pointer flex justify-between items-center;
+}
+
+.tour-faq-answer {
+  @apply text-gray-600 dark:text-gray-400 mt-2;
+}
+
+/* Estilos para la sección de precios */
+.tour-price-section {
+  @apply bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 sticky top-6;
+}
+
+/* Estilos para la sección de información adicional */
+.tour-info-card {
+  @apply bg-white dark:bg-gray-800 rounded-xl shadow-md p-6;
+}
+
+/* Estilos para la sección de recomendaciones */
+.tour-recommendations {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8;
+}
+
+/* Ajustes para móviles */
+@media (max-width: 640px) {
+  .tour-gallery {
+    @apply grid-cols-1;
+  }
+  
+  .tour-recommendations {
+    @apply grid-cols-1;
+  }
+}
+
 /* === Estilos para las tarjetas de rutas === */
 .cyber-card {
   @apply bg-card/80 dark:bg-card/90 border border-border/50 dark:border-border/70 backdrop-blur-sm;
