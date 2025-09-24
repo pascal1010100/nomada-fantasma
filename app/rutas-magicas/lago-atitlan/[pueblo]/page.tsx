@@ -1,10 +1,13 @@
+'use client';
+
+import React from 'react';
 import { notFound } from 'next/navigation';
 import { pueblosAtitlan } from '../../../../app/rutas-magicas/mocks/atitlanData';
 import { 
   ArrowLeft, ArrowRight, MapPin, Wifi, Coffee, Bus, Map, Clock, Landmark, 
   Mountain, Sunset, BookOpen, Wifi as WifiIcon, MapPin as MapPinIcon, 
   Footprints, Star, Users, Calendar, Compass, Sun, Moon, Sunrise, Zap, 
-  Wind, Thermometer, CloudRain, Droplets, Globe, CheckCircle2 
+  Wind, Thermometer, CloudRain, Droplets, Globe, CheckCircle2, CloudSun
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -103,196 +106,111 @@ interface NearbyTown {
   coverImage: string;
 }
 
-export default function PuebloDetailPage({ params }: { params: { pueblo: string } }) {
+interface PageProps {
+  params: Promise<{ pueblo: string }>;
+}
+
+export default function PuebloDetailPage({ params }: PageProps) {
+  // Desenvolver la promesa de params
+  const { pueblo: puebloSlug } = React.use(params);
+  
   // Buscar el pueblo por slug
-  const pueblo = pueblosAtitlan.find(p => p.slug === params.pueblo);
+  const pueblo = pueblosAtitlan.find(p => p.slug === puebloSlug);
   
   // Si no se encuentra el pueblo, mostrar 404
   if (!pueblo) {
     notFound();
   }
 
+    // Mapear los íconos del clima
+  const getWeatherIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'sun':
+        return <Sun className="w-6 h-6" />;
+      case 'cloud-rain':
+        return <CloudRain className="w-6 h-6" />;
+      case 'cloud-sun':
+        return <CloudSun className="w-6 h-6" />;
+      case 'sunset':
+        return <Sunset className="w-6 h-6" />;
+      default:
+        return <Sun className="w-6 h-6" />;
+    }
+  };
+
   // Datos del pueblo
   const puebloData = {
     ...pueblo,
-    description: `San Pedro La Laguna es un pintoresco pueblo maya tz'utujil ubicado a orillas del Lago de Atitlán, conocido por su ambiente relajado, su vibrante vida nocturna y sus impresionantes vistas al volcán San Pedro. Este destino atrae a viajeros de todo el mundo que buscan una combinación de cultura auténtica, naturaleza impresionante y una comunidad de mochileros internacional.`,
+    // Usar la descripción completa del pueblo
+    description: pueblo.fullDescription,
     
-    // Clima actual (datos de ejemplo)
+    // Clima actual
     weather: {
-      temp: 22,
-      condition: 'Soleado',
-      humidity: 65,
-      wind: 12,
-      feelsLike: 24,
-      forecast: [
-        { day: 'Hoy', icon: <Sun className="w-6 h-6" />, high: 26, low: 18, pop: 10 },
-        { day: 'Mañana', icon: <CloudRain className="w-6 h-6" />, high: 24, low: 17, pop: 40 },
-        { day: 'Jue', icon: <Sun className="w-6 h-6" />, high: 25, low: 18, pop: 20 },
-        { day: 'Vie', icon: <Sunset className="w-6 h-6" />, high: 26, low: 19, pop: 10 },
-      ]
+      ...pueblo.weather,
+      forecast: pueblo.weather.forecast.map(day => ({
+        ...day,
+        icon: getWeatherIcon(day.icon)
+      }))
     },
 
     // Puntos destacados
     highlights: [
-      { icon: <Mountain className="w-5 h-5 text-cyan-400" />, text: 'Vistas al Volcán San Pedro' },
-      { icon: <Coffee className="w-5 h-5 text-amber-400" />, text: 'Cafés artesanales' },
-      { icon: <Moon className="w-5 h-5 text-purple-400" />, text: 'Vida nocturna animada' },
-      { icon: <BookOpen className="w-5 h-5 text-green-400" />, text: 'Escuelas de español' },
+      { icon: <Mountain className="w-5 h-5 text-cyan-400" />, text: pueblo.highlights[0] },
+      { icon: <Coffee className="w-5 h-5 text-amber-400" />, text: pueblo.highlights[1] || 'Café local' },
+      { icon: <Moon className="w-5 h-5 text-purple-400" />, text: pueblo.highlights[2] || 'Vida local' },
+      { icon: <BookOpen className="w-5 h-5 text-green-400" />, text: pueblo.highlights[3] || 'Cultura' },
       { icon: <Sunrise className="w-5 h-5 text-yellow-400" />, text: 'Amaneceres espectaculares' },
-      { icon: <Compass className="w-5 h-5 text-red-400" />, text: 'Cultura maya viva' },
+      { icon: <Compass className="w-5 h-5 text-red-400" />, text: 'Cultura local' },
     ] as Highlight[],
 
     // Actividades
-    activities: [
-      'Senderismo al Volcán San Pedro (4-6 horas de subida)',
-      'Kayak al amanecer en el lago',
-      'Clases de español en escuelas locales',
-      'Tours de café por fincas locales',
-      'Visita al mercado local de artesanías',
-      'Clases de cocina tradicional',
-      'Yoga al amanecer con vista al lago',
-      'Paseo en bote a otros pueblos del lago',
-      'Tour de street art y murales locales',
-      'Conexión con comunidades indígenas',
-      'Observación de aves en la naturaleza',
-      'Baños de temazcal tradicional'
-    ],
+    activities: pueblo.activities,
 
     // Horario de transporte
-    transportSchedule: [
-      { route: 'Panajachel → San Pedro', times: ['5:30', '7:00', '8:30', '10:00', '12:00', '14:00', '16:00', '17:30'] },
-      { route: 'San Pedro → Santiago', times: ['7:00', '9:00', '11:00', '13:00', '15:00', '17:00'] },
-      { route: 'San Pedro → San Marcos', times: ['Cada 30 min', '6:00 - 19:00'] },
-      { route: 'San Pedro → San Juan', times: ['Cada 45 min', '6:30 - 18:30'] },
-      { route: 'San Pedro → Ciudad de Guatemala', times: ['4:30', '6:00', '8:00', '10:00', '12:00', '14:00', '16:00'] },
-    ] as TransportSchedule[],
+    transportSchedule: pueblo.transportSchedule,
 
     // Servicios
-    services: {
-      atms: ['Banco Industrial', 'Banrural', '5B'],
-      essentials: [
-        'Farmacias: Farmacia San Pedro, Farmacia La Bendición',
-        'Lavanderías: Lavandería La Esquina, Lavandería Central',
-        'Supermercados: Despensa Familiar, Supermercado San Pedro',
-        'Centro médico: Centro de Salud San Pedro La Laguna',
-        'Oficina de correos: En el centro del pueblo',
-        'Tiendas de alquiler de equipo: Kayaks, tablas de paddle, bicicletas'
-      ]
-    } as Services,
+    services: pueblo.services,
     
     // Guías turísticos
-    guides: [
-      { 
-        name: 'Juan Pérez', 
-        contact: '+502 1234-5678', 
-        languages: ['Español', 'Inglés'],
-        tours: [
-          'Tour al Volcán San Pedro (Q150-200 por persona)',
-          'Tour de café por fincas locales (Q100-150)',
-          'Tour cultural por el pueblo (Q80-120)'
-        ]
-      },
-      { 
-        name: 'María González', 
-        contact: 'maria@guia.com', 
-        languages: ['Español', 'Francés', 'Inglés'],
-        tours: [
-          'Clases de español personalizadas (Q50/hora)',
-          'Tour fotográfico por el lago (Q200 por grupo)',
-          'Visita a comunidades indígenas (Q150 por persona)'
-        ]
-      },
-      { 
-        name: 'Pablo Ramírez', 
-        contact: '@pabloguia', 
-        languages: ['Español', 'Alemán'],
-        tours: [
-          'Tour de senderismo a miradores secretos (Q120 por persona)',
-          'Tour gastronómico por San Pedro (Q180 por persona)',
-          'Tour en bicicleta por los alrededores (Q100 por persona)'
-        ]
-      }
-    ] as Guide[],
+    guides: pueblo.guides,
     
-    // Puntos WiFi
+    // Puntos WiFi (datos de ejemplo)
     wifiSpots: [
       { 
-        name: 'Café La Puerta', 
+        name: 'Café Central', 
         description: 'Buena conexión, ambiente relajado', 
         speed: 'fast',
         hours: '7:00 - 21:00',
         hasOutlets: true
       },
       { 
-        name: 'Hostel Fe', 
+        name: 'Hostal Principal', 
         description: 'Zona de coworking con vista al lago', 
         speed: 'medium',
-        hours: '24/7 para huéspedes',
-        hasOutlets: true
-      },
-      { 
-        name: 'Café Loco', 
-        description: 'WiFi rápido, buen café', 
-        speed: 'fast',
-        hours: '8:00 - 20:00',
-        hasOutlets: true
-      },
-      { 
-        name: 'Zoola', 
-        description: 'Zona de descanso con enchufes', 
-        speed: 'slow',
-        hours: '10:00 - 23:00',
+        hours: '7:00 - 22:00',
         hasOutlets: true
       }
-    ] as WifiSpot[],
+    ],
     
-    // Pueblos cercanos
-    nearbyTowns: [
-      { 
-        id: 'san-marcos',
-        name: 'San Marcos La Laguna',
-        title: 'San Marcos La Laguna',
-        summary: 'Un refugio espiritual a orillas del lago',
-        coverImage: '/images/san-marcos.jpg',
-        distance: '15 min en lancha', 
-        description: 'Conocido por su ambiente espiritual y retiros de yoga',
-        slug: 'san-marcos-la-laguna',
-        highlights: ['Retiros espirituales', 'Clases de yoga', 'Meditación']
-      },
-      { 
-        id: 'san-juan',
-        name: 'San Juan La Laguna',
-        title: 'San Juan La Laguna',
-        summary: 'El corazón artesanal del lago',
-        coverImage: '/images/san-juan.jpg',
-        distance: '10 min en tuk-tuk', 
-        description: 'Famosa por sus cooperativas de arte y tejidos',
-        slug: 'san-juan-la-laguna',
-        highlights: ['Arte textil', 'Pintura naif', 'Cultura maya']
-      },
-      { 
-        id: 'santiago',
-        name: 'Santiago Atitlán',
-        title: 'Santiago Atitlán',
-        summary: 'La cuna de la cultura tzutujil',
-        coverImage: '/images/santiago.jpg',
-        distance: '45 min en lancha', 
-        description: 'Rica en cultura tzutujil y tradiciones mayas',
-        slug: 'santiago-atitlan',
-        highlights: ['Mercado local', 'Iglesia colonial', 'Cofradías']
-      },
-      { 
-        id: 'panajachel',
-        name: 'Panajachel',
-        title: 'Panajachel',
-        summary: 'La puerta de entrada al Lago de Atitlán',
-        coverImage: '/images/panajachel.jpg',
-        distance: '1 hora en lancha', 
-        description: 'La puerta de entrada al Lago de Atitlán',
-        slug: 'panajachel',
-        highlights: ['Calle Santander', 'Vida nocturna', 'Vistas al lago']
-      }
-    ] as NearbyTown[]
+    // Pueblos cercanos (excluyendo el actual)
+    nearbyTowns: pueblosAtitlan
+      .filter(p => p.slug !== pueblo.slug)
+      .map(p => ({
+        id: p.id,
+        name: p.title.split(' ')[0], // Tomar solo el primer nombre
+        title: p.title,
+        slug: p.slug,
+        summary: p.summary,
+        description: p.summary,
+        distance: p.slug.includes('san-juan') ? '10 min en tuk-tuk' : 
+                 p.slug.includes('santiago') ? '45 min en lancha' :
+                 p.slug.includes('san-marcos') ? '15 min en lancha' :
+                 p.slug.includes('panajachel') ? '1 hora en lancha' :
+                 'Cerca',
+        highlights: p.highlights,
+        coverImage: p.coverImage || `/images/${p.slug}.jpg`
+      }))
   };
 
   return (

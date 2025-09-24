@@ -46,18 +46,26 @@ export default function RouteCard({ route }: RouteCardProps) {
   
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    const path = route.region === 'america' && route.slug.includes('san-') 
+    const isAtitlanTown = route.region === 'america' && 
+      (route.slug.includes('san-') || route.slug === 'santiago-atitlan');
+    
+    const path = isAtitlanTown
       ? `/rutas-magicas/lago-atitlan/${route.slug}`
       : `/rutas-magicas/${route.slug}`;
+      
     router.push(path);
   };
   
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      const path = route.region === 'america' && route.slug.includes('san-')
+      const isAtitlanTown = route.region === 'america' && 
+        (route.slug.includes('san-') || route.slug === 'santiago-atitlan');
+      
+      const path = isAtitlanTown
         ? `/rutas-magicas/lago-atitlan/${route.slug}`
         : `/rutas-magicas/${route.slug}`;
+        
       router.push(path);
     }
   };
