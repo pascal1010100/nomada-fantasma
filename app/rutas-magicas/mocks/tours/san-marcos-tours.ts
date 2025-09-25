@@ -1,3 +1,5 @@
+//imagenes agregadas
+
 import { Tour } from './types';
 
 const tours: Tour[] = [
