@@ -3,6 +3,7 @@ import sanPedroTours from './san-pedro-tours';
 import sanMarcosTours from './san-marcos-tours';
 import santiagoTours from './santiago-tours';
 import sanJuanTours from './san-juan-tours';
+import panajachelTours from './panajachel-tours';
 
 // Tipado para el objeto de tours por pueblo
 type PuebloTours = {
@@ -22,6 +23,7 @@ registerTours('san-pedro-la-laguna', sanPedroTours);
 registerTours('san-marcos-la-laguna', sanMarcosTours);
 registerTours('santiago-atitlan', santiagoTours);
 registerTours('san-juan-la-laguna', sanJuanTours);
+registerTours('panajachel', panajachelTours);
 
 // Función para obtener tours por pueblo
 export const getToursByPueblo = (puebloSlug: string): Tour[] => {

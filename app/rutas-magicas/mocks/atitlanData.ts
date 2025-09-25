@@ -55,6 +55,83 @@ export const pueblosAtitlan: (Route & {
   }>;
 })[] = [
   {
+    id: 'p0',
+    slug: 'panajachel',
+    title: 'Panajachel',
+    summary: 'La puerta de entrada al Lago de Atitlán. Conocida cariñosamente como "Pana", es el principal punto de acceso al Lago de Atitlán.',
+    coverImage: '/images/rutas/panajachel.jpg',
+    region: 'america',
+    durationDays: 3,
+    groupSize: { min: 1, max: 12 },
+    wifiRating: 5,
+    priceTier: 'standard',
+    highlights: [
+      'Calle Santander con tiendas y restaurantes',
+      'Vida nocturna animada',
+      'Vistas panorámicas del lago',
+      'Acceso a otros pueblos del lago',
+      'Mercado de artesanías'
+    ],
+    fullDescription: 'Panajachel, conocida cariñosamente como "Pana", es el principal punto de acceso al Lago de Atitlán. Ofrece una mezcla perfecta entre comodidades modernas y encanto local, con su famosa Calle Santander llena de tiendas, restaurantes y vida nocturna. Es el lugar ideal para comenzar tu aventura en el lago, con fácil acceso a los demás pueblos y una amplia gama de servicios turísticos.',
+    price: 350,
+    rating: 4.7,
+    weather: {
+      temp: 22,
+      condition: 'Parcialmente nublado',
+      humidity: 65,
+      wind: 8,
+      feelsLike: 24,
+      forecast: [
+        { day: 'Hoy', icon: '☀️', high: 26, low: 16, pop: 10 },
+        { day: 'Mañana', icon: '⛅', high: 24, low: 15, pop: 20 },
+        { day: 'Vie', icon: '🌧️', high: 22, low: 15, pop: 60 },
+        { day: 'Sáb', icon: '🌦️', high: 23, low: 15, pop: 40 },
+        { day: 'Dom', icon: '☀️', high: 25, low: 16, pop: 10 }
+      ]
+    },
+    activities: [
+      'Paseo por la Calle Santander',
+      'Tour de compras de artesanías',
+      'Paseo en bote por el lago',
+      'Tour gastronómico',
+      'Observación de aves',
+      'Kayak al atardecer',
+      'Visita a reservas naturales cercanas',
+      'Tour fotográfico'
+    ],
+    transportSchedule: [
+      { route: 'Ciudad de Guatemala → Panajachel', times: ['4:30', '7:00', '9:30', '12:00', '14:30', '17:00'] },
+      { route: 'Panajachel → San Pedro', times: ['Cada 30 min', '5:30 - 18:30'] },
+      { route: 'Panajachel → San Marcos', times: ['Cada 45 min', '6:00 - 18:00'] },
+      { route: 'Panajachel → San Juan', times: ['Cada hora', '7:00 - 17:30'] },
+      { route: 'Panajachel → Aeropuerto La Aurora', times: ['3:30', '6:00', '8:30', '11:00', '13:30', '16:00'] }
+    ],
+    services: {
+      atms: ['Banco Industrial', 'Banrural', 'BAC', 'Banco G&T'],
+      essentials: [
+        'Farmacias: Farmacia Pana',
+        'Hospital: Centro de Salud Panajachel',
+        'Supermercados: Despensa Familiar',
+        'Lavanderías',
+        'Oficina de turismo'
+      ]
+    },
+    guides: [
+      {
+        name: 'María González',
+        contact: 'maria@nomadafantasma.com',
+        languages: ['Español', 'Inglés'],
+        tours: ['Tour Gastronómico', 'Tour Cultural']
+      },
+      {
+        name: 'Juan Pérez',
+        contact: 'juan@nomadafantasma.com',
+        languages: ['Español', 'Kakchiquel', 'Inglés básico'],
+        tours: ['Tour de Naturaleza', 'Tour de Aventura']
+      }
+    ]
+  },
+  {
     id: 'p1',
     slug: 'san-pedro-la-laguna',
     title: 'San Pedro La Laguna',
