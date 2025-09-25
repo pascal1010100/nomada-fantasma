@@ -37,8 +37,8 @@ const tours: Tour[] = [
       'Botella de agua reutilizable'
     ],
     images: [
-      '/images/tours/yoga-retreat-1.jpg',
-      '/images/tours/yoga-retreat-2.jpg'
+      '/images/tours/san-marcos/yoga-retreat-1.jpg',
+      '/images/tours/san-marcos/yoga-retreat-2.jpg'
     ],
     highlights: [
       'Clases con instructores certificados',
@@ -133,8 +133,8 @@ const tours: Tour[] = [
       'Un objeto personal para energizar (opcional)'
     ],
     images: [
-      '/images/tours/sound-healing-1.jpg',
-      '/images/tours/sound-healing-2.jpg'
+      '/images/tours/san-marcos/sound-healing-1.jpg',
+      '/images/tours/san-marcos/sound-healing-2.jpg'
     ],
     highlights: [
       'Terapia de sonido con instrumentos auténticos',
