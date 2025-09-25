@@ -38,9 +38,9 @@ const tours: Tour[] = [
       'Chaqueta ligera (puede hacer fresco)'
     ],
     images: [
-      '/images/tours/coffee-tour-1.jpg',
-      '/images/tours/coffee-tour-2.jpg',
-      '/images/tours/dye-workshop-1.jpg'
+      '/images/tours/san-juan/coffee-tour-1.jpg',
+      '/images/tours/san-juan/coffee-tour-2.jpg',
+      '/images/tours/san-juan/dye-workshop-1.jpg'
     ],
     highlights: [
       'Visita a finca de café orgánico',
@@ -148,8 +148,8 @@ const tours: Tour[] = [
       'Cuaderno para bocetos (opcional)'
     ],
     images: [
-      '/images/tours/mural-tour-1.jpg',
-      '/images/tours/mural-tour-2.jpg'
+      '/images/tours/san-juan/mural-tour-1.jpg',
+      '/images/tours/san-juan/mural-tour-2.jpg'
     ],
     highlights: [
       'Recorrido por los murales más impresionantes',
