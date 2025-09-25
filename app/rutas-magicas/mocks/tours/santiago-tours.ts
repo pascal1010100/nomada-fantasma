@@ -35,8 +35,8 @@ const tours: Tour[] = [
       'Sombrero o gorra'
     ],
     images: [
-      '/images/tours/santiago-cultural-1.jpg',
-      '/images/tours/santiago-cultural-2.jpg'
+      '/images/tours/santiago/santiago-cultural-1.jpg',
+      '/images/tours/santiago/santiago-cultural-2.jpg'
     ],
     highlights: [
       'Visita a la iglesia de Santiago Apóstol',
@@ -132,8 +132,8 @@ const tours: Tour[] = [
       'Una sonrisa y ganas de aprender'
     ],
     images: [
-      '/images/tours/weaving-workshop-1.jpg',
-      '/images/tours/weaving-workshop-2.jpg'
+      '/images/tours/santiago/weaving-workshop-1.jpg',
+      '/images/tours/santiago/weaving-workshop-2.jpg'
     ],
     highlights: [
       'Experiencia auténtica con artesanas locales',

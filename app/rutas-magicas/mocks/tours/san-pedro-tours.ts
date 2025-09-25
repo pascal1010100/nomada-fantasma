@@ -58,8 +58,8 @@ const tours: Tour[] = [
       'Dinero extra para gastos personales'
     ],
     images: [
-      '/images/tours/volcan-san-pedro-1.jpg',
-      '/images/tours/volcan-san-pedro-2.jpg'
+      '/images/tours/san-pedro/volcan-san-pedro-1.jpg',
+      '/images/tours/san-pedro/volcan-san-pedro-2.jpg'
     ],
     highlights: [
       'Vistas panorámicas del Lago de Atitlán',
@@ -157,8 +157,8 @@ const tours: Tour[] = [
       'Sombrero o gorra'
     ],
     images: [
-      '/images/tours/cafe-tour-1.jpg',
-      '/images/tours/cafe-tour-2.jpg'
+      '/images/tours/san-pedro/cafe-tour-1.jpg',
+      '/images/tours/san-pedro/cafe-tour-2.jpg'
     ],
     highlights: [
       'Recorrido por plantaciones de café',

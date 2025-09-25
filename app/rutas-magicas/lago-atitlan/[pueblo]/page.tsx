@@ -120,6 +120,7 @@ export default async function PuebloDetailPage({ params }: PageProps) {
   // Si no se encuentra el pueblo, mostrar 404
   if (!pueblo) {
     notFound();
+    return null; // Asegurar que el componente no continúe
   }
 
     // Mapear los íconos del clima
@@ -213,67 +214,97 @@ export default async function PuebloDetailPage({ params }: PageProps) {
       }))
   };
 
+  // Si no hay datos del pueblo, no renderizar nada
+  if (!pueblo) return null;
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Breadcrumb */}
-      <nav className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="container mx-auto px-4 py-3">
-          <ol className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
-            <li>
-              <Link href="/rutas-magicas" className="hover:text-electricBlue dark:hover:text-cyberPurple transition-colors">
-                Rutas Mágicas
-              </Link>
-            </li>
-            <li>/</li>
-            <li>
-              <Link href="/rutas-magicas/lago-atitlan" className="hover:text-electricBlue dark:hover:text-cyberPurple transition-colors">
-                Lago de Atitlán
-              </Link>
-            </li>
-            <li>/</li>
-            <li className="text-gray-900 dark:text-white font-medium">{pueblo.title}</li>
-          </ol>
-        </div>
-      </nav>
-
       {/* Hero Section */}
-      <div className="relative h-96 overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src={pueblo.coverImage}
-            alt={pueblo.title}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/30 to-transparent" />
-        </div>
-        <div className="relative z-10 container mx-auto px-4 h-full flex flex-col justify-end pb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">{pueblo.title}</h1>
-          <p className="text-xl text-gray-200 mb-6 max-w-2xl">{pueblo.summary}</p>
-          <div className="flex flex-wrap gap-2">
-            {puebloData.highlights.map((item, index) => (
-              <span key={index} className="inline-flex items-center bg-white/20 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm">
-                {item.icon}
-                <span className="ml-1.5">{item.text}</span>
-              </span>
-            ))}
+      <div className="relative">
+        <div className="relative h-[28rem] md:h-[32rem] w-full">
+          <div className="absolute inset-0">
+            <Image
+              src={pueblo.coverImage}
+              alt={pueblo.title}
+              fill
+              className="object-cover"
+              priority
+              sizes="100vw"
+              quality={90}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/95 via-gray-900/40 to-transparent" />
+          </div>
+          
+          {/* Contenedor del contenido */}
+          <div className="relative h-full flex flex-col">
+            {/* Breadcrumb */}
+            <div className="z-10 pt-6 px-4 sm:px-6">
+              <nav className="max-w-7xl mx-auto">
+                <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/90">
+                  <li>
+                    <Link href="/rutas-magicas" className="hover:text-cyan-300 transition-colors text-xs sm:text-sm md:text-base">
+                      Rutas Mágicas
+                    </Link>
+                  </li>
+                  <li className="text-white/60 text-xs sm:text-sm">/</li>
+                  <li>
+                    <Link href="/rutas-magicas/lago-atitlan" className="hover:text-cyan-300 transition-colors text-xs sm:text-sm md:text-base">
+                      Lago de Atitlán
+                    </Link>
+                  </li>
+                  <li className="text-white/60 text-xs sm:text-sm">/</li>
+                  <li className="font-medium text-white text-xs sm:text-sm md:text-base">
+                    {pueblo.title}
+                  </li>
+                </ol>
+              </nav>
+            </div>
+            
+            {/* Contenido del héroe */}
+            <div className="flex-1 flex items-end pb-8 sm:pb-12 px-4 sm:px-6">
+              <div className="w-full max-w-7xl mx-auto">
+                <div className="max-w-3xl">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight">
+                    {pueblo.title}
+                  </h1>
+                  <p className="text-base sm:text-lg md:text-xl text-gray-200 mb-6 sm:mb-8 max-w-3xl">
+                    {pueblo.summary}
+                  </p>
+                  <div className="flex flex-wrap gap-2 sm:gap-3">
+                    {pueblo.region && (
+                      <span className="inline-flex items-center bg-black/30 backdrop-blur-sm text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm border border-white/20">
+                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        {pueblo.region}
+                      </span>
+                    )}
+                    <span className="inline-flex items-center bg-black/30 backdrop-blur-sm text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm border border-white/20">
+                      <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      {pueblo.durationDays} día{pueblo.durationDays > 1 ? 's' : ''}
+                    </span>
+                    <span className="inline-flex items-center bg-black/30 backdrop-blur-sm text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm border border-white/20">
+                      <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      {pueblo.groupSize.min}-{pueblo.groupSize.max} personas
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-12">
+          <div className="lg:col-span-2 space-y-8 sm:space-y-12">
             {/* Por qué visitar */}
-            <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                <MapPin className="w-6 h-6 mr-2 text-electricBlue dark:text-cyberPurple" />
-                Por qué visitar {pueblo.title}
+            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center">
+                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-electricBlue dark:text-cyberPurple" />
+                Por qué visitar {pueblo?.title || 'este pueblo'}
               </h2>
-              <div className="prose dark:prose-invert max-w-none">
+              <div className="prose dark:prose-invert max-w-none text-sm sm:text-base">
                 <p className="text-gray-700 dark:text-gray-300">
                   {puebloData.description}
                 </p>
@@ -281,16 +312,16 @@ export default async function PuebloDetailPage({ params }: PageProps) {
             </section>
 
             {/* Qué hacer */}
-            <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                <Footprints className="w-6 h-6 mr-2 text-electricBlue dark:text-cyberPurple" />
-                Qué hacer en {pueblo.title}
+            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center">
+                <Footprints className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-electricBlue dark:text-cyberPurple" />
+                Qué hacer en {pueblo?.title || 'este pueblo'}
               </h2>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 {puebloData.activities.map((activity, index) => (
                   <li key={index} className="flex items-start">
-                    <span className="text-electricBlue dark:text-cyberPurple mr-2">•</span>
-                    <span className="text-gray-700 dark:text-gray-300">{activity}</span>
+                    <span className="text-electricBlue dark:text-cyberPurple mr-2 mt-1">•</span>
+                    <span className="text-gray-700 dark:text-gray-300 text-sm sm:text-base">{activity}</span>
                   </li>
                 ))}
               </ul>
@@ -300,10 +331,10 @@ export default async function PuebloDetailPage({ params }: PageProps) {
             <ToursSection puebloSlug={puebloSlug} />
 
             {/* Horarios de transporte */}
-            <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                <Bus className="w-6 h-6 mr-2 text-electricBlue dark:text-cyberPurple" />
-                Transporte desde/hacia {pueblo.title}
+            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                <Bus className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-electricBlue dark:text-cyberPurple" />
+                Transporte desde/hacia {pueblo?.title || 'este pueblo'}
               </h2>
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                 <div className="overflow-x-auto">
@@ -333,7 +364,7 @@ export default async function PuebloDetailPage({ params }: PageProps) {
             </section>
 
             {/* Guías turísticos - Sección condicional */}
-            {Array.isArray((pueblo as any).guides) && (pueblo as any).guides.length > 0 && (
+            {Array.isArray(pueblo.guides) && pueblo.guides.length > 0 && (
               <section>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
                   <Landmark className="w-6 h-6 mr-2 text-electricBlue dark:text-cyberPurple" />
@@ -344,7 +375,7 @@ export default async function PuebloDetailPage({ params }: PageProps) {
                     {pueblo.title} cuenta con una variedad de guías locales que ofrecen experiencias auténticas. Aquí tienes algunas opciones:
                   </p>
                   <div className="space-y-4">
-                    {(pueblo as any).guides.map((guide: Guide, index: number) => (
+                    {pueblo.guides.map((guide, index) => (
                       <div key={index} className="p-5 bg-gray-800/50 rounded-xl border border-cyan-400/20 hover:border-cyan-400/40 transition-colors">
                         <div className="flex flex-col md:flex-row md:items-start gap-4">
                           <div className="bg-cyan-500/10 p-3 rounded-lg w-12 h-12 flex items-center justify-center flex-shrink-0">
@@ -356,26 +387,32 @@ export default async function PuebloDetailPage({ params }: PageProps) {
                               <span className="font-medium">Contacto:</span> {guide.contact}
                             </p>
                             
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              <span className="text-xs px-3 py-1 bg-cyan-900/50 text-cyan-300 rounded-full flex items-center">
-                                <Globe className="w-3 h-3 mr-1" />
-                                {guide.languages.join(' • ')}
-                              </span>
-                            </div>
+                            {guide.languages && guide.languages.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mb-4">
+                                <span className="text-xs px-3 py-1 bg-cyan-900/50 text-cyan-300 rounded-full flex items-center">
+                                  <Globe className="w-3 h-3 mr-1" />
+                                  {Array.isArray(guide.languages) ? guide.languages.join(' • ') : ''}
+                                </span>
+                              </div>
+                            )}
 
                             <div className="mt-4">
                               <h4 className="text-sm font-semibold text-cyan-200 mb-2 flex items-center">
                                 <Zap className="w-4 h-4 mr-2 text-cyan-400" />
-                                Tours Disponibles
+                                {guide.tours && guide.tours.length > 0 ? 'Tours Disponibles' : 'Servicios de Guía'}
                               </h4>
-                              <ul className="space-y-2">
-                                {guide.tours.map((tour, tourIndex) => (
-                                  <li key={tourIndex} className="flex items-start">
-                                    <CheckCircle2 className="w-4 h-4 text-cyan-400 mt-1 mr-2 flex-shrink-0" />
-                                    <span className="text-sm text-gray-300">{tour}</span>
-                                  </li>
-                                ))}
-                              </ul>
+                              {guide.tours && guide.tours.length > 0 ? (
+                                <ul className="space-y-2">
+                                  {guide.tours.map((tour, tourIndex) => (
+                                    <li key={tourIndex} className="flex items-start">
+                                      <CheckCircle2 className="w-4 h-4 text-cyan-400 mt-1 mr-2 flex-shrink-0" />
+                                      <span className="text-sm text-gray-300">{tour}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p className="text-sm text-cyan-100/80">Servicio personalizado de guía turístico</p>
+                              )}
                             </div>
                           </div>
                         </div>
