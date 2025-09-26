@@ -9,6 +9,7 @@ interface SearchBarProps {
   placeholder?: string;
   className?: string;
   value?: string;
+  defaultValue?: string;
   delay?: number;
 }
 
@@ -16,14 +17,18 @@ export default function SearchBar({
   onSearch, 
   placeholder = 'Buscar rutas...',
   className = '',
-  value = '',
+  value,
+  defaultValue = '',
   delay = 300
 }: SearchBarProps) {
-  const [searchQuery, setSearchQuery] = useState(value);
+  // Use value if provided, otherwise use defaultValue
+  const [searchQuery, setSearchQuery] = useState(value ?? defaultValue);
   
   // Update internal state when value prop changes
   useEffect(() => {
-    setSearchQuery(value);
+    if (value !== undefined) {
+      setSearchQuery(value);
+    }
   }, [value]);
   
   // Debounce search
