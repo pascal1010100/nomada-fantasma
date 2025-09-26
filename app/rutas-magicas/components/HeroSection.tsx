@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import SearchBar from './SearchBar';
 
 type Variants = {
   hidden: { opacity: number; y: number };
@@ -23,10 +24,20 @@ const textVariants: Variants = {
   })
 };
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  onSearch?: (query: string) => void;
+}
+
+export default function HeroSection({ onSearch }: HeroSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   
+  const handleSearch = (query: string) => {
+    if (onSearch) {
+      onSearch(query);
+    }
+  };
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start start', 'end start']
@@ -94,7 +105,20 @@ export default function HeroSection() {
           </motion.p>
 
           <motion.div 
-            className="flex flex-col sm:flex-row justify-center gap-4 mt-10"
+            className="max-w-2xl mx-auto my-8 w-full px-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+          >
+            <SearchBar 
+              onSearch={handleSearch} 
+              placeholder="Busca destinos, actividades o experiencias..."
+              className="w-full"
+            />
+          </motion.div>
+
+          <motion.div 
+            className="flex flex-col sm:flex-row justify-center gap-4 mt-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.6 }}
