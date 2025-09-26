@@ -26,9 +26,10 @@ const textVariants: Variants = {
 
 interface HeroSectionProps {
   onSearch?: (query: string) => void;
+  defaultQuery?: string;
 }
 
-export default function HeroSection({ onSearch }: HeroSectionProps) {
+export default function HeroSection({ onSearch, defaultQuery = '' }: HeroSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   
@@ -112,6 +113,7 @@ export default function HeroSection({ onSearch }: HeroSectionProps) {
           >
             <SearchBar 
               onSearch={handleSearch} 
+              defaultValue={defaultQuery}
               placeholder="Busca destinos, actividades o experiencias..."
               className="w-full"
             />
