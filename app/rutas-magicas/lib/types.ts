@@ -17,4 +17,5 @@ export interface Route {
   rating: number;
   difficulty?: 'FÁCIL' | 'MEDIO' | 'DIFÍCIL' | 'EXTREMO';
   isRecommended?: boolean;
+  tags?: string[];
 }

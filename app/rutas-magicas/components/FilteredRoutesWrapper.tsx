@@ -22,8 +22,9 @@ const FilteredRoutes = dynamic(
 
 interface FilteredRoutesWrapperProps {
   region?: Region;
+  searchQuery?: string;
 }
 
-export default function FilteredRoutesWrapper({ region }: FilteredRoutesWrapperProps) {
-  return <FilteredRoutes region={region} />;
+export default function FilteredRoutesWrapper({ region, searchQuery = '' }: FilteredRoutesWrapperProps) {
+  return <FilteredRoutes region={region} searchQuery={searchQuery} />;
 }
