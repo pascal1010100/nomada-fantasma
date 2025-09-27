@@ -3,10 +3,24 @@
 
 import { useState, useMemo, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, X, Loader2, AlertCircle } from 'lucide-react';
+import { Search, MapPin, X, Loader2, AlertCircle, Compass, Wifi, Home, Anchor, Coffee, CreditCard } from 'lucide-react';
 import dynamic from 'next/dynamic';
+
+const ParticlesBackground = dynamic(
+  () => import('./components/ParticlesBackground'),
+  { ssr: false }
+);
 import { samplePoints } from './points';
 import { CategoryKey, CATEGORIES } from './types';
+
+// Definir las categorías con íconos y colores
+const CATEGORY_ICONS = {
+  wifi: Wifi,
+  hospedaje: Home,
+  cowork: Coffee,
+  banco: CreditCard,
+  puerto: Anchor,
+};
 
 // Carga dinámica del cliente del mapa para mejor rendimiento
 const MapClient = dynamic(() => import('./MapClient'), {
@@ -33,20 +47,26 @@ export function MapFilters({
   onSearchChange 
 }: MapFiltersProps) {
   return (
-    <div className="mb-6 space-y-4">
+    <div className="mb-8 space-y-6 max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+
       {/* Barra de búsqueda */}
-      <div className="relative">
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+      <motion.div 
+        className="relative max-w-2xl mx-auto"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
           <Search className="h-4 w-4 text-muted-foreground" />
         </div>
         <input
           type="text"
-          placeholder="Buscar lugares..."
+          placeholder="Buscar destinos, lugares o categorías..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full rounded-lg border border-border bg-background/50 py-2 pl-10 pr-4 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="w-full rounded-xl border border-border/50 bg-card/70 backdrop-blur-sm py-3 pl-11 pr-4 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/60"
         />
-      </div>
+      </motion.div>
 
       {/* Filtros de categoría */}
       <div className="flex flex-wrap gap-2">
@@ -73,41 +93,12 @@ export function MapFilters({
 }
 
 export default function MapaPage() {
-  const [selectedCategories, setSelectedCategories] = useState<Set<CategoryKey>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<Set<CategoryKey>>(new Set());
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
-  // Filtrar puntos basados en categorías seleccionadas y búsqueda
-  const filteredPoints = useMemo(() => {
-    return samplePoints.filter(point => {
-      // Filtrar por categorías seleccionadas
-      const categoryMatch = selectedCategories.size === 0 || 
-        selectedCategories.has(point.category);
-      
-      // Filtrar por búsqueda (solo por nombre por ahora)
-      const searchMatch = searchQuery === '' || 
-        point.name.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      return categoryMatch && searchMatch;
-    });
-  }, [selectedCategories, searchQuery]);
-
-  // Alternar categoría seleccionada
-  const toggleCategory = (category: CategoryKey) => {
-    setSelectedCategories(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(category)) {
-        newSet.delete(category);
-      } else {
-        newSet.add(category);
-      }
-      return newSet;
-    });
-  };
-
-  // Obtener ubicación del usuario
   const handleLocateMe = () => {
     if (!navigator.geolocation) {
       setLocationError('La geolocalización no es compatible con tu navegador');
@@ -119,12 +110,13 @@ export default function MapaPage() {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setUserLocation([position.coords.latitude, position.coords.longitude]);
+        const { latitude, longitude } = position.coords;
+        setUserLocation([latitude, longitude]);
         setIsLocating(false);
       },
       (error) => {
         console.error('Error al obtener la ubicación:', error);
-        setLocationError('No se pudo obtener tu ubicación. Asegúrate de haber otorgado los permisos necesarios.');
+        setLocationError('No se pudo obtener tu ubicación. Asegúrate de que los permisos estén habilitados.');
         setIsLocating(false);
       },
       {
@@ -135,28 +127,83 @@ export default function MapaPage() {
     );
   };
 
-  return (
-    <div className="container relative z-0 py-6 md:py-10">
-      <header className="mb-8">
-        <motion.h1 
-          className="mb-2 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-4xl md:text-5xl"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          Mapa Nómada
-        </motion.h1>
-        <motion.p 
-          className="text-muted-foreground"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-        >
-          Explora lugares con Wi-Fi, hospedaje, coworking, bancos y puertos para nómadas digitales.
-        </motion.p>
-      </header>
+  // Filtrar puntos basados en la búsqueda y categorías seleccionadas
+  const filteredPoints = useMemo(() => {
+    return samplePoints.filter(point => {
+      const matchesSearch = point.name.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesCategory = selectedCategories.size === 0 || 
+                            (point.category && selectedCategories.has(point.category));
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategories]);
 
-      <div className="space-y-6">
+  const toggleCategory = (category: CategoryKey) => {
+    setSelectedCategories(prev => {
+      const newCategories = new Set(prev);
+      if (newCategories.has(category)) {
+        newCategories.delete(category);
+      } else {
+        newCategories.add(category);
+      }
+      return newCategories;
+    });
+  };
+
+  return (
+    <div className="relative min-h-screen">
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 nf-grid opacity-20" />
+        <div className="absolute inset-0 nf-vignette" />
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.05)_0%,transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.05)_0%,transparent_50%)]" />
+      </div>
+      <div className="relative overflow-hidden">
+
+        {/* Efecto de partículas sutiles */}
+        <ParticlesBackground />
+
+        <div className="relative z-10 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+          {/* Badge */}
+          <motion.div 
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-cyberPurple dark:text-cyberPurple-300 bg-cyberPurple/5 dark:bg-cyberPurple/10 rounded-full border border-cyberPurple/10 mb-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+          >
+            <span className="relative flex h-2 w-2 mr-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyberPurple opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyberPurple"></span>
+            </span>
+            Explora el mapa
+          </motion.div>
+
+          {/* Título principal */}
+          <motion.div className="text-center max-w-4xl mx-auto">
+            <motion.h1 
+              className="text-4xl font-medium tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+            >
+              <span className="block text-gray-900 dark:text-white">Mapa</span>
+              <span className="block mt-2 bg-gradient-to-r from-cyberPurple to-electricBlue bg-clip-text text-transparent">
+                Nómada Fantasma
+              </span>
+            </motion.h1>
+            
+            <motion.p 
+              className="mt-6 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-300 md:text-xl"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            >
+              Descubre los mejores destinos para nómadas digitales en Guatemala
+            </motion.p>
+          </motion.div>
+        </div>
+
         {/* Filtros y búsqueda */}
         <MapFilters 
           selectedCategories={selectedCategories}
@@ -166,88 +213,80 @@ export default function MapaPage() {
         />
 
         {/* Mapa */}
-        <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-background shadow-lg">
-          <Suspense fallback={
-            <div className="flex h-[60vh] w-full items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          }>
-            <MapClient 
-              points={filteredPoints} 
-              key={JSON.stringify(userLocation)} // Forzar remontaje al cambiar la ubicación
-            />
-          </Suspense>
-
-          {/* Botón de ubicación */}
-          <button
-            onClick={handleLocateMe}
-            disabled={isLocating}
-            className="absolute bottom-4 right-4 z-[1000] flex h-10 w-10 items-center justify-center rounded-full bg-background p-2 shadow-lg transition-colors hover:bg-muted disabled:opacity-50"
-            aria-label="Centrar en mi ubicación"
-            title="Centrar en mi ubicación"
-          >
-            {isLocating ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <MapPin className="h-5 w-5" />
-            )}
-          </button>
-        </div>
-
-        {/* Contador de resultados */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Mostrando {filteredPoints.length} {filteredPoints.length === 1 ? 'lugar' : 'lugares'}
-          </p>
-          
-          {selectedCategories.size > 0 && (
-            <button
-              onClick={() => setSelectedCategories(new Set())}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-3 w-3" />
-              Limpiar filtros
-            </button>
-          )}
-        </div>
-
-        {/* Mensaje de error de ubicación */}
-        <AnimatePresence>
-          {locationError && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive"
-            >
-              <AlertCircle className="h-4 w-4" />
-              <span>{locationError}</span>
-              <button 
-                onClick={() => setLocationError(null)}
-                className="ml-auto text-destructive/70 hover:text-destructive"
-                aria-label="Cerrar"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Leyenda */}
-      <div className="mt-8 rounded-xl border border-border/60 bg-muted/30 p-4">
-        <h3 className="mb-3 text-sm font-medium">Leyenda</h3>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-          {CATEGORIES.map((category) => (
-            <div key={category.key} className="flex items-center gap-2">
-              <div 
-                className="h-3 w-3 rounded-full"
-                style={{ backgroundColor: category.color }}
+        <motion.div 
+          className="relative mx-auto max-w-6xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <div className="rounded-2xl overflow-hidden border border-border/60 bg-background shadow-lg">
+            <Suspense fallback={
+              <div className="flex h-[60vh] w-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }>
+              <MapClient 
+                points={filteredPoints} 
+                key={userLocation ? JSON.stringify(userLocation) : 'no-location'}
               />
-              <span className="text-xs text-muted-foreground">{category.label}</span>
+            </Suspense>
+
+            {/* Botón de ubicación */}
+            <button
+              onClick={handleLocateMe}
+              disabled={isLocating}
+              className="absolute bottom-4 right-4 z-[1000] flex h-10 w-10 items-center justify-center rounded-full bg-background p-2 shadow-lg transition-colors hover:bg-muted disabled:opacity-50"
+              aria-label="Centrar en mi ubicación"
+              title="Centrar en mi ubicación"
+            >
+              {isLocating ? (
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              ) : (
+                <Compass className="h-5 w-5 text-foreground" />
+              )}
+            </button>
+
+            <AnimatePresence>
+              {locationError && (
+                <motion.div 
+                  className="fixed bottom-4 left-1/2 z-[9999] -translate-x-1/2 transform"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{locationError}</span>
+                    <button 
+                      onClick={() => setLocationError(null)}
+                      className="ml-auto text-destructive/70 hover:text-destructive"
+                      aria-label="Cerrar"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Leyenda */}
+          <div className="mt-8 rounded-xl border border-border/60 bg-muted/30 p-4">
+            <h3 className="mb-3 text-sm font-medium">Leyenda</h3>
+            <div className="space-y-2">
+              {CATEGORIES.map((category) => (
+                <div key={category.key} className="flex items-center gap-2">
+                  <div 
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: category.color }}
+                  />
+                  <span className="text-xs text-muted-foreground">{category.label}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
