@@ -12,6 +12,7 @@ interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   onSearch?: () => void;
   onClear?: () => void;
   showClear?: boolean;
+  iconClassName?: string;
 }
 
 export function SearchInput({
@@ -22,6 +23,7 @@ export function SearchInput({
   onSearch,
   onClear,
   showClear,
+  iconClassName,
   ...props
 }: SearchInputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,7 +39,7 @@ export function SearchInput({
   return (
     <div className={cn('relative', className)}>
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <Search className="h-4 w-4 text-gray-400" />
+        <Search className={cn('h-4 w-4 text-gray-400', iconClassName)} />
       </div>
       <div className="relative w-full">
         <Input
