@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, X, Loader2, AlertCircle, Compass, Wifi, Home, Anchor, Coffee, CreditCard } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -66,6 +67,9 @@ export function MapSearch({
 }
 
 export default function MapaPage() {
+  const searchParams = useSearchParams();
+  const townParam = searchParams?.get('town');
+
   const [searchQuery, setSearchQuery] = useState('');
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -101,10 +105,17 @@ export default function MapaPage() {
 
   // Filtrar puntos basados en la búsqueda solamente
   const filteredPoints = useMemo(() => {
-    return samplePoints.filter(point => {
+    let points = samplePoints.filter(point => {
       return point.name.toLowerCase().includes(searchQuery.toLowerCase());
     });
-  }, [searchQuery]);
+
+    // Si hay parámetro de pueblo, filtrar solo esos puntos
+    if (townParam) {
+      points = points.filter(p => p.townSlug === townParam);
+    }
+
+    return points;
+  }, [searchQuery, townParam]);
 
   return (
     <div className="relative min-h-screen">

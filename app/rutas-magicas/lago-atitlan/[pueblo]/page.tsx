@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
 import { pueblosAtitlan } from '../../../../app/rutas-magicas/mocks/atitlanData';
-import { 
-  ArrowLeft, ArrowRight, MapPin, Wifi, Coffee, Bus, Map, Clock, Landmark, 
-  Mountain, Sunset, BookOpen, Wifi as WifiIcon, MapPin as MapPinIcon, 
-  Footprints, Star, Users, Calendar, Compass, Sun, Moon, Sunrise, Zap, 
+import {
+  ArrowLeft, ArrowRight, MapPin, Wifi, Coffee, Bus, Map, Clock, Landmark,
+  Mountain, Sunset, BookOpen, Wifi as WifiIcon, MapPin as MapPinIcon,
+  Footprints, Star, Users, Calendar, Compass, Sun, Moon, Sunrise, Zap,
   Wind, Thermometer, CloudRain, Droplets, Globe, CheckCircle2, CloudSun
 } from 'lucide-react';
 import Link from 'next/link';
@@ -105,7 +105,7 @@ interface NearbyTown {
 }
 
 interface PageProps {
-  params: { 
+  params: {
     pueblo: string;
   };
 }
@@ -113,17 +113,17 @@ interface PageProps {
 export default async function PuebloDetailPage({ params }: PageProps) {
   // Obtener el slug del pueblo de los parámetros
   const { pueblo: puebloSlug } = params;
-  
+
   // Buscar el pueblo por slug
   const pueblo = pueblosAtitlan.find(p => p.slug === puebloSlug);
-  
+
   // Si no se encuentra el pueblo, mostrar 404
   if (!pueblo) {
     notFound();
     return null; // Asegurar que el componente no continúe
   }
 
-    // Mapear los íconos del clima
+  // Mapear los íconos del clima
   const getWeatherIcon = (iconName: string) => {
     switch (iconName) {
       case 'sun':
@@ -144,7 +144,7 @@ export default async function PuebloDetailPage({ params }: PageProps) {
     ...pueblo,
     // Usar la descripción completa del pueblo
     description: pueblo.fullDescription,
-    
+
     // Clima actual
     weather: {
       ...pueblo.weather,
@@ -172,28 +172,28 @@ export default async function PuebloDetailPage({ params }: PageProps) {
 
     // Servicios
     services: pueblo.services,
-    
+
     // Guías turísticos
     guides: pueblo.guides,
-    
+
     // Puntos WiFi (datos de ejemplo)
     wifiSpots: [
-      { 
-        name: 'Café Central', 
-        description: 'Buena conexión, ambiente relajado', 
+      {
+        name: 'Café Central',
+        description: 'Buena conexión, ambiente relajado',
         speed: 'fast',
         hours: '7:00 - 21:00',
         hasOutlets: true
       },
-      { 
-        name: 'Hostal Principal', 
-        description: 'Zona de coworking con vista al lago', 
+      {
+        name: 'Hostal Principal',
+        description: 'Zona de coworking con vista al lago',
         speed: 'medium',
         hours: '7:00 - 22:00',
         hasOutlets: true
       }
     ],
-    
+
     // Pueblos cercanos (excluyendo el actual)
     nearbyTowns: pueblosAtitlan
       .filter(p => p.slug !== pueblo.slug)
@@ -204,11 +204,11 @@ export default async function PuebloDetailPage({ params }: PageProps) {
         slug: p.slug,
         summary: p.summary,
         description: p.summary,
-        distance: p.slug.includes('san-juan') ? '10 min en tuk-tuk' : 
-                 p.slug.includes('santiago') ? '45 min en lancha' :
-                 p.slug.includes('san-marcos') ? '15 min en lancha' :
-                 p.slug.includes('panajachel') ? '1 hora en lancha' :
-                 'Cerca',
+        distance: p.slug.includes('san-juan') ? '10 min en tuk-tuk' :
+          p.slug.includes('santiago') ? '45 min en lancha' :
+            p.slug.includes('san-marcos') ? '15 min en lancha' :
+              p.slug.includes('panajachel') ? '1 hora en lancha' :
+                'Cerca',
         highlights: p.highlights,
         coverImage: p.coverImage || `/images/${p.slug}.jpg`
       }))
@@ -234,7 +234,7 @@ export default async function PuebloDetailPage({ params }: PageProps) {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900/95 via-gray-900/40 to-transparent" />
           </div>
-          
+
           {/* Contenedor del contenido */}
           <div className="relative h-full flex flex-col">
             {/* Breadcrumb */}
@@ -259,7 +259,7 @@ export default async function PuebloDetailPage({ params }: PageProps) {
                 </ol>
               </nav>
             </div>
-            
+
             {/* Contenido del héroe */}
             <div className="flex-1 flex items-end pb-8 sm:pb-12 px-4 sm:px-6">
               <div className="w-full max-w-7xl mx-auto">
@@ -285,6 +285,15 @@ export default async function PuebloDetailPage({ params }: PageProps) {
                       <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                       {pueblo.groupSize.min}-{pueblo.groupSize.max} personas
                     </span>
+                  </div>
+                  <div className="mt-6">
+                    <Link
+                      href={`/mapa?town=${puebloSlug}`}
+                      className="inline-flex items-center gap-2 bg-cyan-500/90 hover:bg-cyan-400 text-white font-medium px-6 py-3 rounded-full transition-all hover:scale-105 shadow-lg shadow-cyan-500/30"
+                    >
+                      <Map className="w-5 h-5" />
+                      Ver en el Mapa
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -386,7 +395,7 @@ export default async function PuebloDetailPage({ params }: PageProps) {
                             <p className="text-sm text-cyan-100/80 mb-3">
                               <span className="font-medium">Contacto:</span> {guide.contact}
                             </p>
-                            
+
                             {guide.languages && guide.languages.length > 0 && (
                               <div className="flex flex-wrap gap-2 mb-4">
                                 <span className="text-xs px-3 py-1 bg-cyan-900/50 text-cyan-300 rounded-full flex items-center">
@@ -432,7 +441,7 @@ export default async function PuebloDetailPage({ params }: PageProps) {
                 <MapPinIcon className="w-5 h-5 mr-2 text-electricBlue dark:text-cyberPurple" />
                 Cajeros y Servicios
               </h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <h4 className="font-medium text-gray-900 dark:text-white mb-2">Cajeros Automáticos:</h4>
@@ -442,7 +451,7 @@ export default async function PuebloDetailPage({ params }: PageProps) {
                     ))}
                   </ul>
                 </div>
-                
+
                 <div>
                   <h4 className="font-medium text-gray-900 dark:text-white mb-2">Servicios Esenciales:</h4>
                   <ul className="space-y-1">
@@ -478,12 +487,12 @@ export default async function PuebloDetailPage({ params }: PageProps) {
                   Ubicación
                 </h3>
                 <div className="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
-                  <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15445.16229681136!2d-91.2759655!3d14.6932037!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85896c3f5e7e7f1b%3A0x2f4b8e8e2f2f2f2f!2sSan%20Pedro%20La%20Laguna%2C%20Guatemala!5e0!3m2!1sen!2sgt!4v1620000000000!5m2!1sen!2sgt" 
-                    width="100%" 
-                    height="250" 
-                    style={{ border: 0 }} 
-                    allowFullScreen 
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15445.16229681136!2d-91.2759655!3d14.6932037!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85896c3f5e7e7f1b%3A0x2f4b8e8e2f2f2f2f!2sSan%20Pedro%20La%20Laguna%2C%20Guatemala!5e0!3m2!1sen!2sgt!4v1620000000000!5m2!1sen!2sgt"
+                    width="100%"
+                    height="250"
+                    style={{ border: 0 }}
+                    allowFullScreen
                     loading="lazy"
                     title={`Mapa de ${pueblo.title}`}
                   ></iframe>
@@ -499,13 +508,13 @@ export default async function PuebloDetailPage({ params }: PageProps) {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Otros pueblos cercanos</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {puebloData.nearbyTowns.map((town) => (
-                <Link 
-                  key={town.id} 
+                <Link
+                  key={town.id}
                   href={`/rutas-magicas/lago-atitlan/${town.slug}`}
                   className="group block bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
                 >
                   <div className="h-40 relative">
-                    <div 
+                    <div
                       className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
                       style={{ backgroundImage: `url(${town.coverImage})` }}
                     >
