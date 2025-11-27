@@ -3,7 +3,8 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Tooltip, Popup } from "react-leaflet";
 import L from "leaflet";
-import { Skull } from "lucide-react";
+import Link from "next/link";
+import { Skull, ArrowRight } from "lucide-react";
 import type { Point } from "./points";
 import { MapControls } from "./components/MapControls";
 import { CategoryFilter } from "./components/CategoryFilter";
@@ -179,6 +180,14 @@ export default function MapCanvas({ points = [], initialCenter }: MapCanvasProps
                     <div className="text-xs opacity-80">
                       Categoría: <span className="font-medium">{category}</span>
                     </div>
+                    {p.townSlug && (
+                      <Link
+                        href={`/rutas-magicas/lago-atitlan/${p.townSlug}`}
+                        className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1 mt-2"
+                      >
+                        Ver guía del pueblo <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    )}
                   </div>
                 </Popup>
               </Marker>
