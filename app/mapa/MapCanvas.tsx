@@ -24,6 +24,11 @@ import {
 interface MapCanvasProps {
   points?: Point[];
   initialCenter?: [number, number];
+  compact?: boolean; // Compact mode for sidebar
+  zoom?: number; // Custom zoom level
+  hideControls?: boolean; // Hide map controls
+  hideFilters?: boolean; // Hide category filters
+  hideAtmosphere?: boolean; // Hide atmospheric effects
 }
 
 function useThemeDark(): boolean {
@@ -78,7 +83,15 @@ const PinNeonIcon = ({ color = "#38BDF8" }: { color?: string }) => {
   });
 };
 
-export default function MapCanvas({ points = [], initialCenter }: MapCanvasProps) {
+export default function MapCanvas({
+  points = [],
+  initialCenter,
+  compact = false,
+  zoom,
+  hideControls = false,
+  hideFilters = false,
+  hideAtmosphere = false
+}: MapCanvasProps) {
   const isDark = useThemeDark();
   const mapRef = useRef<L.Map | null>(null);
   const { activeCats, toggleCat } = useMapControls();
@@ -127,13 +140,13 @@ export default function MapCanvas({ points = [], initialCenter }: MapCanvasProps
   }, [points, activeCats, isGhostMode]);
 
   return (
-    <div className="relative rounded-3xl overflow-hidden h-[62vh] min-h-[420px] z-0">
+    <div className={`relative rounded-3xl overflow-hidden z-0 ${compact ? 'h-[300px]' : 'h-[62vh] min-h-[420px]'}`}>
       {/* MAP */}
       <div className="absolute inset-0 z-0">
         <MapContainer
           ref={mapRef}
           center={initialCenter || HOME_CENTER}
-          zoom={HOME_ZOOM}
+          zoom={zoom || HOME_ZOOM}
           minZoom={2}
           maxZoom={18}
           maxBounds={L.latLngBounds(
@@ -197,7 +210,7 @@ export default function MapCanvas({ points = [], initialCenter }: MapCanvasProps
       </div>
 
       {/* Atmosphere Effects */}
-      <Atmosphere active={isGhostMode} />
+      {!hideAtmosphere && <Atmosphere active={isGhostMode} />}
 
       {/* Overlay HUD (non-interactive) */}
       <div aria-hidden className={`pointer-events-none absolute inset-0 z-10 transition-opacity duration-700 ${isGhostMode ? 'opacity-40 bg-purple-900/20 mix-blend-overlay' : 'opacity-0'}`} />
@@ -225,20 +238,24 @@ export default function MapCanvas({ points = [], initialCenter }: MapCanvasProps
       </div>
 
       {/* Map Controls */}
-      <MapControls
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
-        onLocate={locate}
-        onRecenter={recenter}
-        onToggleGhost={toggleGhost}
-        isGhostMode={isGhostMode}
-      />
+      {!hideControls && (
+        <MapControls
+          onZoomIn={zoomIn}
+          onZoomOut={zoomOut}
+          onLocate={locate}
+          onRecenter={recenter}
+          onToggleGhost={toggleGhost}
+          isGhostMode={isGhostMode}
+        />
+      )}
 
       {/* Category Filters */}
-      <CategoryFilter
-        activeCats={activeCats}
-        onToggleCategory={toggleCat}
-      />
+      {!hideFilters && (
+        <CategoryFilter
+          activeCats={activeCats}
+          onToggleCategory={toggleCat}
+        />
+      )}
     </div>
   );
 }

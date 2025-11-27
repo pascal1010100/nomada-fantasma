@@ -7,6 +7,11 @@ import type { Point } from "./points";
 type Props = {
   points?: Point[];
   initialCenter?: [number, number];
+  compact?: boolean;
+  zoom?: number;
+  hideControls?: boolean;
+  hideFilters?: boolean;
+  hideAtmosphere?: boolean;
 };
 
 const LeafletMap = dynamic(() => import("./MapCanvas"), {
@@ -18,6 +23,6 @@ const LeafletMap = dynamic(() => import("./MapCanvas"), {
   ),
 });
 
-export default function MapClient({ points = [], initialCenter }: Props) {
-  return <LeafletMap points={points} initialCenter={initialCenter} />;
+export default function MapClient(props: Props) {
+  return <LeafletMap {...props} />;
 }

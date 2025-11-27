@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { pueblosAtitlan } from '../../../../app/rutas-magicas/mocks/atitlanData';
+import { samplePoints } from '../../../../app/mapa/points';
 import {
   ArrowLeft, ArrowRight, MapPin, Wifi, Coffee, Bus, Map, Clock, Landmark,
   Mountain, Sunset, BookOpen, Wifi as WifiIcon, MapPin as MapPinIcon,
@@ -10,6 +11,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import ToursSection from '../../components/ToursSection';
+import TownMap from '../../components/TownMap';
 
 // Definición de tipos para los componentes
 interface CyberCardProps {
@@ -122,6 +124,17 @@ export default async function PuebloDetailPage({ params }: PageProps) {
     notFound();
     return null; // Asegurar que el componente no continúe
   }
+
+  // Obtener puntos del pueblo
+  const townPoints = samplePoints.filter(p => p.townSlug === puebloSlug);
+
+  // Calcular centro del pueblo basado en sus puntos
+  const townCenter: [number, number] = townPoints.length > 0
+    ? [
+      townPoints.reduce((sum, p) => sum + p.lat, 0) / townPoints.length,
+      townPoints.reduce((sum, p) => sum + p.lng, 0) / townPoints.length
+    ]
+    : [14.6907, -91.2025]; // Default: centro del lago
 
   // Mapear los íconos del clima
   const getWeatherIcon = (iconName: string) => {
@@ -486,16 +499,11 @@ export default async function PuebloDetailPage({ params }: PageProps) {
                   <Map className="w-5 h-5 mr-2 text-electricBlue dark:text-cyberPurple" />
                   Ubicación
                 </h3>
-                <div className="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
-                  <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15445.16229681136!2d-91.2759655!3d14.6932037!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85896c3f5e7e7f1b%3A0x2f4b8e8e2f2f2f2f!2sSan%20Pedro%20La%20Laguna%2C%20Guatemala!5e0!3m2!1sen!2sgt!4v1620000000000!5m2!1sen!2sgt"
-                    width="100%"
-                    height="250"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    title={`Mapa de ${pueblo.title}`}
-                  ></iframe>
+                <div className="rounded-lg overflow-hidden">
+                  <TownMap
+                    townPoints={townPoints}
+                    townCenter={townCenter}
+                  />
                 </div>
               </div>
             </div>
