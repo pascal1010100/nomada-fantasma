@@ -352,7 +352,31 @@
    ========================= */
 @layer utilities {
   .text-balance { text-wrap: balance; }
-  .text-pretty  { text-wrap: pretty;  }
+
+/* Atmospheric Effects */
+@keyframes fog-flow {
+  0% { background-position: 0 0; }
+  100% { background-position: 100% 0; }
+}
+
+.animate-fog {
+  animation: fog-flow 60s linear infinite;
+}
+
+@keyframes glitch-skew {
+  0% { transform: skew(0deg); }
+  20% { transform: skew(-2deg); }
+  40% { transform: skew(2deg); }
+  60% { transform: skew(0deg); }
+  80% { transform: skew(1deg); }
+  100% { transform: skew(0deg); }
+}
+
+.glitch-active {
+  animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+  color: #a855f7; /* Purple for ghost mode glitch */
+  text-shadow: 2px 0 #0ff, -2px 0 #f0f;
+}  .text-pretty  { text-wrap: pretty;  }
   .visually-hidden {
     position: absolute !important; height:1px; width:1px;
     overflow:hidden; clip: rect(1px,1px,1px,1px);

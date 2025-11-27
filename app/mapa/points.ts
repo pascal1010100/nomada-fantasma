@@ -7,31 +7,41 @@ export type Point = {
   category: Category;
   lat: number;
   lng: number;
+  isGhost?: boolean;
+  townSlug?: string; // Link to town detail page
 };
 
 export const samplePoints: Point[] = [
-  // ——— Centro (Ciudad de Guatemala) ———
-  { id: "wifi-gua-1", name: "Wi-Fi — Centro Histórico", category: "wifi", lat: 14.621, lng: -90.513 },
-  { id: "cowork-gua-1", name: "Cowork — Nodo Z4",       category: "cowork", lat: 14.615, lng: -90.516 },
-  { id: "hotel-gua-1", name: "Hospedaje — Z1 Norte",    category: "hospedaje", lat: 14.628, lng: -90.510 },
-  { id: "atm-gua-1",  name: "Banco/ATM — Obelisco",     category: "banco", lat: 14.586, lng: -90.510 },
-  { id: "wifi-gua-2", name: "Wi-Fi — Z10",              category: "wifi", lat: 14.604, lng: -90.510 },
-  { id: "wifi-gua-3", name: "Wi-Fi — Z15",              category: "wifi", lat: 14.596, lng: -90.488 },
-  { id: "cowork-gua-2", name: "Cowork — Z10",           category: "cowork", lat: 14.603, lng: -90.515 },
-  { id: "wifi-gua-4", name: "Wi-Fi — Z4 (2)",           category: "wifi", lat: 14.616, lng: -90.512 },
-  { id: "wifi-gua-5", name: "Wi-Fi — Z4 (3)",           category: "wifi", lat: 14.617, lng: -90.513 },
+  // ——— Panajachel ———
+  { id: "pana-cowork-1", name: "Selina Panajachel", category: "cowork", lat: 14.744, lng: -91.159, townSlug: "panajachel" },
+  { id: "pana-wifi-1", name: "Café Loco", category: "wifi", lat: 14.741, lng: -91.156, townSlug: "panajachel" },
+  { id: "pana-banco-1", name: "Banco Industrial", category: "banco", lat: 14.742, lng: -91.155, townSlug: "panajachel" },
+  { id: "pana-puerto-1", name: "Embarcadero Tzanjuyu", category: "puerto", lat: 14.745, lng: -91.160, townSlug: "panajachel" },
+  { id: "pana-ghost-1", name: "Jardín Secreto", category: "wifi", lat: 14.746, lng: -91.158, isGhost: true, townSlug: "panajachel" },
 
-  // ——— Mixco / Periferia ———
-  { id: "atm-mixco-1", name: "Banco/ATM — Mixco",       category: "banco", lat: 14.644, lng: -90.607 },
-  { id: "wifi-mixco-1", name: "Wi-Fi — Mixco",          category: "wifi", lat: 14.656, lng: -90.607 },
+  // ——— San Pedro La Laguna ———
+  { id: "sp-cowork-1", name: "Mikaso Hotel & Cowork", category: "cowork", lat: 14.6930, lng: -91.2720, townSlug: "san-pedro-la-laguna" },
+  { id: "sp-wifi-1", name: "La Terraza", category: "wifi", lat: 14.6910, lng: -91.2700, townSlug: "san-pedro-la-laguna" },
+  { id: "sp-banco-1", name: "Banrural", category: "banco", lat: 14.6920, lng: -91.2710, townSlug: "san-pedro-la-laguna" },
+  { id: "sp-puerto-1", name: "Muelle Principal", category: "puerto", lat: 14.6950, lng: -91.2690, townSlug: "san-pedro-la-laguna" },
+  { id: "sp-ghost-1", name: "Playa Escondida", category: "puerto", lat: 14.6980, lng: -91.2740, isGhost: true, townSlug: "san-pedro-la-laguna" },
 
-  // ——— Antigua ———
-  { id: "hotel-antigua-1", name: "Hospedaje — Antigua Norte", category: "hospedaje", lat: 14.574, lng: -90.733 },
-  { id: "cowork-antigua-1", name: "Cowork — Antigua",    category: "cowork", lat: 14.563, lng: -90.734 },
-  { id: "banco-antigua-1", name: "Banco/ATM — Antigua",  category: "banco", lat: 14.560, lng: -90.733 },
-  { id: "hotel-antigua-2", name: "Hospedaje — Antigua Sur", category: "hospedaje", lat: 14.552, lng: -90.737 },
+  // ——— San Marcos La Laguna ———
+  { id: "sm-cowork-1", name: "Lush Atitlán", category: "cowork", lat: 14.723, lng: -91.258, townSlug: "san-marcos-la-laguna" },
+  { id: "sm-wifi-1", name: "Circles Café", category: "wifi", lat: 14.722, lng: -91.257, townSlug: "san-marcos-la-laguna" },
+  { id: "sm-puerto-1", name: "Muelle San Marcos", category: "puerto", lat: 14.724, lng: -91.256, townSlug: "san-marcos-la-laguna" },
+  { id: "sm-ghost-1", name: "Altar Maya Oculto", category: "hospedaje", lat: 14.726, lng: -91.259, isGhost: true, townSlug: "san-marcos-la-laguna" },
 
-  // ——— Costa / Puerto ———
-  { id: "puerto-pm-1", name: "Puerto Quetzal",          category: "puerto", lat: 13.924, lng: -90.785 },
-  { id: "puerto-pm-2", name: "Muelle Secundario",       category: "puerto", lat: 13.925, lng: -90.780 },
+  // ——— San Juan La Laguna ———
+  { id: "sj-wifi-1", name: "Café Las Marias", category: "wifi", lat: 14.695, lng: -91.285, townSlug: "san-juan-la-laguna" },
+  { id: "sj-puerto-1", name: "Muelle San Juan", category: "puerto", lat: 14.697, lng: -91.283, townSlug: "san-juan-la-laguna" },
+
+  // ——— Santiago Atitlán ———
+  { id: "sa-banco-1", name: "BAM Santiago", category: "banco", lat: 14.635, lng: -91.228, townSlug: "santiago-atitlan" },
+  { id: "sa-puerto-1", name: "Muelle Santiago", category: "puerto", lat: 14.638, lng: -91.230, townSlug: "santiago-atitlan" },
+
+  // ——— Santa Cruz La Laguna ———
+  { id: "sc-cowork-1", name: "La Iguana Perdida", category: "cowork", lat: 14.748, lng: -91.205, townSlug: "santa-cruz-la-laguna" },
+  { id: "sc-puerto-1", name: "Muelle Santa Cruz", category: "puerto", lat: 14.749, lng: -91.205, townSlug: "santa-cruz-la-laguna" },
+  { id: "sc-ghost-1", name: "Cueva del Pescador", category: "puerto", lat: 14.750, lng: -91.208, isGhost: true, townSlug: "santa-cruz-la-laguna" },
 ];

@@ -28,7 +28,7 @@ import {
   Anchor,
 } from "lucide-react";
 
-type MapCanvasProps = { 
+type MapCanvasProps = {
   points?: Point[];
   initialCenter?: [number, number];
 };
@@ -52,7 +52,7 @@ function useThemeDark(): boolean {
   return isDark;
 }
 
-const HOME_CENTER: L.LatLngExpression = [14.62, -90.56];
+const HOME_CENTER: L.LatLngExpression = [14.6907, -91.2025];
 const HOME_ZOOM = 5;
 const WORLD_BOUNDS = L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180));
 const WORLD_BOUNDS_ARR: [number, number, number, number] = [-180, -85, 180, 85];
@@ -265,7 +265,7 @@ export default function MapCanvasCluster({ points = [], initialCenter }: MapCanv
 
   // Centro inicial del mapa
   const [mapCenter, setMapCenter] = useState<[number, number]>(
-    initialCenter || [14.6349, -90.5069] // Usar initialCenter o Guatemala City por defecto
+    initialCenter || [14.6907, -91.2025] // Usar initialCenter o Lago de Atitlán por defecto
   );
 
   // Estado de bounds/zoom
@@ -472,10 +472,9 @@ export default function MapCanvasCluster({ points = [], initialCenter }: MapCanv
                 group flex items-center gap-1 rounded-full px-3 py-1.5 text-xs
                 transition-all backdrop-blur
                 border
-                ${
-                  active
-                    ? "bg-white/10 dark:bg-white/10 border-white/30 text-white"
-                    : "bg-[color:var(--card,rgba(17,24,39,0.55))] border-[color:var(--border,#334155)] text-slate-200/80"
+                ${active
+                  ? "bg-white/10 dark:bg-white/10 border-white/30 text-white"
+                  : "bg-[color:var(--card,rgba(17,24,39,0.55))] border-[color:var(--border,#334155)] text-slate-200/80"
                 }
                 hover:scale-[1.02] active:scale-95
                 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60
