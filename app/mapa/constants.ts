@@ -1,7 +1,7 @@
 import { Wifi, Bed, Coffee, CreditCard, Anchor } from "lucide-react";
 
-export const HOME_CENTER: [number, number] = [14.62, -90.56];
-export const HOME_ZOOM = 5;
+export const HOME_CENTER: [number, number] = [14.6907, -91.2025];
+export const HOME_ZOOM = 12;
 
 export const CATEGORIES = [
   { key: "wifi" as const, label: "Wi-Fi", icon: Wifi, color: "#00E5FF" },     // azul neón

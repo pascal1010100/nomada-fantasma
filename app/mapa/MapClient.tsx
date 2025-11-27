@@ -4,12 +4,12 @@
 import dynamic from "next/dynamic";
 import type { Point } from "./points";
 
-type Props = { 
+type Props = {
   points?: Point[];
   initialCenter?: [number, number];
 };
 
-const LeafletMap = dynamic(() => import("./MapCanvasCluster"), {
+const LeafletMap = dynamic(() => import("./MapCanvas"), {
   ssr: false,
   loading: () => (
     <div className="relative rounded-3xl overflow-hidden h-[62vh] min-h-[420px] grid place-items-center border border-border/60 bg-card/30">

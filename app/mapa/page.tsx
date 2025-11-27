@@ -32,26 +32,20 @@ const MapClient = dynamic(() => import('./MapClient'), {
   ),
 });
 
-// Componente para los filtros
-interface MapFiltersProps {
-  selectedCategories: Set<CategoryKey>; 
-  onCategoryToggle: (cat: CategoryKey) => void;
+// Componente para la búsqueda
+interface MapSearchProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
 }
 
-export function MapFilters({ 
-  selectedCategories, 
-  onCategoryToggle,
+export function MapSearch({
   searchQuery,
-  onSearchChange 
-}: MapFiltersProps) {
+  onSearchChange
+}: MapSearchProps) {
   return (
-    <div className="mb-8 space-y-6 max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-
-      {/* Barra de búsqueda */}
-      <motion.div 
-        className="relative max-w-2xl mx-auto"
+    <div className="mb-8 max-w-2xl mx-auto px-4 sm:px-6 relative z-10">
+      <motion.div
+        className="relative"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
@@ -61,40 +55,18 @@ export function MapFilters({
         </div>
         <input
           type="text"
-          placeholder="Buscar destinos, lugares o categorías..."
+          placeholder="Buscar destinos, lugares..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-full rounded-xl border border-border/50 bg-card/70 backdrop-blur-sm py-3 pl-11 pr-4 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/60"
         />
       </motion.div>
-
-      {/* Filtros de categoría */}
-      <div className="flex flex-wrap gap-2">
-        {CATEGORIES.map((category) => (
-          <button
-            key={category.key}
-            onClick={() => onCategoryToggle(category.key as CategoryKey)}
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-              selectedCategories.has(category.key as CategoryKey)
-                ? 'bg-primary/10 text-primary border border-primary/20'
-                : 'bg-muted/50 text-muted-foreground hover:bg-muted/80'
-            }`}
-          >
-            <category.icon className="h-3.5 w-3.5" />
-            {category.label}
-            {selectedCategories.has(category.key as CategoryKey) && (
-              <X className="ml-1 h-3 w-3" />
-            )}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
 
 export default function MapaPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<Set<CategoryKey>>(new Set());
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -127,29 +99,12 @@ export default function MapaPage() {
     );
   };
 
-  // Filtrar puntos basados en la búsqueda y categorías seleccionadas
+  // Filtrar puntos basados en la búsqueda solamente
   const filteredPoints = useMemo(() => {
     return samplePoints.filter(point => {
-      const matchesSearch = point.name.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesCategory = selectedCategories.size === 0 || 
-                            (point.category && selectedCategories.has(point.category));
-      
-      return matchesSearch && matchesCategory;
+      return point.name.toLowerCase().includes(searchQuery.toLowerCase());
     });
-  }, [searchQuery, selectedCategories]);
-
-  const toggleCategory = (category: CategoryKey) => {
-    setSelectedCategories(prev => {
-      const newCategories = new Set(prev);
-      if (newCategories.has(category)) {
-        newCategories.delete(category);
-      } else {
-        newCategories.add(category);
-      }
-      return newCategories;
-    });
-  };
+  }, [searchQuery]);
 
   return (
     <div className="relative min-h-screen">
@@ -166,7 +121,7 @@ export default function MapaPage() {
 
         <div className="relative z-10 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
           {/* Badge */}
-          <motion.div 
+          <motion.div
             className="inline-flex items-center px-4 py-2 text-sm font-medium text-cyberPurple dark:text-cyberPurple-300 bg-cyberPurple/5 dark:bg-cyberPurple/10 rounded-full border border-cyberPurple/10 mb-6"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -181,7 +136,7 @@ export default function MapaPage() {
 
           {/* Título principal */}
           <motion.div className="text-center max-w-4xl mx-auto">
-            <motion.h1 
+            <motion.h1
               className="text-4xl font-medium tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -192,8 +147,8 @@ export default function MapaPage() {
                 Nómada Fantasma
               </span>
             </motion.h1>
-            
-            <motion.p 
+
+            <motion.p
               className="mt-6 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-300 md:text-xl"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -204,16 +159,14 @@ export default function MapaPage() {
           </motion.div>
         </div>
 
-        {/* Filtros y búsqueda */}
-        <MapFilters 
-          selectedCategories={selectedCategories}
-          onCategoryToggle={toggleCategory}
+        {/* Búsqueda */}
+        <MapSearch
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
         />
 
         {/* Mapa */}
-        <motion.div 
+        <motion.div
           className="relative mx-auto max-w-6xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -225,8 +178,8 @@ export default function MapaPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             }>
-              <MapClient 
-                points={filteredPoints} 
+              <MapClient
+                points={filteredPoints}
                 key={userLocation ? JSON.stringify(userLocation) : 'no-location'}
               />
             </Suspense>
@@ -248,7 +201,7 @@ export default function MapaPage() {
 
             <AnimatePresence>
               {locationError && (
-                <motion.div 
+                <motion.div
                   className="fixed bottom-4 left-1/2 z-[9999] -translate-x-1/2 transform"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -258,7 +211,7 @@ export default function MapaPage() {
                   <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
                     <AlertCircle className="h-4 w-4" />
                     <span>{locationError}</span>
-                    <button 
+                    <button
                       onClick={() => setLocationError(null)}
                       className="ml-auto text-destructive/70 hover:text-destructive"
                       aria-label="Cerrar"
@@ -277,7 +230,7 @@ export default function MapaPage() {
             <div className="space-y-2">
               {CATEGORIES.map((category) => (
                 <div key={category.key} className="flex items-center gap-2">
-                  <div 
+                  <div
                     className="h-3 w-3 rounded-full"
                     style={{ backgroundColor: category.color }}
                   />

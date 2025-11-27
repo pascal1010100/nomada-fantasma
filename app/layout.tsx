@@ -8,7 +8,7 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 
 // Configuración de fuentes
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
@@ -86,7 +86,10 @@ export default function RootLayout({
           crossOrigin=""
         />
       </head>
-      <body className={`${inter.variable} font-sans antialiased bg-background text-foreground min-h-screen flex flex-col`}>
+      <body
+        suppressHydrationWarning
+        className={`${inter.variable} font-sans antialiased bg-background text-foreground min-h-screen flex flex-col`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
