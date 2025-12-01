@@ -4,6 +4,7 @@ import sanMarcosTours from './san-marcos-tours';
 import santiagoTours from './santiago-tours';
 import sanJuanTours from './san-juan-tours';
 import panajachelTours from './panajachel-tours';
+import santaCruzTours from './santa-cruz-tours';
 
 // Tipado para el objeto de tours por pueblo
 type PuebloTours = {
@@ -18,12 +19,13 @@ const registerTours = (puebloSlug: string, tours: Tour[]) => {
   allTours[puebloSlug] = tours;
 };
 
-// Registrar los tours de cada pueblo
-registerTours('san-pedro-la-laguna', sanPedroTours);
-registerTours('san-marcos-la-laguna', sanMarcosTours);
-registerTours('santiago-atitlan', santiagoTours);
-registerTours('san-juan-la-laguna', sanJuanTours);
+// Registrar los tours de cada pueblo (usando slugs cortos)
+registerTours('san-pedro', sanPedroTours);
+registerTours('san-marcos', sanMarcosTours);
+registerTours('santiago', santiagoTours);
+registerTours('san-juan', sanJuanTours);
 registerTours('panajachel', panajachelTours);
+registerTours('santa-cruz', santaCruzTours);
 
 // Función para obtener tours por pueblo
 export const getToursByPueblo = (puebloSlug: string): Tour[] => {
@@ -42,6 +44,15 @@ export const getTourById = (tourId: string): Tour | undefined => {
   for (const puebloSlug in allTours) {
     const tour = allTours[puebloSlug].find(t => t.id === tourId);
     if (tour) return tour;
+  }
+  return undefined;
+};
+
+// Función para obtener el slug del pueblo dado un ID de tour
+export const getPuebloSlugByTourId = (tourId: string): string | undefined => {
+  for (const puebloSlug in allTours) {
+    const tour = allTours[puebloSlug].find(t => t.id === tourId);
+    if (tour) return puebloSlug;
   }
   return undefined;
 };

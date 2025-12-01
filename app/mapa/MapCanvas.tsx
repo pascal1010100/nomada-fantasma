@@ -126,7 +126,10 @@ export default function MapCanvas({
   const [isGhostMode, setIsGhostMode] = React.useState(false);
   const toggleGhost = React.useCallback(() => setIsGhostMode(prev => !prev), []);
 
-  // Filter points based on active categories and ghost mode
+  const [isNomadMode, setIsNomadMode] = React.useState(false);
+  const toggleNomad = React.useCallback(() => setIsNomadMode(prev => !prev), []);
+
+  // Filter points based on active categories and ghost/nomad mode
   const filteredPoints = React.useMemo(() => {
     if (activeCats.size === 0) return [];
 
@@ -135,9 +138,15 @@ export default function MapCanvas({
       if (p.isGhost && !isGhostMode) return false;
 
       const category = (p as any).category as CategoryKey | undefined;
+
+      // Nomad logic: if mode is ON, only show wifi and cowork
+      if (isNomadMode) {
+        return category === 'wifi' || category === 'cowork';
+      }
+
       return activeCats.has(category || 'wifi');
     });
-  }, [points, activeCats, isGhostMode]);
+  }, [points, activeCats, isGhostMode, isNomadMode]);
 
   return (
     <div className={`relative rounded-3xl overflow-hidden z-0 ${compact ? 'h-[300px]' : 'h-[62vh] min-h-[420px]'}`}>
@@ -170,6 +179,7 @@ export default function MapCanvas({
             // Use a special color for ghost points if needed, or just standard category color
             const color = p.isGhost ? "#A855F7" : categoryColor(category); // Purple for ghosts
 
+            // Custom icon logic could go here, for now we stick to the neon pin but with correct category color
             return (
               <Marker
                 key={p.id ?? `${p.lat}-${p.lng}-${i}`}
@@ -246,6 +256,8 @@ export default function MapCanvas({
           onRecenter={recenter}
           onToggleGhost={toggleGhost}
           isGhostMode={isGhostMode}
+          onToggleNomad={toggleNomad}
+          isNomadMode={isNomadMode}
         />
       )}
 

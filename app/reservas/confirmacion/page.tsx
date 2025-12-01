@@ -15,22 +15,22 @@ type SearchParams = {
 export default async function ConfirmationPage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
   // Obtener los parámetros de la URL
-  const { tourId, date, adults, children, total } = searchParams;
-  
+  const { tourId, date, adults, children, total } = await searchParams;
+
   // Obtener los datos reales del tour
   const tour = getTourById(tourId);
-  
+
   if (!tour) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Tour no encontrado</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">Lo sentimos, no pudimos encontrar los detalles de este tour.</p>
-          <Link 
-            href="/rutas-magicas" 
+          <Link
+            href="/rutas-magicas"
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -40,21 +40,21 @@ export default async function ConfirmationPage({
       </div>
     );
   }
-  
+
   // Formatear los datos de la reserva
   const reservation = {
-    date: date ? new Date(date).toLocaleDateString('es-GT', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    date: date ? new Date(date).toLocaleDateString('es-GT', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     }) : 'Fecha no especificada',
     time: tour.startTimes?.[0] || 'Por confirmar',
     adults: parseInt(adults || '1'),
     children: children ? parseInt(children) : 0,
     total: total ? parseFloat(total) : 0,
   };
-  
+
   // Calcular precios
   const adultPrice = tour.price.adult;
   const childPrice = tour.price.child || 0;
@@ -67,7 +67,7 @@ export default async function ConfirmationPage({
     'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
   ];
   const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-  
+
   // Formatear la fecha de manera más amigable
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -141,7 +141,7 @@ export default async function ConfirmationPage({
                 Confirmado
               </span>
             </div>
-            
+
             <div className="space-y-6">
               <div className="flex items-start p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                 <div className="flex-shrink-0 h-12 w-12 rounded-xl bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
@@ -240,7 +240,7 @@ export default async function ConfirmationPage({
                   </div>
                 </div>
               </div>
-              
+
               {/* Información de pago */}
               <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
                 <div className="flex">
@@ -270,7 +270,7 @@ export default async function ConfirmationPage({
               </svg>
               Consejos para tu aventura
             </h3>
-            
+
             <div className="grid md:grid-cols-2 gap-4 mt-6">
               <div className="flex items-start p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600/30 hover:border-cyan-100 dark:hover:border-cyan-900/50 transition-colors duration-200">
                 <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
@@ -283,7 +283,7 @@ export default async function ConfirmationPage({
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">Te recomendamos llegar 15 minutos antes de la hora programada para el check-in.</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600/30 hover:border-cyan-100 dark:hover:border-cyan-900/50 transition-colors duration-200">
                 <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
                   <svg className="h-5 w-5 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -295,7 +295,7 @@ export default async function ConfirmationPage({
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">Ropa cómoda, bloqueador solar, agua y cámara fotográfica. ¡No olvides tu espíritu aventurero!</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600/30 hover:border-cyan-100 dark:hover:border-cyan-900/50 transition-colors duration-200">
                 <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
                   <svg className="h-5 w-5 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -307,7 +307,7 @@ export default async function ConfirmationPage({
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">Puedes cancelar hasta 24 horas antes sin cargo. Después de este período, se cobrará el 50% del valor total.</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600/30 hover:border-cyan-100 dark:hover:border-cyan-900/50 transition-colors duration-200">
                 <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
                   <svg className="h-5 w-5 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -347,7 +347,7 @@ export default async function ConfirmationPage({
               Ver más tours
             </Link>
           </div>
-          
+
           <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               ¿Tienes alguna pregunta? Estamos aquí para ayudarte.

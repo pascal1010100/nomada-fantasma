@@ -1,6 +1,6 @@
 // app/layout.tsx
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/app/providers/theme-provider";
 import ChatButton from "./components/ChatButton";
@@ -17,19 +17,10 @@ const inter = Inter({
 
 // Metadata de la aplicación
 export const metadata: Metadata = {
+  metadataBase: new URL('https://nomadafantasma.com'),
   title: "Nómada Fantasma",
   description: "Cartografía náutica-tecnológica para nómadas digitales.",
   keywords: ["nómada", "mapas", "navegación", "viajes", "tecnología", "cyberpunk"],
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#d8e4f0" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
-  ],
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    viewportFit: "cover",
-  },
   manifest: "/site.webmanifest",
   icons: {
     icon: [
@@ -66,6 +57,17 @@ export const metadata: Metadata = {
     images: ["/og-image.jpg"],
     creator: "@nomadafantasma",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#d8e4f0" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
 };
 
 // Componente raíz del layout
