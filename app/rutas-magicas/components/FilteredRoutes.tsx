@@ -21,10 +21,10 @@ const containerVariants: Variants = {
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
-  show: { 
-    opacity: 1, 
+  show: {
+    opacity: 1,
     y: 0,
-    transition: { 
+    transition: {
       duration: 0.6,
       ease: [0.22, 1, 0.36, 1] as const
     }
@@ -56,13 +56,14 @@ export default function FilteredRoutes({ region, searchQuery = '' }: FilteredRou
 
   const filteredRoutes = mockRoutes.filter((route: Route) => {
     const matchesRegion = !region || route.region === region;
-    const matchesSearch = 
-      !searchQuery || 
+    const isMainRoute = !route.isSubRoute;
+    const matchesSearch =
+      !searchQuery ||
       route.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       route.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (route.tags && route.tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase())));
-    
-    return matchesRegion && matchesSearch;
+
+    return matchesRegion && matchesSearch && isMainRoute;
   });
 
   return (
@@ -76,7 +77,7 @@ export default function FilteredRoutes({ region, searchQuery = '' }: FilteredRou
             {searchQuery ? 'No se encontraron resultados' : 'No hay rutas disponibles'}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-            {searchQuery 
+            {searchQuery
               ? 'No encontramos ninguna ruta que coincida con tu búsqueda. Intenta con otros términos.'
               : 'Parece que no hay rutas disponibles en este momento. Vuelve a intentarlo más tarde.'}
           </p>
@@ -98,7 +99,7 @@ export default function FilteredRoutes({ region, searchQuery = '' }: FilteredRou
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {filteredRoutes.map((route) => (
-            <motion.div 
+            <motion.div
               key={route.id}
               variants={itemVariants}
             >

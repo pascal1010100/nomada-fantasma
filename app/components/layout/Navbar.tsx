@@ -30,6 +30,9 @@ export default function Navbar() {
   const prevFocus = useRef<Element | null>(null);
   const rafId = useRef<number | null>(null);
 
+  // Detectar si estamos en una página con Hero (Home, Rutas, Pueblos)
+  const hasHero = pathname === "/" || pathname.includes("/rutas-magicas");
+
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
@@ -38,7 +41,7 @@ export default function Navbar() {
       if (rafId.current) return;
       rafId.current = requestAnimationFrame(() => {
         rafId.current = null;
-        setScrolled(window.scrollY > 6);
+        setScrolled(window.scrollY > 10);
       });
     };
     onScroll();
@@ -89,20 +92,22 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full">
+    <header className="sticky top-0 z-[90] w-full">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[60] focus:rounded-lg focus:bg-white/90 focus:px-3 focus:py-2 focus:text-slate-900 dark:focus:bg-slate-900/90 dark:focus:text-white"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-white/90 focus:px-3 focus:py-2 focus:text-slate-900 dark:focus:bg-slate-900/90 dark:focus:text-white"
       >
         Saltar al contenido
       </a>
 
       <div
-        className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
-        scrolled ? "card-glass" : "bg-card/50 border border-border backdrop-blur-xs shadow-sm"
-      }`}
+        suppressHydrationWarning
+        className={`fixed left-0 right-0 top-0 z-[90] transition-all duration-300 ${scrolled || !hasHero
+          ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg shadow-lg border-b border-gray-200 dark:border-gray-800"
+          : "bg-transparent border-transparent"
+          }`}
       >
-        <nav aria-label="Principal" className="flex items-center justify-between px-4 py-2.5">
+        <nav aria-label="Principal" className="flex items-center justify-between px-6 py-4">
           <Link href="/" className="group inline-flex items-center gap-2">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card/70">
               <Ghost className="h-4 w-4" />
@@ -118,9 +123,8 @@ export default function Navbar() {
                   <Link
                     href={href}
                     aria-current={active ? "page" : undefined}
-                    className={`pill surface-hover relative inline-flex items-center gap-2 ${
-                      active ? "neon-border bg-card/60" : ""
-                    }`}
+                    className={`pill surface-hover relative inline-flex items-center gap-2 ${active ? "neon-border bg-card/60" : ""
+                      }`}
                   >
                     <Icon className="h-4 w-4" />
                     <span className="text-sm">{label}</span>
@@ -171,7 +175,7 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: prefersReduced ? 0 : 0.22 }}
-              className="md:hidden fixed right-0 top-0 z-50 h-dvh w-[50vw] max-w-[480px] min-w-[300px] bg-background/95 backdrop-blur-xs border-l border-border shadow-2xl"
+              className="md:hidden fixed right-0 top-0 z-50 h-dvh w-[80vw] max-w-[420px] min-w-[280px] glass-enhanced border-l border-border shadow-2xl"
             >
               <nav className="flex h-full flex-col">
                 <div className="flex items-center justify-between p-4 border-b border-border">
@@ -188,15 +192,14 @@ export default function Navbar() {
                         <Link
                           href={href}
                           onClick={() => setOpen(false)}
-                          className={`card-glass surface-hover flex items-center justify-between p-3 ${
-                            active ? "neon-border" : ""
-                          }`}
+                          className={`glass-enhanced flex items-center justify-between p-4 rounded-xl transition-all hover:scale-[1.02] ${active ? "border-primary/50 bg-primary/5" : "hover:border-primary/30"
+                            }`}
                         >
                           <div className="flex items-center gap-3">
-                            <Icon className="h-4 w-4 opacity-90" />
-                            <span className="text-sm">{label}</span>
+                            <Icon className={`h-5 w-5 ${active ? 'text-primary' : 'opacity-70'}`} />
+                            <span className={`text-sm font-medium ${active ? 'text-primary' : ''}`}>{label}</span>
                           </div>
-                          <ChevronRight className="h-4 w-4 opacity-70" />
+                          <ChevronRight className={`h-4 w-4 transition-transform ${active ? 'text-primary translate-x-1' : 'opacity-50'}`} />
                         </Link>
                       </li>
                     );

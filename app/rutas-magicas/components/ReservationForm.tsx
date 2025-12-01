@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar, Users, Loader2, CheckCircle2, AlertCircle, ChevronDown, Info, User, User2, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { trackEvent } from '../../lib/analytics';
 
 type ReservationFormProps = {
   tourId: string;
@@ -14,16 +15,16 @@ type ReservationFormProps = {
   startTimes: string[];
 };
 
-export default function ReservationForm({ 
-  tourId, 
-  price, 
-  childPrice, 
-  maxCapacity, 
-  availableDays, 
-  startTimes 
+export default function ReservationForm({
+  tourId,
+  price,
+  childPrice,
+  maxCapacity,
+  availableDays,
+  startTimes
 }: ReservationFormProps) {
   const router = useRouter();
-  
+
   // Estados del formulario
   const [date, setDate] = useState(availableDays[0] || '');
   const [adults, setAdults] = useState(1);
@@ -44,7 +45,7 @@ export default function ReservationForm({
     email: false,
     phone: false
   });
-  
+
   // Efecto para reiniciar el estado cuando cambia el tour
   useEffect(() => {
     setDate(availableDays[0] || '');
@@ -63,22 +64,37 @@ export default function ReservationForm({
       email: false,
       phone: false
     });
-  }, [tourId, availableDays, startTimes]);
-  
+
+    // Track form view
+    trackEvent('view_reservation_form', {
+      tour_id: tourId,
+      price: price
+    });
+  }, [tourId, availableDays, startTimes, price]);
+
+  // Track when user starts filling the form
+  useEffect(() => {
+    if (formData.name || formData.email || formData.phone) {
+      trackEvent('start_reservation_form', {
+        tour_id: tourId
+      });
+    }
+  }, [formData.name, formData.email, formData.phone, tourId]);
+
   // Validaciones
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
   };
-  
+
   const validatePhone = (phone: string) => {
     const re = /^[0-9\-\+\(\)\s]{8,20}$/;
     return re.test(phone);
   };
-  
+
   const validateForm = () => {
     const errors = [];
-    
+
     if (!formData.name.trim()) errors.push('El nombre es obligatorio');
     if (!formData.email) {
       errors.push('El correo electrónico es obligatorio');
@@ -93,17 +109,17 @@ export default function ReservationForm({
     if (adults + children > maxCapacity) {
       errors.push(`La capacidad máxima es de ${maxCapacity} personas`);
     }
-    
+
     return errors;
   };
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    
+
     // Marcar como tocado para mostrar errores
     if (name in touched) {
       setTouched(prev => ({
@@ -112,7 +128,7 @@ export default function ReservationForm({
       }));
     }
   };
-  
+
   const handleBlur = (field: string) => {
     setTouched(prev => ({
       ...prev,
@@ -133,25 +149,36 @@ export default function ReservationForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Validar formulario
     const errors = validateForm();
-    
+
     if (errors.length > 0) {
       setError(errors[0]);
       setIsSubmitting(false);
+
+      // Track validation error
+      trackEvent('reservation_validation_error', {
+        tour_id: tourId,
+        error: errors[0]
+      });
       return;
     }
 
     try {
       setIsLoading(true);
       setError('');
-      
-      // Simular una petición a la API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Aquí iría la llamada real a la API
-      /*
+
+      // Track submission attempt
+      trackEvent('submit_reservation', {
+        tour_id: tourId,
+        adults: adults,
+        children: children,
+        total: calculateTotal(),
+        date: date
+      });
+
+      // Llamada real a la API
       const response = await fetch('/api/reservations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -160,14 +187,18 @@ export default function ReservationForm({
           date,
           time: selectedTime,
           adults,
-          children: children || undefined,
+          children: children || 0,
+          totalPrice: calculateTotal(),
           ...formData
         }),
       });
-      
-      if (!response.ok) throw new Error('Error al procesar la reserva');
-      */
-      
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al procesar la reserva');
+      }
+
       // Redirigir a la página de confirmación con los parámetros necesarios
       const searchParams = new URLSearchParams({
         tourId,
@@ -178,17 +209,31 @@ export default function ReservationForm({
         total: calculateTotal().toString(),
         name: encodeURIComponent(formData.name)
       });
-      
+
       setSuccess(true);
-      
+
+      // Track successful reservation
+      trackEvent('complete_reservation', {
+        tour_id: tourId,
+        adults: adults,
+        children: children,
+        total: calculateTotal()
+      });
+
       // Redirigir después de un breve retraso para mostrar el mensaje de éxito
       setTimeout(() => {
         router.push(`/reservas/confirmacion?${searchParams.toString()}`);
       }, 1500);
-      
+
     } catch (err) {
       setError('Ocurrió un error al procesar tu reserva. Por favor, inténtalo de nuevo.');
       console.error('Error al reservar:', err);
+
+      // Track error
+      trackEvent('reservation_error', {
+        tour_id: tourId,
+        error: err instanceof Error ? err.message : 'Unknown error'
+      });
     } finally {
       setIsLoading(false);
       setIsSubmitting(false);
@@ -198,7 +243,7 @@ export default function ReservationForm({
   // Si la reserva fue exitosa, mostrar mensaje de confirmación
   if (success) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center p-8 bg-gradient-to-br from-green-50 to-cyan-50 dark:from-green-900/30 dark:to-cyan-900/20 rounded-2xl border border-green-100 dark:border-green-900/50 shadow-sm"
@@ -209,7 +254,7 @@ export default function ReservationForm({
         <h3 className="text-xl font-bold text-green-800 dark:text-green-200 mb-2">¡Reserva en Proceso!</h3>
         <p className="text-green-700 dark:text-green-300 mb-6">Estamos procesando tu solicitud de reserva.</p>
         <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-          <motion.div 
+          <motion.div
             className="bg-green-500 h-2.5 rounded-full"
             initial={{ width: '0%' }}
             animate={{ width: '100%' }}
@@ -221,8 +266,8 @@ export default function ReservationForm({
   }
 
   return (
-    <motion.form 
-      onSubmit={handleSubmit} 
+    <motion.form
+      onSubmit={handleSubmit}
       className="space-y-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -233,7 +278,7 @@ export default function ReservationForm({
         <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reserva Ahora</h3>
         <p className="text-gray-500 dark:text-gray-400">Completa el formulario para asegurar tu lugar</p>
       </div>
-      
+
       {/* Precio */}
       <div className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-gray-800 dark:to-gray-800 p-5 rounded-xl border border-cyan-100 dark:border-gray-700">
         <div className="flex justify-between items-center">
@@ -280,16 +325,16 @@ export default function ReservationForm({
                 const dateObj = new Date(day);
                 const today = new Date();
                 const isToday = dateObj.toDateString() === today.toDateString();
-                
+
                 return (
                   <option key={index} value={day}>
-                    {isToday 
-                      ? 'Hoy' 
-                      : dateObj.toLocaleDateString('es-GT', { 
-                          weekday: 'short', 
-                          day: 'numeric', 
-                          month: 'short' 
-                        })}
+                    {isToday
+                      ? 'Hoy'
+                      : dateObj.toLocaleDateString('es-GT', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short'
+                      })}
                     {!isToday && `, ${dateObj.toLocaleDateString('es-GT', { year: 'numeric' })}`}
                   </option>
                 );
@@ -300,7 +345,7 @@ export default function ReservationForm({
             </div>
           </div>
         </div>
-        
+
         {/* Hora */}
         {startTimes.length > 0 && (
           <div>
@@ -398,14 +443,14 @@ export default function ReservationForm({
           </div>
         )}
       </div>
-      
+
       {/* Información del Contacto */}
       <div className="pt-2">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
           <Info className="w-5 h-5 mr-2 text-cyan-600" />
           Información de contacto
         </h3>
-        
+
         <div className="space-y-4">
           {/* Nombre */}
           <div>
@@ -420,11 +465,10 @@ export default function ReservationForm({
                 value={formData.name}
                 onChange={handleInputChange}
                 onBlur={() => handleBlur('name')}
-                className={`w-full rounded-xl border ${
-                  touched.name && !formData.name.trim() 
-                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                    : 'border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
-                } bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm transition-all`}
+                className={`w-full rounded-xl border ${touched.name && !formData.name.trim()
+                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                  : 'border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
+                  } bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm transition-all`}
                 placeholder="Tu nombre completo"
                 disabled={isLoading}
               />
@@ -433,7 +477,7 @@ export default function ReservationForm({
               )}
             </div>
           </div>
-          
+
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -447,11 +491,10 @@ export default function ReservationForm({
                 value={formData.email}
                 onChange={handleInputChange}
                 onBlur={() => handleBlur('email')}
-                className={`w-full rounded-xl border ${
-                  touched.email && (!formData.email || !validateEmail(formData.email))
-                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                    : 'border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
-                } bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm transition-all`}
+                className={`w-full rounded-xl border ${touched.email && (!formData.email || !validateEmail(formData.email))
+                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                  : 'border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
+                  } bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm transition-all`}
                 placeholder="tucorreo@ejemplo.com"
                 disabled={isLoading}
               />
@@ -462,7 +505,7 @@ export default function ReservationForm({
               )}
             </div>
           </div>
-          
+
           {/* Teléfono */}
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -476,11 +519,10 @@ export default function ReservationForm({
                 value={formData.phone}
                 onChange={handleInputChange}
                 onBlur={() => handleBlur('phone')}
-                className={`w-full rounded-xl border ${
-                  touched.phone && (!formData.phone || !validatePhone(formData.phone))
-                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                    : 'border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
-                } bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm transition-all`}
+                className={`w-full rounded-xl border ${touched.phone && (!formData.phone || !validatePhone(formData.phone))
+                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                  : 'border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-transparent'
+                  } bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm transition-all`}
                 placeholder="Ej: 502 1234 5678"
                 disabled={isLoading}
               />
@@ -491,7 +533,7 @@ export default function ReservationForm({
               )}
             </div>
           </div>
-          
+
           {/* Solicitudes especiales */}
           <div>
             <label htmlFor="specialRequests" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -519,7 +561,7 @@ export default function ReservationForm({
           </span>
           <span className="font-medium">${(adults * price).toLocaleString()}</span>
         </div>
-        
+
         {childPrice && children > 0 && (
           <div className="flex justify-between mb-2">
             <span className="text-gray-600 dark:text-gray-300">
@@ -528,7 +570,7 @@ export default function ReservationForm({
             <span className="font-medium">${(children * childPrice).toLocaleString()}</span>
           </div>
         )}
-        
+
         <div className="border-t border-gray-200 dark:border-gray-700 mt-3 pt-3">
           <div className="flex justify-between font-semibold">
             <span>Total</span>

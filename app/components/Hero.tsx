@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Compass, MapPin, Anchor, Wifi, Coffee, Home, Map, MessageCircle } from "lucide-react";
 import { useId, useMemo, useState } from "react";
 import ChatModal from "./ChatModal";
+import Tooltip from "./ui/Tooltip";
 
 export default function Hero(): JSX.Element {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -63,9 +64,9 @@ export default function Hero(): JSX.Element {
   const mapAnimProps: MotionProps = reduce
     ? {}
     : {
-        animate: { scale: [1.02, 1, 1.02], x: [-4, 0, -4], y: [0, -2, 0] },
-        transition: { duration: 16, repeat: Infinity, ease: "easeInOut" },
-      };
+      animate: { scale: [1.02, 1, 1.02], x: [-4, 0, -4], y: [0, -2, 0] },
+      transition: { duration: 16, repeat: Infinity, ease: "easeInOut" },
+    };
 
   // Rosa náutica (rotación lenta)
   const compassAnim: MotionProps = reduce
@@ -137,7 +138,7 @@ export default function Hero(): JSX.Element {
         <div className="relative z-40 mx-auto w-full max-w-5xl px-6 py-16 text-center sm:py-24">
           <div className="mx-auto max-w-4xl">
             {/* Badge */}
-            <motion.div 
+            <motion.div
               className="mb-6 inline-flex items-center rounded-full border border-cyberPurple/30 bg-cyberPurple/10 px-4 py-1.5 text-sm font-medium text-cyberPurple backdrop-blur-sm"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -151,8 +152,8 @@ export default function Hero(): JSX.Element {
             </motion.div>
 
             {/* Main Heading */}
-            <motion.h1 
-              className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl md:text-7xl lg:text-8xl" 
+            <motion.h1
+              className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl md:text-7xl lg:text-8xl"
               {...base}
             >
               <span className="block font-display bg-gradient-to-r from-gray-900 via-gray-700 to-gray-500 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
@@ -173,22 +174,40 @@ export default function Hero(): JSX.Element {
             </motion.p>
 
             {/* Stats */}
-            <motion.div 
+            <motion.div
               className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               {[
-                { value: '500+', label: 'Destinos' },
-                { value: '24/7', label: 'Soporte' },
-                { value: '1M+', label: 'Miembros' },
-                { value: '4.9/5', label: 'Valoración' }
+                { value: '500+', label: 'Destinos', color: 'from-cyan-400 to-blue-500', tooltip: 'Más de 500 destinos verificados' },
+                { value: '24/7', label: 'Soporte', color: 'from-purple-400 to-pink-500', tooltip: 'Asistencia disponible las 24 horas' },
+                { value: '1M+', label: 'Miembros', color: 'from-amber-400 to-orange-500', tooltip: 'Comunidad de más de 1 millón de nómadas' },
+                { value: '4.9/5', label: 'Valoración', color: 'from-green-400 to-emerald-500', tooltip: 'Valoración promedio de usuarios' }
               ].map((stat, index) => (
-                <div key={index} className="rounded-xl bg-white/5 p-4 backdrop-blur-sm">
-                  <div className="text-2xl font-bold text-cyberPurple sm:text-3xl">{stat.value}</div>
-                  <div className="mt-1 text-xs font-medium uppercase tracking-wider text-gray-500">{stat.label}</div>
-                </div>
+                <Tooltip key={index} content={stat.tooltip} position="bottom">
+                  <motion.div
+                    className="glass-enhanced rounded-2xl p-4 relative group overflow-hidden cursor-help"
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    {/* Gradient background on hover */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+
+                    <div className="relative">
+                      <div className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                        {stat.value}
+                      </div>
+                      <div className="mt-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                        {stat.label}
+                      </div>
+                    </div>
+
+                    {/* Subtle scan line */}
+                    <div className="scan-line absolute inset-0 opacity-10 pointer-events-none" />
+                  </motion.div>
+                </Tooltip>
               ))}
             </motion.div>
 
@@ -199,26 +218,26 @@ export default function Hero(): JSX.Element {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <Link 
-                href="/mapa" 
-                className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-cyberPurple to-electricBlue px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-cyberPurple/30 transition-all duration-300 hover:shadow-xl hover:shadow-cyberPurple/40 sm:w-auto"
+              <Link
+                href="/mapa"
+                className="shimmer group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-primary to-accent px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 sm:w-auto"
               >
-                <Compass className="h-5 w-5" />
+                <Compass className="h-5 w-5 transition-transform group-hover:rotate-12" />
                 <span>Explorar destinos</span>
                 <span className="absolute right-4 transition-transform duration-300 group-hover:translate-x-1">→</span>
               </Link>
-              
-              <button 
+
+              <button
                 onClick={() => setIsChatOpen(true)}
-                className="group flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white/10 px-8 py-4 text-sm font-medium text-gray-700 backdrop-blur-sm transition-all duration-300 hover:bg-white/20 hover:text-white dark:border-gray-600 dark:text-gray-200 sm:w-auto"
+                className="group flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card/50 backdrop-blur-sm px-8 py-4 text-sm font-medium transition-all duration-300 hover:bg-card hover:border-primary/50 hover:scale-105 sm:w-auto"
               >
-                <MessageCircle className="h-5 w-5" />
+                <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
                 <span>Chatear con IA</span>
               </button>
             </motion.div>
 
             {/* Trust Badges */}
-            <motion.div 
+            <motion.div
               className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -247,10 +266,10 @@ export default function Hero(): JSX.Element {
           </div>
         </div>
       </div>
-      
+
       {/* Chat Modal */}
-      <ChatModal 
-        open={isChatOpen} 
+      <ChatModal
+        open={isChatOpen}
         onClose={() => setIsChatOpen(false)}
         variant="ghost"
       />

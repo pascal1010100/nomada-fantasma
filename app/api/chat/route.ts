@@ -1,5 +1,7 @@
 export const runtime = "edge";
 
+import { PROJECT_KNOWLEDGE, CHAT_PERSONALITY } from './knowledge';
+
 // Basic schema for incoming chat messages
 // We'll keep it flexible for now and validate lightly.
 
@@ -7,6 +9,7 @@ type ChatRequest = {
   message: string;
   locale?: string; // optional hint: "es", "en", "fr", etc.
   threadId?: string; // for future conversation continuity
+  history?: Array<{ role: "user" | "assistant"; content: string }>; // conversation history
 };
 
 export async function POST(req: Request): Promise<Response> {
@@ -21,6 +24,7 @@ export async function POST(req: Request): Promise<Response> {
 
     const body = (await req.json()) as Partial<ChatRequest> | null;
     const text = (body?.message ?? "").toString().trim();
+    const history = body?.history || [];
 
     if (!text) {
       return new Response(
@@ -30,15 +34,12 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     // Language heuristic
-    const locale = (body?.locale || detectLocale(text)) as string | undefined;
+    const locale = (body?.locale || detectLocale(text)) as "es" | "en" | "fr" | undefined;
 
-    // Compose a short system prompt derived from project style
-    const system =
-      locale === "es"
-        ? "Eres Aletheia, la Guía Fantasma de Nómada Fantasma. Responde en el idioma del usuario. Estilo: 1 línea de valor → 3 bullets máx. → 1 acción. No inventes horarios/precios. Si dudas, dilo y ofrece verificación. Seguridad primero."
-        : locale === "fr"
-        ? "Tu es Aletheia, la Guide Fantôme de Nómada Fantasma. Réponds dans la langue de l'utilisateur. Style: 1 ligne de valeur → 3 points max → 1 action. N'invente pas d'horaires/prix. Si tu doutes, dis-le et propose une vérification. Priorité à la sécurité."
-        : "You are Aletheia, the Ghost Guide of Nómada Fantasma. Reply in the user's language. Style: 1 value line → max 3 bullets → 1 action. Do not invent schedules/prices. If unsure, say so and offer verification. Safety first.";
+    // Compose system prompt with project knowledge
+    const basePersonality = locale ? CHAT_PERSONALITY[locale] : CHAT_PERSONALITY.es;
+    const system = `${PROJECT_KNOWLEDGE}\n\n${basePersonality}`;
+
 
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
@@ -47,6 +48,13 @@ export async function POST(req: Request): Promise<Response> {
         { status: 500, headers: { "content-type": "application/json" } }
       );
     }
+
+    // Build messages array with history
+    const messages = [
+      { role: "system" as const, content: system },
+      ...history.map(msg => ({ role: msg.role as "user" | "assistant", content: msg.content })),
+      { role: "user" as const, content: text },
+    ];
 
     // Create upstream streaming fetch to Groq (OpenAI-compatible chat.completions)
     const upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -59,10 +67,7 @@ export async function POST(req: Request): Promise<Response> {
         model: "llama-3.1-8b-instant",
         stream: true,
         temperature: 0.3,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: text },
-        ],
+        messages,
       }),
     });
 

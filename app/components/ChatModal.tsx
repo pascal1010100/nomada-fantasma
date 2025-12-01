@@ -76,7 +76,7 @@ export default function ChatModal({
   // Abort any in-flight streaming when closing the modal
   useEffect(() => {
     if (!open && abortRef.current) {
-      try { abortRef.current.abort(); } catch {}
+      try { abortRef.current.abort(); } catch { }
       abortRef.current = null;
       setLoading(false);
     }
@@ -127,19 +127,56 @@ export default function ChatModal({
                 </button>
               </div>
 
-              {/* Mensajes (placeholder) */}
-              <div className="bg-background/70 px-4 py-3" aria-live="polite">
-                <div className="text-xs text-slate-600 dark:text-slate-300 opacity-80">
-                  Bienvenido al puerto. Pronto conectaremos la IA.
+              {/* Mensaje de bienvenida */}
+              <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 dark:from-cyan-500/5 dark:to-blue-500/5 px-4 py-3 border-b border-border/40" aria-live="polite">
+                <div className="flex items-start gap-2">
+                  <span className="text-lg mt-0.5">👋</span>
+                  <div className="text-sm text-slate-700 dark:text-slate-200">
+                    <strong>¡Hola!</strong> Soy Aletheia, tu guía del Lago de Atitlán.
+                    <br />
+                    <span className="text-xs text-slate-600 dark:text-slate-300 opacity-90">
+                      Pregúntame sobre pueblos, tours, precios o actividades.
+                    </span>
+                  </div>
                 </div>
               </div>
 
               <div className="px-4 py-3 space-y-3 max-h-[48vh] overflow-auto">
                 {messages.length === 0 ? (
-                  <div className="text-sm text-slate-700 dark:text-slate-200">
-                    <span className="opacity-70">💬</span>{" "}
-                    ¿En qué ruta te ayudo hoy?
-                  </div>
+                  <>
+                    <div className="text-sm text-slate-700 dark:text-slate-200">
+                      <span className="opacity-70">💬</span>{" "}
+                      ¿En qué ruta te ayudo hoy?
+                    </div>
+
+                    {/* Sugerencias rápidas */}
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      <button
+                        onClick={() => setInput("¿Qué hacer en San Marcos?")}
+                        className="text-xs px-3 py-1.5 rounded-full bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 transition-colors"
+                      >
+                        🧘 Yoga en San Marcos
+                      </button>
+                      <button
+                        onClick={() => setInput("Tours económicos en el lago")}
+                        className="text-xs px-3 py-1.5 rounded-full bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 transition-colors"
+                      >
+                        💰 Tours baratos
+                      </button>
+                      <button
+                        onClick={() => setInput("¿Dónde hay mejor WiFi?")}
+                        className="text-xs px-3 py-1.5 rounded-full bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 transition-colors"
+                      >
+                        📶 Nómada digital
+                      </button>
+                      <button
+                        onClick={() => setInput("Diferencias entre San Pedro y San Marcos")}
+                        className="text-xs px-3 py-1.5 rounded-full bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 transition-colors"
+                      >
+                        🏘️ Comparar pueblos
+                      </button>
+                    </div>
+                  </>
                 ) : (
                   messages.map((m, idx) => (
                     <div
@@ -181,10 +218,20 @@ export default function ChatModal({
                     // setup abort controller to allow stopping the stream
                     const controller = new AbortController();
                     abortRef.current = controller;
+
+                    // Prepare conversation history (exclude the messages we just added)
+                    const history = messages.slice(0, startIndex).map(m => ({
+                      role: m.role,
+                      content: m.content
+                    }));
+
                     const res = await fetch("/api/chat", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ message: text }),
+                      body: JSON.stringify({
+                        message: text,
+                        history // Send conversation history
+                      }),
                       signal: controller.signal,
                     });
                     if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
@@ -270,7 +317,7 @@ export default function ChatModal({
                   <button
                     type="button"
                     onClick={() => {
-                      try { abortRef.current?.abort(); } catch {}
+                      try { abortRef.current?.abort(); } catch { }
                       abortRef.current = null;
                       setLoading(false);
                     }}

@@ -1,4 +1,4 @@
-import { Plus, Minus, Crosshair, RotateCcw, Ghost } from "lucide-react";
+import { Plus, Minus, Crosshair, RotateCcw, Ghost, Wifi } from "lucide-react";
 
 interface MapControlButtonProps {
   label: string;
@@ -36,6 +36,8 @@ interface MapControlsProps {
   onRecenter: () => void;
   onToggleGhost: () => void;
   isGhostMode: boolean;
+  onToggleNomad: () => void;
+  isNomadMode: boolean;
 }
 
 export const MapControls = ({
@@ -45,6 +47,8 @@ export const MapControls = ({
   onRecenter,
   onToggleGhost,
   isGhostMode,
+  onToggleNomad,
+  isNomadMode,
 }: MapControlsProps) => (
   <div
     className="
@@ -59,6 +63,7 @@ export const MapControls = ({
       { label: "Mi ubicación", Icon: Crosshair, onClick: onLocate },
       { label: "Volver al inicio", Icon: RotateCcw, onClick: onRecenter },
       { label: "Modo Fantasma", Icon: Ghost, onClick: onToggleGhost, active: isGhostMode },
+      { label: "Modo Nómada (WiFi/Cowork)", Icon: Wifi, onClick: onToggleNomad, active: isNomadMode },
     ].map((props) => (
       <MapControlButton key={props.label} {...props} />
     ))}
