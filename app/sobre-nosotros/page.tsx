@@ -338,28 +338,41 @@ export default function AboutPage() {
 
         {/* CTA */}
         <section className="py-20 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-90"></div>
-          <div className="absolute inset-0 nf-grid opacity-30 mix-blend-overlay"></div>
+          {/* Darker, more sophisticated background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-background"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.1)_0%,transparent_70%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.1)_0%,transparent_70%)]"></div>
+          <div className="absolute inset-0 nf-grid opacity-20"></div>
+          <div className="absolute inset-0 nf-vignette"></div>
 
           <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-              Únete a la comunidad de nómadas digitales
-            </h2>
-            <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Descubre destinos increíbles, conecta con guías locales y vive experiencias que recordarás para siempre.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/registro">
-                <button className="px-8 py-4 bg-white text-primary font-bold rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1">
-                  Crear cuenta gratuita
-                </button>
-              </Link>
-              <Link href="/contacto">
-                <button className="px-8 py-4 border-2 border-white text-white font-bold rounded-xl hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
-                  Contáctanos
-                </button>
-              </Link>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">
+                <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
+                  Únete a la comunidad de nómadas digitales
+                </span>
+              </h2>
+              <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+                Descubre destinos increíbles, conecta con guías locales y vive experiencias que recordarás para siempre.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Link href="/registro">
+                  <RippleButton className="px-8 py-4 text-lg font-bold">
+                    Crear cuenta gratuita
+                  </RippleButton>
+                </Link>
+                <Link href="/contacto">
+                  <button className="px-8 py-4 glass-enhanced border border-primary/30 text-foreground font-bold rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 hover-lift">
+                    Contáctanos
+                  </button>
+                </Link>
+              </div>
+            </motion.div>
           </div>
         </section>
       </div>
