@@ -26,6 +26,7 @@ export default function Navbar() {
   const prefersReduced = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const drawerRef = useRef<HTMLDivElement | null>(null);
   const prevFocus = useRef<Element | null>(null);
   const rafId = useRef<number | null>(null);
@@ -36,7 +37,15 @@ export default function Navbar() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
+  // Set mounted state to prevent hydration mismatch
   useEffect(() => {
+    setMounted(true);
+    setScrolled(window.scrollY > 10);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     const onScroll = () => {
       if (rafId.current) return;
       rafId.current = requestAnimationFrame(() => {
@@ -44,13 +53,12 @@ export default function Navbar() {
         setScrolled(window.scrollY > 10);
       });
     };
-    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       if (rafId.current) cancelAnimationFrame(rafId.current);
       window.removeEventListener("scroll", onScroll);
     };
-  }, []);
+  }, [mounted]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
