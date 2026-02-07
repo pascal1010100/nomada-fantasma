@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { Menu, X, Map, MessageCircle, Home, ChevronRight, Ghost, Compass, Info } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import ThemeToggle from "../ui/ThemeToggle";
+import LanguageSwitcher from "../LanguageSwitcher";
 
 type LinkItem = { href: string; label: string; icon: React.ComponentType<any> };
 
@@ -140,10 +141,12 @@ export default function Navbar() {
                 </li>
               );
             })}
+            <li className="pl-1"><LanguageSwitcher /></li>
             <li className="pl-1"><ThemeToggle /></li>
           </ul>
 
           <div className="flex items-center gap-2 md:hidden">
+            <LanguageSwitcher />
             <ThemeToggle />
             <button
               aria-label={open ? "Cerrar menú" : "Abrir menú"}

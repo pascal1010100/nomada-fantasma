@@ -24,7 +24,7 @@ import RippleButton from "../ui/RippleButton";
 
 // Dynamic import for Particles to avoid SSR issues
 const ParticlesBackground = dynamic(
-  () => import('../../mapa/components/ParticlesBackground'),
+  () => import('../../[locale]/mapa/components/ParticlesBackground'),
   { ssr: false }
 );
 

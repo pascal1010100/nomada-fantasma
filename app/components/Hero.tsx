@@ -6,10 +6,12 @@ import { Compass, MapPin, Anchor, Wifi, Coffee, Home, Map, MessageCircle } from 
 import { useId, useMemo, useState } from "react";
 import ChatModal from "./ChatModal";
 import Tooltip from "./ui/Tooltip";
+import { useTranslations } from "next-intl";
 
 export default function Hero(): JSX.Element {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const reduce = useReducedMotion();
+  const t = useTranslations('Hero');
 
   // IDs únicos para gradientes/filtros del SVG
   const uid = useId();
@@ -148,7 +150,7 @@ export default function Hero(): JSX.Element {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-electricBlue opacity-75"></span>
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-electricBlue"></span>
               </span>
-              <span className="tracking-wider">PLATAFORMA PARA NÓMADAS DIGITALES</span>
+              <span className="tracking-wider">{t('badge')}</span>
             </motion.div>
 
             {/* Main Heading */}
@@ -157,10 +159,10 @@ export default function Hero(): JSX.Element {
               {...base}
             >
               <span className="block font-display bg-gradient-to-r from-gray-900 via-gray-700 to-gray-500 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                Nómada
+                {t('title1')}
               </span>
               <span className="mt-2 block bg-gradient-to-r from-[#BC13FE] via-[#8A2BE2] to-[#05D9E8] bg-clip-text text-transparent">
-                Fantasma
+                {t('title2')}
               </span>
             </motion.h1>
 
@@ -170,7 +172,7 @@ export default function Hero(): JSX.Element {
               {...base}
               transition={{ ...base.transition, delay: 0.06 }}
             >
-              La plataforma definitiva para nómadas digitales que buscan los mejores destinos, conexiones y experiencias alrededor del mundo.
+              {t('description')}
             </motion.p>
 
             {/* Stats */}
@@ -181,10 +183,10 @@ export default function Hero(): JSX.Element {
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               {[
-                { value: '500+', label: 'Destinos', color: 'from-cyan-400 to-blue-500', tooltip: 'Más de 500 destinos verificados' },
-                { value: '24/7', label: 'Soporte', color: 'from-purple-400 to-pink-500', tooltip: 'Asistencia disponible las 24 horas' },
-                { value: '1M+', label: 'Miembros', color: 'from-amber-400 to-orange-500', tooltip: 'Comunidad de más de 1 millón de nómadas' },
-                { value: '4.9/5', label: 'Valoración', color: 'from-green-400 to-emerald-500', tooltip: 'Valoración promedio de usuarios' }
+                { value: '500+', label: t('stats.destinations'), color: 'from-cyan-400 to-blue-500', tooltip: t('stats.destinationsTooltip') },
+                { value: '24/7', label: t('stats.support'), color: 'from-purple-400 to-pink-500', tooltip: t('stats.supportTooltip') },
+                { value: '1M+', label: t('stats.members'), color: 'from-amber-400 to-orange-500', tooltip: t('stats.membersTooltip') },
+                { value: '4.9/5', label: t('stats.rating'), color: 'from-green-400 to-emerald-500', tooltip: t('stats.ratingTooltip') }
               ].map((stat, index) => (
                 <Tooltip key={index} content={stat.tooltip} position="bottom">
                   <motion.div
@@ -223,7 +225,7 @@ export default function Hero(): JSX.Element {
                 className="shimmer group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-primary to-accent px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 sm:w-auto"
               >
                 <Compass className="h-5 w-5 transition-transform group-hover:rotate-12" />
-                <span>Explorar destinos</span>
+                <span>{t('explore')}</span>
                 <span className="absolute right-4 transition-transform duration-300 group-hover:translate-x-1">→</span>
               </Link>
 
@@ -232,7 +234,7 @@ export default function Hero(): JSX.Element {
                 className="group flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card/50 backdrop-blur-sm px-8 py-4 text-sm font-medium transition-all duration-300 hover:bg-card hover:border-primary/50 hover:scale-105 sm:w-auto"
               >
                 <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
-                <span>Chatear con IA</span>
+                <span>{t('chat')}</span>
               </button>
             </motion.div>
 
@@ -249,7 +251,7 @@ export default function Hero(): JSX.Element {
                     <div key={i} className="h-8 w-8 rounded-full border-2 border-white bg-gray-200 dark:border-gray-800 dark:bg-gray-700"></div>
                   ))}
                 </div>
-                <span>+10,000 nómadas felices</span>
+                <span>{t('trust.happyNomads')}</span>
               </div>
               <div className="hidden h-4 w-px bg-gray-300 sm:block"></div>
               <div className="flex items-center gap-2">
@@ -260,7 +262,7 @@ export default function Hero(): JSX.Element {
                     </svg>
                   ))}
                 </div>
-                <span>4.9/5 en valoraciones</span>
+                <span>{t('trust.ratings')}</span>
               </div>
             </motion.div>
           </div>
