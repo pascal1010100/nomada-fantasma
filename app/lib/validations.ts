@@ -24,7 +24,7 @@ export const CreateReservationSchema = z.object({
 
     // Type and Relations
     type: z.enum(['tour', 'accommodation', 'guide'], {
-        errorMap: () => ({ message: 'Type must be tour, accommodation, or guide' }),
+        message: 'Type must be tour, accommodation, or guide',
     }),
 
     tourId: z.string().uuid().optional(),
@@ -106,7 +106,7 @@ export async function validateRequestBody<T>(
         return { data, error: null };
     } catch (error) {
         if (error instanceof z.ZodError) {
-            const errorMessage = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+            const errorMessage = error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
             return { data: null, error: errorMessage };
         }
         return { data: null, error: 'Invalid request body' };
