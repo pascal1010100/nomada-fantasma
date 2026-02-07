@@ -1,0 +1,34 @@
+{
+    "HomePage": {
+        "title": "Welcome to Nómada Fantasma",
+        "description": "A unique experience at Lake Atitlán"
+    },
+    "Navigation": {
+        "home": "Home",
+        "about": "About Us",
+        "scenarios": "Scenarios",
+        "contact": "Contact"
+    },
+    "Hero": {
+        "badge": "PLATFORM FOR DIGITAL NOMADS",
+        "title1": "Nomad",
+        "title2": "Ghost",
+        "description": "The ultimate platform for digital nomads seeking the best destinations, connections, and experiences around the world.",
+        "explore": "Explore Destinations",
+        "chat": "Chat with AI",
+        "stats": {
+            "destinations": "Destinations",
+            "support": "Support",
+            "members": "Members",
+            "rating": "Rating",
+            "destinationsTooltip": "Over 500 verified destinations",
+            "supportTooltip": "24/7 Support available",
+            "membersTooltip": "Community of over 1 million nomads",
+            "ratingTooltip": "Average user rating"
+        },
+        "trust": {
+            "happyNomads": "+10,000 happy nomads",
+            "ratings": "4.9/5 in ratings"
+        }
+    }
+}

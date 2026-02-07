@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 
 const ParticlesBackground = dynamic(
-    () => import('../mapa/components/ParticlesBackground'),
+    () => import('@/app/[locale]/mapa/components/ParticlesBackground'),
     { ssr: false }
 );
 
