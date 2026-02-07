@@ -5,13 +5,14 @@ import {
   Mountain, Sunset, BookOpen, Wifi as WifiIcon, MapPin as MapPinIcon,
   Footprints, Star, Users, Calendar, Compass, Sun, Moon, Sunrise, Zap,
   Wind, Thermometer, CloudRain, Droplets, Globe, CheckCircle2, CloudSun,
-  DollarSign, Signal, Sparkles
+  DollarSign, Signal, Sparkles, Hotel, Home
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ToursSection from '../../components/ToursSection';
 import GuideCard from '../../components/GuideCard';
 import TownTabs from '../../components/TownTabs';
+import AccommodationSection from '../../components/AccommodationSection';
 import EliteActionBar from '../../components/EliteActionBar';
 
 // Definición de tipos para los componentes
@@ -82,7 +83,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
     }));
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 pb-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 pb-20">
       {/* Hero Section */}
       <div className="relative h-[500px] overflow-hidden group">
         <div className="absolute inset-0 transition-transform duration-[3000ms] ease-in-out group-hover:scale-105">
@@ -163,7 +164,36 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
         <EliteActionBar title={town.title} slug={slug} />
 
         <TownTabs>
-          {/* Tab 1: Experiencias (DEFAULT) */}
+          {/* Tab 1: Hospedaje (NEW PRIMARY TAB) */}
+          <div className="space-y-8">
+            <section className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg border border-purple-200 dark:border-purple-900/30">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl md:text-4xl font-bold mb-3">
+                  <span className="bg-gradient-to-r from-purple-600 via-cyan-500 to-purple-600 bg-clip-text text-transparent">
+                    Hospedaje en {town.title}
+                  </span>
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                  Encuentra el lugar perfecto para quedarte durante tu visita
+                </p>
+              </div>
+
+              {/* Placeholder content - to be populated with real accommodation data */}
+              <AccommodationSection
+                accommodations={town.accommodations}
+                townName={town.title}
+                townSlug={slug}
+              />
+
+              <div className="mt-8 p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800/30">
+                <p className="text-sm text-gray-700 dark:text-gray-300 text-center">
+                  💡 <strong>Tip:</strong> Estamos trabajando en traerte las mejores opciones de hospedaje. Mientras tanto, explora las experiencias y actividades disponibles.
+                </p>
+              </div>
+            </section>
+          </div>
+
+          {/* Tab 2: Experiencias */}
           <div className="space-y-8">
             {/* Tours Profesionales */}
             <section id="experiencias-section">
@@ -182,7 +212,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
 
             {/* Guías Locales */}
             {town.guides && town.guides.length > 0 && (
-              <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-purple-200 dark:border-purple-900/30">
+              <section className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg border border-purple-200 dark:border-purple-900/30">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
                   <Users className="w-6 h-6 mr-2 text-purple-500" />
                   Guías Locales Independientes
@@ -215,7 +245,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
           {/* Tab 2: Descubre */}
           <div className="space-y-8">
             {/* Sobre el Pueblo */}
-            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-cyan-200 dark:border-cyan-900/30">
+            <section className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg border border-cyan-200 dark:border-cyan-900/30">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
                 <MapPin className="w-6 h-6 mr-2 text-cyan-500" />
                 Sobre {town.title}
@@ -237,7 +267,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
 
             {/* Actividades */}
             {town.activities && town.activities.length > 0 && (
-              <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-purple-200 dark:border-purple-900/30">
+              <section className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg border border-purple-200 dark:border-purple-900/30">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
                   <Footprints className="w-5 h-5 mr-2 text-purple-500" />
                   Actividades Populares
@@ -257,7 +287,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
           {/* Tab 3: Info Práctica */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Clima */}
-            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+            <section className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-600">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
                 <Sun className="w-5 h-5 mr-2 text-yellow-500" />
                 Clima Actual
@@ -289,7 +319,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
             </section>
 
             {/* Cómo llegar */}
-            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+            <section className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-600">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
                 <Bus className="w-5 h-5 mr-2 text-cyan-500" />
                 Cómo llegar
@@ -316,7 +346,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
             </section>
 
             {/* Servicios */}
-            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 lg:col-span-2">
+            <section className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-600 lg:col-span-2">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
                 <Landmark className="w-5 h-5 mr-2 text-green-500" />
                 Servicios Esenciales
@@ -371,7 +401,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
                 <Link
                   key={nearbyTown.id}
                   href={`/rutas-magicas/lago-atitlan/${nearbyTown.slug}`}
-                  className="group block bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                  className="group block bg-white dark:bg-gray-700 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
                 >
                   <div className="h-40 relative">
                     <div

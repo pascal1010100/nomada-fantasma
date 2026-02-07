@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Compass, Info } from 'lucide-react';
+import { Sparkles, Compass, Info, Hotel } from 'lucide-react';
 
 interface Tab {
     id: string;
@@ -15,13 +15,14 @@ interface TownTabsProps {
 }
 
 const tabs: Tab[] = [
+    { id: 'hospedaje', label: 'Hospedaje', icon: <Hotel className="w-4 h-4" /> },
     { id: 'experiences', label: 'Experiencias', icon: <Sparkles className="w-4 h-4" /> },
     { id: 'discover', label: 'Descubre', icon: <Compass className="w-4 h-4" /> },
     { id: 'info', label: 'Info Práctica', icon: <Info className="w-4 h-4" /> },
 ];
 
 export default function TownTabs({ children }: TownTabsProps) {
-    const [activeTab, setActiveTab] = useState('experiences');
+    const [activeTab, setActiveTab] = useState('hospedaje');
 
     // Calculate active index for rendering the correct child
     const activeTabIndex = tabs.findIndex(tab => tab.id === activeTab);
@@ -29,7 +30,7 @@ export default function TownTabs({ children }: TownTabsProps) {
     return (
         <div className="w-full">
             {/* Tab Navigation */}
-            <div className="sticky top-[48px] md:top-[53px] z-40 transition-all duration-300 pt-2 pb-1 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm mb-8">
+            <div className="sticky top-[48px] md:top-[53px] z-40 transition-all duration-300 pt-2 pb-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm mb-8">
                 <nav className="flex space-x-8 overflow-x-auto px-4 sm:px-0 no-scrollbar" aria-label="Tabs">
                     {tabs.map((tab) => (
                         <button
