@@ -340,8 +340,11 @@ export default function AboutPage() {
         <section className="py-20 relative overflow-hidden">
           {/* Darker, more sophisticated background */}
           <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-background"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.1)_0%,transparent_70%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.1)_0%,transparent_70%)]"></div>
+          {/* Stronger overlay for light mode */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/50 via-accent/50 to-primary/50 dark:hidden"></div>
+          {/* Subtle overlay for dark mode */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 hidden dark:block"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.15)_0%,transparent_70%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.1)_0%,transparent_70%)]"></div>
           <div className="absolute inset-0 nf-grid opacity-20"></div>
           <div className="absolute inset-0 nf-vignette"></div>
 
