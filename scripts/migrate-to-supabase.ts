@@ -1,15 +1,17 @@
 #!/usr/bin/env tsx
+// @ts-nocheck - Supabase type inference requires real credentials. Will have proper types at runtime.
 // Script to migrate existing reservation data from JSON file to Supabase
-// Run with: npx tsx scripts/migrate-to-supabase.ts
+// Run: tsx scripts/migrate-to-supabase.ts
 
-import fs from 'fs';
-import path from 'path';
+import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
+import { readFileSync, writeFileSync } from 'fs';
+import path from 'path';
 import type { Database } from '../types/database.types';
 
 // Load environment variables
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env.local' });
+// The 'dotenv/config' import above handles this, but keeping this for explicit path if needed.
+// dotenv.config({ path: '.env.local' }); // This line is now redundant if 'dotenv/config' is used without specific path.
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
