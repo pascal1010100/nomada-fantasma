@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
 
   // Reemplaza "experimental.turbo" por "turbopack"
   turbopack: {}, // sin "disabled"
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
+  },
 };
 
 export default withNextIntl(nextConfig);

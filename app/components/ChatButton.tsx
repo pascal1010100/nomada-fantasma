@@ -6,6 +6,7 @@ import { Ghost, Ship } from "lucide-react";
 import { createPortal } from "react-dom";
 import ChatModal from "./ChatModal";
 import Tooltip from "./ui/Tooltip";
+import { useTranslations } from "next-intl";
 
 type ChatButtonProps = {
   variant?: "ghost" | "ship";
@@ -14,8 +15,9 @@ type ChatButtonProps = {
 
 export default function ChatButton({
   variant = "ghost",
-  label = "Hablar con la IA",
+  label,
 }: ChatButtonProps): JSX.Element | null {
+  const t = useTranslations("Chat");
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const reduce = useReducedMotion();
@@ -48,16 +50,17 @@ export default function ChatButton({
   }, [open]);
 
   const Icon = useMemo(() => (variant === "ship" ? Ship : Ghost), [variant]);
+  const buttonLabel = label || t("buttonLabel");
 
   if (!mounted) return null;
 
   return createPortal(
     <>
-      <Tooltip content="Chatea con nuestra IA" position="left">
+      <Tooltip content={t("tooltip")} position="left">
         <motion.button
           ref={btnRef}
           type="button"
-          aria-label={label}
+          aria-label={buttonLabel}
           aria-controls={panelId}
           aria-expanded={open}
           onClick={() => setOpen(true)}

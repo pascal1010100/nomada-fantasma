@@ -4,10 +4,17 @@
         "description": "Una experiencia única en el Lago Atitlán"
     },
     "Navigation": {
+        "brandName": "Nómada Fantasma",
         "home": "Inicio",
-        "about": "Nosotros",
-        "scenarios": "Escenarios",
-        "contact": "Contacto"
+        "map": "Mapa",
+        "routes": "Rutas Mágicas",
+        "shuttles": "Transporte",
+        "about": "Cómo funciona",
+        "contact": "Contacto",
+        "menu": "Menú",
+        "closeMenu": "Cerrar menú",
+        "openMenu": "Abrir menú",
+        "skip": "Saltar al contenido"
     },
     "Hero": {
         "badge": "PLATAFORMA PARA NÓMADAS DIGITALES",
@@ -30,5 +37,498 @@
             "happyNomads": "+10,000 nómadas felices",
             "ratings": "4.9/5 en valoraciones"
         }
+    },
+    "Shuttles": {
+        "badge": "Traslados Premium Atitlán",
+        "title": "Cruza el Lago,",
+        "subtitle": "Explora Guate.",
+        "description": "Servicios compartidos y privados desde el corazón del Lago de Atitlán hacia los puntos más icónicos del país.",
+        "searchPlaceholder": "Buscar aventura...",
+        "originPlaceholder": "Origen: Todos",
+        "destinationPlaceholder": "Destino: Todos",
+        "sectionTitle": "Explora las Conexiones",
+        "sectionDesc": "Rutas optimizadas para que tu única preocupación sea disfrutar del paisaje entre montañas y cafetales.",
+        "availableRoutes": "Rutas Disponibles",
+        "noRoutesTitle": "Aún no llegamos hasta allí...",
+        "noRoutesAction": "Ver todas las rutas de Atitlán",
+        "privateTransferTitle": "¿Necesitas un traslado privado personalizado?",
+        "privateTransferDesc": "Si viajas en un grupo grande o tienes requerimientos especiales, podemos organizar un transporte exclusivo para ti.",
+        "privateTransferBtn": "Solicitar Cotización Privada",
+        "conciergeService": "Servicio de Concierge",
+        "card": {
+            "eliteService": "Servicio Elite",
+            "sharedType": "Shuttle Compartido",
+            "privateType": "Traslado Privado",
+            "from": "Desde",
+            "perPerson": "por persona",
+            "originLabel": "Origen",
+            "destinationLabel": "Destino",
+            "durationLabel": "Duración",
+            "scheduleLabel": "Salidas",
+            "bookNow": "Reservar Ahora"
+        },
+        "modal": {
+            "successTitle": "¡Solicitud Enviada!",
+            "successDesc": "Hemos recibido tu solicitud para el shuttle de {origin} a {destination}.",
+            "successSubDesc": "Nuestro equipo revisará la disponibilidad con la agencia y te contactaremos en {email} en breve.",
+            "successBtn": "Entendido, gracias",
+            "title": "Reserva Elite",
+            "titlePrivate": "Consulta Traslado Privado",
+            "customRoute": "Ruta Personalizada",
+            "originLabel": "Origen",
+            "destinationLabel": "Destino",
+            "nameLabel": "Nombre Completo",
+            "emailLabel": "Email de Contacto",
+            "dateLabel": "Fecha del Viaje",
+            "timeLabel": "Hora",
+            "timePlaceholder": "Hora",
+            "passengersLabel": "Pasajeros",
+            "pickupLabel": "Lugar de Recogida",
+            "pickupPlaceholder": "Nombre del Hotel o dirección exacta",
+            "submitBtn": "Solicitar Reserva",
+            "submitting": "Procesando...",
+            "footerInfo": "Confirmación Elite • Respuesta en < 24h",
+            "errorGeneric": "Error al enviar la solicitud"
+        }
+    },
+    "About": {
+        "badge": "Protocolo de Viaje V2.0",
+        "titleTop": "El Nexo del",
+        "titleGradient": "Nómada Moderno",
+        "description": "Tu portal a un mundo sin fronteras. Fusionamos tecnología de vanguardia con experiencias locales auténticas para el viajero de élite.",
+        "btnExploration": "Iniciar Exploración",
+        "btnProtocol": "Ver Protocolo",
+        "decodingTitle": "Decodificando el Caos Urbano",
+        "decodingDesc": "Más que una plataforma, somos una red de inteligencia colectiva. Nómada Fantasma decodifica el caos urbano para revelarte rutas secretas, conexiones vitales y el pulso real de cada destino.",
+        "cortexTitle": "Potenciado por Cortex AI",
+        "cortexDesc": "Algoritmos predictivos que te ofrecen:",
+        "cortexItems": [
+            "Curaduría de rutas basada en tu perfil psicográfico",
+            "Asistente táctico 24/7 para logística en terreno",
+            "Análisis de flujo para evitar saturación turística",
+            "Enlace lingüístico en tiempo real"
+        ],
+        "radarTitle": "Radar de Recursos:",
+        "resources": {
+            "wifi": "WiFi Alta Velocidad",
+            "shelters": "Refugios",
+            "recharge": "Estaciones de Recarga",
+            "atms": "Cajeros",
+            "nodes": "Nodos de Interés",
+            "hubs": "Hubs Creativos"
+        },
+        "features": {
+            "cartography": {
+                "title": "Cartografía Viva",
+                "desc": "Datos en tiempo real sobre el ecosistema urbano: WiFi de alta velocidad, hubs de innovación y refugios creativos."
+            },
+            "voyages": {
+                "title": "Travesías Ocultas",
+                "desc": "Caminos no marcados en los mapas convencionales. Experiencias diseñadas por curadores locales."
+            },
+            "cortex": {
+                "title": "Cortex AI",
+                "desc": "Algoritmos predictivos que curan tu viaje en tiempo real. Tu copiloto digital que anticipa tus necesidades."
+            },
+            "syndicate": {
+                "title": "El Sindicato Nómada",
+                "desc": "Conecta con una red global de visionarios, creadores y exploradores."
+            },
+            "sync": {
+                "title": "Sincronización Flexible",
+                "desc": "Reserva cuando quieras. Personaliza tu experiencia. Sin ataduras."
+            },
+            "oracle": {
+                "title": "Oráculo Virtual",
+                "desc": "Respuestas instantáneas a tus dudas sobre el terreno. Asistencia 24/7."
+            }
+        },
+        "protocolTitle": "Ejecutando el Protocolo",
+        "protocolDesc": "Accede a experiencias exclusivas en 5 pasos",
+        "steps": {
+            "scan": {
+                "title": "Escanea el Terreno",
+                "desc": "Navega por nuestra cartografía interactiva y detecta las Travesías Ocultas."
+            },
+            "mission": {
+                "title": "Identifica tu Misión",
+                "desc": "Elige experiencias que resuenen con tu frecuencia. Desde free tours hasta inmersiones exclusivas."
+            },
+            "protocol": {
+                "title": "Inicia Protocolo",
+                "desc": "Solicita tu reserva. Establece conexión directa con el guía local."
+            },
+            "sync": {
+                "title": "Sincronización Confirmada",
+                "desc": "Recibe estado de disponibilidad, coordenadas exactas y hora de encuentro."
+            },
+            "immersion": {
+                "title": "Inmersión Total",
+                "desc": "Vive la experiencia. Descubre la realidad oculta de cada destino."
+            }
+        },
+        "readyTitle": "¿Listo para la inmersión?",
+        "readyMission": "Iniciar Misión",
+        "ctaTitle": "Únete a la comunidad de nómadas digitales",
+        "ctaDesc": "Descubre destinos increíbles, conecta con guías locales y vive experiencias que recordarás para siempre.",
+        "ctaRegister": "Crear cuenta gratuita",
+        "ctaContact": "Contáctanos"
+    },
+    "Contact": {
+        "badge": "Contacto",
+        "titleTop": "Hablemos sobre tu",
+        "titleGradient": "Próximo Viaje",
+        "description": "Nuestro equipo está listo para ayudarte a planificar tu aventura nómada digital. Conecta con nosotros y empieza tu travesía.",
+        "cardChat": {
+            "title": "Chatea con nosotros",
+            "desc": "Nuestro equipo está listo para responder tus preguntas en tiempo real.",
+            "action": "Iniciar chat"
+        },
+        "cardMail": {
+            "title": "Envíanos un correo",
+            "desc": "Escríbenos a nuestro correo electrónico y te responderemos lo antes posible.",
+            "action": "hola@nomadafantasma.com"
+        },
+        "cardVisit": {
+            "title": "Visítanos",
+            "desc": "¿Eres nómada digital? Conoce nuestros espacios de trabajo recomendados.",
+            "action": "Ver en el mapa"
+        },
+        "formBadge": "Formulario de contacto",
+        "formTitle": "Envíanos un mensaje",
+        "formDesc": "Completa el formulario y nos pondremos en contacto contigo en menos de 24 horas.",
+        "formName": "Nombre completo",
+        "formEmail": "Correo electrónico",
+        "formMessage": "Mensaje",
+        "formSubmit": "Enviar mensaje",
+        "formSuccess": "¡Mensaje enviado con éxito!",
+        "formError": "Error al enviar. Inténtalo de nuevo.",
+        "infoTitle": "Información de contacto",
+        "infoLocation": "Ubicación",
+        "infoLocationCity": "Ciudad de Guatemala, Guatemala",
+        "infoEmail": "Correo",
+        "infoSchedule": "Horario",
+        "infoScheduleWeek": "Lunes a Viernes: 9:00 - 18:00",
+        "infoScheduleSat": "Sábado: 10:00 - 14:00",
+        "infoSocial": "Síguenos en redes",
+        "footerCopyright": "© {year} Nómada Fantasma — Hecho con 💙 desde mar abierto.",
+        "footerPrivacy": "Política de privacidad",
+        "footerTerms": "Términos de uso"
+    },
+    "Map": {
+        "badge": "Explora el mundo nómada",
+        "titleTop": "Mapa Interactivo",
+        "titleGradient": "Nómada Fantasma",
+        "description": "Descubre los mejores destinos para nómadas digitales en Guatemala. WiFi rápido, espacios de coworking y comunidad vibrante.",
+        "stats": {
+            "places": "Lugares",
+            "wifi": "WiFi",
+            "verified": "Verificado"
+        },
+        "search": "Buscar destinos, lugares, experiencias...",
+        "locating": "Cargando mapa...",
+        "locateMe": "Centrar en mi ubicación",
+        "legend": {
+            "title": "Leyenda del Mapa",
+            "categories": "categorías"
+        },
+        "cta": {
+            "title": "¿No encuentras lo que buscas?",
+            "description": "Ayúdanos a mejorar el mapa sugiriendo nuevos lugares",
+            "button": "Sugerir un lugar"
+        },
+        "north": "Rumbo Norte"
+    },
+    "Routes": {
+        "badge": "Explora el mundo",
+        "titleTop": "Descubre",
+        "titleGradient": "Rutas Mágicas",
+        "description": "Experiencias únicas en los destinos más asombrosos del mundo, curadas para nómadas digitales.",
+        "search": "Busca destinos, actividades o experiencias...",
+        "btnExplore": "Explorar rutas",
+        "btnHow": "¿Cómo funciona?",
+        "loadingRoutes": "Cargando rutas mágicas",
+        "loadingDesc": "Buscando las mejores rutas para ti",
+        "noResults": "No se encontraron resultados",
+        "noRoutes": "No hay rutas disponibles",
+        "noResultsDesc": "No encontramos ninguna ruta que coincida con tu búsqueda. Intenta con otros términos.",
+        "noRoutesDesc": "Parece que no hay rutas disponibles en este momento. Vuelve a intentarlo más tarde.",
+        "clearSearch": "Limpiar búsqueda",
+        "filterByRegion": "Filtrar por región",
+        "allRegions": "Todas las regiones",
+        "regions": {
+            "europe": "Europa",
+            "asia": "Asia",
+            "america": "América"
+        },
+        "recommended": "Recomendado",
+        "from": "Desde",
+        "explore": "Explorar",
+        "discover": "Descubrir",
+        "viewFullGuide": "Ver guía completa",
+        "addToFavorites": "Añadir a favoritos",
+        "viewDetailsOf": "Ver detalles de {title}",
+        "day": "día",
+        "days": "días"
+    },
+    "Data": {
+        "routes": {
+            "lago-atitlan": {
+                "title": "Lago de Atitlán",
+                "summary": "Un paraíso rodeado de volcanes en Guatemala",
+                "fullDescription": "El Lago de Atitlán es uno de los destinos más impresionantes de Centroamérica, rodeado de volcanes y pueblos mayas llenos de color y tradición.",
+                "vibe": "Paraíso Volcánico",
+                "highlights": [
+                    "Vistas panorámicas del lago",
+                    "Pueblos indígenas mayas",
+                    "Amaneceres inolvidables"
+                ]
+            },
+            "coban": {
+                "title": "Cobán",
+                "summary": "Naturaleza exuberante y cultura viva en Alta Verapaz",
+                "fullDescription": "Adéntrate en el corazón verde de Guatemala, donde la niebla besa las montañas y las aguas cristalinas de Semuc Champey te invitan a la aventura.",
+                "vibe": "Naturaleza & Grutas",
+                "highlights": [
+                    "Semuc Champey y sus pozas turquesas",
+                    "Orquigonia y reservas naturales",
+                    "Cultura Q'eqchi' y gastronomía local"
+                ]
+            },
+            "antigua-guatemala": {
+                "title": "Antigua Guatemala",
+                "summary": "Historia colonial y volcanes majestuosos",
+                "fullDescription": "Recorre las calles de una de las ciudades coloniales más bellas del mundo, rodeada de volcanes y llena de historia en cada rincón.",
+                "vibe": "Historia Colonial",
+                "highlights": [
+                    "Arco de Santa Catalina y calles empedradas",
+                    "Ruinas coloniales y museos",
+                    "Vistas impresionantes de volcanes"
+                ]
+            },
+            "san-marcos": {
+                "title": "San Marcos La Laguna",
+                "summary": "Yoga, meditación y misticismo maya",
+                "fullDescription": "El centro espiritual del lago.",
+                "vibe": "Yoga & Místico",
+                "highlights": [
+                    "Cerro Tzankujil",
+                    "Yoga",
+                    "Cacao"
+                ]
+            },
+            "san-pedro": {
+                "title": "San Pedro La Laguna",
+                "summary": "Fiesta y aventura",
+                "fullDescription": "Diversión y aventura garantizada.",
+                "vibe": "Fiesta & Aventura",
+                "highlights": [
+                    "Volcán San Pedro",
+                    "Vida Nocturna"
+                ]
+            },
+            "san-juan": {
+                "title": "San Juan La Laguna",
+                "summary": "Arte y cultura auténtica",
+                "fullDescription": "El pueblo más colorido.",
+                "vibe": "Arte & Cultura",
+                "highlights": [
+                    "Textiles",
+                    "Galerías",
+                    "Mirador"
+                ]
+            },
+            "santiago": {
+                "title": "Santiago Atitlán",
+                "summary": "Tradición y Maximón",
+                "fullDescription": "Historia profunda.",
+                "vibe": "Tradición Maya",
+                "highlights": [
+                    "Maximón",
+                    "Iglesia",
+                    "Cultura"
+                ]
+            },
+            "panajachel": {
+                "title": "Panajachel",
+                "summary": "La puerta de entrada al Lago de Atitlán. Conocida cariñosamente como \"Pana\", es el principal punto de acceso al Lago de Atitlán.",
+                "fullDescription": "Panajachel, conocida cariñosamente como \"Pana\", es el principal punto de acceso al Lago de Atitlán. Ofrece una mezcla perfecta entre comodidades modernas y encanto local, con su famosa Calle Santander llena de tiendas, restaurantes y vida nocturna. Es el lugar ideal para comenzar tu aventura en el lago, con fácil acceso a los demás pueblos y una amplia gama de servicios turísticos.",
+                "vibe": "Cosmopolita & Compras",
+                "highlights": [
+                    "Calle Santander con tiendas y restaurantes",
+                    "Vida nocturna animada",
+                    "Vistas panorámicas del lago",
+                    "Acceso a otros pueblos del lago",
+                    "Mercado de artesanías"
+                ]
+            },
+            "santa-cruz": {
+                "title": "Santa Cruz La Laguna",
+                "summary": "Pueblo tranquilo con las mejores vistas y buceo de altura",
+                "fullDescription": "Santa Cruz La Laguna es un pueblo pintoresco y tranquilo, accesible solo por lancha. Es famoso por tener algunas de las mejores vistas del lago y los volcanes, así como por ser el hogar de la única escuela de buceo profesional en Atitlán. Es el lugar perfecto para relajarse, nadar y disfrutar de la naturaleza sin las multitudes.",
+                "vibe": "Relax & Vistas",
+                "highlights": [
+                    "Buceo de altura en el lago",
+                    "Vistas panorámicas increíbles",
+                    "Senderismo a Jaibalito",
+                    "Hoteles con acceso directo al lago"
+                ]
+            }
+        },
+        "tours": {
+            "tour-sm-001": {
+                "title": "Retiro de Yoga y Meditación",
+                "summary": "Una experiencia transformadora de conexión mente-cuerpo en un entorno natural único.",
+                "description": "Sumérgete en la práctica del yoga y la meditación en uno de los lugares más energéticos del Lago de Atitlán. Este retiro incluye sesiones de yoga al amanecer, meditaciones guiadas, talleres de autoconocimiento y tiempo para la reflexión personal.",
+                "duration": "1 día completo",
+                "difficulty": "Fácil",
+                "meetingPoint": "Centro Holístico San Marcos",
+                "includes": [
+                    "3 sesiones de yoga",
+                    "2 meditaciones guiadas",
+                    "Taller de respiración",
+                    "Almuerzo vegetariano",
+                    "Tés e infusiones",
+                    "Material didáctico",
+                    "Acceso a las instalaciones"
+                ],
+                "notIncludes": [
+                    "Hospedaje",
+                    "Cena",
+                    "Masajes o terapias adicionales",
+                    "Propinas"
+                ],
+                "whatToBring": [
+                    "Ropa cómoda para yoga",
+                    "Toalla",
+                    "Bloqueador solar",
+                    "Cuaderno para notas",
+                    "Botella de agua reutilizable"
+                ]
+            }
+        },
+        "points": {
+            "pana-cowork-1": {
+                "name": "Selina Panajachel"
+            },
+            "pana-wifi-1": {
+                "name": "Café Loco"
+            },
+            "pana-banco-1": {
+                "name": "Banco Industrial"
+            },
+            "pana-puerto-1": {
+                "name": "Embarcadero Tzanjuyu"
+            },
+            "pana-ghost-1": {
+                "name": "Jardín Secreto"
+            },
+            "sp-cowork-1": {
+                "name": "Mikaso Hotel & Cowork"
+            },
+            "sp-wifi-1": {
+                "name": "La Terraza"
+            },
+            "sp-banco-1": {
+                "name": "Banrural"
+            },
+            "sp-puerto-1": {
+                "name": "Muelle Principal"
+            },
+            "sp-ghost-1": {
+                "name": "Playa Escondida"
+            },
+            "sm-cowork-1": {
+                "name": "Lush Atitlán"
+            },
+            "sm-wifi-1": {
+                "name": "Circles Café"
+            },
+            "sm-puerto-1": {
+                "name": "Muelle San Marcos"
+            },
+            "sm-ghost-1": {
+                "name": "Altar Maya Oculto"
+            },
+            "sj-wifi-1": {
+                "name": "Café Las Marias"
+            },
+            "sj-puerto-1": {
+                "name": "Muelle San Juan"
+            },
+            "sa-banco-1": {
+                "name": "BAM Santiago"
+            },
+            "sa-puerto-1": {
+                "name": "Muelle Santiago"
+            },
+            "sc-cowork-1": {
+                "name": "La Iguana Perdida"
+            },
+            "sc-puerto-1": {
+                "name": "Muelle Santa Cruz"
+            },
+            "sc-ghost-1": {
+                "name": "Cueva del Pescador"
+            }
+        }
+    },
+    "Chat": {
+        "title": "Asesor Táctico IA",
+        "buttonLabel": "Hablar con la IA",
+        "tooltip": "Chatea con nuestra IA",
+        "statusOnline": "Enlace Activo",
+        "statusWait": "Esperando Comando...",
+        "statusActive": "Enlace Ghost Activo...",
+        "inputPlaceholder": "Ingresar consulta / solicitar asistencia...",
+        "welcomeMessage": "Enlace Táctico Nómada Fantasma inicializado. ¿Cómo puedo asistir tu misión hoy?",
+        "errorMessage": "Falla de comunicación. Enlace inestable. Reintentar protocolo.",
+        "clearTooltip": "Limpiar historial",
+        "closeMenu": "Cerrar chat",
+        "suggestions": {
+            "yoga": {
+                "text": "🧘 Yoga en San Marcos",
+                "query": "¿Qué hacer en San Marcos?"
+            },
+            "tours": {
+                "text": "💰 Tours baratos",
+                "query": "Tours económicos en el lago"
+            },
+            "nomad": {
+                "text": "📶 Nómada digital",
+                "query": "¿Dónde hay mejor WiFi?"
+            },
+            "compare": {
+                "text": "🏘️ Comparar pueblos",
+                "query": "Diferencias entre San Pedro y San Marcos"
+            }
+        }
+    },
+    "Tours": {
+        "title": "Tours y Experiencias",
+        "sectionDesc": "¿No encuentras lo que buscas? Pregunta por tours personalizados.",
+        "popular": "Popular",
+        "viewDetails": "Ver detalles",
+        "book": "Reservar",
+        "perPerson": "/ persona",
+        "children": "Niños: {price}",
+        "maxCapacity": "Hasta {max} personas",
+        "detailsAria": "Ver detalles del tour {title}",
+        "reservationAria": "Reservar ahora el tour {title}",
+        "difficulty": {
+            "easy": "Fácil",
+            "medium": "Moderado",
+            "hard": "Difícil"
+        }
+    },
+    "LanguageSwitcher": {
+        "switch": "Cambiar a Inglés",
+        "current": "Español",
+        "other": "English"
+    },
+    "Footer": {
+        "rights": "© {year} Nómada Fantasma",
+        "remote": "Remoto · GT",
+        "contact": "Página de contacto"
     }
 }

@@ -1,79 +1,79 @@
-'use client';
+"use client"
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Region } from '../lib/types';
-import { Globe, Compass, MapPin } from 'lucide-react';
-import { useState } from 'react';
-
-const regions: { value: Region; label: string; icon: React.ReactNode }[] = [
-  { 
-    value: 'europe', 
-    label: 'Europa',
-    icon: <Compass className="w-4 h-4 mr-2" />
-  },
-  { 
-    value: 'asia', 
-    label: 'Asia',
-    icon: <MapPin className="w-4 h-4 mr-2" />
-  },
-  { 
-    value: 'america', 
-    label: 'América',
-    icon: <Globe className="w-4 h-4 mr-2" />
-  },
-];
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
+import { Region } from "../lib/types"
+import { Globe, Compass, MapPin } from "lucide-react"
+import { useState } from "react"
+import { useTranslations } from "next-intl"
 
 interface RegionFilterProps {
-  selectedRegion?: Region | null;
+  selectedRegion?: Region | null
 }
 
 export default function RegionFilter({ selectedRegion = null }: RegionFilterProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams()!;
-  const [isOpen, setIsOpen] = useState(false);
+  const t = useTranslations("Routes")
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()!
+  const [isOpen, setIsOpen] = useState(false)
+
+  const regions: { value: Region; label: string; icon: React.ReactNode }[] = [
+    {
+      value: "europe",
+      label: t("regions.europe"),
+      icon: <Compass className="w-4 h-4 mr-2" />,
+    },
+    {
+      value: "asia",
+      label: t("regions.asia"),
+      icon: <MapPin className="w-4 h-4 mr-2" />,
+    },
+    {
+      value: "america",
+      label: t("regions.america"),
+      icon: <Globe className="w-4 h-4 mr-2" />,
+    },
+  ]
 
   const handleRegionChange = (region: Region | null) => {
-    const params = new URLSearchParams(searchParams);
-    
-    if (region) {
-      params.set('region', region);
-    } else {
-      params.delete('region');
-    }
-    
-    router.push(`${pathname}?${params.toString()}`);
-    setIsOpen(false);
-  };
+    const params = new URLSearchParams(searchParams)
 
-  const selectedRegionData = regions.find(r => r.value === selectedRegion);
+    if (region) {
+      params.set("region", region)
+    } else {
+      params.delete("region")
+    }
+
+    router.push(`${pathname}?${params.toString()}`)
+    setIsOpen(false)
+  }
+
+  const selectedRegionData = regions.find((r) => r.value === selectedRegion)
 
   return (
     <div className="relative">
       <div className="flex flex-wrap items-center justify-center gap-3">
         <motion.button
           onClick={() => handleRegionChange(null)}
-          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center ${
-            !selectedRegion
-              ? 'bg-gradient-to-r from-electricBlue to-cyberPurple text-white shadow-md hover:shadow-lg hover:shadow-electricBlue/20 dark:shadow-cyberPurple/10'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-gray-200 dark:border-gray-700 hover:border-electricBlue/60 dark:hover:border-cyberPurple/40 hover:shadow-sm transition-all duration-300'
-          }`}
+          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center ${!selectedRegion
+              ? "bg-gradient-to-r from-electricBlue to-cyberPurple text-white shadow-md hover:shadow-lg hover:shadow-electricBlue/20 dark:shadow-cyberPurple/10"
+              : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-gray-200 dark:border-gray-700 hover:border-electricBlue/60 dark:hover:border-cyberPurple/40 hover:shadow-sm transition-all duration-300"
+            }`}
           whileHover={{ y: -1 }}
           whileTap={{ scale: 0.98 }}
         >
           <Globe className="w-4 h-4 mr-2" />
-          <span>Todas las regiones</span>
+          <span>{t("allRegions")}</span>
         </motion.button>
 
         <div className="relative">
           <motion.button
             onClick={() => setIsOpen(!isOpen)}
-            className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center ${
-              selectedRegion
-                ? 'bg-gradient-to-r from-electricBlue to-cyberPurple text-white shadow-md hover:shadow-lg hover:shadow-electricBlue/20 dark:shadow-cyberPurple/10'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-gray-200 dark:border-gray-700 hover:border-electricBlue/60 dark:hover:border-cyberPurple/40 hover:shadow-sm transition-all duration-300'
-            }`}
+            className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center ${selectedRegion
+                ? "bg-gradient-to-r from-electricBlue to-cyberPurple text-white shadow-md hover:shadow-lg hover:shadow-electricBlue/20 dark:shadow-cyberPurple/10"
+                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-gray-200 dark:border-gray-700 hover:border-electricBlue/60 dark:hover:border-cyberPurple/40 hover:shadow-sm transition-all duration-300"
+              }`}
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -85,13 +85,13 @@ export default function RegionFilter({ selectedRegion = null }: RegionFilterProp
             ) : (
               <>
                 <Compass className="w-4 h-4 mr-2" />
-                <span>Filtrar por región</span>
+                <span>{t("filterByRegion")}</span>
               </>
             )}
-            <svg 
-              className={`w-4 h-4 ml-2 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
-              fill="none" 
-              viewBox="0 0 24 24" 
+            <svg
+              className={`w-4 h-4 ml-2 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
               stroke="currentColor"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -112,11 +112,10 @@ export default function RegionFilter({ selectedRegion = null }: RegionFilterProp
                     <button
                       key={region.value}
                       onClick={() => handleRegionChange(region.value)}
-                      className={`w-full text-left px-4 py-2.5 text-sm rounded-md flex items-center transition-colors ${
-                        selectedRegion === region.value
-                          ? 'bg-gradient-to-r from-electricBlue/10 to-cyberPurple/10 text-electricBlue dark:text-cyberPurple font-medium'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                      }`}
+                      className={`w-full text-left px-4 py-2.5 text-sm rounded-md flex items-center transition-colors ${selectedRegion === region.value
+                          ? "bg-gradient-to-r from-electricBlue/10 to-cyberPurple/10 text-electricBlue dark:text-cyberPurple font-medium"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                        }`}
                     >
                       {region.icon}
                       {region.label}
@@ -128,11 +127,11 @@ export default function RegionFilter({ selectedRegion = null }: RegionFilterProp
           </AnimatePresence>
         </div>
       </div>
-      
+
       {/* Decorative elements */}
       <div className="absolute -bottom-6 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent dark:via-gray-800/50">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-electricBlue/50 to-transparent dark:via-electricBlue/40 opacity-70"></div>
       </div>
     </div>
-  );
+  )
 }

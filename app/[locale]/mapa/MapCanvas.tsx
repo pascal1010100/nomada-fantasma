@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Tooltip, Popup } from "react-leaflet";
 import L from "leaflet";
 import Link from "next/link";
 import { Skull, ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { Point } from "./points";
 import { MapControls } from "./components/MapControls";
 import { CategoryFilter } from "./components/CategoryFilter";
@@ -95,6 +96,9 @@ export default function MapCanvas({
   const isDark = useThemeDark();
   const mapRef = useRef<L.Map | null>(null);
   const { activeCats, toggleCat } = useMapControls();
+  const t = useTranslations('Map');
+  const tr = useTranslations('Routes');
+  const tm = useTranslations('Data.points');
 
   // Invalidate size when theme changes
   React.useEffect(() => {
@@ -195,20 +199,20 @@ export default function MapCanvas({
                 }}
               >
                 <Tooltip direction="top" offset={[0, -6]} opacity={0.95}>
-                  {p.name}
+                  {tm(`${p.id}.name`)}
                 </Tooltip>
                 <Popup>
                   <div className="space-y-1">
-                    <div className="text-sm font-medium">{p.name}</div>
+                    <div className="text-sm font-medium">{tm(`${p.id}.name`)}</div>
                     <div className="text-xs opacity-80">
-                      Categoría: <span className="font-medium">{category}</span>
+                      {t('legend.categories')}: <span className="font-medium">{category}</span>
                     </div>
                     {p.townSlug && (
                       <Link
                         href={`/rutas-magicas/lago-atitlan/${p.townSlug}`}
                         className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1 mt-2"
                       >
-                        Ver guía del pueblo <ArrowRight className="w-3 h-3" />
+                        {tr('viewFullGuide')} <ArrowRight className="w-3 h-3" />
                       </Link>
                     )}
                   </div>
@@ -240,7 +244,7 @@ export default function MapCanvas({
       <div
         aria-hidden
         className="pointer-events-none absolute bottom-4 left-4 z-[40] opacity-60"
-        title="Rumbo Norte"
+        title={t('north')}
       >
         <div className="rounded-full bg-[color:var(--card,rgba(17,24,39,0.7))] border border-[color:var(--border,#334155)] px-2 py-1 text-xs backdrop-blur">
           N

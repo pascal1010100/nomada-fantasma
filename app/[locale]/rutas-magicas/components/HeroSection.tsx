@@ -1,38 +1,42 @@
-'use client';
+"use client"
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef, useState, useEffect } from 'react';
-import { ArrowRight, Sparkles } from 'lucide-react';
-import Link from 'next/link';
-import SearchBar from './SearchBar';
+import { motion, useScroll, useTransform } from "framer-motion"
+import { useRef, useState, useEffect } from "react"
+import { ArrowRight, Sparkles } from "lucide-react"
+import Link from "next/link"
+import SearchBar from "./SearchBar"
+import { useTranslations } from "next-intl"
 
-export default function HeroSection({ onSearch, defaultQuery = '' }: { onSearch?: (query: string) => void; defaultQuery?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isMounted, setIsMounted] = useState(false);
+export default function HeroSection({
+  onSearch,
+  defaultQuery = "",
+}: {
+  onSearch?: (query: string) => void
+  defaultQuery?: string
+}) {
+  const t = useTranslations("Routes")
+  const ref = useRef<HTMLDivElement>(null)
+  const [isMounted, setIsMounted] = useState(false)
 
   const handleSearch = (query: string) => {
     if (onSearch) {
-      onSearch(query);
+      onSearch(query)
     }
-  };
+  }
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start start', 'end start']
-  });
+    offset: ["start start", "end start"],
+  })
 
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    setIsMounted(true)
+  }, [])
 
   return (
-    <motion.section
-      ref={ref}
-      style={{ opacity }}
-      className="relative min-h-[80vh] flex items-center justify-center"
-    >
+    <motion.section ref={ref} style={{ opacity }} className="relative min-h-[80vh] flex items-center justify-center">
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-6xl px-6 mx-auto text-center sm:px-8">
         <div className="space-y-8">
@@ -46,7 +50,7 @@ export default function HeroSection({ onSearch, defaultQuery = '' }: { onSearch?
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
-            <span className="text-primary font-semibold tracking-wide uppercase text-xs">Explora el mundo</span>
+            <span className="text-primary font-semibold tracking-wide uppercase text-xs">{t("badge")}</span>
           </motion.div>
 
           <motion.h1
@@ -55,9 +59,9 @@ export default function HeroSection({ onSearch, defaultQuery = '' }: { onSearch?
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
           >
-            <span className="block text-foreground">Descubre</span>
+            <span className="block text-foreground">{t("titleTop")}</span>
             <span className="block mt-2 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
-              Rutas Mágicas
+              {t("titleGradient")}
             </span>
           </motion.h1>
 
@@ -67,7 +71,7 @@ export default function HeroSection({ onSearch, defaultQuery = '' }: { onSearch?
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
           >
-            Experiencias únicas en los destinos más asombrosos del mundo, curadas para nómadas digitales.
+            {t("description")}
           </motion.p>
 
           <motion.div
@@ -79,7 +83,7 @@ export default function HeroSection({ onSearch, defaultQuery = '' }: { onSearch?
             <SearchBar
               onSearch={handleSearch}
               defaultValue={defaultQuery}
-              placeholder="Busca destinos, actividades o experiencias..."
+              placeholder={t("search")}
               className="w-full"
             />
           </motion.div>
@@ -95,7 +99,7 @@ export default function HeroSection({ onSearch, defaultQuery = '' }: { onSearch?
               className="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-medium text-white bg-gradient-to-r from-primary to-accent rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
             >
               <span className="relative z-10 flex items-center gap-2">
-                Explorar rutas
+                {t("btnExplore")}
                 <Sparkles className="w-4 h-4" />
               </span>
             </Link>
@@ -103,7 +107,7 @@ export default function HeroSection({ onSearch, defaultQuery = '' }: { onSearch?
               href="/sobre-nosotros"
               className="inline-flex items-center justify-center px-8 py-3.5 text-base font-medium text-foreground bg-card/50 hover:bg-card/80 border border-border/50 rounded-xl backdrop-blur-sm transition-all duration-300 hover:scale-105"
             >
-              <span>¿Cómo funciona?</span>
+              <span>{t("btnHow")}</span>
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </motion.div>
@@ -129,7 +133,8 @@ export default function HeroSection({ onSearch, defaultQuery = '' }: { onSearch?
       {/* Gradient animation CSS */}
       <style jsx>{`
         @keyframes gradient {
-          0%, 100% {
+          0%,
+          100% {
             background-position: 0% 50%;
           }
           50% {
@@ -141,5 +146,5 @@ export default function HeroSection({ onSearch, defaultQuery = '' }: { onSearch?
         }
       `}</style>
     </motion.section>
-  );
+  )
 }

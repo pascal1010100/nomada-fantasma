@@ -6,7 +6,7 @@ import { Route } from '../lib/types';
 import { motion, useInView } from 'framer-motion';
 import { Star, MapPin, Calendar, ArrowRight, Users, Zap, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import RippleButton from '@/app/components/ui/RippleButton';
+import { RippleButton } from '@/app/components/ui';
 
 interface RouteCardProps {
   route: Route;
@@ -40,10 +40,24 @@ const fadeIn: Variants = {
   }
 };
 
+import { useTranslations } from 'next-intl';
+
 export default function RouteCard({ route }: RouteCardProps) {
   const router = useRouter();
+  const t = useTranslations('Routes');
+  // Localized data for the specific route
+  const td = useTranslations(`Data.routes.${route.slug}`);
+
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
+
+  const title = td('title');
+  const summary = td('summary');
+  const vibe = route.vibe ? td('vibe') : undefined;
+
+  // We need to handle highlights carefully as it's an array
+  // next-intl supports getting arrays if configured, but let's assume we can map keys
+  const highlights = route.highlights ? (td.raw('highlights') as string[]) : [];
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -88,7 +102,7 @@ export default function RouteCard({ route }: RouteCardProps) {
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex={0}
-      aria-label={`Ver detalles de ${route.title}`}
+      aria-label={t('viewDetailsOf', { title })}
       whileHover={{ scale: 1.02 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
     >
@@ -120,7 +134,7 @@ export default function RouteCard({ route }: RouteCardProps) {
               transition={{ delay: 0.3 }}
             >
               <span className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold shadow-lg shadow-amber-500/30 animate-pulse-glow">
-                🌟 Recomendado
+                🌟 {t('recommended')}
               </span>
             </motion.div>
           )}
@@ -129,17 +143,17 @@ export default function RouteCard({ route }: RouteCardProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            {getRegionFlag(route.region)} {route.region.charAt(0).toUpperCase() + route.region.slice(1)}
+            {getRegionFlag(route.region)} {t(`regions.${route.region}`)}
           </motion.div>
 
           {/* Conditional Badge */}
-          {route.vibe ? (
+          {vibe ? (
             <motion.div
               className="px-3 py-1 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-xs font-bold shadow-lg shadow-purple-500/20"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {route.vibe}
+              {vibe}
             </motion.div>
           ) : (
             <motion.div
@@ -169,7 +183,7 @@ export default function RouteCard({ route }: RouteCardProps) {
             className="p-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-white/20 transition-colors"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            aria-label="Añadir a favoritos"
+            aria-label={t('addToFavorites')}
           >
             <Heart className="h-4 w-4 text-white hover:text-pink-500 hover:fill-pink-500 transition-colors" />
           </motion.button>
@@ -181,17 +195,17 @@ export default function RouteCard({ route }: RouteCardProps) {
         <div className="flex-1">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
-              {route.title}
+              {title}
             </h3>
           </div>
           <p className="text-sm text-muted-foreground mb-4 leading-relaxed line-clamp-2">
-            {route.summary}
+            {summary}
           </p>
 
           {/* Highlights */}
-          {route.highlights && route.highlights.length > 0 && (
+          {highlights && highlights.length > 0 && (
             <div className="mt-3 space-y-1">
-              {route.highlights.slice(0, 3).map((highlight, i) => (
+              {highlights.slice(0, 3).map((highlight, i) => (
                 <div key={i} className="flex items-start">
                   <Zap className="h-3.5 w-3.5 text-primary mt-0.5 mr-2 flex-shrink-0" />
                   <span className="text-xs text-muted-foreground">{highlight}</span>
@@ -213,12 +227,12 @@ export default function RouteCard({ route }: RouteCardProps) {
             }
           }}
         >
-          {route.vibe ? (
+          {vibe ? (
             // Town Mode Meta
             <>
               <div className="flex items-center">
                 <Zap className="w-3.5 h-3.5 mr-1.5 text-accent" />
-                <span>{route.vibe}</span>
+                <span>{vibe}</span>
               </div>
               <div className="flex items-center">
                 <div className="flex mr-1.5">
@@ -234,11 +248,11 @@ export default function RouteCard({ route }: RouteCardProps) {
             <>
               <div className="flex items-center">
                 <MapPin className="w-3.5 h-3.5 mr-1.5 text-primary" />
-                <span>{route.region.charAt(0).toUpperCase() + route.region.slice(1)}</span>
+                <span>{t(`regions.${route.region}`)}</span>
               </div>
               <div className="flex items-center">
                 <Calendar className="w-3.5 h-3.5 mr-1.5 text-primary" />
-                <span>{route.durationDays} {route.durationDays === 1 ? 'día' : 'días'}</span>
+                <span>{route.durationDays} {route.durationDays === 1 ? t('day') : t('days')}</span>
               </div>
             </>
           )}
@@ -258,11 +272,11 @@ export default function RouteCard({ route }: RouteCardProps) {
         >
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col">
-              {route.vibe ? (
-                <span className="text-xs text-muted-foreground">Ver guía completa</span>
+              {vibe ? (
+                <span className="text-xs text-muted-foreground">{t('viewFullGuide')}</span>
               ) : (
                 <>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Desde</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('from')}</span>
                   <span className="text-lg font-bold text-primary">
                     ${route.price.toLocaleString()}
                   </span>
@@ -278,7 +292,7 @@ export default function RouteCard({ route }: RouteCardProps) {
                 variant="primary"
                 className="!py-2 !px-4 !text-sm !rounded-lg"
               >
-                {route.vibe ? 'Descubrir' : 'Explorar'} <ArrowRight className="w-4 h-4 ml-1" />
+                {vibe ? t('discover') : t('explore')} <ArrowRight className="w-4 h-4 ml-1" />
               </RippleButton>
             </div>
           </div>

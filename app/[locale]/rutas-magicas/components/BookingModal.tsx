@@ -120,19 +120,31 @@ export default function BookingModal({ isOpen, onClose, guideName, guidePhone }:
         }, 500);
     };
 
+    // Lock body scroll when modal is open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
+
     if (!mounted) return null;
 
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <>
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999]"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
                     />
 
                     {/* Modal */}
@@ -140,7 +152,7 @@ export default function BookingModal({ isOpen, onClose, guideName, guidePhone }:
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md max-h-[90vh] overflow-y-auto bg-gray-900 border border-cyan-500/30 rounded-2xl shadow-2xl z-[10000]"
+                        className="relative w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto bg-gray-900 border border-cyan-500/30 rounded-2xl shadow-2xl z-10"
                     >
                         {/* Header */}
                         <div className="relative p-6 border-b border-gray-800 bg-gray-900/50">
@@ -267,7 +279,7 @@ export default function BookingModal({ isOpen, onClose, guideName, guidePhone }:
                             </p>
                         </form>
                     </motion.div>
-                </>
+                </div>
             )}
         </AnimatePresence>,
         document.body

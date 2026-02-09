@@ -1,4 +1,4 @@
-// app/mapa/page.tsx
+// app/[locale]/mapa/page.tsx
 'use client';
 
 import { useState, Suspense } from 'react';
@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, X, Loader2, AlertCircle, Compass, Wifi, Home, Anchor, Coffee, CreditCard, Sparkles, Navigation } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { RippleButton, Tooltip, LoadingSpinner } from '../../components/ui';
+import { useTranslations } from 'next-intl';
 
 const ParticlesBackground = dynamic(
   () => import('./components/ParticlesBackground'),
@@ -29,11 +30,13 @@ const CATEGORY_ICONS = {
 // Carga dinámica del cliente del mapa para mejor rendimiento
 const MapClient = dynamic(() => import('./MapClient'), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-[60vh] w-full items-center justify-center rounded-2xl glass-enhanced">
-      <LoadingSpinner variant="glow" size="lg" text="Cargando mapa..." />
-    </div>
-  ),
+  loading: () => {
+    return (
+      <div className="flex h-[60vh] w-full items-center justify-center rounded-2xl glass-enhanced">
+        <LoadingSpinner variant="glow" size="lg" text="Cargando..." />
+      </div>
+    );
+  },
 });
 
 // Componente para la búsqueda mejorado
@@ -46,6 +49,7 @@ export function MapSearch({
   searchQuery,
   onSearchChange
 }: MapSearchProps) {
+  const t = useTranslations('Map');
   return (
     <div className="mb-8 max-w-2xl mx-auto px-4 sm:px-6 relative z-10">
       <motion.div
@@ -59,7 +63,7 @@ export function MapSearch({
         </div>
         <input
           type="text"
-          placeholder="Buscar destinos, lugares, experiencias..."
+          placeholder={t('search')}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-full rounded-2xl border border-border/50 glass-enhanced py-4 pl-14 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/60 transition-all"
@@ -80,6 +84,7 @@ export function MapSearch({
 }
 
 export default function MapaPage() {
+  const t = useTranslations('Map');
   const [searchQuery, setSearchQuery] = useState('');
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -87,7 +92,7 @@ export default function MapaPage() {
 
   const handleLocateMe = () => {
     if (!navigator.geolocation) {
-      setLocationError('La geolocalización no es compatible con tu navegador');
+      setLocationError(t('locationError.notSupported'));
       return;
     }
 
@@ -102,7 +107,7 @@ export default function MapaPage() {
       },
       (error) => {
         console.error('Error al obtener la ubicación:', error);
-        setLocationError('No se pudo obtener tu ubicación. Asegúrate de que los permisos estén habilitados.');
+        setLocationError(t('locationError.failed'));
         setIsLocating(false);
       },
       {
@@ -141,7 +146,7 @@ export default function MapaPage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              <span className="text-primary font-semibold">Explora el mundo nómada</span>
+              <span className="text-primary font-semibold">{t('badge')}</span>
             </motion.div>
 
             {/* Título principal con efectos */}
@@ -152,9 +157,9 @@ export default function MapaPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
               >
-                <span className="block text-foreground">Mapa Interactivo</span>
+                <span className="block text-foreground">{t('titleTop')}</span>
                 <span className="block mt-2 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
-                  Nómada Fantasma
+                  {t('titleGradient')}
                 </span>
               </motion.h1>
 
@@ -164,8 +169,7 @@ export default function MapaPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
               >
-                Descubre los mejores destinos para nómadas digitales en Guatemala.
-                WiFi rápido, espacios de coworking y comunidad vibrante.
+                {t('description')}
               </motion.p>
 
               {/* Stats rápidos */}
@@ -176,11 +180,11 @@ export default function MapaPage() {
                 transition={{ delay: 0.4, duration: 0.6 }}
               >
                 {[
-                  { value: samplePoints.length, label: 'Lugares', icon: MapPin },
-                  { value: '24/7', label: 'WiFi', icon: Wifi },
-                  { value: '100%', label: 'Verificado', icon: Sparkles }
+                  { value: samplePoints.length, label: t('stats.places'), icon: MapPin },
+                  { value: '24/7', label: t('stats.wifi'), icon: Wifi },
+                  { value: '100%', label: t('stats.verified'), icon: Sparkles }
                 ].map((stat, index) => (
-                  <Tooltip key={index} content={`${stat.label} disponibles`} position="bottom">
+                  <Tooltip key={index} content={`${stat.label}`} position="bottom">
                     <motion.div
                       className="glass-enhanced rounded-xl px-4 py-2 flex items-center gap-2 cursor-help hover:scale-105 transition-transform"
                       whileHover={{ y: -2 }}
@@ -217,7 +221,7 @@ export default function MapaPage() {
 
             <Suspense fallback={
               <div className="flex h-[60vh] w-full items-center justify-center">
-                <LoadingSpinner variant="glow" size="lg" text="Cargando mapa..." />
+                <LoadingSpinner variant="glow" size="lg" text={t('locating')} />
               </div>
             }>
               <MapContent searchQuery={searchQuery}>
@@ -231,14 +235,14 @@ export default function MapaPage() {
             </Suspense>
 
             {/* Botón de ubicación mejorado */}
-            <Tooltip content="Centrar en mi ubicación" position="left">
+            <Tooltip content={t('locateMe')} position="left">
               <motion.button
                 onClick={handleLocateMe}
                 disabled={isLocating}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="absolute bottom-6 right-6 z-[1000] flex h-12 w-12 items-center justify-center rounded-xl glass-enhanced shadow-lg transition-all hover:border-primary/50 disabled:opacity-50 group"
-                aria-label="Centrar en mi ubicación"
+                aria-label={t('locateMe')}
               >
                 {isLocating ? (
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
@@ -284,10 +288,10 @@ export default function MapaPage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-primary" />
-                Leyenda del Mapa
+                {t('legend.title')}
               </h3>
               <span className="text-xs text-muted-foreground">
-                {CATEGORIES.length} categorías
+                {t('legend.categories', { count: CATEGORIES.length })}
               </span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -326,16 +330,16 @@ export default function MapaPage() {
             transition={{ delay: 0.8, duration: 0.6 }}
           >
             <div className="glass-enhanced rounded-2xl p-8 border border-border/60">
-              <h3 className="text-2xl font-bold mb-2">¿No encuentras lo que buscas?</h3>
+              <h3 className="text-2xl font-bold mb-2">{t('cta.title')}</h3>
               <p className="text-muted-foreground mb-6">
-                Ayúdanos a mejorar el mapa sugiriendo nuevos lugares
+                {t('cta.description')}
               </p>
               <RippleButton
                 variant="primary"
                 onClick={() => window.location.href = '/contacto'}
               >
                 <Sparkles className="w-4 h-4" />
-                Sugerir un lugar
+                {t('cta.button')}
               </RippleButton>
             </div>
           </motion.div>

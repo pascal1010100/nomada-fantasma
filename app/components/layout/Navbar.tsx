@@ -4,25 +4,29 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Menu, X, Map, MessageCircle, Home, ChevronRight, Ghost, Compass, Info } from "lucide-react";
+import { Menu, X, Map, MessageCircle, Home, ChevronRight, Ghost, Compass, Info, Bus } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import ThemeToggle from "../ui/ThemeToggle";
 import LanguageSwitcher from "../LanguageSwitcher";
+import { useTranslations, useLocale } from "next-intl";
 
 type LinkItem = { href: string; label: string; icon: React.ComponentType<any> };
 
-const LINKS: LinkItem[] = [
-  { href: "/", label: "Inicio", icon: Home },
-  { href: "/mapa", label: "Mapa", icon: Map },
-  { href: "/rutas-magicas", label: "Rutas Mágicas", icon: Compass },
-  { href: "/sobre-nosotros", label: "Cómo funciona", icon: Info },
-  { href: "/contacto", label: "Contacto", icon: MessageCircle },
+const getLinks = (t: any) => [
+  { href: "/", label: t("home"), icon: Home },
+  { href: "/mapa", label: t("map"), icon: Map },
+  { href: "/rutas-magicas", label: t("routes"), icon: Compass },
+  { href: "/shuttles", label: t("shuttles"), icon: Bus },
+  { href: "/sobre-nosotros", label: t("about"), icon: Info },
+  { href: "/contacto", label: t("contact"), icon: MessageCircle },
 ];
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
 export default function Navbar() {
+  const t = useTranslations("Navigation");
+  const locale = useLocale();
   const pathname = usePathname() || "/";
   const prefersReduced = useReducedMotion();
   const [open, setOpen] = useState(false);
@@ -32,11 +36,13 @@ export default function Navbar() {
   const prevFocus = useRef<Element | null>(null);
   const rafId = useRef<number | null>(null);
 
-  // Detectar si estamos en una página con Hero (Home, Rutas, Pueblos)
-  const hasHero = pathname === "/" || pathname.includes("/rutas-magicas");
+  const hasHero = pathname === `/${locale}` || pathname === "/" || pathname.includes("/rutas-magicas");
 
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const isActive = (href: string) => {
+    // Standardize href and pathname to compare without locale prefix
+    const cleanPath = pathname === `/${locale}` ? "/" : pathname.replace(`/${locale}`, "") || "/";
+    return href === "/" ? cleanPath === "/" : cleanPath.startsWith(href);
+  };
 
   // Set mounted state to prevent hydration mismatch
   useEffect(() => {
@@ -106,7 +112,7 @@ export default function Navbar() {
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-white/90 focus:px-3 focus:py-2 focus:text-slate-900 dark:focus:bg-slate-900/90 dark:focus:text-white"
       >
-        Saltar al contenido
+        {t("skip")}
       </a>
 
       <div
@@ -121,16 +127,18 @@ export default function Navbar() {
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card/70">
               <Ghost className="h-4 w-4" />
             </span>
-            <span className="text-sm font-semibold tracking-tight">Nómada Fantasma</span>
+            <span className="text-sm font-semibold tracking-tight">{t("brandName")}</span>
           </Link>
 
           <ul className="hidden items-center gap-2 md:flex">
-            {LINKS.map(({ href, label, icon: Icon }) => {
+            {getLinks(t).map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
+              const localizedHref = href === "/" ? `/${locale}` : `/${locale}${href}`;
+
               return (
                 <li key={href} className="relative">
                   <Link
-                    href={href}
+                    href={localizedHref}
                     aria-current={active ? "page" : undefined}
                     className={`pill surface-hover relative inline-flex items-center gap-2 ${active ? "neon-border bg-card/60" : ""
                       }`}
@@ -149,7 +157,7 @@ export default function Navbar() {
             <LanguageSwitcher />
             <ThemeToggle />
             <button
-              aria-label={open ? "Cerrar menú" : "Abrir menú"}
+              aria-label={open ? t("closeMenu") : t("openMenu")}
               aria-expanded={open}
               aria-controls="mobile-drawer"
               onClick={() => setOpen((v) => !v)}
@@ -190,18 +198,19 @@ export default function Navbar() {
             >
               <nav className="flex h-full flex-col">
                 <div className="flex items-center justify-between p-4 border-b border-border">
-                  <span id="mobile-menu-title" className="font-semibold">Menú</span>
-                  <button onClick={() => setOpen(false)} aria-label="Cerrar menú" className="pill">
+                  <span id="mobile-menu-title" className="font-semibold">{t("menu")}</span>
+                  <button onClick={() => setOpen(false)} aria-label={t("closeMenu")} className="pill">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
                 <ul className="grid gap-2 p-3">
-                  {LINKS.map(({ href, label, icon: Icon }) => {
+                  {getLinks(t).map(({ href, label, icon: Icon }) => {
                     const active = isActive(href);
+                    const localizedHref = href === "/" ? `/${locale}` : `/${locale}${href}`;
                     return (
                       <li key={href}>
                         <Link
-                          href={href}
+                          href={localizedHref}
                           onClick={() => setOpen(false)}
                           className={`glass-enhanced flex items-center justify-between p-4 rounded-xl transition-all hover:scale-[1.02] ${active ? "border-primary/50 bg-primary/5" : "hover:border-primary/30"
                             }`}
@@ -217,7 +226,7 @@ export default function Navbar() {
                   })}
                 </ul>
                 <div className="mt-auto p-4 text-xs text-muted-foreground">
-                  © {new Date().getFullYear()} Nómada Fantasma
+                  © {new Date().getFullYear()} {t("brandName")}
                 </div>
               </nav>
             </motion.div>

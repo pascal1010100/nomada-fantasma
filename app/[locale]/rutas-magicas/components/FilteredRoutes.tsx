@@ -1,23 +1,12 @@
-'use client';
+"use client"
 
-import { motion, AnimatePresence, Variants } from 'framer-motion';
-import RegionFilter from './RegionFilter';
-import RouteCard from './RouteCard';
-import { mockRoutes } from '../mocks/routes';
-import { Region, Route } from '../lib/types';
-import { Compass, ArrowRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2
-    }
-  }
-};
+import { motion, Variants } from "framer-motion"
+import RouteCard from "./RouteCard"
+import { mockRoutes } from "../mocks/routes"
+import { Region, Route } from "../lib/types"
+import { Compass, ArrowRight } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useTranslations } from "next-intl"
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -26,45 +15,44 @@ const itemVariants: Variants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: [0.22, 1, 0.36, 1] as const
-    }
-  }
-};
-interface FilteredRoutesProps {
-  region?: Region;
-  searchQuery?: string;
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
 }
-export default function FilteredRoutes({ region, searchQuery = '' }: FilteredRoutesProps) {
-  const [isSearching, setIsSearching] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+interface FilteredRoutesProps {
+  region?: Region
+  searchQuery?: string
+}
+export default function FilteredRoutes({ region, searchQuery = "" }: FilteredRoutesProps) {
+  const t = useTranslations("Routes")
+  const td = useTranslations('Data.routes');
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    if (searchQuery) {
-      setIsSearching(true);
-      const timer = setTimeout(() => setIsSearching(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [searchQuery]);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    setIsMounted(true)
+  }, [])
 
   if (!isMounted) {
-    return null;
+    return null
   }
 
   const filteredRoutes = mockRoutes.filter((route: Route) => {
-    const matchesRegion = !region || route.region === region;
-    const isMainRoute = !route.isSubRoute;
+    const matchesRegion = !region || route.region === region
+    const isMainRoute = !route.isSubRoute
+
+    // Get localized content for search
+    const localizedTitle = td(`${route.slug}.title`).toLowerCase();
+    const localizedSummary = td(`${route.slug}.summary`).toLowerCase();
+    const query = searchQuery.toLowerCase();
+
     const matchesSearch =
       !searchQuery ||
-      route.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      route.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (route.tags && route.tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase())));
+      localizedTitle.includes(query) ||
+      localizedSummary.includes(query) ||
+      (route.tags && route.tags.some((tag: string) => tag.toLowerCase().includes(query)))
 
-    return matchesRegion && matchesSearch && isMainRoute;
-  });
+    return matchesRegion && matchesSearch && isMainRoute
+  })
 
   return (
     <div className="relative">
@@ -74,19 +62,17 @@ export default function FilteredRoutes({ region, searchQuery = '' }: FilteredRou
             <Compass className="w-8 h-8 text-cyberPurple" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            {searchQuery ? 'No se encontraron resultados' : 'No hay rutas disponibles'}
+            {searchQuery ? t("noResults") : t("noRoutes")}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-            {searchQuery
-              ? 'No encontramos ninguna ruta que coincida con tu búsqueda. Intenta con otros términos.'
-              : 'Parece que no hay rutas disponibles en este momento. Vuelve a intentarlo más tarde.'}
+            {searchQuery ? t("noResultsDesc") : t("noRoutesDesc")}
           </p>
           {searchQuery && (
             <button
-              onClick={() => window.location.href = window.location.pathname}
+              onClick={() => (window.location.href = window.location.pathname)}
               className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-cyberPurple hover:bg-cyberPurple/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyberPurple transition-colors"
             >
-              Limpiar búsqueda
+              {t("clearSearch")}
               <ArrowRight className="ml-2 -mr-1 h-4 w-4" />
             </button>
           )}
@@ -95,14 +81,11 @@ export default function FilteredRoutes({ region, searchQuery = '' }: FilteredRou
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {filteredRoutes.map((route) => (
-            <motion.div
-              key={route.id}
-              variants={itemVariants}
-            >
+            <motion.div key={route.id} variants={itemVariants}>
               <RouteCard route={route} />
             </motion.div>
           ))}
@@ -116,5 +99,5 @@ export default function FilteredRoutes({ region, searchQuery = '' }: FilteredRou
         </>
       )}
     </div>
-  );
+  )
 }

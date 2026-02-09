@@ -33,12 +33,15 @@ export async function POST(req: Request): Promise<Response> {
       );
     }
 
-    // Language heuristic
-    const locale = (body?.locale || detectLocale(text)) as "es" | "en" | "fr" | undefined;
+    // Language handling
+    const locale = (body?.locale || detectLocale(text) || "es") as "es" | "en" | "fr";
 
     // Compose system prompt with project knowledge
-    const basePersonality = locale ? CHAT_PERSONALITY[locale] : CHAT_PERSONALITY.es;
-    const system = `${PROJECT_KNOWLEDGE}\n\n${basePersonality}`;
+    // We explicitly tell the AI to respond in the target language even if knowledge is in Spanish
+    const basePersonality = CHAT_PERSONALITY[locale] || CHAT_PERSONALITY.es;
+    const languageInstruction = `IMPORTANT: You must respond ALWAYS in ${locale === 'es' ? 'Spanish' : locale === 'en' ? 'English' : 'French'}. The provided project knowledge is in Spanish, but your output must be in ${locale === 'es' ? 'Spanish' : locale === 'en' ? 'English' : 'French'}.`;
+
+    const system = `${PROJECT_KNOWLEDGE}\n\n${languageInstruction}\n\n${basePersonality}`;
 
 
     const apiKey = process.env.GROQ_API_KEY;

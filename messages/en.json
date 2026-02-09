@@ -4,10 +4,17 @@
         "description": "A unique experience at Lake Atitlán"
     },
     "Navigation": {
+        "brandName": "Nomada Fantasma",
         "home": "Home",
-        "about": "About Us",
-        "scenarios": "Scenarios",
-        "contact": "Contact"
+        "map": "Map",
+        "routes": "Magic Routes",
+        "shuttles": "Transportation",
+        "about": "How it works",
+        "contact": "Contact",
+        "menu": "Menu",
+        "closeMenu": "Close menu",
+        "openMenu": "Open menu",
+        "skip": "Skip to content"
     },
     "Hero": {
         "badge": "PLATFORM FOR DIGITAL NOMADS",
@@ -30,5 +37,498 @@
             "happyNomads": "+10,000 happy nomads",
             "ratings": "4.9/5 in ratings"
         }
+    },
+    "Shuttles": {
+        "badge": "Atitlán Premium Transfers",
+        "title": "Cross the Lake,",
+        "subtitle": "Explore Guate.",
+        "description": "Shared and private services from the heart of Lake Atitlán to the country's most iconic spots.",
+        "searchPlaceholder": "Search adventure...",
+        "originPlaceholder": "Origin: All",
+        "destinationPlaceholder": "Destination: All",
+        "sectionTitle": "Explore Connections",
+        "sectionDesc": "Optimized routes so your only worry is enjoying the landscape between mountains and coffee plantations.",
+        "availableRoutes": "Available Routes",
+        "noRoutesTitle": "We haven't reached there yet...",
+        "noRoutesAction": "See all Atitlán routes",
+        "privateTransferTitle": "Need a personalized private transfer?",
+        "privateTransferDesc": "If you are traveling in a large group or have special requirements, we can organize exclusive transportation for you.",
+        "privateTransferBtn": "Request Private Quote",
+        "conciergeService": "Concierge Service",
+        "card": {
+            "eliteService": "Elite Service",
+            "sharedType": "Shared Shuttle",
+            "privateType": "Private Transfer",
+            "from": "From",
+            "perPerson": "per person",
+            "originLabel": "Origin",
+            "destinationLabel": "Destination",
+            "durationLabel": "Duration",
+            "scheduleLabel": "Schedule",
+            "bookNow": "Book Now"
+        },
+        "modal": {
+            "successTitle": "Request Sent!",
+            "successDesc": "We have received your request for the shuttle from {origin} to {destination}.",
+            "successSubDesc": "Our team will check availability with the agency and contact you at {email} shortly.",
+            "successBtn": "Got it, thanks",
+            "title": "Elite Booking",
+            "titlePrivate": "Private Transfer Inquiry",
+            "customRoute": "Custom Route",
+            "originLabel": "Origin",
+            "destinationLabel": "Destination",
+            "nameLabel": "Full Name",
+            "emailLabel": "Contact Email",
+            "dateLabel": "Travel Date",
+            "timeLabel": "Time",
+            "timePlaceholder": "Time",
+            "passengersLabel": "Passengers",
+            "pickupLabel": "Pickup Location",
+            "pickupPlaceholder": "Hotel name or exact address",
+            "submitting": "Processing...",
+            "submitBtn": "Request Booking",
+            "footerInfo": "Elite Confirmation • Response in < 24h",
+            "errorGeneric": "Error sending request"
+        }
+    },
+    "About": {
+        "badge": "Travel Protocol V2.0",
+        "titleTop": "The Nexus of the",
+        "titleGradient": "Modern Nomad",
+        "description": "Your portal to a world without borders. We fuse cutting-edge technology with authentic local experiences for the elite traveler.",
+        "btnExploration": "Start Exploration",
+        "btnProtocol": "View Protocol",
+        "decodingTitle": "Decoding Urban Chaos",
+        "decodingDesc": "More than a platform, we are a collective intelligence network. Ghost Nomad decodes urban chaos to reveal secret routes, vital connections and the real pulse of each destination.",
+        "cortexTitle": "Powered by Cortex AI",
+        "cortexDesc": "Predictive algorithms that offer you:",
+        "cortexItems": [
+            "Route curation based on your psychographic profile",
+            "Tactical 24/7 assistant for on-ground logistics",
+            "Flow analysis to avoid tourist saturation",
+            "Real-time linguistic link"
+        ],
+        "radarTitle": "Resource Radar:",
+        "resources": {
+            "wifi": "High Speed WiFi",
+            "shelters": "Shelters",
+            "recharge": "Recharge Stations",
+            "atms": "ATMs",
+            "nodes": "Nodes of Interest",
+            "hubs": "Creative Hubs"
+        },
+        "features": {
+            "cartography": {
+                "title": "Living Cartography",
+                "desc": "Real-time data on the urban ecosystem: high-speed WiFi, innovation hubs and creative shelters."
+            },
+            "voyages": {
+                "title": "Hidden Voyages",
+                "desc": "Paths not marked on conventional maps. Experiences designed by local curators."
+            },
+            "cortex": {
+                "title": "Cortex AI",
+                "desc": "Predictive algorithms that curate your trip in real time. Your digital co-pilot that anticipates your needs."
+            },
+            "syndicate": {
+                "title": "The Nomad Syndicate",
+                "desc": "Connect with a global network of visionaries, creators and explorers."
+            },
+            "sync": {
+                "title": "Flexible Sync",
+                "desc": "Book when you want. Personalize your experience. No strings attached."
+            },
+            "oracle": {
+                "title": "Virtual Oracle",
+                "desc": "Instant answers to your questions on the ground. 24/7 assistance."
+            }
+        },
+        "protocolTitle": "Executing the Protocol",
+        "protocolDesc": "Access exclusive experiences in 5 steps",
+        "steps": {
+            "scan": {
+                "title": "Scan the Terrain",
+                "desc": "Navigate through our interactive cartography and detect Hidden Voyages."
+            },
+            "mission": {
+                "title": "Identify your Mission",
+                "desc": "Choose experiences that resonate with your frequency. From free tours to exclusive immersions."
+            },
+            "protocol": {
+                "title": "Start Protocol",
+                "desc": "Request your reservation. Establish direct connection with the local guide."
+            },
+            "sync": {
+                "title": "Sync Confirmed",
+                "desc": "Receive availability status, exact coordinates and meeting time."
+            },
+            "immersion": {
+                "title": "Total Immersion",
+                "desc": "Live the experience. Discover the hidden reality of each destination."
+            }
+        },
+        "readyTitle": "Ready for immersion?",
+        "readyMission": "Start Mission",
+        "ctaTitle": "Join the digital nomad community",
+        "ctaDesc": "Discover incredible destinations, connect with local guides and live experiences you'll remember forever.",
+        "ctaRegister": "Create free account",
+        "ctaContact": "Contact us"
+    },
+    "Contact": {
+        "badge": "Contact",
+        "titleTop": "Let's talk about your",
+        "titleGradient": "Next Trip",
+        "description": "Our team is ready to help you plan your digital nomad adventure. Connect with us and start your journey.",
+        "cardChat": {
+            "title": "Chat with us",
+            "desc": "Our team is ready to answer your questions in real time.",
+            "action": "Start chat"
+        },
+        "cardMail": {
+            "title": "Email us",
+            "desc": "Write to our email and we will respond as soon as possible.",
+            "action": "hola@nomadafantasma.com"
+        },
+        "cardVisit": {
+            "title": "Visit us",
+            "desc": "Are you a digital nomad? Meet our recommended workspaces.",
+            "action": "View on map"
+        },
+        "formBadge": "Contact form",
+        "formTitle": "Send us a message",
+        "formDesc": "Complete the form and we will contact you in less than 24 hours.",
+        "formName": "Full name",
+        "formEmail": "Email address",
+        "formMessage": "Message",
+        "formSubmit": "Send message",
+        "formSuccess": "Message sent successfully!",
+        "formError": "Error sending. Please try again.",
+        "infoTitle": "Contact information",
+        "infoLocation": "Location",
+        "infoLocationCity": "Guatemala City, Guatemala",
+        "infoEmail": "Email",
+        "infoSchedule": "Schedule",
+        "infoScheduleWeek": "Monday to Friday: 9:00 - 18:00",
+        "infoScheduleSat": "Saturday: 10:00 - 14:00",
+        "infoSocial": "Follow us on social media",
+        "footerCopyright": "© {year} Ghost Nomad — Made with 💙 from the open sea.",
+        "footerPrivacy": "Privacy Policy",
+        "footerTerms": "Terms of Use"
+    },
+    "Map": {
+        "badge": "Explore the nomad world",
+        "titleTop": "Interactive Map",
+        "titleGradient": "Ghost Nomad",
+        "description": "Discover the best destinations for digital nomads in Guatemala. Fast WiFi, coworking spaces and vibrant community.",
+        "stats": {
+            "places": "Places",
+            "wifi": "WiFi",
+            "verified": "Verified"
+        },
+        "search": "Search destinations, places, experiences...",
+        "locating": "Loading map...",
+        "locateMe": "Center on my location",
+        "legend": {
+            "title": "Map Legend",
+            "categories": "categories"
+        },
+        "cta": {
+            "title": "Can't find what you're looking for?",
+            "description": "Help us improve the map by suggesting new places",
+            "button": "Suggest a place"
+        },
+        "north": "North Heading"
+    },
+    "Routes": {
+        "badge": "Explore the world",
+        "titleTop": "Discover",
+        "titleGradient": "Magic Routes",
+        "description": "Unique experiences in the world's most amazing destinations, curated for digital nomads.",
+        "search": "Search destinations, activities or experiences...",
+        "btnExplore": "Explore routes",
+        "btnHow": "How it works?",
+        "loadingRoutes": "Loading magic routes",
+        "loadingDesc": "Searching for the best routes for you",
+        "noResults": "No results found",
+        "noRoutes": "No routes available",
+        "noResultsDesc": "We couldn't find any route matching your search. Try other terms.",
+        "noRoutesDesc": "It seems there are no routes available at this time. Please try again later.",
+        "clearSearch": "Clear search",
+        "filterByRegion": "Filter by region",
+        "allRegions": "All regions",
+        "regions": {
+            "europe": "Europe",
+            "asia": "Asia",
+            "america": "America"
+        },
+        "recommended": "Recommended",
+        "from": "From",
+        "explore": "Explore",
+        "discover": "Discover",
+        "viewFullGuide": "View Full Guide",
+        "addToFavorites": "Add to Favorites",
+        "viewDetailsOf": "View details of {title}",
+        "day": "day",
+        "days": "days"
+    },
+    "Data": {
+        "routes": {
+            "lago-atitlan": {
+                "title": "Lake Atitlán",
+                "summary": "A paradise surrounded by volcanoes in Guatemala",
+                "fullDescription": "Lake Atitlán is one of the most impressive destinations in Central America, surrounded by volcanoes and Mayan villages full of color and tradition.",
+                "vibe": "Volcanic Paradise",
+                "highlights": [
+                    "Panoramic lake views",
+                    "Mayan indigenous villages",
+                    "Unforgettable sunrises"
+                ]
+            },
+            "coban": {
+                "title": "Cobán",
+                "summary": "Exuberant nature and living culture in Alta Verapaz",
+                "fullDescription": "Delve into the green heart of Guatemala, where the mist kisses the mountains and the crystal clear waters of Semuc Champey invite you to adventure.",
+                "vibe": "Nature & Caves",
+                "highlights": [
+                    "Semuc Champey and its turquoise pools",
+                    "Orquigonia and nature reserves",
+                    "Q'eqchi' culture and local gastronomy"
+                ]
+            },
+            "antigua-guatemala": {
+                "title": "Antigua Guatemala",
+                "summary": "Colonial history and majestic volcanoes",
+                "fullDescription": "Walk the streets of one of the most beautiful colonial cities in the world, surrounded by volcanoes and full of history in every corner.",
+                "vibe": "Colonial History",
+                "highlights": [
+                    "Santa Catalina Arch and cobblestone streets",
+                    "Colonial ruins and museums",
+                    "Impressive volcano views"
+                ]
+            },
+            "san-marcos": {
+                "title": "San Marcos La Laguna",
+                "summary": "Yoga, meditation and Mayan mysticism",
+                "fullDescription": "The spiritual center of the lake.",
+                "vibe": "Yoga & Mystic",
+                "highlights": [
+                    "Tzankujil Hill",
+                    "Yoga",
+                    "Cacao"
+                ]
+            },
+            "san-pedro": {
+                "title": "San Pedro La Laguna",
+                "summary": "Party and adventure",
+                "fullDescription": "Guaranteed fun and adventure.",
+                "vibe": "Party & Adventure",
+                "highlights": [
+                    "San Pedro Volcano",
+                    "Nightlife"
+                ]
+            },
+            "san-juan": {
+                "title": "San Juan La Laguna",
+                "summary": "Authentic art and culture",
+                "fullDescription": "The most colorful village.",
+                "vibe": "Art & Culture",
+                "highlights": [
+                    "Textiles",
+                    "Galleries",
+                    "Lookout"
+                ]
+            },
+            "santiago": {
+                "title": "Santiago Atitlán",
+                "summary": "Tradition and Maximón",
+                "fullDescription": "Deep history.",
+                "vibe": "Mayan Tradition",
+                "highlights": [
+                    "Maximón",
+                    "Church",
+                    "Culture"
+                ]
+            },
+            "panajachel": {
+                "title": "Panajachel",
+                "summary": "The gateway to Lake Atitlán. Affectionately known as \"Pana\", it is the main access point to Lake Atitlán.",
+                "fullDescription": "Panajachel, affectionately known as \"Pana\", is the primary entry point to Lake Atitlán. It offers a perfect blend of modern amenities and local charm, with its famous Santander Street filled with shops, restaurants, and nightlife. It's the ideal place to start your lake adventure, with easy access to all other villages and a wide range of tourist services.",
+                "vibe": "Cosmopolitan & Shopping",
+                "highlights": [
+                    "Santander Street with shops and restaurants",
+                    "Lively nightlife",
+                    "Panoramic lake views",
+                    "Access to other lake villages",
+                    "Artisans market"
+                ]
+            },
+            "santa-cruz": {
+                "title": "Santa Cruz La Laguna",
+                "summary": "Quiet village with the best views and high-altitude diving",
+                "fullDescription": "Santa Cruz La Laguna is a picturesque and tranquil village, accessible only by boat. It is famous for having some of the best views of the lake and volcanoes, as well as being home to only professional diving school in Atitlán. It is the perfect place to relax, swim, and enjoy nature without the crowds.",
+                "vibe": "Relax & Views",
+                "highlights": [
+                    "High-altitude diving in the lake",
+                    "Incredible panoramic views",
+                    "Hiking to Jaibalito",
+                    "Hotels with direct lake access"
+                ]
+            }
+        },
+        "tours": {
+            "tour-sm-001": {
+                "title": "Yoga and Meditation Retreat",
+                "summary": "A transformative mind-body connection experience in a unique natural setting.",
+                "description": "Immerse yourself in the practice of yoga and meditation in one of the most energetic places on Lake Atitlán. This retreat includes sunrise yoga sessions, guided meditations, self-knowledge workshops and time for personal reflection.",
+                "duration": "1 full day",
+                "difficulty": "Easy",
+                "meetingPoint": "San Marcos Holistic Center",
+                "includes": [
+                    "3 yoga sessions",
+                    "2 guided meditations",
+                    "Breathing workshop",
+                    "Vegetarian lunch",
+                    "Teas and infusions",
+                    "Educational material",
+                    "Access to facilities"
+                ],
+                "notIncludes": [
+                    "Accommodation",
+                    "Dinner",
+                    "Additional massages or therapies",
+                    "Tips"
+                ],
+                "whatToBring": [
+                    "Comfortable yoga clothes",
+                    "Towel",
+                    "Sunscreen",
+                    "Notebook",
+                    "Reusable water bottle"
+                ]
+            }
+        },
+        "points": {
+            "pana-cowork-1": {
+                "name": "Selina Panajachel"
+            },
+            "pana-wifi-1": {
+                "name": "Café Loco"
+            },
+            "pana-banco-1": {
+                "name": "Industrial Bank"
+            },
+            "pana-puerto-1": {
+                "name": "Tzanjuyu Dock"
+            },
+            "pana-ghost-1": {
+                "name": "Secret Garden"
+            },
+            "sp-cowork-1": {
+                "name": "Mikaso Hotel & Cowork"
+            },
+            "sp-wifi-1": {
+                "name": "The Terrace"
+            },
+            "sp-banco-1": {
+                "name": "Banrural"
+            },
+            "sp-puerto-1": {
+                "name": "Main Dock"
+            },
+            "sp-ghost-1": {
+                "name": "Hidden Beach"
+            },
+            "sm-cowork-1": {
+                "name": "Lush Atitlán"
+            },
+            "sm-wifi-1": {
+                "name": "Circles Café"
+            },
+            "sm-puerto-1": {
+                "name": "San Marcos Dock"
+            },
+            "sm-ghost-1": {
+                "name": "Hidden Mayan Altar"
+            },
+            "sj-wifi-1": {
+                "name": "Café Las Marias"
+            },
+            "sj-puerto-1": {
+                "name": "San Juan Dock"
+            },
+            "sa-banco-1": {
+                "name": "BAM Santiago"
+            },
+            "sa-puerto-1": {
+                "name": "Santiago Dock"
+            },
+            "sc-cowork-1": {
+                "name": "The Lost Iguana"
+            },
+            "sc-puerto-1": {
+                "name": "Santa Cruz Dock"
+            },
+            "sc-ghost-1": {
+                "name": "Fisherman's Cave"
+            }
+        }
+    },
+    "Chat": {
+        "title": "Tactical Advisor AI",
+        "buttonLabel": "Speak with AI",
+        "tooltip": "Chat with our AI",
+        "statusOnline": "Link Active",
+        "statusWait": "Awaiting Command...",
+        "statusActive": "Ghost Link Active...",
+        "inputPlaceholder": "Enter query / request assistance...",
+        "welcomeMessage": "Ghost Nomad Tactical Link initialized. How can I assist your mission today?",
+        "errorMessage": "Communication failure. Link unstable. Retry protocol.",
+        "clearTooltip": "Clear logs",
+        "closeMenu": "Close chat",
+        "suggestions": {
+            "yoga": {
+                "text": "🧘 Yoga in San Marcos",
+                "query": "What to do in San Marcos?"
+            },
+            "tours": {
+                "text": "💰 Cheap tours",
+                "query": "Budget tours on the lake"
+            },
+            "nomad": {
+                "text": "📶 Digital nomad",
+                "query": "Where is the best WiFi?"
+            },
+            "compare": {
+                "text": "🏘️ Compare towns",
+                "query": "Differences between San Pedro and San Marcos"
+            }
+        }
+    },
+    "Tours": {
+        "title": "Tours & Experiences",
+        "sectionDesc": "Can't find what you're looking for? Ask for personalized tours.",
+        "popular": "Popular",
+        "viewDetails": "View details",
+        "book": "Book",
+        "perPerson": "/ person",
+        "children": "Children: {price}",
+        "maxCapacity": "Up to {max} people",
+        "detailsAria": "View details for {title} tour",
+        "reservationAria": "Book {title} tour now",
+        "difficulty": {
+            "easy": "Easy",
+            "medium": "Medium",
+            "hard": "Hard"
+        }
+    },
+    "LanguageSwitcher": {
+        "switch": "Switch to Spanish",
+        "current": "English",
+        "other": "Español"
+    },
+    "Footer": {
+        "rights": "© {year} Nomada Fantasma",
+        "remote": "Remote · GT",
+        "contact": "Contact page"
     }
 }
