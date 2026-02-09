@@ -4,10 +4,19 @@ import { render } from '@react-email/render';
 import ShuttleConfirmationEmail from '@/app/components/emails/ShuttleConfirmationEmail';
 import ShuttleAdminNotification from '@/app/components/emails/ShuttleAdminNotification';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(request: NextRequest) {
   try {
+    // Validate API key first
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      console.error('RESEND_API_KEY is not configured');
+      return NextResponse.json(
+        { error: 'Email service is not configured' },
+        { status: 500 }
+      );
+    }
+
+    const resend = new Resend(resendApiKey);
     const {
       customerName,
       customerEmail,
