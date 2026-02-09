@@ -47,7 +47,8 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
         setError('');
 
         try {
-            const response = await fetch('/api/shuttles/reserve', {
+            // First, save to database
+            const reserveResponse = await fetch('/api/shuttles/reserve', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -63,9 +64,39 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                 }),
             });
 
-            const data = await response.json();
+            const reserveData = await reserveResponse.json();
 
-            if (!response.ok) throw new Error(data.error || t('errorGeneric'));
+            if (!reserveResponse.ok) throw new Error(reserveData.error || t('errorGeneric'));
+
+            // Then send confirmation emails
+            try {
+                const emailResponse = await fetch('/api/emails/shuttle-confirmation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customerName: name,
+                        customerEmail: email,
+                        origin: isCustom ? customOrigin : shuttle.origin,
+                        destination: isCustom ? customDestination : shuttle.destination,
+                        travelDate: date,
+                        travelTime: time,
+                        passengers,
+                        pickupLocation: pickup,
+                        type: shuttle.type,
+                        price: shuttle.price,
+                    }),
+                });
+
+                const emailData = await emailResponse.json();
+                
+                if (!emailResponse.ok) {
+                    console.warn('Email notification failed:', emailData.error);
+                    // Don't fail the whole process if email fails
+                }
+            } catch (emailError) {
+                console.warn('Email notification failed:', emailError);
+                // Don't fail the whole process if email fails
+            }
 
             setIsSuccess(true);
         } catch (err: any) {
