@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { render } from '@react-email/render';
 import ShuttleConfirmationEmail from '@/app/components/emails/ShuttleConfirmationEmail';
 import ShuttleAdminNotification from '@/app/components/emails/ShuttleAdminNotification';
 
@@ -28,22 +29,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Render email templates
+    const customerEmailHtml = await render(ShuttleConfirmationEmail({
+      customerName,
+      origin,
+      destination,
+      travelDate,
+      travelTime,
+      passengers,
+      pickupLocation,
+      type,
+      price
+    }));
+
+    const adminEmailHtml = await render(ShuttleAdminNotification({
+      customerName,
+      customerEmail,
+      origin,
+      destination,
+      travelDate,
+      travelTime,
+      passengers,
+      pickupLocation,
+      type,
+      price
+    }));
+
     // Send confirmation email to customer
     const customerEmailPromise = resend.emails.send({
       from: 'Nómada Fantasma <noreply@nomadafantasma.com>',
       to: [customerEmail],
       subject: `✈️ Confirmación de Solicitud de Shuttle - ${origin} a ${destination}`,
-      react: ShuttleConfirmationEmail({
-        customerName,
-        origin,
-        destination,
-        travelDate,
-        travelTime,
-        passengers,
-        pickupLocation,
-        type,
-        price
-      }),
+      html: customerEmailHtml,
     });
 
     // Send notification email to admin
@@ -51,18 +68,7 @@ export async function POST(request: NextRequest) {
       from: 'Nómada Fantasma <noreply@nomadafantasma.com>',
       to: ['josemanu0885@gmail.com'],
       subject: `🚌 Nueva Solicitud de Shuttle - ${origin} a ${destination}`,
-      react: ShuttleAdminNotification({
-        customerName,
-        customerEmail,
-        origin,
-        destination,
-        travelDate,
-        travelTime,
-        passengers,
-        pickupLocation,
-        type,
-        price
-      }),
+      html: adminEmailHtml,
     });
 
     // Send both emails concurrently
