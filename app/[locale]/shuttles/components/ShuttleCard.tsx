@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { Clock, MapPin, Users, ArrowRight, Star } from 'lucide-react';
 import { ShuttleRoute } from '@/types/shuttle';
@@ -13,6 +14,11 @@ interface ShuttleCardProps {
 
 export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
     const t = useTranslations('Shuttles.card');
+    const [imageError, setImageError] = useState(false);
+
+    const handleImageError = () => {
+        setImageError(true);
+    };
 
     return (
         <motion.div
@@ -25,10 +31,12 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
             {/* Image Section */}
             <div className="relative h-64 overflow-hidden">
                 <Image
-                    src={shuttle.image}
+                    src={imageError ? '/images/shuttles/default-shuttle.svg' : shuttle.image}
                     alt={`${shuttle.origin} a ${shuttle.destination}`}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    onError={handleImageError}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-80" />
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { ShuttleRoute } from '@/types/shuttle';
 import { supabase } from '@/app/lib/supabase/client';
 import ShuttleCard from './components/ShuttleCard';
@@ -67,10 +68,12 @@ export default function ShuttlesClient() {
             <div className="relative h-[65vh] flex items-center justify-center border-b border-white/5">
                 <div className="absolute inset-0 z-0 overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/20 to-background z-10" />
-                    <img
-                        src="https://images.unsplash.com/photo-1544039417-08f827236bbd?q=80&w=2070&auto=format&fit=crop"
+                    <Image
+                        src="/images/shuttles/default-shuttle.svg"
                         alt="Atitlán Shuttle Service"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        priority
                     />
                 </div>
 
