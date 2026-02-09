@@ -6,6 +6,7 @@ import { Clock, MapPin, Users, ArrowRight, Star } from 'lucide-react';
 import { ShuttleRoute } from '@/types/shuttle';
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import { getDestinationImage } from '../utils/destinationImages';
 
 interface ShuttleCardProps {
     shuttle: ShuttleRoute;
@@ -15,6 +16,9 @@ interface ShuttleCardProps {
 export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
     const t = useTranslations('Shuttles.card');
     const [imageError, setImageError] = useState(false);
+
+    // Usar imagen del destino específico
+    const destinationImage = getDestinationImage(shuttle.destination);
 
     const handleImageError = () => {
         setImageError(true);
@@ -31,7 +35,7 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
             {/* Image Section */}
             <div className="relative h-64 overflow-hidden">
                 <Image
-                    src={imageError ? '/images/shuttles/default-shuttle.svg' : shuttle.image}
+                    src={imageError ? '/images/shuttles/default-shuttle.svg' : destinationImage}
                     alt={`${shuttle.origin} a ${shuttle.destination}`}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
