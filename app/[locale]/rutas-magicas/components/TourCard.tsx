@@ -76,7 +76,7 @@ export default function TourCard({ tour, puebloSlug, className = '' }: TourCardP
         aria-label={t('detailsAria', { title })}
       >
         <Image
-          src={tour.images[0] || '/images/tours/default-tour.jpg'}
+          src={tour.images[0] || '/images/tours/default-tour.svg'}
           alt={title}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"

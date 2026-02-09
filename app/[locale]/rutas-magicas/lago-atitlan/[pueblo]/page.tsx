@@ -227,7 +227,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
                       guide={{
                         id: `guide-${index}`,
                         name: guide.name,
-                        photo: '/images/guides/default-avatar.jpg',
+                        photo: '/images/guides/default-avatar.svg',
                         bio: 'Guía local experto en la región.',
                         specialties: guide.tours,
                         languages: guide.languages,

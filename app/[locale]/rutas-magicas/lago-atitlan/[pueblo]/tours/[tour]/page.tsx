@@ -34,7 +34,7 @@ export default async function TourDetailPage({ params }: RouteParams) {
       {/* Header con imagen */}
       <div className="relative h-64 md:h-96 bg-gray-800">
         <Image
-          src={tour.images[0] || '/images/tours/default-tour.jpg'}
+          src={tour.images[0] || '/images/tours/default-tour.svg'}
           alt={tour.title}
           fill
           className="object-cover opacity-70"
@@ -217,7 +217,7 @@ export default async function TourDetailPage({ params }: RouteParams) {
                 <div key={tour.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="relative h-48">
                     <Image
-                      src={tour.images[0] || '/images/tours/default-tour.jpg'}
+                      src={tour.images[0] || '/images/tours/default-tour.svg'}
                       alt={tour.title}
                       fill
                       className="object-cover"

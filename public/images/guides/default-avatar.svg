@@ -1,0 +1,12 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="avatar-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <circle cx="50%" cy="50%" r="45%" fill="url(#avatar-gradient)"/>
+  <circle cx="50%" cy="35%" r="15%" fill="#ffffff" opacity="0.9"/>
+  <path d="M 50% 55% Q 35% 65% 35% 75% Q 35% 85% 50% 85% Q 65% 85% 65% 75% Q 65% 65% 50% 55%" fill="#ffffff" opacity="0.9"/>
+  <text x="50%" y="95%" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">Guía Local</text>
+</svg>

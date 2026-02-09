@@ -111,7 +111,7 @@ export default async function ConfirmationPage({
           {/* Imagen del tour */}
           <div className="relative h-56 bg-gradient-to-r from-cyan-500 to-blue-500">
             <Image
-              src={tour.images?.[0] || '/images/tours/default-tour.jpg'}
+              src={tour.images?.[0] || '/images/tours/default-tour.svg'}
               alt={tour.title}
               fill
               className="object-cover"

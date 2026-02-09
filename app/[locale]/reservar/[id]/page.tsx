@@ -35,7 +35,7 @@ export default async function TourReservationPage({ params }: { params: Promise<
 
     // Normalize data for rendering
     const title = tour.title;
-    const coverImage = 'coverImage' in tour ? tour.coverImage : (tour.images?.[0] || '/images/placeholder.jpg');
+    const coverImage = 'coverImage' in tour ? tour.coverImage : (tour.images?.[0] || '/images/placeholder.svg');
     const price = typeof tour.price === 'number' ? tour.price : tour.price.adult;
     const maxCapacity = 'groupSize' in tour ? tour.groupSize.max : (tour.capacity?.max || 10);
     const summary = 'summary' in tour ? tour.summary : '';
