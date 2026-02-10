@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Compass, Info, Hotel } from 'lucide-react';
+import React from 'react';
+import { useTranslations } from 'next-intl';
 
 interface Tab {
     id: string;
@@ -14,15 +16,16 @@ interface TownTabsProps {
     children: React.ReactNode[];
 }
 
-const tabs: Tab[] = [
-    { id: 'hospedaje', label: 'Hospedaje', icon: <Hotel className="w-4 h-4" /> },
-    { id: 'experiences', label: 'Experiencias', icon: <Sparkles className="w-4 h-4" /> },
-    { id: 'discover', label: 'Descubre', icon: <Compass className="w-4 h-4" /> },
-    { id: 'info', label: 'Info Práctica', icon: <Info className="w-4 h-4" /> },
-];
-
 export default function TownTabs({ children }: TownTabsProps) {
+    const t = useTranslations('TownTabs');
     const [activeTab, setActiveTab] = useState('hospedaje');
+
+    const tabs: Tab[] = [
+        { id: 'hospedaje', label: t('accommodation'), icon: <Hotel className="w-4 h-4" /> },
+        { id: 'experiences', label: t('experiences'), icon: <Sparkles className="w-4 h-4" /> },
+        { id: 'discover', label: t('discover'), icon: <Compass className="w-4 h-4" /> },
+        { id: 'info', label: t('practicalInfo'), icon: <Info className="w-4 h-4" /> },
+    ];
 
     // Calculate active index for rendering the correct child
     const activeTabIndex = tabs.findIndex(tab => tab.id === activeTab);

@@ -271,6 +271,23 @@
         "day": "day",
         "days": "days"
     },
+    "RouteDetail": {
+        "backToRoutes": "Back to routes",
+        "readyTitle": "Ready for the adventure?",
+        "readySubtitle": "Book your spot now or explore the map.",
+        "map": "Map",
+        "reserveNow": "Reserve Now",
+        "exploreTowns": "Explore Towns",
+        "descriptionTitle": "Route Description",
+        "highlightsTitle": "Highlights",
+        "helpCardTitle": "Need help?",
+        "helpCardText": "Our team is available 24/7 to answer your questions.",
+        "supportLink": "Contact support"
+    },
+    "RouteActions": {
+        "exploreTownsAndTours": "Explore towns and tours",
+        "reserveNow": "Reserve Now"
+    },
     "Data": {
         "routes": {
             "lago-atitlan": {
@@ -520,6 +537,33 @@
             "medium": "Medium",
             "hard": "Hard"
         }
+    },
+    "TownTabs": {
+        "accommodation": "Accommodation",
+        "experiences": "Experiences",
+        "discover": "Discover",
+        "practicalInfo": "Practical Info"
+    },
+    "Town": {
+        "about": "About {name}",
+        "experiencesIn": "Experiences in {name}",
+        "experiencesSubtitle": "Professional tours and local guides to live {name} to the fullest",
+        "accommodationIn": "Accommodation in {name}",
+        "accommodationSubtitle": "Find the perfect place to stay during your visit",
+        "accommodationTip": "We are working to bring you the best options. In the meantime, explore the experiences and activities available.",
+        "guidesTitle": "Independent Local Guides",
+        "guidesSubtitle": "Connect directly with local guides. Nomada Fantasma does not charge commission.",
+        "activitiesTitle": "Popular Activities",
+        "weatherTitle": "Current Weather",
+        "humidity": "Humidity",
+        "wind": "Wind",
+        "feelsLike": "Feels Like",
+        "howToGetTitle": "How to get there",
+        "servicesTitle": "Essential Services",
+        "atmsTitle": "ATMs",
+        "essentialsTitle": "Essentials",
+        "noAtms": "No ATMs available. Bring cash.",
+        "nearbyTitle": "Other nearby towns"
     },
     "Reservation": {
         "successTitle": "Reservation in Progress",

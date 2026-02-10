@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent } from 'react';
 import { ShuttleRoute } from '@/types/shuttle';
 import { X, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { trackEvent } from '../../../lib/analytics';
 
@@ -26,6 +27,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState('');
+    const [showBank, setShowBank] = useState(false);
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const minDate = tomorrow.toISOString().split('T')[0];
@@ -145,6 +147,25 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
         }
     };
 
+    const routeLabel = `${isCustom ? customOrigin : shuttle.origin} -> ${isCustom ? customDestination : shuttle.destination}`;
+    const paymentLink =
+        shuttle.type === 'shared'
+            ? process.env.NEXT_PUBLIC_PAYMENT_LINK_SHARED
+            : process.env.NEXT_PUBLIC_PAYMENT_LINK_PRIVATE;
+    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '';
+    const whatsappUrl = whatsappNumber
+        ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+              `Hola, quiero confirmar shuttle ${routeLabel} para ${date} a las ${time}, ${passengers} pasajeros. Mi correo es ${email}.`
+          )}`
+        : '';
+    const bankName = process.env.NEXT_PUBLIC_BANK_BANK_NAME || '';
+    const bankAccountName = process.env.NEXT_PUBLIC_BANK_ACCOUNT_NAME || '';
+    const bankAccountNumber = process.env.NEXT_PUBLIC_BANK_ACCOUNT_NUMBER || '';
+    const bankCurrency = process.env.NEXT_PUBLIC_BANK_CURRENCY || 'USD';
+    const bankSwift = process.env.NEXT_PUBLIC_BANK_SWIFT || '';
+    const bankQrUrl = process.env.NEXT_PUBLIC_BANK_QR_URL || '';
+    const hasBankTransfer = Boolean(bankName && bankAccountNumber);
+
     const resetAndClose = () => {
         setIsSuccess(false);
         setName('');
@@ -187,6 +208,90 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                         {t('successSubDesc', { email: email })}
                                     </p>
                                 </div>
+                                {paymentLink && (
+                                    <a
+                                        href={paymentLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full py-5 rounded-2xl font-bold bg-primary text-white hover:bg-primary/90 transition-all text-lg shadow-xl"
+                                    >
+                                        Pagar depósito ahora
+                                    </a>
+                                )}
+                                {hasBankTransfer && (
+                                    <button
+                                        onClick={() => {
+                                            setShowBank((v) => !v);
+                                        }}
+                                        className="w-full py-4 rounded-2xl font-bold bg-white text-black hover:opacity-90 transition-all text-base shadow-xl border border-white/20"
+                                    >
+                                        {showBank ? 'Ocultar instrucciones de transferencia' : 'Pagar por transferencia bancaria'}
+                                    </button>
+                                )}
+                                {showBank && (
+                                    <div className="w-full bg-muted/50 p-6 rounded-2xl border border-border text-left space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 font-black">Banco</p>
+                                                <p className="font-bold">{bankName}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 font-black">Moneda</p>
+                                                <p className="font-bold">{bankCurrency}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 font-black">Titular</p>
+                                                <p className="font-bold">{bankAccountName}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 font-black">Cuenta</p>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-bold">{bankAccountNumber}</span>
+                                                    <button
+                                                        onClick={async () => {
+                                                            await navigator.clipboard.writeText(bankAccountNumber);
+                                                        }}
+                                                        className="text-xs px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10"
+                                                    >
+                                                        Copiar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            {bankSwift && (
+                                                <div>
+                                                    <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 font-black">SWIFT</p>
+                                                    <p className="font-bold">{bankSwift}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                        {bankQrUrl && (
+                                            <div className="mt-2">
+                                                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 font-black mb-2">QR para pago</p>
+                                                <Image
+                                                    src={bankQrUrl}
+                                                    alt="QR de pago"
+                                                    width={800}
+                                                    height={800}
+                                                    unoptimized
+                                                    className="w-full rounded-xl border border-white/10"
+                                                />
+                                            </div>
+                                        )}
+                                        <p className="text-sm text-muted-foreground mt-2">
+                                            Envía el comprobante a {email} o responde al correo de confirmación para acelerar la validación.
+                                        </p>
+                                    </div>
+                                )}
+                                {whatsappUrl && (
+                                    <a
+                                        href={whatsappUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full py-4 rounded-2xl font-bold bg-white text-black hover:opacity-90 transition-all text-base shadow-xl border border-white/20"
+                                    >
+                                        Confirmar por WhatsApp
+                                    </a>
+                                )}
                                 <button
                                     onClick={resetAndClose}
                                     className="w-full py-5 rounded-2xl font-bold bg-foreground text-background hover:opacity-90 transition-all text-lg shadow-xl"

@@ -6,14 +6,17 @@ import { mockRoutes } from '../mocks/routes';
 import { atitlanInfo, pueblosAtitlan } from '../mocks/atitlanData';
 import { ArrowLeft, ArrowRight, MapPin, Calendar, Users, Wifi, Star, Zap, CheckCircle, Map, Mountain } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 import RouteCard from '../components/RouteCard';
 import RouteActionButtons from '../components/RouteActionButtons';
 import BookingModal from '../components/BookingModal';
 import { useState } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function RouteDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const tData = useTranslations('Data.routes');
+  const tRoute = useTranslations('RouteDetail');
+  const locale = useLocale();
 
   // Unwrap params Promise using React.use()
   const { id } = use(params);
@@ -43,6 +46,14 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
   if (!route) {
     notFound();
   }
+
+  const i18nSlug = isAtitlanPage ? 'lago-atitlan' : route.slug;
+  let localizedTitle = route.title;
+  let localizedSummary = route.summary;
+  let localizedFull = route.fullDescription;
+  try { localizedTitle = tData(`${i18nSlug}.title`); } catch { localizedTitle = route.title; }
+  try { localizedSummary = tData(`${i18nSlug}.summary`); } catch { localizedSummary = route.summary; }
+  try { localizedFull = tData(`${i18nSlug}.fullDescription`); } catch { localizedFull = route.fullDescription; }
 
   // Obtener los pueblos solo si es la página de Atitlán
   const pueblos = isAtitlanPage ? pueblosAtitlan : [];
@@ -91,11 +102,11 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
           {/* Botón de volver */}
           <div className="pt-20 md:pt-24">
             <Link
-              href="/rutas-magicas"
+              href={`/${locale}/rutas-magicas`}
               className="inline-flex items-center text-white/90 hover:text-white transition-colors duration-200 group"
             >
               <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
-              Volver a rutas
+              {tRoute('backToRoutes')}
             </Link>
           </div>
 
@@ -113,7 +124,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold">
                 <span className="bg-gradient-to-r from-purple-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent">
-                  {route.title}
+                  {localizedTitle}
                 </span>
               </h1>
             </div>
@@ -156,24 +167,24 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               <div className="relative z-10">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">¿Listo para la aventura?</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Reserva tu lugar ahora o explora el mapa.</p>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{tRoute('readyTitle')}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{tRoute('readySubtitle')}</p>
               </div>
 
               <div className="flex flex-wrap gap-3 relative z-10 w-full sm:w-auto">
                 <Link
-                  href={`/mapa?route=${route.slug}`}
+                  href={`/${locale}/mapa?route=${route.slug}`}
                   className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-cyan-500 dark:hover:border-cyan-400 text-gray-700 dark:text-gray-200 font-semibold transition-all duration-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20"
                 >
                   <Map className="w-5 h-5 text-cyan-500" />
-                  <span>Mapa</span>
+                  <span>{tRoute('map')}</span>
                 </Link>
                 {!isAtitlanPage ? (
                   <button
                     onClick={handleBookingClick}
                     className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-bold px-8 py-3 rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:-translate-y-0.5 transition-all duration-300"
                   >
-                    <span>Reservar Ahora</span>
+                    <span>{tRoute('reserveNow')}</span>
                     <ArrowRight className="w-5 h-5" />
                   </button>
                 ) : (
@@ -186,7 +197,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
                     }}
                     className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-bold px-8 py-3 rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:-translate-y-0.5 transition-all duration-300"
                   >
-                    <span>Explorar Pueblos</span>
+                    <span>{tRoute('exploreTowns')}</span>
                     <ArrowRight className="w-5 h-5" />
                   </button>
                 )}
@@ -195,15 +206,15 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
 
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
               <div className="p-6 md:p-8">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Descripción de la ruta</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{tRoute('descriptionTitle')}</h2>
                 <div className="prose dark:prose-invert max-w-none">
-                  <p className="text-gray-700 dark:text-gray-300 mb-6">{route.summary}</p>
-                  <p className="text-gray-700 dark:text-gray-300">{route.fullDescription}</p>
+                  <p className="text-gray-700 dark:text-gray-300 mb-6">{localizedSummary}</p>
+                  <p className="text-gray-700 dark:text-gray-300">{localizedFull}</p>
                 </div>
 
                 {/* Puntos destacados */}
                 <div className="mt-10">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Lo más destacado</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{tRoute('highlightsTitle')}</h3>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {route.highlights.map((highlight, index) => (
                       <li key={index} className="flex items-start">
@@ -306,12 +317,12 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
                   <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="ml-3">
-                  <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200">¿Necesitas ayuda?</h4>
+                  <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200">{tRoute('helpCardTitle')}</h4>
                   <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
-                    Nuestro equipo está disponible 24/7 para responder tus preguntas.
+                    {tRoute('helpCardText')}
                   </p>
                   <a href="#" className="mt-2 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-                    Contactar con soporte
+                    {tRoute('supportLink')}
                     <ArrowRight className="w-4 h-4 ml-1" />
                   </a>
                 </div>
@@ -370,7 +381,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
                         ${relatedRoute.price.toLocaleString()}
                       </span>
                       <Link
-                        href={`/rutas-magicas/${relatedRoute.id}`}
+                        href={`/${locale}/rutas-magicas/${relatedRoute.id}`}
                         className="text-sm font-medium text-electricBlue hover:text-cyberPurple dark:text-cyberPurple dark:hover:text-electricBlue transition-colors flex items-center"
                       >
                         Ver detalles

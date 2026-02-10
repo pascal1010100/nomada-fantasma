@@ -271,6 +271,23 @@
         "day": "día",
         "days": "días"
     },
+    "RouteDetail": {
+        "backToRoutes": "Volver a rutas",
+        "readyTitle": "¿Listo para la aventura?",
+        "readySubtitle": "Reserva tu lugar ahora o explora el mapa.",
+        "map": "Mapa",
+        "reserveNow": "Reservar Ahora",
+        "exploreTowns": "Explorar Pueblos",
+        "descriptionTitle": "Descripción de la ruta",
+        "highlightsTitle": "Lo más destacado",
+        "helpCardTitle": "¿Necesitas ayuda?",
+        "helpCardText": "Nuestro equipo está disponible 24/7 para responder tus preguntas.",
+        "supportLink": "Contactar con soporte"
+    },
+    "RouteActions": {
+        "exploreTownsAndTours": "Explorar pueblos y tours",
+        "reserveNow": "Reservar Ahora"
+    },
     "Data": {
         "routes": {
             "lago-atitlan": {
@@ -520,6 +537,33 @@
             "medium": "Moderado",
             "hard": "Difícil"
         }
+    },
+    "TownTabs": {
+        "accommodation": "Hospedaje",
+        "experiences": "Experiencias",
+        "discover": "Descubre",
+        "practicalInfo": "Info Práctica"
+    },
+    "Town": {
+        "about": "Sobre {name}",
+        "experiencesIn": "Experiencias en {name}",
+        "experiencesSubtitle": "Tours profesionales y guías locales para vivir {name} al máximo",
+        "accommodationIn": "Hospedaje en {name}",
+        "accommodationSubtitle": "Encuentra el lugar perfecto para quedarte durante tu visita",
+        "accommodationTip": "Estamos trabajando en traerte las mejores opciones. Mientras tanto, explora las experiencias y actividades disponibles.",
+        "guidesTitle": "Guías Locales Independientes",
+        "guidesSubtitle": "Conecta directamente con guías locales. Nómada Fantasma no cobra comisión.",
+        "activitiesTitle": "Actividades Populares",
+        "weatherTitle": "Clima Actual",
+        "humidity": "Humedad",
+        "wind": "Viento",
+        "feelsLike": "Sensación",
+        "howToGetTitle": "Cómo llegar",
+        "servicesTitle": "Servicios Esenciales",
+        "atmsTitle": "Cajeros (ATMs)",
+        "essentialsTitle": "Esenciales",
+        "noAtms": "No hay cajeros disponibles. Llevar efectivo.",
+        "nearbyTitle": "Otros pueblos cercanos"
     },
     "Reservation": {
         "successTitle": "¡Reserva en Proceso!",

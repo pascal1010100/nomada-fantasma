@@ -1,4 +1,4 @@
-import { LucideIcon } from 'lucide-react';
+// removed unused LucideIcon import
 
 export interface Guide {
     id: string;
@@ -110,7 +110,7 @@ export const atitlanTowns: Town[] = [
         title: 'San Pedro La Laguna',
         summary: 'Fiesta, mochileros y aventura al pie del volcán.',
         fullDescription: 'San Pedro es vibrante y lleno de vida. Famoso por su vida nocturna, escuelas de español y ser el punto de partida para escalar el Volcán San Pedro. Es el lugar ideal para conocer viajeros de todo el mundo.',
-        coverImage: '/images/rutas/san-pedro.jpg',
+        coverImage: '/images/rutas/atitlan.jpg',
         vibe: 'Fiesta & Aventura',
         location: { lat: 14.6936, lng: -91.2725 },
         highlights: ['Volcán San Pedro', 'Vida Nocturna', 'Indian Nose (Amanecer)'],

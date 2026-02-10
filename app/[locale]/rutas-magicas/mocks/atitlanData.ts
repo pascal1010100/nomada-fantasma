@@ -206,7 +206,7 @@ export const pueblosAtitlan: (Route & {
       slug: 'san-pedro',
       title: 'San Pedro La Laguna',
       summary: 'El pueblo más animado del lago con ambiente bohemio y vibrante vida nocturna',
-      coverImage: '/images/rutas/san-pedro.jpg',
+      coverImage: '/images/rutas/atitlan.jpg',
       region: 'america',
       durationDays: 3,
       groupSize: { min: 1, max: 12 },
@@ -298,8 +298,8 @@ export const pueblosAtitlan: (Route & {
           image: '/images/rutas/mandalas-hostal.png',
           gallery: [
             '/images/rutas/mandalas-hostal.png',
-            '/images/rutas/san-pedro.jpg', // Placeholder for view
-            '/images/rutas/atitlan.jpg'    // Placeholder for lake
+            '/images/rutas/atitlan.jpg', // Placeholder for view
+            '/images/rutas/atitlan.jpg'  // Placeholder for lake
           ],
           vibeMetrics: {
             chill: 9,
