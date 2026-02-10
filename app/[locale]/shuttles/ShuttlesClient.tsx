@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { ShuttleRoute } from '@/types/shuttle';
 import { supabase } from '@/app/lib/supabase/client';
 import ShuttleCard from './components/ShuttleCard';
 import ShuttleBookingModal from './components/ShuttleBookingModal';
-import { Search, MapPin, ArrowRightLeft, Sparkles, Loader2 } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 
@@ -28,11 +27,24 @@ export default function ShuttlesClient() {
                     .select('*')
                     .order('origin', { ascending: true });
 
-                if (error) throw error;
+                if (error) {
+                    const message = (() => {
+                        if (typeof error === 'string') return error;
+                        if (error && typeof error === 'object' && 'message' in error) {
+                            const m = (error as { message?: unknown }).message;
+                            return typeof m === 'string' ? m : 'Supabase fetch error';
+                        }
+                        return 'Supabase fetch error';
+                    })();
+                    throw new Error(message);
+                }
                 if (!data || data.length === 0) throw new Error('No data found');
                 setShuttleList(data as ShuttleRoute[]);
             } catch (error) {
-                console.error('Error fetching shuttles, falling back to mocks:', error);
+                const msg = error instanceof Error ? error.message : String(error);
+                if (process.env.NODE_ENV === 'development') {
+                    console.warn('Error fetching shuttles, using mocks:', msg);
+                }
                 // Fallback to mock data if DB is inaccessible
                 const { shuttles } = await import('./mocks/shuttles');
                 setShuttleList(shuttles);
@@ -68,13 +80,31 @@ export default function ShuttlesClient() {
             <div className="relative h-[65vh] flex items-center justify-center border-b border-white/5">
                 <div className="absolute inset-0 z-0 overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/20 to-background z-10" />
-                    <Image
-                        src="/images/shuttles/default-shuttle.svg"
-                        alt="Atitlán Shuttle Service"
-                        fill
-                        className="object-cover"
-                        priority
+                    <div className="absolute inset-0 bg-black/20 z-10" />
+                    <div className="absolute inset-0 opacity-70"
+                         style={{
+                             backgroundImage: 'radial-gradient(1200px 600px at 50% 20%, rgba(59,130,246,0.10), transparent 60%)'
+                         }}
                     />
+                    <div
+                        className="absolute inset-0 opacity-15"
+                        style={{
+                            backgroundImage:
+                                'repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 40px), ' +
+                                'repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 40px)'
+                        }}
+                    />
+                    <svg
+                        className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] opacity-[0.05] text-primary"
+                        viewBox="0 0 256 256"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                    >
+                        <path
+                            d="M128 16c-39.2 0-72 30.6-72 68.4v66.7c0 8.3 8.7 13.6 16.2 10.2l11.6-5.3a8 8 0 0 1 10.6 4.1l5.9 13.6a8 8 0 0 0 12.7 3l12.7-10.7a8 8 0 0 1 10 0l12.7 10.7a8 8 0 0 0 12.7-3l5.9-13.6a8 8 0 0 1 10.6-4.1l11.6 5.3c7.5 3.4 16.2-2 16.2-10.2V84.4C200 46.6 167.2 16 128 16Zm-34 64a14 14 0 1 1 28 0 14 14 0 1 1-28 0Zm68 0a14 14 0 1 1 28 0 14 14 0 1 1-28 0Z"
+                            fill="currentColor"
+                        />
+                    </svg>
                 </div>
 
                 <div className="relative z-20 text-center px-4 max-w-4xl mx-auto space-y-6 py-12">
@@ -90,15 +120,17 @@ export default function ShuttlesClient() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-6xl md:text-8xl font-black text-white tracking-tight leading-[1.1] pb-2"
+                        style={{ textShadow: '0 2px 8px rgba(0,0,0,0.35)' }}
                     >
                         {t('title')} <br />
-                        <span className="text-gray-400">{t('subtitle')}</span>
+                        <span className="text-white/90">{t('subtitle')}</span>
                     </motion.h1>
 
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="text-lg text-gray-500 font-medium max-w-2xl mx-auto leading-relaxed"
+                        className="text-lg text-gray-200 font-medium max-w-2xl mx-auto leading-relaxed"
+                        style={{ textShadow: '0 1px 6px rgba(0,0,0,0.25)' }}
                     >
                         {t('description')}
                     </motion.p>

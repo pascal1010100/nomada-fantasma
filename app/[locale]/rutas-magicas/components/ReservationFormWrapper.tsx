@@ -40,7 +40,11 @@ export default function ReservationFormWrapper({
   // Si no hay días disponibles, usar la fecha de hoy como predeterminada
   const defaultAvailableDays = safeAvailableDays.length > 0
     ? safeAvailableDays
-    : [new Date().toISOString().split('T')[0]];
+    : (() => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return [tomorrow.toISOString().split('T')[0]];
+      })();
 
   // Si no hay horarios, usar algunos por defecto
   const defaultStartTimes = safeStartTimes.length > 0

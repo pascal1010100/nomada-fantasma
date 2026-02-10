@@ -5,6 +5,7 @@ import { Clock, Users, Zap, ArrowRight, MapPin, Star, Calendar, CheckCircle } fr
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { useLocale } from 'next-intl';
 
 interface TourCardProps {
   tour: Tour;
@@ -32,6 +33,7 @@ import { useTranslations } from 'next-intl';
 export default function TourCard({ tour, puebloSlug, className = '' }: TourCardProps) {
   const t = useTranslations('Tours');
   const td = useTranslations(`Data.tours.${tour.id}`);
+  const locale = useLocale();
 
   // Fallback to original values if translation doesn't exist yet
   // This helps when not all tours are in the translation files
@@ -71,7 +73,7 @@ export default function TourCard({ tour, puebloSlug, className = '' }: TourCardP
 
       {/* Imagen del tour con overlay y efecto de zoom */}
       <Link
-        href={`/rutas-magicas/lago-atitlan/${puebloSlug}/tours/${tour.slug}`}
+        href={`/${locale}/rutas-magicas/lago-atitlan/${puebloSlug}/tours/${tour.slug}`}
         className="block h-48 relative overflow-hidden group"
         aria-label={t('detailsAria', { title })}
       >
@@ -156,7 +158,7 @@ export default function TourCard({ tour, puebloSlug, className = '' }: TourCardP
                   className="w-full"
                 >
                   <Link
-                    href={`/rutas-magicas/lago-atitlan/${puebloSlug}/tours/${tour.slug}`}
+                    href={`/${locale}/rutas-magicas/lago-atitlan/${puebloSlug}/tours/${tour.slug}`}
                     className="w-full flex items-center justify-center px-3 py-2.5 text-sm font-medium text-cyan-700 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg border border-cyan-200 dark:border-cyan-800 transition-colors"
                     aria-label={t('detailsAria', { title })}
                   >
@@ -170,7 +172,7 @@ export default function TourCard({ tour, puebloSlug, className = '' }: TourCardP
                   className="w-full"
                 >
                   <Link
-                    href={`/reservar/${tour.id}`}
+                    href={`/${locale}/reservar/${tour.id}`}
                     className="w-full flex items-center justify-center px-3 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 rounded-lg shadow-sm transition-all"
                     aria-label={t('reservationAria', { title })}
                   >

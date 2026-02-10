@@ -216,6 +216,88 @@ export interface Database {
                     is_active?: boolean;
                 };
             };
+            shuttle_routes: {
+                Row: {
+                    id: string;
+                    origin: string;
+                    destination: string;
+                    price: number;
+                    schedule: string[];
+                    duration: string;
+                    image: string | null;
+                    type: string | null;
+                    description: string | null;
+                    created_at: string;
+                };
+                Insert: {
+                    id: string;
+                    origin: string;
+                    destination: string;
+                    price: number;
+                    schedule: string[];
+                    duration: string;
+                    image?: string | null;
+                    type?: string | null;
+                    description?: string | null;
+                    created_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    origin?: string;
+                    destination?: string;
+                    price?: number;
+                    schedule?: string[];
+                    duration?: string;
+                    image?: string | null;
+                    type?: string | null;
+                    description?: string | null;
+                    created_at?: string;
+                };
+            };
+            shuttle_bookings: {
+                Row: {
+                    id: string;
+                    customer_name: string;
+                    customer_email: string;
+                    route_origin: string;
+                    route_destination: string;
+                    travel_date: string;
+                    travel_time: string;
+                    passengers: number;
+                    pickup_location: string;
+                    type: string | null;
+                    status: string | null;
+                    created_at: string;
+                };
+                Insert: {
+                    id?: string;
+                    customer_name: string;
+                    customer_email: string;
+                    route_origin: string;
+                    route_destination: string;
+                    travel_date: string;
+                    travel_time: string;
+                    passengers: number;
+                    pickup_location: string;
+                    type?: string | null;
+                    status?: string | null;
+                    created_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    customer_name?: string;
+                    customer_email?: string;
+                    route_origin?: string;
+                    route_destination?: string;
+                    travel_date?: string;
+                    travel_time?: string;
+                    passengers?: number;
+                    pickup_location?: string;
+                    type?: string | null;
+                    status?: string | null;
+                    created_at?: string;
+                };
+            };
             reservations: {
                 Row: {
                     id: string;

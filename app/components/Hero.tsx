@@ -2,16 +2,17 @@
 
 import { motion, type MotionProps, useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import { Compass, MapPin, Anchor, Wifi, Coffee, Home, Map, MessageCircle } from "lucide-react";
+import { Compass, MessageCircle } from "lucide-react";
 import { useId, useMemo, useState } from "react";
 import ChatModal from "./ChatModal";
 import Tooltip from "./ui/Tooltip";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
-export default function Hero(): JSX.Element {
+export default function Hero() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const reduce = useReducedMotion();
   const t = useTranslations('Hero');
+  const locale = useLocale();
 
   // IDs únicos para gradientes/filtros del SVG
   const uid = useId();
@@ -221,7 +222,7 @@ export default function Hero(): JSX.Element {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <Link
-                href="/mapa"
+              href={`/${locale}/mapa`}
                 className="shimmer group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-primary to-accent px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 sm:w-auto"
               >
                 <Compass className="h-5 w-5 transition-transform group-hover:rotate-12" />

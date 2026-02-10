@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import { AlertTriangle, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 
 export default function TourNotFound() {
   const router = useRouter();
+  const locale = useLocale();
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
@@ -26,7 +28,7 @@ export default function TourNotFound() {
             Volver atrás
           </button>
           <Link 
-            href="/rutas-magicas"
+            href={`/${locale}/rutas-magicas`}
             className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-cyan-700 dark:text-cyan-400 bg-white dark:bg-gray-800 border border-cyan-200 dark:border-cyan-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
           >
             Ver todos los destinos

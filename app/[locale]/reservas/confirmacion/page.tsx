@@ -1,4 +1,4 @@
-import { CheckCircle2, ArrowLeft, Calendar, Users, MapPin, Clock, Loader2 } from 'lucide-react';
+import { CheckCircle2, ArrowLeft, Calendar, Users, MapPin, Clock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getTourById } from '@/app/[locale]/rutas-magicas/mocks/tours';
@@ -30,7 +30,7 @@ export default async function ConfirmationPage({
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Tour no encontrado</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">Lo sentimos, no pudimos encontrar los detalles de este tour.</p>
           <Link
-            href="/rutas-magicas"
+            href="../rutas-magicas"
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -328,7 +328,7 @@ export default async function ConfirmationPage({
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">¿Listo para tu aventura?</h3>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/"
+              href="../.."
               className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-all transform hover:-translate-y-0.5"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -337,7 +337,7 @@ export default async function ConfirmationPage({
               Volver al inicio
             </Link>
             <Link
-              href="/rutas-magicas"
+              href="../rutas-magicas"
               className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-xl text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-all transform hover:-translate-y-0.5"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

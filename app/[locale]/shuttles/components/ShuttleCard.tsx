@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Clock, MapPin, Users, ArrowRight, Star } from 'lucide-react';
+import { MapPin, Users, ArrowRight, Star } from 'lucide-react';
 import { ShuttleRoute } from '@/types/shuttle';
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
@@ -18,7 +18,12 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
     const [imageError, setImageError] = useState(false);
 
     // Usar imagen del destino específico
-    const destinationImage = getDestinationImage(shuttle.destination);
+    const remote = (shuttle.image || '').trim();
+    const isLocal = remote.startsWith('/');
+    const candidate = isLocal && remote ? remote : getDestinationImage(shuttle.destination);
+    const destinationImage = imageError ? '/images/shuttles/default-shuttle.svg' : candidate;
+    const isFallback = imageError || destinationImage.endsWith('/default-shuttle.svg');
+    const isSVG = destinationImage.endsWith('.svg');
 
     const handleImageError = () => {
         setImageError(true);
@@ -38,11 +43,11 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
                     src={imageError ? '/images/shuttles/default-shuttle.svg' : destinationImage}
                     alt={`${shuttle.origin} a ${shuttle.destination}`}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className={`transition-transform duration-700 group-hover:scale-105 ${isSVG ? 'object-contain p-2' : 'object-cover'} ${isFallback && !isSVG ? 'filter brightness-[1.25] contrast-[1.1]' : ''}`}
                     onError={handleImageError}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-80" />
+                <div className={`absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent ${isFallback ? 'opacity-50' : isSVG ? 'opacity-40' : 'opacity-80'}`} />
 
                 {/* Badge Elite */}
                 <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white text-[9px] font-black uppercase tracking-widest">
@@ -56,13 +61,13 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
                         {shuttle.type === 'shared' ? t('sharedType') : t('privateType')}
                     </div>
                     <div className="flex items-end justify-between">
-                        <div className="space-y-0">
-                            <h3 className="text-3xl font-black text-white tracking-tighter">
-                                Q{shuttle.price}
+                        <div className="space-y-1">
+                            <h3 className="text-4xl font-black text-white tracking-tighter leading-none">
+                                {shuttle.price ? `Q${shuttle.price}` : 'Q 0'}
                             </h3>
-                            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">{t('from')}</p>
+                            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest leading-tight">{t('from')}</p>
                         </div>
-                        <span className="text-[9px] text-gray-500 uppercase font-bold tracking-widest pb-1 border-b border-white/10">{t('perPerson')}</span>
+                        <span className="text-[9px] text-white uppercase font-bold tracking-widest pb-1 border-b border-white/20 leading-none">{t('perPerson')}</span>
                     </div>
                 </div>
             </div>
@@ -73,7 +78,7 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
                     <div className="relative flex flex-col gap-6">
                         {/* Route representation - Minimalist Elite Style */}
                         <div className="flex items-center gap-6">
-                            <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                            <MapPin className="w-5 h-5 text-muted-foreground/40" />
                             <p className="font-extrabold text-lg text-foreground tracking-tight">{shuttle.origin}</p>
                         </div>
 

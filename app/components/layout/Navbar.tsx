@@ -123,7 +123,7 @@ export default function Navbar() {
           }`}
       >
         <nav aria-label="Principal" className="flex items-center justify-between px-6 py-4">
-          <Link href="/" className="group inline-flex items-center gap-2">
+          <Link href={`/${locale}`} className="group inline-flex items-center gap-2">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card/70">
               <Ghost className="h-4 w-4" />
             </span>

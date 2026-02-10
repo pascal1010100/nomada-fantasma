@@ -1,12 +1,13 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, type MouseEvent, type KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Route } from '../lib/types';
 import { motion, useInView } from 'framer-motion';
-import { Star, MapPin, Calendar, ArrowRight, Users, Zap, Heart } from 'lucide-react';
+import { Star, MapPin, Calendar, ArrowRight, Zap, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RippleButton } from '@/app/components/ui';
+import { useLocale } from 'next-intl';
 
 interface RouteCardProps {
   route: Route;
@@ -44,6 +45,7 @@ import { useTranslations } from 'next-intl';
 
 export default function RouteCard({ route }: RouteCardProps) {
   const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations('Routes');
   // Localized data for the specific route
   const td = useTranslations(`Data.routes.${route.slug}`);
@@ -59,27 +61,27 @@ export default function RouteCard({ route }: RouteCardProps) {
   // next-intl supports getting arrays if configured, but let's assume we can map keys
   const highlights = route.highlights ? (td.raw('highlights') as string[]) : [];
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: MouseEvent) => {
     e.preventDefault();
     const isAtitlanTown = route.region === 'america' &&
       (route.slug.includes('san-') || route.slug === 'santiago' || route.slug === 'panajachel' || route.slug === 'santa-cruz');
 
     const path = isAtitlanTown
-      ? `/rutas-magicas/lago-atitlan/${route.slug}`
-      : `/rutas-magicas/${route.slug}`;
+      ? `/${locale}/rutas-magicas/lago-atitlan/${route.slug}`
+      : `/${locale}/rutas-magicas/${route.slug}`;
 
     router.push(path);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       const isAtitlanTown = route.region === 'america' &&
         (route.slug.includes('san-') || route.slug === 'santiago' || route.slug === 'panajachel' || route.slug === 'santa-cruz');
 
       const path = isAtitlanTown
-        ? `/rutas-magicas/lago-atitlan/${route.slug}`
-        : `/rutas-magicas/${route.slug}`;
+        ? `/${locale}/rutas-magicas/lago-atitlan/${route.slug}`
+        : `/${locale}/rutas-magicas/${route.slug}`;
 
       router.push(path);
     }

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { ShuttleRoute } from '@/types/shuttle';
-import { X, Calendar, User, MapPin, Mail, Send, CheckCircle2, Loader2, Clock, ArrowRight } from 'lucide-react';
+import { X, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import { trackEvent } from '../../../lib/analytics';
 
 interface ShuttleBookingModalProps {
     isOpen: boolean;
@@ -25,10 +26,19 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState('');
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDate = tomorrow.toISOString().split('T')[0];
 
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
+            if (shuttle) {
+                trackEvent('view_general_booking_form', {
+                    route: `${shuttle.origin} -> ${shuttle.destination}`,
+                    type: shuttle.type
+                });
+            }
         } else {
             document.body.style.overflow = '';
         }
@@ -37,16 +47,64 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
         };
     }, [isOpen]);
 
+    useEffect(() => {
+        if (shuttle && (name || email || date || time || pickup)) {
+            trackEvent('start_general_booking_form', {
+                route: `${shuttle.origin} -> ${shuttle.destination}`,
+                type: shuttle.type
+            });
+        }
+    }, [name, email, date, time, pickup, shuttle]);
+
     const isCustom = shuttle?.id === 'custom-private';
 
     if (!isOpen || !shuttle) return null;
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    
+
+    const validateEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+    const validateForm = (): string | null => {
+        if (!name.trim() || name.trim().length < 2) return 'Por favor ingresa tu nombre';
+        if (!email || !validateEmail(email)) return 'Ingresa un correo válido';
+        if (!date) return 'Selecciona una fecha';
+        const selected = new Date(date);
+        const boundary = new Date(minDate);
+        if (selected < boundary) return 'Selecciona una fecha a partir de mañana';
+        if (!time) return 'Selecciona una hora';
+        if (!pickup || pickup.trim().length < 5) return 'Indica un lugar de recogida claro';
+        if (passengers < 1) return 'Selecciona al menos 1 pasajero';
+        if (isCustom) {
+            if (!customOrigin.trim()) return 'Indica el origen';
+            if (!customDestination.trim()) return 'Indica el destino';
+        }
+        return null;
+    };
+
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         setError('');
 
         try {
+            const validationError = validateForm();
+            if (validationError) {
+                setError(validationError);
+                trackEvent('general_booking_error', {
+                    route: `${shuttle.origin} -> ${shuttle.destination}`,
+                    type: shuttle.type,
+                    error: validationError
+                });
+                setIsSubmitting(false);
+                return;
+            }
+
+            trackEvent('submit_general_booking', {
+                route: `${isCustom ? customOrigin : shuttle.origin} -> ${isCustom ? customDestination : shuttle.destination}`,
+                passengers,
+                type: shuttle.type,
+                date,
+                time
+            });
             // First, save to database
             const reserveResponse = await fetch('/api/shuttles/reserve', {
                 method: 'POST',
@@ -68,39 +126,20 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
 
             if (!reserveResponse.ok) throw new Error(reserveData.error || t('errorGeneric'));
 
-            // Then send confirmation emails
-            try {
-                const emailResponse = await fetch('/api/emails/shuttle-confirmation', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        customerName: name,
-                        customerEmail: email,
-                        origin: isCustom ? customOrigin : shuttle.origin,
-                        destination: isCustom ? customDestination : shuttle.destination,
-                        travelDate: date,
-                        travelTime: time,
-                        passengers,
-                        pickupLocation: pickup,
-                        type: shuttle.type,
-                        price: shuttle.price,
-                    }),
-                });
-
-                const emailData = await emailResponse.json();
-                
-                if (!emailResponse.ok) {
-                    console.warn('Email notification failed:', emailData.error);
-                    // Don't fail the whole process if email fails
-                }
-            } catch (emailError) {
-                console.warn('Email notification failed:', emailError);
-                // Don't fail the whole process if email fails
-            }
-
             setIsSuccess(true);
-        } catch (err: any) {
-            setError(err.message);
+            trackEvent('complete_booking', {
+                route: `${isCustom ? customOrigin : shuttle.origin} -> ${isCustom ? customDestination : shuttle.destination}`,
+                passengers,
+                type: shuttle.type
+            });
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            setError(msg);
+            trackEvent('general_booking_error', {
+                route: `${shuttle.origin} -> ${shuttle.destination}`,
+                type: shuttle.type,
+                error: msg
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -253,7 +292,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                                 type="date"
                                                 className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none transition-all font-bold text-sm"
                                                 value={date}
-                                                min={new Date().toISOString().split('T')[0]}
+                                                min={minDate}
                                                 onChange={(e) => setDate(e.target.value)}
                                             />
                                         </div>

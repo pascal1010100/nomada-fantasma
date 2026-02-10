@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
-import { sendShuttleRequestEmail } from '@/app/lib/email';
+import { sendShuttleConfirmationEmails } from '@/app/lib/email';
 import { supabaseAdmin } from '@/app/lib/supabase/server';
+import type { Database } from '@/types/database.types';
 import { z } from 'zod';
+
+const rateLimitStore = new Map<string, { count: number; start: number }>();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 
 const ShuttleRequestSchema = z.object({
     customerName: z.string().min(2, 'El nombre es muy corto'),
@@ -17,6 +22,23 @@ const ShuttleRequestSchema = z.object({
 
 export async function POST(request: Request) {
     try {
+        const ipHeader = request.headers.get('x-forwarded-for') || '';
+        const ip = ipHeader.split(',')[0].trim() || 'unknown';
+        const now = Date.now();
+        const entry = rateLimitStore.get(ip);
+        if (!entry || now - entry.start > RATE_LIMIT_WINDOW_MS) {
+            rateLimitStore.set(ip, { count: 1, start: now });
+        } else {
+            if (entry.count >= RATE_LIMIT_MAX) {
+                return NextResponse.json(
+                    { error: 'Demasiadas solicitudes. Intenta más tarde.' },
+                    { status: 429 }
+                );
+            }
+            entry.count += 1;
+            rateLimitStore.set(ip, entry);
+        }
+
         const body = await request.json();
         const validation = ShuttleRequestSchema.safeParse(body);
 
@@ -30,20 +52,22 @@ export async function POST(request: Request) {
         const data = validation.data;
 
         // 1. Persist to Supabase
-        const { error: dbError } = await (supabaseAdmin as any)
+        const payload: Database['public']['Tables']['shuttle_bookings']['Insert'] = {
+            customer_name: data.customerName,
+            customer_email: data.customerEmail,
+            route_origin: data.routeOrigin,
+            route_destination: data.routeDestination,
+            travel_date: data.date,
+            travel_time: data.time,
+            passengers: data.passengers,
+            pickup_location: data.pickupLocation,
+            type: data.type || 'shared',
+            status: 'pending',
+        };
+
+        const { error: dbError } = await supabaseAdmin
             .from('shuttle_bookings')
-            .insert([{
-                customer_name: data.customerName,
-                customer_email: data.customerEmail,
-                route_origin: data.routeOrigin,
-                route_destination: data.routeDestination,
-                travel_date: data.date,
-                travel_time: data.time,
-                passengers: data.passengers,
-                pickup_location: data.pickupLocation,
-                type: data.type || 'shared',
-                status: 'pending'
-            }]);
+            .insert([payload] as unknown as never[]);
 
         if (dbError) {
             console.error('Error saving to Supabase:', dbError);
@@ -53,11 +77,21 @@ export async function POST(request: Request) {
             );
         }
 
-        // 2. Trigger Email
-        const result = await sendShuttleRequestEmail(data);
+        // 2. Send confirmation to customer and notification to admin
+        const result = await sendShuttleConfirmationEmails({
+            customerName: data.customerName,
+            customerEmail: data.customerEmail,
+            origin: data.routeOrigin,
+            destination: data.routeDestination,
+            travelDate: data.date,
+            travelTime: data.time,
+            passengers: data.passengers,
+            pickupLocation: data.pickupLocation,
+            type: data.type || 'shared',
+            price: undefined,
+        });
 
         if (!result.success) {
-            // We don't block the response here since the DB record is already saved
             console.warn('Email failed but booking was saved to DB');
         }
 
