@@ -32,12 +32,26 @@ export async function POST(request: Request) {
         }
 
         // Sanitize and normalize input
-        const reservationData: ReservationInsert = sanitizeReservationInput(validation.data);
+        const sanitizedData = sanitizeReservationInput(validation.data);
+
+        // Explicitly create an object with only the fields for insertion
+        const dataToInsert: ReservationInsert = {
+            customer_name: sanitizedData.customer_name,
+            customer_email: sanitizedData.customer_email,
+            customer_phone: sanitizedData.customer_phone,
+            customer_country: sanitizedData.customer_country,
+            reservation_date: sanitizedData.reservation_date,
+            tour_id: sanitizedData.tour_id,
+            tour_name: sanitizedData.tour_name,
+            guests: sanitizedData.guests,
+            total_price: sanitizedData.total_price,
+            status: 'pending', // Default status
+        };
 
         // Insert into Supabase
         const { data: newReservation, error: dbError } = await supabaseAdmin
             .from('reservations')
-            .insert<ReservationInsert>(reservationData)
+            .insert(dataToInsert)
             .select()
             .single();
 
