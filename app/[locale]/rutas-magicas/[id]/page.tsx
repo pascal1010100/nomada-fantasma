@@ -48,12 +48,21 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
   }
 
   const i18nSlug = isAtitlanPage ? 'lago-atitlan' : route.slug;
-  let localizedTitle = route.title;
-  let localizedSummary = route.summary;
-  let localizedFull = route.fullDescription;
-  try { localizedTitle = tData(`${i18nSlug}.title`); } catch { localizedTitle = route.title; }
-  try { localizedSummary = tData(`${i18nSlug}.summary`); } catch { localizedSummary = route.summary; }
-  try { localizedFull = tData(`${i18nSlug}.fullDescription`); } catch { localizedFull = route.fullDescription; }
+  let localizedTitle = '';
+  let localizedSummary = '';
+  let localizedFull = '';
+  let localizedHighlights: string[] = [];
+  try { localizedTitle = tData(`${i18nSlug}.title`); } catch { localizedTitle = ''; }
+  try { localizedSummary = tData(`${i18nSlug}.summary`); } catch { localizedSummary = ''; }
+  try { localizedFull = tData(`${i18nSlug}.fullDescription`); } catch { localizedFull = ''; }
+  try {
+    const rawHighlights = tData.raw(`${i18nSlug}.highlights`);
+    if (Array.isArray(rawHighlights)) {
+      localizedHighlights = rawHighlights;
+    }
+  } catch {
+    localizedHighlights = [];
+  }
 
   // Obtener los pueblos solo si es la página de Atitlán
   const pueblos = isAtitlanPage ? pueblosAtitlan : [];
@@ -216,7 +225,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="mt-10">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{tRoute('highlightsTitle')}</h3>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {route.highlights.map((highlight, index) => (
+                    {localizedHighlights.map((highlight, index) => (
                       <li key={index} className="flex items-start">
                         <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
                         <span className="text-gray-700 dark:text-gray-300">{highlight}</span>

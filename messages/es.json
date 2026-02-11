@@ -296,9 +296,11 @@
                 "fullDescription": "El Lago de Atitlán es uno de los destinos más impresionantes de Centroamérica, rodeado de volcanes y pueblos mayas llenos de color y tradición.",
                 "vibe": "Paraíso Volcánico",
                 "highlights": [
-                    "Vistas panorámicas del lago",
-                    "Pueblos indígenas mayas",
-                    "Amaneceres inolvidables"
+                    "Vistas panorámicas del lago y volcanes",
+                    "Pueblos indígenas mayas llenos de cultura",
+                    "Actividades acuáticas y senderismo",
+                    "Gastronomía local única",
+                    "Amaneceres y atardeceres inolvidables"
                 ]
             },
             "coban": {
@@ -421,6 +423,177 @@
                     "Bloqueador solar",
                     "Cuaderno para notas",
                     "Botella de agua reutilizable"
+                ]
+            },
+            "pana-market-tour": {
+                "title": "Tour del Mercado Local y Calle Santander",
+                "summary": "Explora el bullicioso mercado local y la famosa Calle Santander de Panajachel.",
+                "description": "Sumérgete en la vida local con este tour que te llevará por el auténtico mercado de Panajachel, donde podrás encontrar desde frutas exóticas hasta artesanías tradicionales. Luego, recorre la icónica Calle Santander, llena de tiendas, galerías y restaurantes con vista al lago.",
+                "duration": "3 horas",
+                "difficulty": "Fácil",
+                "meetingPoint": "Parque Central de Panajachel",
+                "includes": [
+                    "Guía local bilingüe",
+                    "Degustación de frutas locales",
+                    "Muestra de artesanías",
+                    "Mapa de la zona"
+                ],
+                "notIncludes": [
+                    "Transporte al punto de encuentro",
+                    "Comidas no especificadas",
+                    "Propinas",
+                    "Gastos personales"
+                ],
+                "whatToBring": [
+                    "Zapatos cómodos para caminar",
+                    "Dinero en efectivo para compras",
+                    "Cámara fotográfica",
+                    "Bloqueador solar",
+                    "Sombrero o gorra"
+                ],
+                "highlights": [
+                    "Recorrido por el mercado local",
+                    "Calle Santander y sus tiendas",
+                    "Degustación de frutas locales",
+                    "Artesanías típicas",
+                    "Vistas al Lago de Atitlán"
+                ],
+                "itinerary": [
+                    {
+                        "time": "9:00 AM",
+                        "title": "Encuentro en el Parque Central",
+                        "description": "Breve introducción sobre la historia de Panajachel."
+                    },
+                    {
+                        "time": "9:30 AM",
+                        "title": "Mercado Local",
+                        "description": "Recorrido por los puestos de frutas, verduras y artesanías."
+                    },
+                    {
+                        "time": "11:00 AM",
+                        "title": "Calle Santander",
+                        "description": "Paseo por la calle principal de tiendas y restaurantes."
+                    },
+                    {
+                        "time": "12:00 PM",
+                        "title": "Tiempo libre",
+                        "description": "Tiempo para compras o exploración por cuenta propia."
+                    }
+                ]
+            },
+            "pana-kayak-sunset": {
+                "title": "Kayak al Atardecer en el Lago",
+                "summary": "Una experiencia única navegando las aguas del Lago de Atitlán al atardecer.",
+                "description": "Disfruta de las impresionantes vistas de los volcanes mientras navegas en kayak por las tranquilas aguas del lago. Esta experiencia incluye una parada en una playa privada para disfrutar de un snack y bebidas mientras el sol se oculta detrás de los volcanes.",
+                "duration": "2.5 horas",
+                "difficulty": "Moderado",
+                "meetingPoint": "Playa Pública de Panajachel",
+                "includes": [
+                    "Equipo de kayak y chaleco salvavidas",
+                    "Guía instructor certificado",
+                    "Snack y bebidas",
+                    "Toalla y bolsa seca",
+                    "Seguro de responsabilidad civil"
+                ],
+                "notIncludes": [
+                    "Transporte al punto de encuentro",
+                    "Comidas no especificadas",
+                    "Propinas",
+                    "Seguro de viaje",
+                    "Gastos personales"
+                ],
+                "whatToBring": [
+                    "Traje de baño",
+                    "Toalla",
+                    "Bloqueador solar",
+                    "Gorra o sombrero",
+                    "Cámara a prueba de agua"
+                ],
+                "highlights": [
+                    "Vistas panorámicas de los volcanes",
+                    "Atardecer en el lago",
+                    "Guía experto",
+                    "Equipo de calidad",
+                    "Experiencia segura y divertida"
+                ],
+                "itinerary": [
+                    {
+                        "time": "4:00 PM",
+                        "title": "Encuentro en la playa",
+                        "description": "Breve instrucción sobre seguridad y técnicas de remo."
+                    },
+                    {
+                        "time": "4:30 PM",
+                        "title": "Navegación",
+                        "description": "Recorrido por la costa con paradas para fotos."
+                    },
+                    {
+                        "time": "5:30 PM",
+                        "title": "Puesta de sol",
+                        "description": "Parada en playa privada para disfrutar del atardecer."
+                    },
+                    {
+                        "time": "6:30 PM",
+                        "title": "Regreso",
+                        "description": "Retorno a la playa de Panajachel."
+                    }
+                ]
+            },
+            "pana-culinary-tour": {
+                "title": "Tour Culinario por Panajachel",
+                "summary": "Descubre los sabores auténticos de la cocina guatemalteca en un recorrido gastronómico.",
+                "description": "Este tour te llevará a probar los platillos más representativos de la gastronomía guatemalteca en los restaurantes y puestos locales de Panajachel. Desde los típicos chuchitos y tamales hasta los postres tradicionales, acompañados de bebidas locales como el atol de elote y el café guatemalteco.",
+                "duration": "4 horas",
+                "difficulty": "Fácil",
+                "meetingPoint": "Parque Central de Panajachel",
+                "includes": [
+                    "Degustación en 5-6 establecimientos",
+                    "Guía gastronómico local",
+                    "Agua purificada",
+                    "Recetario digital",
+                    "Descuentos en compras locales"
+                ],
+                "notIncludes": [
+                    "Bebidas alcohólicas",
+                    "Propinas",
+                    "Compras personales",
+                    "Transporte al punto de encuentro"
+                ],
+                "whatToBring": [
+                    "Ropa cómoda",
+                    "Zapatos para caminar",
+                    "Cámara",
+                    "Dinero extra para compras",
+                    "Apetito"
+                ],
+                "highlights": [
+                    "Degustación de platos típicos",
+                    "Visita a restaurantes locales",
+                    "Cocina en vivo",
+                    "Historia de la gastronomía local",
+                    "Recomendaciones culinarias"
+                ],
+                "itinerary": [
+                    {
+                        "time": "10:00 AM",
+                        "title": "Encuentro",
+                        "description": "Presentación del tour y breve introducción a la gastronomía guatemalteca."
+                    },
+                    {
+                        "time": "10:30 AM",
+                        "title": "Desayuno típico",
+                        "description": "Degustación de desayunos tradicionales."
+                    },
+                    {
+                        "time": "12:00 PM",
+                        "title": "Comida callejera",
+                        "description": "Prueba de antojitos y comida rápida local."
+                    },
+                    {
+                        "time": "1:30 PM",
+                        "title": "Postres y café",
+                        "description": "Cierre con postres tradicionales y degustación de café."
+                    }
                 ]
             }
         },

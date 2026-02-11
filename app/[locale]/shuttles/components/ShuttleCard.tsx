@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { MapPin, Users, ArrowRight, Star } from 'lucide-react';
+import { Users, ArrowRight, Star } from 'lucide-react';
 import { ShuttleRoute } from '@/types/shuttle';
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
@@ -65,9 +65,11 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
                             <h3 className="text-4xl font-black text-white tracking-tighter leading-none">
                                 {shuttle.price ? `Q${shuttle.price}` : 'Q 0'}
                             </h3>
-                            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest leading-tight">{t('from')}</p>
+                            <p className="text-[10px] text-gray-300 uppercase font-bold tracking-widest leading-tight">
+                                {t('from')} / {t('perPerson')}
+                            </p>
                         </div>
-                        <span className="text-[9px] text-white uppercase font-bold tracking-widest pb-1 border-b border-white/20 leading-none">{t('perPerson')}</span>
+                        <span className="text-[9px] text-white uppercase font-bold tracking-widest pb-1 border-b border-white/20 leading-none hidden">{t('perPerson')}</span>
                     </div>
                 </div>
             </div>
@@ -77,27 +79,21 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
                 <div className="space-y-8">
                     <div className="relative flex flex-col gap-6">
                         {/* Route representation - Minimalist Elite Style */}
-                        <div className="flex items-center gap-6">
-                            <MapPin className="w-5 h-5 text-muted-foreground/40" />
-                            <p className="font-extrabold text-lg text-foreground tracking-tight">{shuttle.origin}</p>
-                        </div>
-
-                        {/* Elegant Connector */}
-                        <div className="ml-[2px] w-[2px] h-8 bg-gradient-to-b from-primary/20 to-transparent" />
-
-                        <div className="flex items-center gap-6">
-                            <MapPin className="w-5 h-5 text-muted-foreground/40" />
-                            <p className="font-extrabold text-lg text-foreground tracking-tight">{shuttle.destination}</p>
+                        <div className="flex items-center justify-center text-center gap-3">
+                            <p className="font-extrabold text-lg text-foreground tracking-tight truncate">{shuttle.origin}</p>
+                            <ArrowRight className="w-4 h-4 text-primary/50 flex-shrink-0" />
+                            <p className="font-extrabold text-lg text-foreground tracking-tight truncate">{shuttle.destination}</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="pt-8 border-t border-white/5 flex items-center justify-between">
+                <div className="pt-8 border-t border-white/5 flex items-center justify-center text-center gap-4">
                     <div className="space-y-1">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">{t('durationLabel')}</span>
                         <p className="font-bold text-sm text-muted-foreground/80">{shuttle.duration}</p>
                     </div>
-                    <div className="space-y-1 text-right">
+                    <div className="text-muted-foreground/30 text-xl font-thin">•</div>
+                    <div className="space-y-1">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">{t('scheduleLabel')}</span>
                         <p className="font-bold text-sm text-muted-foreground/80">
                             {shuttle.schedule[0]} <span className="text-[10px] opacity-40">...</span>

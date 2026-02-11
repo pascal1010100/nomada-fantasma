@@ -3,39 +3,39 @@ import { Tour } from './types';
 const panajachelTours: Tour[] = [
   {
     id: 'pana-market-tour',
-    title: 'Tour del Mercado Local y Calle Santander',
+    title: 'Data.tours.pana-market-tour.title',
     slug: 'tour-mercado-santander',
-    summary: 'Explora el bullicioso mercado local y la famosa Calle Santander de Panajachel.',
-    description: 'Sumérgete en la vida local con este tour que te llevará por el auténtico mercado de Panajachel, donde podrás encontrar desde frutas exóticas hasta artesanías tradicionales. Luego, recorre la icónica Calle Santander, llena de tiendas, galerías y restaurantes con vista al lago.',
-    duration: '3 horas',
+    summary: 'Data.tours.pana-market-tour.summary',
+    description: 'Data.tours.pana-market-tour.description',
+    duration: 'Data.tours.pana-market-tour.duration',
     difficulty: 'Fácil',
     price: {
       adult: 150,
       privateGroup: 1200
     },
     includes: [
-      'Guía local bilingüe',
-      'Degustación de frutas locales',
-      'Muestra de artesanías',
-      'Mapa de la zona'
+      'Data.tours.pana-market-tour.includes.0',
+      'Data.tours.pana-market-tour.includes.1',
+      'Data.tours.pana-market-tour.includes.2',
+      'Data.tours.pana-market-tour.includes.3'
     ],
-    meetingPoint: 'Parque Central de Panajachel',
+    meetingPoint: 'Data.tours.pana-market-tour.meetingPoint',
     whatToBring: [
-      'Zapatos cómodos para caminar',
-      'Dinero en efectivo para compras',
-      'Cámara fotográfica',
-      'Bloqueador solar',
-      'Sombrero o gorra'
+      'Data.tours.pana-market-tour.whatToBring.0',
+      'Data.tours.pana-market-tour.whatToBring.1',
+      'Data.tours.pana-market-tour.whatToBring.2',
+      'Data.tours.pana-market-tour.whatToBring.3',
+      'Data.tours.pana-market-tour.whatToBring.4'
     ],
     images: [
       '/images/tours/panajachel/mercado-1.jpg',
       '/images/tours/panajachel/santander-1.jpg'
     ],
     notIncludes: [
-      'Transporte al punto de encuentro',
-      'Comidas no especificadas',
-      'Propinas',
-      'Gastos personales'
+      'Data.tours.pana-market-tour.notIncludes.0',
+      'Data.tours.pana-market-tour.notIncludes.1',
+      'Data.tours.pana-market-tour.notIncludes.2',
+      'Data.tours.pana-market-tour.notIncludes.3'
     ],
     capacity: {
       min: 2,
@@ -44,72 +44,72 @@ const panajachelTours: Tour[] = [
     availableDays: ['Lunes', 'Miércoles', 'Viernes', 'Sábado'],
     startTimes: ['9:00 AM', '2:00 PM'],
     highlights: [
-      'Recorrido por el mercado local',
-      'Calle Santander y sus tiendas',
-      'Degustación de frutas locales',
-      'Artesanías típicas',
-      'Vistas al Lago de Atitlán'
+      'Data.tours.pana-market-tour.highlights.0',
+      'Data.tours.pana-market-tour.highlights.1',
+      'Data.tours.pana-market-tour.highlights.2',
+      'Data.tours.pana-market-tour.highlights.3',
+      'Data.tours.pana-market-tour.highlights.4'
     ],
     itinerary: [
       {
         time: '9:00 AM',
-        title: 'Encuentro en el Parque Central',
-        description: 'Breve introducción sobre la historia de Panajachel.'
+        title: 'Data.tours.pana-market-tour.itinerary.0.title',
+        description: 'Data.tours.pana-market-tour.itinerary.0.description'
       },
       {
         time: '9:30 AM',
-        title: 'Mercado Local',
-        description: 'Recorrido por los puestos de frutas, verduras y artesanías.'
+        title: 'Data.tours.pana-market-tour.itinerary.1.title',
+        description: 'Data.tours.pana-market-tour.itinerary.1.description'
       },
       {
         time: '11:00 AM',
-        title: 'Calle Santander',
-        description: 'Paseo por la calle principal de tiendas y restaurantes.'
+        title: 'Data.tours.pana-market-tour.itinerary.2.title',
+        description: 'Data.tours.pana-market-tour.itinerary.2.description'
       },
       {
         time: '12:00 PM',
-        title: 'Tiempo libre',
-        description: 'Tiempo para compras o exploración por cuenta propia.'
+        title: 'Data.tours.pana-market-tour.itinerary.3.title',
+        description: 'Data.tours.pana-market-tour.itinerary.3.description'
       }
     ]
   },
   {
     id: 'pana-kayak-sunset',
-    title: 'Kayak al Atardecer en el Lago',
+    title: 'Data.tours.pana-kayak-sunset.title',
     slug: 'kayak-atardecer',
-    summary: 'Una experiencia única navegando las aguas del Lago de Atitlán al atardecer.',
-    description: 'Disfruta de las impresionantes vistas de los volcanes mientras navegas en kayak por las tranquilas aguas del lago. Esta experiencia incluye una parada en una playa privada para disfrutar de un snack y bebidas mientras el sol se oculta detrás de los volcanes.',
-    duration: '2.5 horas',
+    summary: 'Data.tours.pana-kayak-sunset.summary',
+    description: 'Data.tours.pana-kayak-sunset.description',
+    duration: 'Data.tours.pana-kayak-sunset.duration',
     difficulty: 'Moderado',
     price: {
       adult: 250,
       privateGroup: 2000
     },
     includes: [
-      'Equipo de kayak y chaleco salvavidas',
-      'Guía instructor certificado',
-      'Snack y bebidas',
-      'Toalla y bolsa seca',
-      'Seguro de responsabilidad civil'
+      'Data.tours.pana-kayak-sunset.includes.0',
+      'Data.tours.pana-kayak-sunset.includes.1',
+      'Data.tours.pana-kayak-sunset.includes.2',
+      'Data.tours.pana-kayak-sunset.includes.3',
+      'Data.tours.pana-kayak-sunset.includes.4'
     ],
-    meetingPoint: 'Playa Pública de Panajachel',
+    meetingPoint: 'Data.tours.pana-kayak-sunset.meetingPoint',
     whatToBring: [
-      'Traje de baño',
-      'Toalla',
-      'Bloqueador solar',
-      'Gorra o sombrero',
-      'Cámara a prueba de agua'
+      'Data.tours.pana-kayak-sunset.whatToBring.0',
+      'Data.tours.pana-kayak-sunset.whatToBring.1',
+      'Data.tours.pana-kayak-sunset.whatToBring.2',
+      'Data.tours.pana-kayak-sunset.whatToBring.3',
+      'Data.tours.pana-kayak-sunset.whatToBring.4'
     ],
     images: [
       '/images/tours/panajachel/kayak-1.jpg',
       '/images/tours/panajachel/sunset-1.jpg'
     ],
     notIncludes: [
-      'Transporte al punto de encuentro',
-      'Comidas no especificadas',
-      'Propinas',
-      'Seguro de viaje',
-      'Gastos personales'
+      'Data.tours.pana-kayak-sunset.notIncludes.0',
+      'Data.tours.pana-kayak-sunset.notIncludes.1',
+      'Data.tours.pana-kayak-sunset.notIncludes.2',
+      'Data.tours.pana-kayak-sunset.notIncludes.3',
+      'Data.tours.pana-kayak-sunset.notIncludes.4'
     ],
     capacity: {
       min: 1,
@@ -118,71 +118,71 @@ const panajachelTours: Tour[] = [
     availableDays: ['Martes', 'Jueves', 'Sábado', 'Domingo'],
     startTimes: ['4:00 PM'],
     highlights: [
-      'Vistas panorámicas de los volcanes',
-      'Atardecer en el lago',
-      'Guía experto',
-      'Equipo de calidad',
-      'Experiencia segura y divertida'
+      'Data.tours.pana-kayak-sunset.highlights.0',
+      'Data.tours.pana-kayak-sunset.highlights.1',
+      'Data.tours.pana-kayak-sunset.highlights.2',
+      'Data.tours.pana-kayak-sunset.highlights.3',
+      'Data.tours.pana-kayak-sunset.highlights.4'
     ],
     itinerary: [
       {
         time: '4:00 PM',
-        title: 'Encuentro en la playa',
-        description: 'Breve instrucción sobre seguridad y técnicas de remo.'
+        title: 'Data.tours.pana-kayak-sunset.itinerary.0.title',
+        description: 'Data.tours.pana-kayak-sunset.itinerary.0.description'
       },
       {
         time: '4:30 PM',
-        title: 'Navegación',
-        description: 'Recorrido por la costa con paradas para fotos.'
+        title: 'Data.tours.pana-kayak-sunset.itinerary.1.title',
+        description: 'Data.tours.pana-kayak-sunset.itinerary.1.description'
       },
       {
         time: '5:30 PM',
-        title: 'Puesta de sol',
-        description: 'Parada en playa privada para disfrutar del atardecer.'
+        title: 'Data.tours.pana-kayak-sunset.itinerary.2.title',
+        description: 'Data.tours.pana-kayak-sunset.itinerary.2.description'
       },
       {
         time: '6:30 PM',
-        title: 'Regreso',
-        description: 'Retorno a la playa de Panajachel.'
+        title: 'Data.tours.pana-kayak-sunset.itinerary.3.title',
+        description: 'Data.tours.pana-kayak-sunset.itinerary.3.description'
       }
     ]
   },
   {
     id: 'pana-culinary-tour',
-    title: 'Tour Culinario por Panajachel',
+    title: 'Data.tours.pana-culinary-tour.title',
     slug: 'tour-culinario',
-    summary: 'Descubre los sabores auténticos de la cocina guatemalteca en un recorrido gastronómico.',
-    description: 'Este tour te llevará a probar los platillos más representativos de la gastronomía guatemalteca en los restaurantes y puestos locales de Panajachel. Desde los típicos chuchitos y tamales hasta los postres tradicionales, acompañados de bebidas locales como el atol de elote y el café guatemalteco.',
-    duration: '4 horas',
+    summary: 'Data.tours.pana-culinary-tour.summary',
+    description: 'Data.tours.pana-culinary-tour.description',
+    duration: 'Data.tours.pana-culinary-tour.duration',
     difficulty: 'Fácil',
     price: {
       adult: 300,
       privateGroup: 2500
     },
     includes: [
-      'Degustación en 5-6 establecimientos',
-      'Guía gastronómico local',
-      'Agua purificada',
-      'Recetario digital',
-      'Descuentos en compras locales'
+      'Data.tours.pana-culinary-tour.includes.0',
+      'Data.tours.pana-culinary-tour.includes.1',
+      'Data.tours.pana-culinary-tour.includes.2',
+      'Data.tours.pana-culinary-tour.includes.3',
+      'Data.tours.pana-culinary-tour.includes.4'
     ],
-    meetingPoint: 'Parque Central de Panajachel',
+    meetingPoint: 'Data.tours.pana-culinary-tour.meetingPoint',
     whatToBring: [
-      'Ropa cómoda',
-      'Zapatos para caminar',
-      'Cámara',
-      'Dinero extra para compras',
-      'Apetito'
+      'Data.tours.pana-culinary-tour.whatToBring.0',
+      'Data.tours.pana-culinary-tour.whatToBring.1',
+      'Data.tours.pana-culinary-tour.whatToBring.2',
+      'Data.tours.pana-culinary-tour.whatToBring.3',
+      'Data.tours.pana-culinary-tour.whatToBring.4'
     ],
     images: [
       '/images/tours/panajachel/comida-1.jpg',
       '/images/tours/panajachel/comida-2.jpg'
     ],
     notIncludes: [
-      'Bebidas alcohólicas',
-      'Propinas',
-      'Compras personales',
-      'Transporte al punto de encuentro'
+      'Data.tours.pana-culinary-tour.notIncludes.0',
+      'Data.tours.pana-culinary-tour.notIncludes.1',
+      'Data.tours.pana-culinary-tour.notIncludes.2',
+      'Data.tours.pana-culinary-tour.notIncludes.3'
     ],
     capacity: {
       min: 2,
@@ -191,32 +191,32 @@ const panajachelTours: Tour[] = [
     availableDays: ['Lunes', 'Miércoles', 'Viernes', 'Sábado', 'Domingo'],
     startTimes: ['10:00 AM'],
     highlights: [
-      'Degustación de platos típicos',
-      'Visita a restaurantes locales',
-      'Cocina en vivo',
-      'Historia de la gastronomía local',
-      'Recomendaciones culinarias'
+      'Data.tours.pana-culinary-tour.highlights.0',
+      'Data.tours.pana-culinary-tour.highlights.1',
+      'Data.tours.pana-culinary-tour.highlights.2',
+      'Data.tours.pana-culinary-tour.highlights.3',
+      'Data.tours.pana-culinary-tour.highlights.4'
     ],
     itinerary: [
       {
         time: '10:00 AM',
-        title: 'Encuentro',
-        description: 'Presentación del tour y breve introducción a la gastronomía guatemalteca.'
+        title: 'Data.tours.pana-culinary-tour.itinerary.0.title',
+        description: 'Data.tours.pana-culinary-tour.itinerary.0.description'
       },
       {
         time: '10:30 AM',
-        title: 'Desayuno típico',
-        description: 'Degustación de desayunos tradicionales.'
+        title: 'Data.tours.pana-culinary-tour.itinerary.1.title',
+        description: 'Data.tours.pana-culinary-tour.itinerary.1.description'
       },
       {
         time: '12:00 PM',
-        title: 'Comida callejera',
-        description: 'Prueba de antojitos y comida rápida local.'
+        title: 'Data.tours.pana-culinary-tour.itinerary.2.title',
+        description: 'Data.tours.pana-culinary-tour.itinerary.2.description'
       },
       {
         time: '1:30 PM',
-        title: 'Postres y café',
-        description: 'Cierre con postres tradicionales y degustación de café.'
+        title: 'Data.tours.pana-culinary-tour.itinerary.3.title',
+        description: 'Data.tours.pana-culinary-tour.itinerary.3.description'
       }
     ]
   }

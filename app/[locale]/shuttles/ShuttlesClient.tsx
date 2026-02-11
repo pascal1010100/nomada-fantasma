@@ -83,7 +83,7 @@ export default function ShuttlesClient() {
                     <div className="absolute inset-0 bg-black/20 z-10" />
                     <div className="absolute inset-0 opacity-70"
                          style={{
-                             backgroundImage: 'radial-gradient(1200px 600px at 50% 20%, rgba(59,130,246,0.10), transparent 60%)'
+                             backgroundImage: 'radial-gradient(1200px 600px at 50% 20%, hsla(187, 92%, 44%, 0.15), transparent 60%)'
                          }}
                     />
                     <div

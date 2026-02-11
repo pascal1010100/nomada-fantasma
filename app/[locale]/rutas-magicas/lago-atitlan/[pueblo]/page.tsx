@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { pueblosAtitlan as atitlanTowns } from '../../mocks/atitlanData';
 import {
-  ArrowLeft, ArrowRight, MapPin, Wifi, Coffee, Bus, Clock, Landmark,
+  ArrowLeft, MapPin, Wifi, Coffee, Bus, Clock, Landmark,
   Sunset, Footprints, Star, Users, Compass, Sun, Moon, Zap,
   Wind, Thermometer, CloudRain, Droplets, CheckCircle2, CloudSun
 } from 'lucide-react';
@@ -11,6 +11,7 @@ import ToursSection from '../../components/ToursSection';
 import GuideCard from '../../components/GuideCard';
 import TownTabs from '../../components/TownTabs';
 import AccommodationSection from '../../components/AccommodationSection';
+import NearbyTownCard from '../../components/NearbyTownCard';
 import EliteActionBar from '../../components/EliteActionBar';
 import React from 'react';
 import { getTranslations, getLocale } from 'next-intl/server';
@@ -381,30 +382,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{tTown('nearbyTitle')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {nearbyTowns.map((nearbyTown) => (
-                <Link
-                  key={nearbyTown.id}
-                  href={`/${locale}/rutas-magicas/lago-atitlan/${nearbyTown.slug}`}
-                  className="group block bg-white dark:bg-gray-700 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-                >
-                  <div className="h-40 relative">
-                    <div
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                      style={{ backgroundImage: `url(${nearbyTown.coverImage})` }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-transparent to-transparent" />
-                    </div>
-                    <div className="absolute bottom-0 left-0 p-4">
-                      <h3 className="text-xl font-bold text-white">{nearbyTown.title}</h3>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2">{nearbyTown.summary}</p>
-                    <div className="mt-3 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                      <span>Ver más</span>
-                      <ArrowRight className="w-4 h-4 ml-1" />
-                    </div>
-                  </div>
-                </Link>
+                <NearbyTownCard key={nearbyTown.id} town={nearbyTown} locale={locale} />
               ))}
             </div>
           </section>

@@ -1,7 +1,7 @@
 'use client';
 
 import { Tour } from '../mocks/tours/types';
-import { Clock, Users, Zap, ArrowRight, MapPin, Star, Calendar, CheckCircle } from 'lucide-react';
+import { Clock, Users, MapPin, Star, Calendar, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -44,14 +44,12 @@ export default function TourCard({ tour, puebloSlug, className = '' }: TourCardP
 
   // Map difficulty to localized strings
   const getLocalizedDifficulty = (diff: string) => {
-    switch (diff) {
-      case 'Fácil': return t('difficulty.easy');
-      case 'Moderado': return t('difficulty.medium');
-      case 'Difícil': return t('difficulty.hard');
-      default: return diff;
-    }
+    const lowerDiff = diff.toLowerCase();
+    if (lowerDiff === 'fácil') return t('difficulty.easy');
+    if (lowerDiff === 'moderado') return t('difficulty.medium');
+    if (lowerDiff === 'difícil') return t('difficulty.hard');
+    return diff;
   };
-
   const localizedDifficulty = getLocalizedDifficulty(tour.difficulty);
 
   return (

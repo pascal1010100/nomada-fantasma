@@ -296,9 +296,11 @@
                 "fullDescription": "Lake Atitlán is one of the most impressive destinations in Central America, surrounded by volcanoes and Mayan villages full of color and tradition.",
                 "vibe": "Volcanic Paradise",
                 "highlights": [
-                    "Panoramic lake views",
-                    "Mayan indigenous villages",
-                    "Unforgettable sunrises"
+                    "Panoramic lake and volcano views",
+                    "Indigenous Mayan villages full of culture",
+                    "Water activities and hiking",
+                    "Unique local gastronomy",
+                    "Unforgettable sunrises and sunsets"
                 ]
             },
             "coban": {
@@ -421,6 +423,177 @@
                     "Sunscreen",
                     "Notebook",
                     "Reusable water bottle"
+                ]
+            },
+            "pana-market-tour": {
+                "title": "Local Market and Santander Street Tour",
+                "summary": "Explore the bustling local market and the famous Santander Street in Panajachel.",
+                "description": "Immerse yourself in local life with this tour that will take you through the authentic market of Panajachel, where you can find everything from exotic fruits to traditional crafts. Then, walk down the iconic Santander Street, full of shops, galleries, and restaurants with a view of the lake.",
+                "duration": "3 hours",
+                "difficulty": "Easy",
+                "meetingPoint": "Panajachel Central Park",
+                "includes": [
+                    "Bilingual local guide",
+                    "Local fruit tasting",
+                    "Crafts demonstration",
+                    "Area map"
+                ],
+                "notIncludes": [
+                    "Transportation to the meeting point",
+                    "Unspecified meals",
+                    "Tips",
+                    "Personal expenses"
+                ],
+                "whatToBring": [
+                    "Comfortable walking shoes",
+                    "Cash for shopping",
+                    "Camera",
+                    "Sunscreen",
+                    "Hat or cap"
+                ],
+                "highlights": [
+                    "Tour of the local market",
+                    "Santander Street and its shops",
+                    "Local fruit tasting",
+                    "Typical handicrafts",
+                    "Views of Lake Atitlán"
+                ],
+                "itinerary": [
+                    {
+                        "time": "9:00 AM",
+                        "title": "Meeting at the Central Park",
+                        "description": "Brief introduction to the history of Panajachel."
+                    },
+                    {
+                        "time": "9:30 AM",
+                        "title": "Local Market",
+                        "description": "Tour of the fruit, vegetable, and craft stalls."
+                    },
+                    {
+                        "time": "11:00 AM",
+                        "title": "Santander Street",
+                        "description": "Walk along the main street of shops and restaurants."
+                    },
+                    {
+                        "time": "12:00 PM",
+                        "title": "Free Time",
+                        "description": "Time for shopping or exploring on your own."
+                    }
+                ]
+            },
+            "pana-kayak-sunset": {
+                "title": "Sunset Kayak on the Lake",
+                "summary": "A unique experience kayaking on the waters of Lake Atitlán at sunset.",
+                "description": "Enjoy the breathtaking views of the volcanoes as you kayak on the calm waters of the lake. This experience includes a stop at a private beach to enjoy a snack and drinks as the sun sets behind the volcanoes.",
+                "duration": "2.5 hours",
+                "difficulty": "Moderate",
+                "meetingPoint": "Panajachel Public Beach",
+                "includes": [
+                    "Kayak equipment and life jacket",
+                    "Certified instructor guide",
+                    "Snack and drinks",
+                    "Towel and dry bag",
+                    "Liability insurance"
+                ],
+                "notIncludes": [
+                    "Transportation to the meeting point",
+                    "Unspecified meals",
+                    "Tips",
+                    "Travel insurance",
+                    "Personal expenses"
+                ],
+                "whatToBring": [
+                    "Swimsuit",
+                    "Towel",
+                    "Sunscreen",
+                    "Cap or hat",
+                    "Waterproof camera"
+                ],
+                "highlights": [
+                    "Panoramic views of the volcanoes",
+                    "Sunset on the lake",
+                    "Expert guide",
+                    "Quality equipment",
+                    "Safe and fun experience"
+                ],
+                "itinerary": [
+                    {
+                        "time": "4:00 PM",
+                        "title": "Meeting at the beach",
+                        "description": "Brief instruction on safety and paddling techniques."
+                    },
+                    {
+                        "time": "4:30 PM",
+                        "title": "Kayaking",
+                        "description": "Tour along the coast with stops for photos."
+                    },
+                    {
+                        "time": "5:30 PM",
+                        "title": "Sunset",
+                        "description": "Stop at a private beach to enjoy the sunset."
+                    },
+                    {
+                        "time": "6:30 PM",
+                        "title": "Return",
+                        "description": "Return to Panajachel beach."
+                    }
+                ]
+            },
+            "pana-culinary-tour": {
+                "title": "Panajachel Culinary Tour",
+                "summary": "Discover the authentic flavors of Guatemalan cuisine on a gastronomic tour.",
+                "description": "This tour will take you to taste the most representative dishes of Guatemalan gastronomy in the local restaurants and stalls of Panajachel. From the typical chuchitos and tamales to traditional desserts, accompanied by local drinks such as atol de elote and Guatemalan coffee.",
+                "duration": "4 hours",
+                "difficulty": "Easy",
+                "meetingPoint": "Panajachel Central Park",
+                "includes": [
+                    "Tasting at 5-6 establishments",
+                    "Local gastronomic guide",
+                    "Purified water",
+                    "Digital recipe book",
+                    "Discounts on local purchases"
+                ],
+                "notIncludes": [
+                    "Alcoholic beverages",
+                    "Tips",
+                    "Personal purchases",
+                    "Transportation to the meeting point"
+                ],
+                "whatToBring": [
+                    "Comfortable clothes",
+                    "Walking shoes",
+                    "Camera",
+                    "Extra money for shopping",
+                    "Appetite"
+                ],
+                "highlights": [
+                    "Tasting of typical dishes",
+                    "Visit to local restaurants",
+                    "Live cooking",
+                    "History of local gastronomy",
+                    "Culinary recommendations"
+                ],
+                "itinerary": [
+                    {
+                        "time": "10:00 AM",
+                        "title": "Meeting",
+                        "description": "Presentation of the tour and brief introduction to Guatemalan gastronomy."
+                    },
+                    {
+                        "time": "10:30 AM",
+                        "title": "Typical breakfast",
+                        "description": "Tasting of traditional breakfasts."
+                    },
+                    {
+                        "time": "12:00 PM",
+                        "title": "Street food",
+                        "description": "Tasting of local snacks and fast food."
+                    },
+                    {
+                        "time": "1:30 PM",
+                        "title": "Desserts and coffee",
+                        "description": "Closing with traditional desserts and coffee tasting."
+                    }
                 ]
             }
         },
