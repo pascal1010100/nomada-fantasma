@@ -9,6 +9,8 @@ import {
 } from '@/app/lib/validations';
 import type { Database } from '@/types/database.types';
 
+type ReservationInsert = Database['public']['Tables']['reservations']['Insert'];
+
 // POST: Create a new reservation
 export async function POST(request: Request) {
     try {
@@ -30,12 +32,12 @@ export async function POST(request: Request) {
         }
 
         // Sanitize and normalize input
-        const reservationData = sanitizeReservationInput(validation.data);
+        const reservationData: ReservationInsert = sanitizeReservationInput(validation.data);
 
         // Insert into Supabase
         const { data: newReservation, error: dbError } = await supabaseAdmin
             .from('reservations')
-            .insert(reservationData)
+            .insert<ReservationInsert>(reservationData)
             .select()
             .single();
 
