@@ -92,87 +92,36 @@
         }
     },
     "About": {
-        "badge": "Protocolo de Viaje V2.0",
-        "titleTop": "El Nexo del",
-        "titleGradient": "Nómada Moderno",
-        "description": "Tu portal a un mundo sin fronteras. Fusionamos tecnología de vanguardia con experiencias locales auténticas para el viajero de élite.",
-        "btnExploration": "Iniciar Exploración",
-        "btnProtocol": "Ver Protocolo",
-        "decodingTitle": "Decodificando el Caos Urbano",
-        "decodingDesc": "Más que una plataforma, somos una red de inteligencia colectiva. Nómada Fantasma decodifica el caos urbano para revelarte rutas secretas, conexiones vitales y el pulso real de cada destino.",
-        "cortexTitle": "Potenciado por Cortex AI",
-        "cortexDesc": "Algoritmos predictivos que te ofrecen:",
-        "cortexItems": [
-            "Curaduría de rutas basada en tu perfil psicográfico",
-            "Asistente táctico 24/7 para logística en terreno",
-            "Análisis de flujo para evitar saturación turística",
-            "Enlace lingüístico en tiempo real"
-        ],
-        "radarTitle": "Radar de Recursos:",
-        "resources": {
-            "wifi": "WiFi Alta Velocidad",
-            "shelters": "Refugios",
-            "recharge": "Estaciones de Recarga",
-            "atms": "Cajeros",
-            "nodes": "Nodos de Interés",
-            "hubs": "Hubs Creativos"
-        },
+        "badge": "Nuestra Misión",
+        "titleTop": "Más Allá del Mapa Turístico",
+        "titleGradient": "Descubre la Verdadera Guatemala",
+        "description": "Nómada Fantasma no es solo una plataforma de viajes, es tu brújula hacia el corazón de Guatemala. Seleccionamos cuidadosamente las experiencias más auténticas, desde tours que te sumergen en la cultura local hasta alojamientos con encanto y shuttles que te llevan a destinos secretos. Olvídate de las rutas convencionales y prepárate para una aventura inolvidable.",
+        "btnExplore": "Explorar Experiencias",
+        "btnContact": "Contáctanos",
+        "philosophyTitle": "Nuestra Misión: Tu Aventura Auténtica",
+        "philosophyDesc": "Creemos que viajar es más que visitar lugares; es conectar con ellos. Por eso, nuestra misión es simple: ofrecerte acceso a experiencias de alta calidad que respetan la cultura local y te permiten descubrir la verdadera esencia de Guatemala. Cada tour, guía y alojamiento en nuestra plataforma ha sido verificado por nuestro equipo para garantizar que tu única preocupación sea disfrutar.",
+        "featuresTitle": "Pilares de Tu Viaje",
         "features": {
-            "cartography": {
-                "title": "Cartografía Viva",
-                "desc": "Datos en tiempo real sobre el ecosistema urbano: WiFi de alta velocidad, hubs de innovación y refugios creativos."
+            "curated": {
+                "title": "Experiencias Curadas",
+                "desc": "Cada tour y actividad ha sido seleccionado por su autenticidad y calidad."
             },
-            "voyages": {
-                "title": "Travesías Ocultas",
-                "desc": "Caminos no marcados en los mapas convencionales. Experiencias diseñadas por curadores locales."
+            "booking": {
+                "title": "Reservas Fáciles y Seguras",
+                "desc": "Reserva en pocos clics con nuestra plataforma segura y recibe confirmación instantánea."
             },
-            "cortex": {
-                "title": "Cortex AI",
-                "desc": "Algoritmos predictivos que curan tu viaje en tiempo real. Tu copiloto digital que anticipa tus necesidades."
+            "guides": {
+                "title": "Guías Locales Expertos",
+                "desc": "Conecta con guías apasionados que te mostrarán los secretos mejor guardados de cada destino."
             },
-            "syndicate": {
-                "title": "El Sindicato Nómada",
-                "desc": "Conecta con una red global de visionarios, creadores y exploradores."
-            },
-            "sync": {
-                "title": "Sincronización Flexible",
-                "desc": "Reserva cuando quieras. Personaliza tu experiencia. Sin ataduras."
-            },
-            "oracle": {
-                "title": "Oráculo Virtual",
-                "desc": "Respuestas instantáneas a tus dudas sobre el terreno. Asistencia 24/7."
+            "transport": {
+                "title": "Transporte sin Complicaciones",
+                "desc": "Organiza tus traslados entre destinos con nuestros shuttles de confianza."
             }
         },
-        "protocolTitle": "Ejecutando el Protocolo",
-        "protocolDesc": "Accede a experiencias exclusivas en 5 pasos",
-        "steps": {
-            "scan": {
-                "title": "Escanea el Terreno",
-                "desc": "Navega por nuestra cartografía interactiva y detecta las Travesías Ocultas."
-            },
-            "mission": {
-                "title": "Identifica tu Misión",
-                "desc": "Elige experiencias que resuenen con tu frecuencia. Desde free tours hasta inmersiones exclusivas."
-            },
-            "protocol": {
-                "title": "Inicia Protocolo",
-                "desc": "Solicita tu reserva. Establece conexión directa con el guía local."
-            },
-            "sync": {
-                "title": "Sincronización Confirmada",
-                "desc": "Recibe estado de disponibilidad, coordenadas exactas y hora de encuentro."
-            },
-            "immersion": {
-                "title": "Inmersión Total",
-                "desc": "Vive la experiencia. Descubre la realidad oculta de cada destino."
-            }
-        },
-        "readyTitle": "¿Listo para la inmersión?",
-        "readyMission": "Iniciar Misión",
-        "ctaTitle": "Únete a la comunidad de nómadas digitales",
-        "ctaDesc": "Descubre destinos increíbles, conecta con guías locales y vive experiencias que recordarás para siempre.",
-        "ctaRegister": "Crear cuenta gratuita",
-        "ctaContact": "Contáctanos"
+        "ctaTitle": "¿Listo para la Aventura?",
+        "ctaDesc": "Explora nuestras rutas mágicas y descubre la Guatemala que pocos conocen.",
+        "ctaAction": "Ver Rutas Mágicas"
     },
     "Contact": {
         "badge": "Contacto",
@@ -801,5 +750,28 @@
         "rights": "© {year} Nómada Fantasma",
         "remote": "Remoto · GT",
         "contact": "Página de contacto"
+    },
+    "ReservationEmail": {
+      "preview": "Confirmación de reserva: {{tourName}}",
+      "title": "¡Tu aventura comienza aquí! 🌎",
+      "greeting": "Hola {{customerName}}",
+      "intro": "Hemos recibido tu solicitud de reserva para <strong>{{tourName}}</strong>. Estamos emocionados de ser parte de tu experiencia en Guatemala.",
+      "detailsTitle": "Detalles de la Reserva",
+      "detailsExperience": "Experiencia",
+      "detailsDate": "Fecha",
+      "detailsTravelers": "Viajeros",
+      "detailsTraveler": "persona",
+      "detailsTravelersPlural": "personas",
+      "total": "Total",
+      "paymentTitle": "Próximos Pasos: Confirmar tu Reserva",
+      "paymentIntro": "Para confirmar tu lugar, por favor realiza el pago utilizando uno de los siguientes métodos. Tu reserva se mantendrá como pendiente durante 24 horas.",
+      "paymentMethodBank": "Transferencia Bancaria",
+      "paymentBankAccount": "Cuenta: [Tu Número de Cuenta]",
+      "paymentBankHolder": "Titular: [Nombre del Titular]",
+      "paymentBankName": "Banco: [Nombre del Banco]",
+      "paymentConfirmation": "Una vez realizado el pago, por favor envía el comprobante a este mismo correo para que podamos confirmar tu reserva.",
+      "manageButton": "Gestionar mi Reserva",
+      "footerQuestion": "Si tienes alguna pregunta, responde a este correo o contáctanos por WhatsApp.",
+      "footerSignature": "Nómada Fantasma - Viajes Épicos en Guatemala 🇬🇹"
     }
 }

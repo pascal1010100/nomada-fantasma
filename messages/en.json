@@ -92,87 +92,36 @@
         }
     },
     "About": {
-        "badge": "Travel Protocol V2.0",
-        "titleTop": "The Nexus of the",
-        "titleGradient": "Modern Nomad",
-        "description": "Your portal to a world without borders. We fuse cutting-edge technology with authentic local experiences for the elite traveler.",
-        "btnExploration": "Start Exploration",
-        "btnProtocol": "View Protocol",
-        "decodingTitle": "Decoding Urban Chaos",
-        "decodingDesc": "More than a platform, we are a collective intelligence network. Ghost Nomad decodes urban chaos to reveal secret routes, vital connections and the real pulse of each destination.",
-        "cortexTitle": "Powered by Cortex AI",
-        "cortexDesc": "Predictive algorithms that offer you:",
-        "cortexItems": [
-            "Route curation based on your psychographic profile",
-            "Tactical 24/7 assistant for on-ground logistics",
-            "Flow analysis to avoid tourist saturation",
-            "Real-time linguistic link"
-        ],
-        "radarTitle": "Resource Radar:",
-        "resources": {
-            "wifi": "High Speed WiFi",
-            "shelters": "Shelters",
-            "recharge": "Recharge Stations",
-            "atms": "ATMs",
-            "nodes": "Nodes of Interest",
-            "hubs": "Creative Hubs"
-        },
+        "badge": "Our Mission",
+        "titleTop": "Beyond the Tourist Map",
+        "titleGradient": "Discover the Real Guatemala",
+        "description": "Nómada Fantasma is not just a travel platform; it's your compass to the heart of Guatemala. We carefully select the most authentic experiences, from tours that immerse you in local culture to charming accommodations and shuttles that take you to secret destinations. Forget conventional routes and get ready for an unforgettable adventure.",
+        "btnExplore": "Explore Experiences",
+        "btnContact": "Contact Us",
+        "philosophyTitle": "Our Mission: Your Authentic Adventure",
+        "philosophyDesc": "We believe that traveling is more than visiting places; it's about connecting with them. That's why our mission is simple: to offer you access to high-quality experiences that respect local culture and allow you to discover the true essence of Guatemala. Every tour, guide, and accommodation on our platform has been verified by our team to ensure your only concern is to enjoy.",
+        "featuresTitle": "Pillars of Your Journey",
         "features": {
-            "cartography": {
-                "title": "Living Cartography",
-                "desc": "Real-time data on the urban ecosystem: high-speed WiFi, innovation hubs and creative shelters."
+            "curated": {
+                "title": "Curated Experiences",
+                "desc": "Every tour and activity has been selected for its authenticity and quality."
             },
-            "voyages": {
-                "title": "Hidden Voyages",
-                "desc": "Paths not marked on conventional maps. Experiences designed by local curators."
+            "booking": {
+                "title": "Easy and Secure Bookings",
+                "desc": "Book in a few clicks with our secure platform and receive instant confirmation."
             },
-            "cortex": {
-                "title": "Cortex AI",
-                "desc": "Predictive algorithms that curate your trip in real time. Your digital co-pilot that anticipates your needs."
+            "guides": {
+                "title": "Expert Local Guides",
+                "desc": "Connect with passionate guides who will show you the best-kept secrets of each destination."
             },
-            "syndicate": {
-                "title": "The Nomad Syndicate",
-                "desc": "Connect with a global network of visionaries, creators and explorers."
-            },
-            "sync": {
-                "title": "Flexible Sync",
-                "desc": "Book when you want. Personalize your experience. No strings attached."
-            },
-            "oracle": {
-                "title": "Virtual Oracle",
-                "desc": "Instant answers to your questions on the ground. 24/7 assistance."
+            "transport": {
+                "title": "Hassle-Free Transportation",
+                "desc": "Arrange your transfers between destinations with our trusted shuttles."
             }
         },
-        "protocolTitle": "Executing the Protocol",
-        "protocolDesc": "Access exclusive experiences in 5 steps",
-        "steps": {
-            "scan": {
-                "title": "Scan the Terrain",
-                "desc": "Navigate through our interactive cartography and detect Hidden Voyages."
-            },
-            "mission": {
-                "title": "Identify your Mission",
-                "desc": "Choose experiences that resonate with your frequency. From free tours to exclusive immersions."
-            },
-            "protocol": {
-                "title": "Start Protocol",
-                "desc": "Request your reservation. Establish direct connection with the local guide."
-            },
-            "sync": {
-                "title": "Sync Confirmed",
-                "desc": "Receive availability status, exact coordinates and meeting time."
-            },
-            "immersion": {
-                "title": "Total Immersion",
-                "desc": "Live the experience. Discover the hidden reality of each destination."
-            }
-        },
-        "readyTitle": "Ready for immersion?",
-        "readyMission": "Start Mission",
-        "ctaTitle": "Join the digital nomad community",
-        "ctaDesc": "Discover incredible destinations, connect with local guides and live experiences you'll remember forever.",
-        "ctaRegister": "Create free account",
-        "ctaContact": "Contact us"
+        "ctaTitle": "Ready for Adventure?",
+        "ctaDesc": "Explore our magic routes and discover the Guatemala that few know.",
+        "ctaAction": "See Magic Routes"
     },
     "Contact": {
         "badge": "Contact",
@@ -801,5 +750,28 @@
         "rights": "© {year} Nomada Fantasma",
         "remote": "Remote · GT",
         "contact": "Contact page"
+    },
+    "ReservationEmail": {
+      "preview": "Booking confirmation: {{tourName}}",
+      "title": "Your adventure starts here! 🌎",
+      "greeting": "Hello {{customerName}}",
+      "intro": "We have received your booking request for <strong>{{tourName}}</strong>. We are excited to be part of your experience in Guatemala.",
+      "detailsTitle": "Booking Details",
+      "detailsExperience": "Experience",
+      "detailsDate": "Date",
+      "detailsTravelers": "Travelers",
+      "detailsTraveler": "person",
+      "detailsTravelersPlural": "people",
+      "total": "Total",
+      "paymentTitle": "Next Steps: Confirm Your Booking",
+      "paymentIntro": "To confirm your spot, please make the payment using one of the following methods. Your booking will be held as pending for 24 hours.",
+      "paymentMethodBank": "Bank Transfer",
+      "paymentBankAccount": "Account: [Your Account Number]",
+      "paymentBankHolder": "Holder: [Account Holder Name]",
+      "paymentBankName": "Bank: [Bank Name]",
+      "paymentConfirmation": "Once the payment is made, please send the receipt to this email so we can confirm your booking.",
+      "manageButton": "Manage my Booking",
+      "footerQuestion": "If you have any questions, reply to this email or contact us on WhatsApp.",
+      "footerSignature": "Nómada Fantasma - Epic Travels in Guatemala 🇬🇹"
     }
 }

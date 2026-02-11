@@ -9,15 +9,17 @@ const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 const RESEND_FROM = process.env.RESEND_FROM || 'onboarding@resend.dev';
 
+type TFunction = (key: string, values?: Record<string, string | number>) => string;
+
 interface SendConfirmationEmailProps {
     to: string;
     reservationId: string;
     customerName: string;
-    tourName: string;
+    tourName:string;
     date: string;
     guests: number;
     totalPrice: number;
-    type: 'tour' | 'guide';
+    t: TFunction;
 }
 
 interface SendShuttleRequestEmailProps {
@@ -78,7 +80,7 @@ export async function sendConfirmationEmail(data: SendConfirmationEmailProps) {
 
     try {
         const { data: emailData, error } = await resend.emails.send({
-            from: 'Nómada Fantasma <reservas@nomadafantasma.com>',
+            from: RESEND_FROM,
             to: [data.to],
             subject: `Confirmación de reserva: ${data.tourName}`,
             react: ReservationTemplate(data),

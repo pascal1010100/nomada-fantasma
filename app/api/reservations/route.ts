@@ -1,5 +1,5 @@
-// @ts-nocheck - Supabase type inference requires real credentials. Will have proper types at runtime.
 import { NextResponse } from 'next/server';
+import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/app/lib/supabase/server';
 import { sendConfirmationEmail } from '@/app/lib/email';
 import {
@@ -9,12 +9,16 @@ import {
 } from '@/app/lib/validations';
 import type { Database } from '@/types/database.types';
 
-type Reservation = Database['public']['Tables']['reservations']['Row'];
-type ReservationInsert = Database['public']['Tables']['reservations']['Insert'];
-
 // POST: Create a new reservation
 export async function POST(request: Request) {
     try {
+        // 1. Get locale from URL
+        const url = new URL(request.url);
+        const locale = url.pathname.split('/')[1] || 'es'; // Default to 'es'
+
+        // 2. Load translations
+        const t = await getTranslations({ locale, namespace: 'ReservationEmail' });
+
         // Validate request body with Zod
         const validation = await validateRequestBody(request, CreateReservationSchema);
 
@@ -59,7 +63,7 @@ export async function POST(request: Request) {
             date: newReservation.reservation_date,
             guests: newReservation.guests,
             totalPrice: newReservation.total_price || 0,
-            type: newReservation.reservation_type,
+            t: t,
         }).catch((emailError) => {
             console.error('Email sending failed (non-blocking):', emailError);
         });
@@ -165,7 +169,7 @@ export async function PATCH(request: Request) {
             );
         }
 
-        const updateData: any = { status };
+        const updateData: { [key: string]: string | Date } = { status };
 
         if (status === 'confirmed' && !body.confirmed_at) {
             updateData.confirmed_at = new Date().toISOString();
