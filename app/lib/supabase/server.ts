@@ -1,7 +1,7 @@
 // Supabase client for server-side usage
 // Use this in Server Components, API Routes, and Server Actions
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database.types';
 
 let supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -19,10 +19,13 @@ if (!supabaseServiceKey) {
 // Create a supabase client with service role key (bypasses RLS)
 // USE WITH CAUTION: This has full access to your database
 // Note: Empty credentials will cause runtime errors, but allow build to pass
-export const supabaseAdmin = createClient<Database>(
+export const supabaseAdmin: SupabaseClient<Database, 'public'> = createClient<Database, 'public'>(
     supabaseUrl,
     supabaseServiceKey,
     {
+        db: {
+            schema: 'public',
+        },
         auth: {
             persistSession: false,
             autoRefreshToken: false,

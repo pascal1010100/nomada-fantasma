@@ -20,7 +20,10 @@ if (!supabaseAnonKey) {
 }
 
 // Create a single supabase client for interacting with your database
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<Database, 'public'>(supabaseUrl, supabaseAnonKey, {
+    db: {
+        schema: 'public',
+    },
     auth: {
         persistSession: true,
         autoRefreshToken: true,
