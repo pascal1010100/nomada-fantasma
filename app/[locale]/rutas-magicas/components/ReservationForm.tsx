@@ -10,8 +10,10 @@ import { useTranslations, useLocale } from 'next-intl';
 type ReservationFormProps = {
   tourId: string;
   price: number;
+  childPrice?: number;
   maxCapacity: number;
   availableDays: string[];
+  startTimes?: string[];
 };
 
 const normalizeDayName = (value: string) =>
