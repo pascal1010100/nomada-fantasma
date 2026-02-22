@@ -12,7 +12,7 @@ import {
     Text,
     Tailwind,
 } from '@react-email/components';
-type TFunction = (key: string, values?: Record<string, any>) => string;
+type TFunction = (key: string, values?: Record<string, string | number>) => string;
 
 interface ReservationTemplateProps {
     reservationId: string;
@@ -46,14 +46,12 @@ export const ReservationTemplate = ({
                             <Heading className="text-black text-[24px] font-normal text-center p-0 my-[30px] mx-0">
                                 {t('title')}
                             </Heading>
-                            <Text
-                                className="text-black text-[14px] leading-[24px]"
-                                dangerouslySetInnerHTML={{ __html: t('greeting', { customerName: `<strong>${customerName}</strong>` }) }}
-                            />
-                            <Text
-                                className="text-black text-[14px] leading-[24px]"
-                                dangerouslySetInnerHTML={{ __html: t('intro', { tourName: `<strong>${tourName}</strong>` }) }}
-                            />
+                            <Text className="text-black text-[14px] leading-[24px]">
+                                {t('greeting', { customerName })}
+                            </Text>
+                            <Text className="text-black text-[14px] leading-[24px]">
+                                {t('intro', { tourName })}
+                            </Text>
                         </Section>
 
                         <Section className="bg-gray-50 rounded-lg p-6 my-6 border border-gray-100">
@@ -83,7 +81,7 @@ export const ReservationTemplate = ({
                             <div className="flex justify-between items-center">
                                 <Text className="text-gray-900 font-bold text-lg m-0">{t('total')}</Text>
                                 <Text className="text-purple-600 font-bold text-lg m-0">
-                                    ${totalPrice.toLocaleString()}
+                                    Q{totalPrice.toLocaleString()}
                                 </Text>
                             </div>
                         </Section>

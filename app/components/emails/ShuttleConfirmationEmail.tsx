@@ -1,4 +1,4 @@
-import { Html, Head, Body, Container, Section, Text, Heading, Button, Hr, Font } from '@react-email/components';
+import { Html, Head, Body, Container, Section, Text, Heading, Button, Font } from '@react-email/components';
 
 interface ShuttleConfirmationEmailProps {
   customerName: string;
@@ -124,7 +124,7 @@ export default function ShuttleConfirmationEmail({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
                     <Text style={{ color: '#64748b', fontSize: '14px', fontWeight: 500 }}>PRECIO ESTIMADO</Text>
                     <Text style={{ color: '#059669', fontSize: '18px', fontWeight: 700 }}>
-                      ${price} USD
+                      Q{price}
                     </Text>
                   </div>
                 )}

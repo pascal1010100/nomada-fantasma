@@ -1,4 +1,4 @@
-import { Html, Head, Body, Container, Section, Text, Heading, Hr, Font } from '@react-email/components';
+import { Html, Head, Body, Container, Section, Text, Heading, Font } from '@react-email/components';
 
 interface ShuttleAdminNotificationProps {
   customerName: string;
@@ -145,7 +145,7 @@ export default function ShuttleAdminNotification({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #bae6fd' }}>
                     <Text style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 500 }}>PRECIO</Text>
                     <Text style={{ color: '#059669', fontSize: '18px', fontWeight: 700 }}>
-                      ${price} USD
+                      Q{price}
                     </Text>
                   </div>
                 )}

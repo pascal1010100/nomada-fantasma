@@ -1,41 +1,123 @@
-// @ts-nocheck
+
 import { NextResponse } from 'next/server';
 import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/app/lib/supabase/server';
-import { sendConfirmationEmail } from '@/app/lib/email';
+import { sendTourConfirmationEmails } from '@/app/lib/email';
 import {
     CreateReservationSchema,
     sanitizeReservationInput,
     validateRequestBody,
 } from '@/app/lib/validations';
 import type { Database } from '@/types/database.types';
+import type { ZodIssue } from 'zod';
 
 type ReservationInsert = Database['public']['Tables']['reservations']['Insert'];
 type ReservationRow = Database['public']['Tables']['reservations']['Row'];
 type ReservationUpdate = Database['public']['Tables']['reservations']['Update'];
+type LegacyReservationRow = {
+    id: string;
+    full_name?: string | null;
+    email?: string | null;
+    whatsapp?: string | null;
+    date?: string | null;
+    number_of_people?: number | null;
+    tour_id?: string | null;
+    tour_name?: string | null;
+    total_price?: number | null;
+    reservation_type?: string | null;
+    status?: string | null;
+    notes?: string | null;
+    created_at?: string | null;
+};
+type ReservationRecord = ReservationRow | LegacyReservationRow;
+
+const rateLimitStore = new Map<string, { count: number; start: number }>();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 
 // POST: Create a new reservation
 export async function POST(request: Request) {
     try {
-        // 1. Get locale from URL
+        const ipHeader = request.headers.get('x-forwarded-for') || '';
+        const ip = ipHeader.split(',')[0].trim() || 'unknown';
+        const now = Date.now();
+        const entry = rateLimitStore.get(ip);
+        if (!entry || now - entry.start > RATE_LIMIT_WINDOW_MS) {
+            rateLimitStore.set(ip, { count: 1, start: now });
+        } else {
+            if (entry.count >= RATE_LIMIT_MAX) {
+                return NextResponse.json(
+                    { error: 'Demasiadas solicitudes. Intenta más tarde.' },
+                    { status: 429 }
+                );
+            }
+            entry.count += 1;
+            rateLimitStore.set(ip, entry);
+        }
+
         const url = new URL(request.url);
-        const locale = url.pathname.split('/')[1] || 'es'; // Default to 'es'
+        const urlLocale = url.pathname.split('/')[1];
+        const headerLocale = request.headers.get('x-locale');
+        const acceptLanguage = request.headers.get('accept-language');
+        const candidateLocale = headerLocale || acceptLanguage?.split(',')[0] || urlLocale || 'es';
+        const localeToken = candidateLocale.split('-')[0].toLowerCase();
+        const supportedLocales = ['es', 'en'] as const;
+        const locale = supportedLocales.includes(localeToken as (typeof supportedLocales)[number])
+            ? localeToken
+            : 'es';
 
         // 2. Load translations
         const t = await getTranslations({ locale, namespace: 'ReservationEmail' });
+        const tApi = await getTranslations({ locale, namespace: 'ReservationApi' });
+
+        const getIssueKey = (issue: ZodIssue) => {
+            const field = issue.path[0];
+            if (field === 'tourId') return 'requiredTour';
+            if (field === 'accommodationId') return 'requiredAccommodation';
+            if (field === 'guideId') return 'requiredGuide';
+            if (field === 'email') return 'invalidEmail';
+            if (field === 'date') return 'invalidDate';
+            if (field === 'guests') return 'invalidGuests';
+            if (field === 'type') return 'invalidType';
+            if (field === 'name') return 'invalidName';
+            return 'invalidRequest';
+        };
 
         // Validate request body with Zod
         const validation = await validateRequestBody(request, CreateReservationSchema);
 
         if (validation.error || !validation.data) {
+            const issue = validation.issues?.[0];
+            const key = issue ? getIssueKey(issue) : 'invalidRequest';
             return NextResponse.json(
-                { error: validation.error || 'Invalid request data' },
+                { error: tApi(`errors.${key}`) },
                 { status: 400 }
             );
         }
 
         // Sanitize and normalize input
         const sanitizedData = sanitizeReservationInput(validation.data);
+
+        if (sanitizedData.reservation_type === 'tour' && !sanitizedData.tour_id && !sanitizedData.tour_name) {
+            return NextResponse.json(
+                { error: tApi('errors.requiredTour') },
+                { status: 400 }
+            );
+        }
+
+        if (sanitizedData.reservation_type === 'accommodation' && !sanitizedData.accommodation_id) {
+            return NextResponse.json(
+                { error: tApi('errors.requiredAccommodation') },
+                { status: 400 }
+            );
+        }
+
+        if (sanitizedData.reservation_type === 'guide' && !sanitizedData.guide_id) {
+            return NextResponse.json(
+                { error: tApi('errors.requiredGuide') },
+                { status: 400 }
+            );
+        }
 
         // Explicitly create an object with only the fields for insertion
         const dataToInsert: ReservationInsert = {
@@ -44,57 +126,121 @@ export async function POST(request: Request) {
             customer_phone: sanitizedData.customer_phone,
             customer_country: sanitizedData.customer_country,
             reservation_date: sanitizedData.reservation_date,
-            tour_id: sanitizedData.tour_id,
-            tour_name: sanitizedData.tour_name,
             guests: sanitizedData.guests,
+            reservation_type: sanitizedData.reservation_type,
+            tour_id: sanitizedData.tour_id,
+            accommodation_id: sanitizedData.accommodation_id,
+            guide_id: sanitizedData.guide_id,
+            tour_name: sanitizedData.tour_name,
             total_price: sanitizedData.total_price,
-            reservation_type: 'tour', // Required field
-            status: 'pending', // Default status
+            customer_notes: sanitizedData.customer_notes,
         };
 
         // Insert into Supabase
-        const { data: newReservation, error: dbError } = await supabaseAdmin
+        const insertResult = await supabaseAdmin
             .from('reservations')
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .insert(dataToInsert as any)
+            .insert(dataToInsert)
             .select()
             .single<ReservationRow>();
+        let newReservation: ReservationRecord | null = insertResult.data;
+        let dbError = insertResult.error;
 
         if (dbError) {
-            console.error('Supabase error:', dbError);
-            return NextResponse.json(
-                { error: 'Error al crear la reserva en la base de datos' },
-                { status: 500 }
-            );
+            const legacyInsert = {
+                full_name: sanitizedData.customer_name,
+                email: sanitizedData.customer_email,
+                whatsapp: sanitizedData.customer_phone,
+                date: sanitizedData.reservation_date,
+                number_of_people: sanitizedData.guests,
+                tour_id: sanitizedData.tour_id,
+                tour_name: sanitizedData.tour_name,
+                total_price: sanitizedData.total_price,
+                reservation_type: sanitizedData.reservation_type,
+                notes: sanitizedData.customer_notes,
+            } as unknown as ReservationInsert;
+
+            const legacyResult = await supabaseAdmin
+                .from('reservations')
+                .insert(legacyInsert)
+                .select()
+                .single<LegacyReservationRow>();
+
+            if (legacyResult.error) {
+                console.error('Supabase error:', dbError, legacyResult.error);
+                const debug =
+                    process.env.NODE_ENV !== 'production'
+                        ? {
+                              message: legacyResult.error.message,
+                              code: legacyResult.error.code,
+                              details: legacyResult.error.details,
+                              hint: legacyResult.error.hint,
+                          }
+                        : undefined;
+                return NextResponse.json(
+                    { error: 'Error al crear la reserva en la base de datos', debug },
+                    { status: 500 }
+                );
+            }
+
+            newReservation = legacyResult.data;
         }
 
         if (!newReservation) {
+            const debug =
+                process.env.NODE_ENV !== 'production'
+                    ? {
+                          message: dbError?.message,
+                          code: dbError?.code,
+                          details: dbError?.details,
+                          hint: dbError?.hint,
+                      }
+                    : undefined;
             return NextResponse.json(
-                { error: 'No se pudo crear la reserva' },
+                { error: 'No se pudo crear la reserva', debug },
                 { status: 500 }
             );
         }
 
-        // Send confirmation email (don't await to avoid blocking the response)
-        sendConfirmationEmail({
-            to: newReservation.customer_email,
-            reservationId: newReservation.id,
-            customerName: newReservation.customer_name,
-            tourName: newReservation.tour_name || 'Tour Nómada Fantasma',
-            date: newReservation.reservation_date,
-            guests: newReservation.guests,
-            totalPrice: newReservation.total_price || 0,
-            t: t,
-        }).catch((emailError) => {
-            console.error('Email sending failed (non-blocking):', emailError);
-        });
+        const reservation = newReservation as ReservationRecord;
+        const reservationEmail =
+            ('customer_email' in reservation ? reservation.customer_email : reservation.email) || '';
+        const reservationName =
+            ('customer_name' in reservation ? reservation.customer_name : reservation.full_name) || '';
+        const reservationDate =
+            ('reservation_date' in reservation ? reservation.reservation_date : reservation.date) || '';
+        const reservationGuests =
+            ('guests' in reservation ? reservation.guests : reservation.number_of_people) || 1;
+
+        let emailSent: boolean | null = null;
+        if (reservationEmail) {
+            const emailResult = await sendTourConfirmationEmails({
+                to: reservationEmail,
+                reservationId: newReservation.id,
+                customerName: reservationName,
+                tourName:
+                    ('tour_name' in reservation ? reservation.tour_name : reservation.tour_name) ||
+                    'Tour Nómada Fantasma',
+                date: reservationDate,
+                guests: reservationGuests,
+                totalPrice: ('total_price' in reservation ? reservation.total_price : reservation.total_price) || 0,
+                t: t,
+            });
+            emailSent = emailResult.success;
+            if (!emailResult.success) {
+                console.warn('Email failed but reservation was saved to DB');
+            }
+        }
 
         // Update the reservation with the confirmation sent timestamp
-        await supabaseAdmin
-            .from('reservations')
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .update({ confirmation_sent_at: new Date().toISOString() } as any)
-            .eq('id', newReservation.id);
+        try {
+            const updateConfirmation: ReservationUpdate = { confirmation_sent_at: new Date().toISOString() };
+            await supabaseAdmin
+                .from('reservations')
+                .update(updateConfirmation)
+                .eq('id', newReservation.id);
+        } catch (updateError) {
+            console.error('Failed to update confirmation timestamp:', updateError);
+        }
 
         return NextResponse.json(
             {
@@ -102,12 +248,15 @@ export async function POST(request: Request) {
                 message: 'Reserva creada exitosamente',
                 reservation: {
                     id: newReservation.id,
-                    customer_name: newReservation.customer_name,
-                    customer_email: newReservation.customer_email,
-                    reservation_date: newReservation.reservation_date,
-                    guests: newReservation.guests,
+                    customer_name: reservationName,
+                    customer_email: reservationEmail,
+                    reservation_date: reservationDate,
+                    guests: reservationGuests,
                     status: newReservation.status,
                     created_at: newReservation.created_at,
+                },
+                email: {
+                    sent: emailSent,
                 },
             },
             { status: 201 }
@@ -127,7 +276,9 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const status = searchParams.get('status');
         const email = searchParams.get('email');
-        const limit = parseInt(searchParams.get('limit') || '100', 10);
+        const limitParam = searchParams.get('limit');
+        const parsedLimit = limitParam ? parseInt(limitParam, 10) : 100;
+        const limit = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 1), 200) : 100;
 
         // Build query
         let query = supabaseAdmin
@@ -138,7 +289,10 @@ export async function GET(request: Request) {
 
         // Apply filters if provided
         if (status) {
-            query = query.eq('status', status);
+            const validStatuses = ['pending', 'confirmed', 'cancelled', 'completed'] as const;
+            if (validStatuses.includes(status as (typeof validStatuses)[number])) {
+                query = query.eq('status', status as (typeof validStatuses)[number]);
+            }
         }
 
         if (email) {
@@ -183,15 +337,16 @@ export async function PATCH(request: Request) {
         }
 
         // Validate status
-        const validStatuses = ['pending', 'confirmed', 'cancelled', 'completed'];
-        if (!validStatuses.includes(status)) {
+        const validStatuses = ['pending', 'confirmed', 'cancelled', 'completed'] as const;
+        const statusValue = typeof status === 'string' ? status : '';
+        if (!validStatuses.includes(statusValue as (typeof validStatuses)[number])) {
             return NextResponse.json(
                 { error: 'Status inválido' },
                 { status: 400 }
             );
         }
 
-        const updateData: { [key: string]: string | Date } = { status };
+        const updateData: ReservationUpdate = { status: statusValue as (typeof validStatuses)[number] };
 
         if (status === 'confirmed' && !body.confirmed_at) {
             updateData.confirmed_at = new Date().toISOString();
@@ -207,8 +362,7 @@ export async function PATCH(request: Request) {
 
         const { data, error } = await supabaseAdmin
             .from('reservations')
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .update(updateData as any)
+            .update(updateData)
             .eq('id', id)
             .select()
             .single<ReservationRow>();

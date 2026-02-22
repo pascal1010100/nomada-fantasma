@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, ChangeEvent, FormEvent, useRef } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Loader2, CheckCircle2, AlertCircle, ChevronDown, Info, User, User2, Clock } from 'lucide-react';
+import { Calendar, Loader2, CheckCircle2, AlertCircle, ChevronDown, Info, User, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { trackEvent } from '../../../lib/analytics';
 import { useTranslations, useLocale } from 'next-intl';
@@ -10,33 +10,172 @@ import { useTranslations, useLocale } from 'next-intl';
 type ReservationFormProps = {
   tourId: string;
   price: number;
-  childPrice?: number;
   maxCapacity: number;
   availableDays: string[];
-  startTimes: string[];
+};
+
+const normalizeDayName = (value: string) =>
+  value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const dayNameToIndex: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+  domingo: 0,
+  lunes: 1,
+  martes: 2,
+  miercoles: 3,
+  jueves: 4,
+  viernes: 5,
+  sabado: 6,
+};
+
+const toDateKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const parseLocalDate = (value: string) => {
+  const trimmed = value.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return new Date(`${trimmed}T00:00:00`);
+  }
+  return new Date(trimmed);
+};
+
+const buildAvailableDates = (availableDays: string[]) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const weekdayIndexes: number[] = [];
+  const dateKeys: string[] = [];
+  const dateSet = new Set<string>();
+  const everyDayTokens = new Set([
+    'todos los dias',
+    'every day',
+    'everyday',
+    'daily',
+    'all days'
+  ]);
+  let hasEveryDay = false;
+
+  availableDays.forEach((value) => {
+    const parsedDate = parseLocalDate(value);
+    if (!Number.isNaN(parsedDate.getTime())) {
+      parsedDate.setHours(0, 0, 0, 0);
+      if (parsedDate <= today) {
+        return;
+      }
+      const key = toDateKey(parsedDate);
+      if (!dateSet.has(key)) {
+        dateSet.add(key);
+        dateKeys.push(key);
+      }
+      return;
+    }
+
+    const normalized = normalizeDayName(value);
+    if (everyDayTokens.has(normalized)) {
+      hasEveryDay = true;
+      return;
+    }
+    const mappedIndex = dayNameToIndex[normalized];
+    if (mappedIndex !== undefined) {
+      if (!weekdayIndexes.includes(mappedIndex)) {
+        weekdayIndexes.push(mappedIndex);
+      }
+      return;
+    }
+
+    const numericIndex = Number.parseInt(normalized, 10);
+    if (!Number.isNaN(numericIndex)) {
+      const normalizedIndex = numericIndex >= 0 && numericIndex <= 6
+        ? numericIndex
+        : numericIndex >= 1 && numericIndex <= 7
+          ? numericIndex % 7
+          : null;
+      if (normalizedIndex !== null && !weekdayIndexes.includes(normalizedIndex)) {
+        weekdayIndexes.push(normalizedIndex);
+      }
+    }
+  });
+
+  if (hasEveryDay) {
+    for (let offset = 1; offset < 29; offset += 1) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + offset);
+      const key = toDateKey(date);
+      if (!dateSet.has(key)) {
+        dateSet.add(key);
+        dateKeys.push(key);
+      }
+    }
+  }
+
+  if (weekdayIndexes.length > 0) {
+    for (let offset = 1; offset < 29; offset += 1) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + offset);
+      if (weekdayIndexes.includes(date.getDay())) {
+        const key = toDateKey(date);
+        if (!dateSet.has(key)) {
+          dateSet.add(key);
+          dateKeys.push(key);
+        }
+      }
+    }
+  }
+
+  if (dateKeys.length === 0) {
+    for (let offset = 1; offset < 29; offset += 1) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + offset);
+      const key = toDateKey(date);
+      if (!dateSet.has(key)) {
+        dateSet.add(key);
+        dateKeys.push(key);
+      }
+    }
+  }
+
+  return dateKeys.sort();
 };
 
 export default function ReservationForm({
   tourId,
   price,
-  childPrice,
   maxCapacity,
-  availableDays,
-  startTimes
+  availableDays
 }: ReservationFormProps) {
   const router = useRouter();
   const t = useTranslations('Reservation');
   const locale = useLocale();
   const dateLocale = locale === 'es' ? 'es-GT' : 'en-US';
+  const fixedStartTime = '03:40 am';
+  const normalizedAvailableDays = useMemo(
+    () => buildAvailableDates(availableDays),
+    [availableDays]
+  );
+  const normalizedAvailableDaysKey = useMemo(
+    () => normalizedAvailableDays.join('|'),
+    [normalizedAvailableDays]
+  );
 
   // Estados del formulario
-  const [date, setDate] = useState(availableDays[0] || '');
-  const [adults, setAdults] = useState(1);
-  const [children, setChildren] = useState(0);
+  const [date, setDate] = useState(normalizedAvailableDays[0] || '');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [selectedTime, setSelectedTime] = useState(startTimes[0] || '');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -54,10 +193,10 @@ export default function ReservationForm({
 
   // Efecto para reiniciar el estado cuando cambia el tour
   useEffect(() => {
-    setDate(availableDays[0] || '');
-    setSelectedTime(startTimes[0] || '');
-    setAdults(1);
-    setChildren(0);
+    const nextDate = normalizedAvailableDays[0] || '';
+    if (nextDate !== date) {
+      setDate(nextDate);
+    }
     setError('');
     setFormData({
       name: '',
@@ -76,7 +215,7 @@ export default function ReservationForm({
       tour_id: tourId,
       price: price
     });
-  }, [tourId, availableDays, startTimes, price]);
+  }, [tourId, normalizedAvailableDaysKey, price]);
 
   // Track when user starts filling the form
   useEffect(() => {
@@ -112,7 +251,7 @@ export default function ReservationForm({
     } else if (!validatePhone(formData.phone)) {
       errors.push(t('errors.invalidPhone'));
     }
-    if (adults + children > maxCapacity) {
+    if (maxCapacity < 1) {
       errors.push(t('errors.maxCapacity', { max: maxCapacity }));
     }
 
@@ -144,11 +283,7 @@ export default function ReservationForm({
 
   // Calcular el total
   const calculateTotal = () => {
-    let total = adults * price;
-    if (childPrice && children > 0) {
-      total += children * childPrice;
-    }
-    return total;
+    return price;
   };
 
   // Manejar el envío del formulario
@@ -183,8 +318,6 @@ export default function ReservationForm({
       // Track submission attempt
       trackEvent('submit_reservation', {
         tour_id: tourId,
-        adults: adults,
-        children: children,
         total: calculateTotal(),
         date: date
       });
@@ -192,11 +325,14 @@ export default function ReservationForm({
       // Llamada real a la API
       const response = await fetch('/api/reservations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Locale': locale,
+        },
         body: JSON.stringify({
           tourId,
           date,
-          guests: adults + (children || 0),
+          guests: 1,
           type: 'tour',
           totalPrice: calculateTotal(),
           name: formData.name,
@@ -209,17 +345,31 @@ export default function ReservationForm({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || t('errorGeneric'));
+        const apiError = typeof data?.error === 'string' ? data.error : t('errorGeneric');
+        const debugMessage = typeof data?.debug?.message === 'string' ? data.debug.message : '';
+        const displayError = debugMessage ? `${apiError} (${debugMessage})` : apiError;
+        setError(displayError);
+        trackEvent('reservation_error', {
+          tour_id: tourId,
+          error: displayError
+        });
+        return;
       }
+
+      const emailStatus =
+        data?.email && typeof data.email.sent === 'boolean'
+          ? String(data.email.sent)
+          : 'unknown';
+      console.warn('Reservation email status:', emailStatus);
 
       // Redirigir a la página de confirmación con los parámetros necesarios
       const searchParams = new URLSearchParams({
         tourId,
         date,
-        time: selectedTime,
-        adults: adults.toString(),
-        children: children.toString(),
+        time: fixedStartTime,
+        adults: '1',
         total: calculateTotal().toString(),
+        emailSent: emailStatus,
         name: encodeURIComponent(formData.name)
       });
 
@@ -228,18 +378,16 @@ export default function ReservationForm({
       // Track successful reservation
       trackEvent('complete_reservation', {
         tour_id: tourId,
-        adults: adults,
-        children: children,
         total: calculateTotal()
       });
 
       // Redirigir después de un breve retraso para mostrar el mensaje de éxito
       setTimeout(() => {
-        router.push(`/reservas/confirmacion?${searchParams.toString()}`);
+        router.push(`/${locale}/reservas/confirmacion?${searchParams.toString()}`);
       }, 1500);
 
     } catch (err) {
-      setError('Ocurrió un error al procesar tu reserva. Por favor, inténtalo de nuevo.');
+      setError(t('errorGeneric'));
       console.error('Error al reservar:', err);
 
       // Track error
@@ -297,23 +445,15 @@ export default function ReservationForm({
           <div>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('priceAdult')}</p>
             <div className="flex items-baseline mt-1">
-              <span className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">${price.toLocaleString()}</span>
+              <span className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">Q{price.toLocaleString()}</span>
               <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">{t('perPerson')}</span>
             </div>
           </div>
-          {childPrice && (
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('priceChild')}</p>
-              <div className="text-cyan-600 dark:text-cyan-400 font-medium">
-                ${childPrice.toLocaleString()}
-              </div>
-            </div>
-          )}
         </div>
         <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('totalEstimated')}</span>
-            <span className="text-lg font-bold text-gray-900 dark:text-white">${calculateTotal().toLocaleString()}</span>
+            <span className="text-lg font-bold text-gray-900 dark:text-white">Q{calculateTotal().toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -333,21 +473,17 @@ export default function ReservationForm({
               className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm appearance-none pr-10 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
               disabled={isLoading}
             >
-              {availableDays.map((day, index) => {
-                const dateObj = new Date(day);
-                const today = new Date();
-                const isToday = dateObj.toDateString() === today.toDateString();
+              {normalizedAvailableDays.map((day, index) => {
+                const dateObj = new Date(`${day}T00:00:00`);
 
                 return (
-                  <option key={index} value={day} disabled={isToday}>
-                    {isToday
-                      ? t('dateTodayDisabled')
-                      : dateObj.toLocaleDateString(dateLocale, {
-                        weekday: 'short',
-                        day: 'numeric',
-                        month: 'short'
-                      })}
-                    {!isToday && `, ${dateObj.toLocaleDateString(dateLocale, { year: 'numeric' })}`}
+                  <option key={index} value={day}>
+                    {dateObj.toLocaleDateString(dateLocale, {
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'short'
+                    })}
+                    {`, ${dateObj.toLocaleDateString(dateLocale, { year: 'numeric' })}`}
                   </option>
                 );
               })}
@@ -362,109 +498,31 @@ export default function ReservationForm({
         </div>
 
         {/* Hora */}
-        {startTimes.length > 0 && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 flex items-center">
-              <Clock className="w-4 h-4 mr-2 text-cyan-600" />
-              {t('timeLabel')}
-            </label>
-            <div className="relative">
-              <select
-                value={selectedTime}
-                onChange={(e) => setSelectedTime(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm appearance-none pr-10 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                disabled={isLoading}
-              >
-                {startTimes.map((time, index) => (
-                  <option key={index} value={time}>
-                    {time}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                <ChevronDown className="w-4 h-4" />
-              </div>
-            </div>
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              {t('timeHelp')}
-            </p>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 flex items-center">
+            <Clock className="w-4 h-4 mr-2 text-cyan-600" />
+            {t('timeLabel')}
+          </label>
+          <div className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm">
+            {fixedStartTime}
           </div>
-        )}
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {t('timeHelp')}
+          </p>
+        </div>
       </div>
 
       {/* Participantes */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Adultos */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 flex items-center">
             <User className="w-4 h-4 mr-2 text-cyan-600" />
             {t('adultsLabel')}
-            <span className="text-xs text-gray-400 ml-1">{t('adultsAgeHint')}</span>
           </label>
-          <div className="relative">
-            <select
-              value={adults}
-              onChange={(e) => {
-                setAdults(Number(e.target.value));
-                // Ajustar niños si se excede la capacidad máxima
-                if (Number(e.target.value) + children > maxCapacity) {
-                  setChildren(Math.max(0, maxCapacity - Number(e.target.value)));
-                }
-              }}
-              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm appearance-none pr-10 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-              disabled={isLoading}
-            >
-              {Array.from({ length: maxCapacity }, (_, i) => i + 1).map(num => (
-                <option key={`adult-${num}`} value={num}>
-                  {num} {num === 1 ? t('adultsSingular') : t('adultsPlural')}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-              <ChevronDown className="w-4 h-4" />
-            </div>
+          <div className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm">
+            1 {t('adultsSingular')}
           </div>
         </div>
-
-        {/* Niños */}
-        {childPrice && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 flex items-center">
-              <User2 className="w-4 h-4 mr-2 text-cyan-600" />
-              {t('childrenLabel')}
-              <span className="text-xs text-gray-400 ml-1">{t('childrenAgeHint')}</span>
-            </label>
-            <div className="relative">
-              <select
-                value={children}
-                onChange={(e) => {
-                  const newChildren = Number(e.target.value);
-                  setChildren(newChildren);
-                  // Ajustar adultos si se excede la capacidad máxima
-                  if (adults + newChildren > maxCapacity) {
-                    setAdults(Math.max(1, maxCapacity - newChildren));
-                  }
-                }}
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm appearance-none pr-10 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                disabled={isLoading}
-              >
-                {Array.from({ length: maxCapacity + 1 }, (_, i) => i).map(num => (
-                  <option key={`child-${num}`} value={num}>
-                    {num} {num === 1 ? t('childrenSingular') : t('childrenPlural')}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                <ChevronDown className="w-4 h-4" />
-              </div>
-            </div>
-            {childPrice && children > 0 && (
-              <p className="mt-1 text-xs text-cyan-700 dark:text-cyan-300">
-                {t('childrenPriceHint', { price: childPrice })}
-              </p>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Información del Contacto */}
@@ -589,31 +647,22 @@ export default function ReservationForm({
       <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
         <div className="flex justify-between mb-2">
           <span className="text-gray-600 dark:text-gray-300">
-            {adults} {adults === 1 ? t('adultsSingular') : t('adultsPlural')}
+            1 {t('adultsSingular')}
           </span>
-          <span className="font-medium">${(adults * price).toLocaleString()}</span>
+          <span className="font-medium">Q{price.toLocaleString()}</span>
         </div>
-
-        {childPrice && children > 0 && (
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-600 dark:text-gray-300">
-              {children} {children === 1 ? t('childrenSingular') : t('childrenPlural')}
-            </span>
-            <span className="font-medium">${(children * childPrice).toLocaleString()}</span>
-          </div>
-        )}
 
         <div className="border-t border-gray-200 dark:border-gray-700 mt-3 pt-3">
           <div className="flex justify-between font-semibold">
             <span>{t('summaryTotal')}</span>
-            <span>${calculateTotal().toLocaleString()}</span>
+            <span>Q{calculateTotal().toLocaleString()}</span>
           </div>
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            {t('capacityRemaining', { rem: Math.max(0, maxCapacity - (adults + children)) })}
+            {t('capacityRemaining', { rem: Math.max(0, maxCapacity - 1) })}
           </p>
-          {maxCapacity - (adults + children) > 0 && maxCapacity - (adults + children) <= 3 && (
+          {maxCapacity - 1 > 0 && maxCapacity - 1 <= 3 && (
             <p className="mt-1 text-xs text-amber-600 dark:text-amber-300">
-              {t('lowCapacityWarning', { rem: Math.max(0, maxCapacity - (adults + children)) })}
+              {t('lowCapacityWarning', { rem: Math.max(0, maxCapacity - 1) })}
             </p>
           )}
         </div>
@@ -637,7 +686,7 @@ export default function ReservationForm({
           !validateEmail(formData.email) ||
           !formData.phone ||
           !validatePhone(formData.phone) ||
-          adults + children > maxCapacity
+          maxCapacity < 1
         }
         className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
       >

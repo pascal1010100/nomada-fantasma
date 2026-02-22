@@ -90,6 +90,7 @@ export async function POST(request: Request) {
             type: data.type || 'shared',
             price: undefined,
         });
+        const emailSent = result.success;
 
         if (!result.success) {
             console.warn('Email failed but booking was saved to DB');
@@ -98,6 +99,9 @@ export async function POST(request: Request) {
         return NextResponse.json({
             success: true,
             message: 'Solicitud enviada exitosamente. Nos pondremos en contacto contigo pronto.',
+            email: {
+                sent: emailSent,
+            },
         });
     } catch (error) {
         console.error('Error in shuttle reserve API:', error);

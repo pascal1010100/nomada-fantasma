@@ -72,7 +72,7 @@ export async function sendConfirmationEmail(data: SendConfirmationEmailProps) {
     if (!resend) {
         console.log('📧 [EMAIL SIMULATION] ---------------------------------------------------');
         console.log(`To: ${data.to}`);
-        console.log(`Subject: Confirmación de reserva: ${data.tourName}`);
+        console.log(`Subject: ${data.t('preview', { tourName: data.tourName })}`);
         console.log('Template Data:', JSON.stringify(data, null, 2));
         console.log('-----------------------------------------------------------------------');
         return { success: true, id: 'simulated_' + Date.now() };
@@ -82,7 +82,7 @@ export async function sendConfirmationEmail(data: SendConfirmationEmailProps) {
         const { data: emailData, error } = await resend.emails.send({
             from: RESEND_FROM,
             to: [data.to],
-            subject: `Confirmación de reserva: ${data.tourName}`,
+            subject: data.t('preview', { tourName: data.tourName }),
             react: ReservationTemplate(data),
         });
 
@@ -109,6 +109,50 @@ interface SendShuttleConfirmationEmailsProps {
     pickupLocation: string;
     type: string;
     price?: number;
+}
+
+export async function sendTourConfirmationEmails(data: SendConfirmationEmailProps) {
+    const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
+
+    if (!resend) {
+        console.log('📧 [TOUR CONFIRMATION SIMULATION] --------------------------------------');
+        console.log(`To Customer: ${data.to}`);
+        console.log(`Subject: ${data.t('preview', { tourName: data.tourName })}`);
+        console.log('Customer Template Data:', JSON.stringify(data, null, 2));
+        console.log(`To Admin: ${adminEmail}`);
+        console.log(`Subject: Nueva solicitud de tour: ${data.tourName}`);
+        console.log('Admin Template Data:', JSON.stringify(data, null, 2));
+        console.log('-----------------------------------------------------------------------');
+        return { success: true, id: 'simulated_' + Date.now() };
+    }
+
+    try {
+        const [customerRes, adminRes] = await Promise.all([
+            resend.emails.send({
+                from: RESEND_FROM,
+                to: [data.to],
+                subject: data.t('preview', { tourName: data.tourName }),
+                react: ReservationTemplate(data),
+            }),
+            resend.emails.send({
+                from: RESEND_FROM,
+                to: [adminEmail],
+                subject: `Nueva solicitud de tour: ${data.tourName}`,
+                react: ReservationTemplate(data),
+            }),
+        ]);
+
+        const customerError = customerRes?.error;
+        const adminError = adminRes?.error;
+        if (customerError || adminError) {
+            return { success: false, error: customerError || adminError };
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error sending tour confirmation emails:', error);
+        return { success: false, error };
+    }
 }
 
 export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmationEmailsProps) {

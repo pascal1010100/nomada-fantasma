@@ -104,6 +104,13 @@ export const ShuttleRequestTemplate = ({
                             </div>
 
                             <div className="mb-4">
+                                <Text className="text-gray-500 text-xs m-0">Pasajeros</Text>
+                                <Text className="text-gray-900 text-sm font-bold m-0">
+                                    {passengers} {passengers === 1 ? 'persona' : 'personas'}
+                                </Text>
+                            </div>
+
+                            <div className="mb-4">
                                 <Text className="text-gray-500 text-xs m-0">Tipo de Servicio</Text>
                                 <Text className="text-gray-900 text-sm font-bold m-0 uppercase tracking-tight">
                                     {type === 'private' ? '🚐 TRASLADO PRIVADO' : '🚌 SHUTTLE COMPARTIDO'}

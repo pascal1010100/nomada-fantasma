@@ -15,9 +15,17 @@ export const CreateReservationSchema = z.object({
     country: z.string().optional(),
 
     // Reservation Details
-    date: z.string().refine((date) => {
-        const parsed = new Date(date);
-        return !isNaN(parsed.getTime()) && parsed > new Date();
+    date: z.string().refine((value) => {
+        const trimmed = value.trim();
+        const parsed = /^\d{4}-\d{2}-\d{2}$/.test(trimmed)
+            ? new Date(`${trimmed}T12:00:00`)
+            : new Date(trimmed);
+        if (isNaN(parsed.getTime())) {
+            return false;
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return parsed.getTime() > today.getTime();
     }, 'Date must be in the future'),
 
     guests: z.number().int().positive('Number of guests must be positive').max(50, 'Too many guests'),
@@ -39,6 +47,28 @@ export const CreateReservationSchema = z.object({
 
     // Notes
     notes: z.string().max(1000, 'Notes too long').optional(),
+}).superRefine((data, ctx) => {
+    if (data.type === 'tour' && !data.tourId && !data.tourName) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['tourId'],
+            message: 'tourId or tourName is required for tour reservations',
+        });
+    }
+    if (data.type === 'accommodation' && !data.accommodationId) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['accommodationId'],
+            message: 'accommodationId is required for accommodation reservations',
+        });
+    }
+    if (data.type === 'guide' && !data.guideId) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['guideId'],
+            message: 'guideId is required for guide reservations',
+        });
+    }
 });
 
 export type CreateReservationInput = z.infer<typeof CreateReservationSchema>;
@@ -59,7 +89,6 @@ export function sanitizeReservationInput(input: CreateReservationInput) {
         tour_name: input.tourName?.trim() || null,
         total_price: input.totalPrice || null,
         customer_notes: input.notes?.trim() || null,
-        status: 'pending' as const,
     };
 }
 
@@ -99,17 +128,19 @@ export type GuideFilters = z.infer<typeof GuideFilterSchema>;
 export async function validateRequestBody<T>(
     request: Request,
     schema: z.ZodSchema<T>
-): Promise<{ data: T; error: null } | { data: null; error: string }> {
+): Promise<
+    | { data: T; error: null; issues: null }
+    | { data: null; error: string; issues: z.ZodIssue[] | null }
+> {
     try {
         const body = await request.json();
         const data = schema.parse(body);
-        return { data, error: null };
+        return { data, error: null, issues: null };
     } catch (error) {
         if (error instanceof z.ZodError) {
-            const errorMessage = error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
-            return { data: null, error: errorMessage };
+            return { data: null, error: 'ValidationError', issues: error.issues };
         }
-        return { data: null, error: 'Invalid request body' };
+        return { data: null, error: 'Invalid request body', issues: null };
     }
 }
 

@@ -128,6 +128,12 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
 
             if (!reserveResponse.ok) throw new Error(reserveData.error || t('errorGeneric'));
 
+            const emailStatus =
+                reserveData?.email && typeof reserveData.email.sent === 'boolean'
+                    ? String(reserveData.email.sent)
+                    : 'unknown';
+            console.warn('Shuttle email status:', emailStatus);
+
             setIsSuccess(true);
             trackEvent('complete_booking', {
                 route: `${isCustom ? customOrigin : shuttle.origin} -> ${isCustom ? customDestination : shuttle.destination}`,
@@ -161,7 +167,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
     const bankName = process.env.NEXT_PUBLIC_BANK_BANK_NAME || '';
     const bankAccountName = process.env.NEXT_PUBLIC_BANK_ACCOUNT_NAME || '';
     const bankAccountNumber = process.env.NEXT_PUBLIC_BANK_ACCOUNT_NUMBER || '';
-    const bankCurrency = process.env.NEXT_PUBLIC_BANK_CURRENCY || 'USD';
+    const bankCurrency = process.env.NEXT_PUBLIC_BANK_CURRENCY || 'GTQ';
     const bankSwift = process.env.NEXT_PUBLIC_BANK_SWIFT || '';
     const bankQrUrl = process.env.NEXT_PUBLIC_BANK_QR_URL || '';
     const hasBankTransfer = Boolean(bankName && bankAccountNumber);

@@ -25,6 +25,7 @@ export default function ShuttlesClient() {
                 const { data, error } = await supabase
                     .from('shuttle_routes')
                     .select('*')
+                    .eq('origin', 'San Pedro La Laguna')
                     .order('origin', { ascending: true });
 
                 if (error) {
@@ -47,7 +48,7 @@ export default function ShuttlesClient() {
                 }
                 // Fallback to mock data if DB is inaccessible
                 const { shuttles } = await import('./mocks/shuttles');
-                setShuttleList(shuttles);
+                setShuttleList(shuttles.filter((shuttle) => shuttle.origin === 'San Pedro La Laguna'));
             } finally {
                 setLoading(false);
             }
