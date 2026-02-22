@@ -138,6 +138,7 @@ export async function POST(request: Request) {
 
         // Insert into Supabase
         const insertResult = await supabaseAdmin
+            .schema('public')
             .from('reservations')
             .insert(dataToInsert)
             .select()
@@ -160,6 +161,7 @@ export async function POST(request: Request) {
             } as unknown as ReservationInsert;
 
             const legacyResult = await supabaseAdmin
+                .schema('public')
                 .from('reservations')
                 .insert(legacyInsert)
                 .select()
