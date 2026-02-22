@@ -237,6 +237,7 @@ export async function POST(request: Request) {
         try {
             const updateConfirmation: ReservationUpdate = { confirmation_sent_at: new Date().toISOString() };
             await supabaseAdmin
+                .schema('public')
                 .from('reservations')
                 .update(updateConfirmation)
                 .eq('id', newReservation.id);
@@ -284,6 +285,7 @@ export async function GET(request: Request) {
 
         // Build query
         let query = supabaseAdmin
+            .schema('public')
             .from('reservations')
             .select('*')
             .order('created_at', { ascending: false })
@@ -363,6 +365,7 @@ export async function PATCH(request: Request) {
         }
 
         const { data, error } = await supabaseAdmin
+            .schema('public')
             .from('reservations')
             .update(updateData)
             .eq('id', id)
