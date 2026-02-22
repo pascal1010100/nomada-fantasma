@@ -1,3 +1,4 @@
+import { getToursByPuebloFromDB } from '@/app/lib/supabase/tours';
 import { notFound } from 'next/navigation';
 import { pueblosAtitlan as atitlanTowns } from '../../mocks/atitlanData';
 import {
@@ -37,6 +38,8 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
   if (!town) {
     notFound();
   }
+
+  const tours = await getToursByPuebloFromDB(slug);
 
   // Adaptar datos para la UI si faltan propiedades
   const vibe = 'vibe' in town ? (town as unknown as Record<string, unknown>).vibe as string : 'Relax & Nature';
@@ -191,7 +194,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
                   {tTown('experiencesSubtitle', { name: town.title })}
                 </p>
               </div>
-              <ToursSection puebloSlug={slug} className="mb-12" />
+              <ToursSection puebloSlug={slug} tours={tours} className="mb-12" />
             </section>
 
             {/* Guías Locales */}

@@ -7,11 +7,7 @@ import {
   X,
   Send,
   Loader2,
-  Ghost,
-  Sparkles,
-  Shield,
-  Zap,
-  ChevronRight
+  Ghost
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -273,12 +269,12 @@ export default function ChatModal({
                               });
                             }
                           } catch {
-                            // ignore malformed lines
+                            continue;
                           }
                         }
                       }
                     }
-                  } catch (err) {
+                  } catch {
                     setMessages((prev) => {
                       const next = [...prev];
                       const a = next[startIndex + 1];
@@ -311,7 +307,7 @@ export default function ChatModal({
                       <button
                         type="button"
                         onClick={() => {
-                          try { abortRef.current?.abort(); } catch { }
+                          try { abortRef.current?.abort(); } catch { return; }
                           abortRef.current = null;
                           setLoading(false);
                         }}

@@ -1,41 +1,78 @@
 import { notFound } from 'next/navigation';
-import { getTourBySlug, getToursByPueblo } from '@/app/[locale]/rutas-magicas/mocks/tours';
+import { getTourBySlugFromDB } from '@/app/lib/supabase/tours';
 import { Clock, Users, MapPin, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ReservationFormWrapper from '@/app/[locale]/rutas-magicas/components/ReservationFormWrapper';
+import type { Database } from '@/types/database.types';
+import { getTranslations } from 'next-intl/server';
 
-// Type for the route params
-type RouteParams = {
-  params: {
-    pueblo: string;
-    tour: string;
-  };
-};
+type Tour = Database['public']['Tables']['tours']['Row'];
+type ItineraryItem = { time: string; title: string; description: string };
+type FaqItem = { question: string; answer: string };
 
-export default async function TourDetailPage({ params }: RouteParams) {
-  const { pueblo, tour: tourSlug } = params;
-  const tour = await getTourBySlug(pueblo, tourSlug);
+export default async function TourDetailPage({
+  params,
+}: {
+  params: Promise<{ pueblo: string; tour: string; locale: string }>;
+}) {
+  const { pueblo, tour: tourSlug, locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'TourDetail' });
+  const tTours = await getTranslations({ locale, namespace: 'Data.tours' });
+  if (!tourSlug || tourSlug === 'undefined') {
+    notFound();
+  }
+
+  const tour = (await getTourBySlugFromDB(tourSlug)) as Tour | null;
 
   if (!tour) {
     notFound();
   }
 
-  // Función auxiliar para capitalizar palabras
-  const capitalize = (word: string): string => {
-    return word.charAt(0).toUpperCase() + word.slice(1);
+  const coverImage = tour.cover_image || tour.images?.[0] || '/images/tours/default-tour.svg';
+  const description = tour.description ?? '';
+  const fullDescription = tour.full_description ?? tour.description ?? '';
+  const durationHours = tour.duration_hours ?? 0;
+  const minGuests = tour.min_guests ?? 1;
+  const maxGuests = tour.max_guests ?? minGuests;
+  const meetingPoint = (tour as { meeting_point?: string | null }).meeting_point ?? '';
+  const included = (tour.included ?? []) as string[];
+  const notIncluded = (tour.not_included ?? []) as string[];
+  const itinerary = ((tour as { itinerary?: ItineraryItem[] | null }).itinerary ?? []) as ItineraryItem[];
+  const faqs = ((tour as { faqs?: FaqItem[] | null }).faqs ?? []) as FaqItem[];
+  const whatToBring = ((tour as { what_to_bring?: string[] | null }).what_to_bring ?? []) as string[];
+  const availableDays = (tour as { available_days?: number[] | null }).available_days ?? undefined;
+  const safeAvailableDays = (availableDays ?? []).map(String);
+  const townName = pueblo.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  const tourKeyRaw = tour.slug ?? tourSlug;
+  const tourKey = tourKeyRaw.toLowerCase();
+  const localizedTitle = tTours.has(`${tourKey}.title`) ? tTours(`${tourKey}.title`) : tour.title;
+  const localizedSummary = tTours.has(`${tourKey}.summary`) ? tTours(`${tourKey}.summary`) : description;
+  const localizedDescription = tTours.has(`${tourKey}.description`) ? tTours(`${tourKey}.description`) : fullDescription;
+  const localizedMeetingPoint = tTours.has(`${tourKey}.meetingPoint`) ? tTours(`${tourKey}.meetingPoint`) : meetingPoint;
+  const readRaw = <T,>(key: string, fallback: T) => {
+    try {
+      return tTours.raw(key) as T;
+    } catch {
+      return fallback;
+    }
   };
+  const localizedIncluded = readRaw<string[]>(`${tourKey}.includes`, included);
+  const localizedNotIncluded = readRaw<string[]>(`${tourKey}.notIncludes`, notIncluded);
+  const localizedItinerary = readRaw<ItineraryItem[]>(`${tourKey}.itinerary`, itinerary);
+  const localizedWhatToBring = readRaw<string[]>(`${tourKey}.whatToBring`, whatToBring);
+  const localizedFaqs = readRaw<FaqItem[]>(`${tourKey}.faqs`, faqs);
 
   // Obtener otros tours del mismo pueblo para recomendaciones
-  const otherTours = getToursByPueblo(pueblo).filter(t => t.slug !== tourSlug);
+  // const otherTours = getToursByPueblo(pueblo).filter(t => t.slug !== tourSlug);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header con imagen */}
       <div className="relative h-64 md:h-96 bg-gray-800">
         <Image
-          src={tour.images[0] || '/images/tours/default-tour.svg'}
-          alt={tour.title}
+          src={coverImage}
+          alt={localizedTitle}
           fill
           className="object-cover opacity-70"
           priority
@@ -44,28 +81,28 @@ export default async function TourDetailPage({ params }: RouteParams) {
 
         <div className="container mx-auto px-4 h-full flex flex-col justify-end pb-8 relative z-10">
           <Link
-            href={`/rutas-magicas/lago-atitlan/${pueblo}`}
+            href={`/${locale}/rutas-magicas/lago-atitlan/${pueblo}`}
             className="inline-flex items-center text-white hover:text-cyan-300 mb-4 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 mr-1" />
-            Volver a {pueblo.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+            {t('backToTown', { town: townName })}
           </Link>
 
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">{tour.title}</h1>
-          <p className="text-lg text-gray-200 max-w-3xl">{tour.summary}</p>
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">{localizedTitle}</h1>
+          <p className="text-lg text-gray-200 max-w-3xl">{localizedSummary}</p>
 
           <div className="flex flex-wrap gap-4 mt-4">
             <div className="flex items-center text-white">
               <Clock className="w-5 h-5 mr-1 text-cyan-300" />
-              <span>{tour.duration}</span>
+              <span>{t('durationHours', { hours: durationHours })}</span>
             </div>
             <div className="flex items-center text-white">
               <Users className="w-5 h-5 mr-1 text-cyan-300" />
-              <span>Grupo: {tour.capacity.min}-{tour.capacity.max} personas</span>
+              <span>{t('groupRange', { min: minGuests, max: maxGuests })}</span>
             </div>
             <div className="flex items-center text-white">
               <MapPin className="w-5 h-5 mr-1 text-cyan-300" />
-              <span>{tour.meetingPoint}</span>
+              <span>{localizedMeetingPoint}</span>
             </div>
           </div>
         </div>
@@ -78,24 +115,24 @@ export default async function TourDetailPage({ params }: RouteParams) {
           <div className="lg:col-span-2 space-y-8">
             {/* Descripción */}
             <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Sobre esta experiencia</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t('descriptionTitle')}</h2>
               <div className="prose dark:prose-invert max-w-none">
-                <p className="text-gray-700 dark:text-gray-300">{tour.description}</p>
+                <p className="text-gray-700 dark:text-gray-300">{localizedDescription}</p>
               </div>
             </section>
 
             {/* Itinerario */}
-            {tour.itinerary && tour.itinerary.length > 0 && (
+            {localizedItinerary.length > 0 && (
               <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Itinerario</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('itineraryTitle')}</h2>
                 <div className="space-y-6">
-                  {tour.itinerary.map((item, index) => (
+                  {localizedItinerary.map((item, index) => (
                     <div key={index} className="flex">
                       <div className="flex flex-col items-center mr-4">
                         <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/50 flex items-center justify-center">
                           <span className="text-cyan-600 dark:text-cyan-400 font-medium">{index + 1}</span>
                         </div>
-                        {index < tour.itinerary.length - 1 && (
+                        {index < localizedItinerary.length - 1 && (
                           <div className="w-0.5 h-full bg-gray-200 dark:bg-gray-600 my-2"></div>
                         )}
                       </div>
@@ -114,15 +151,15 @@ export default async function TourDetailPage({ params }: RouteParams) {
 
             {/* Lo que incluye */}
             <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Lo que incluye</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('includesTitle')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {tour.includes.map((item, index) => (
+                {localizedIncluded.map((item, index) => (
                   <div key={`inc-${index}`} className="flex items-start">
                     <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
                     <span className="text-gray-700 dark:text-gray-300">{item}</span>
                   </div>
                 ))}
-                {tour.notIncludes && tour.notIncludes.map((item, index) => (
+                {localizedNotIncluded.map((item, index) => (
                   <div key={`not-inc-${index}`} className="flex items-start">
                     <XCircle className="w-5 h-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" />
                     <span className="text-gray-700 dark:text-gray-300">{item}</span>
@@ -132,11 +169,11 @@ export default async function TourDetailPage({ params }: RouteParams) {
             </section>
 
             {/* Preguntas frecuentes */}
-            {tour.faqs && tour.faqs.length > 0 && (
+            {localizedFaqs.length > 0 && (
               <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Preguntas frecuentes</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('faqTitle')}</h2>
                 <div className="space-y-4">
-                  {tour.faqs.map((faq, index) => (
+                  {localizedFaqs.map((faq, index) => (
                     <div key={index} className="border-b border-gray-200 dark:border-gray-700 pb-4">
                       <h3 className="font-semibold text-gray-800 dark:text-gray-200">{faq.question}</h3>
                       <p className="text-gray-600 dark:text-gray-400 mt-1">{faq.answer}</p>
@@ -153,38 +190,36 @@ export default async function TourDetailPage({ params }: RouteParams) {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 sticky top-6">
               <ReservationFormWrapper
                 tourId={tour.id}
-                price={tour.price.adult}
-                childPrice={tour.price.child}
-                maxCapacity={tour.capacity.max}
-                availableDays={tour.availableDays}
-                startTimes={tour.startTimes}
+                price={tour.price_min ?? 0}
+                maxCapacity={maxGuests ?? 10}
+                availableDays={safeAvailableDays}
               />
             </div>
 
             {/* Información adicional */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Información importante</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">{t('importantInfoTitle')}</h3>
               <ul className="space-y-3">
                 <li className="flex items-start">
                   <MapPin className="w-5 h-5 text-cyan-500 mt-0.5 mr-2 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-sm text-gray-900 dark:text-white">Punto de encuentro</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{tour.meetingPoint}</p>
+                    <p className="font-medium text-sm text-gray-900 dark:text-white">{t('meetingPointLabel')}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{localizedMeetingPoint}</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <Clock className="w-5 h-5 text-cyan-500 mt-0.5 mr-2 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-sm text-gray-900 dark:text-white">Duración</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{tour.duration}</p>
+                    <p className="font-medium text-sm text-gray-900 dark:text-white">{t('durationLabel')}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('durationHours', { hours: durationHours })}</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <Users className="w-5 h-5 text-cyan-500 mt-0.5 mr-2 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-sm text-gray-900 dark:text-white">Tamaño del grupo</p>
+                    <p className="font-medium text-sm text-gray-900 dark:text-white">{t('groupSizeLabel')}</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {tour.capacity.min}-{tour.capacity.max} personas
+                      {t('groupRange', { min: minGuests, max: maxGuests })}
                     </p>
                   </div>
                 </li>
@@ -192,11 +227,11 @@ export default async function TourDetailPage({ params }: RouteParams) {
             </div>
 
             {/* Qué llevar */}
-            {tour.whatToBring && tour.whatToBring.length > 0 && (
+            {localizedWhatToBring.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Qué llevar</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">{t('whatToBringTitle')}</h3>
                 <ul className="space-y-2">
-                  {tour.whatToBring.map((item, index) => (
+                  {localizedWhatToBring.map((item, index) => (
                     <li key={index} className="flex items-start">
                       <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
                       <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
@@ -209,7 +244,7 @@ export default async function TourDetailPage({ params }: RouteParams) {
         </div>
 
         {/* Otros tours */}
-        {otherTours.length > 0 && (
+        {/* {otherTours.length > 0 && (
           <section className="mt-16">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">También te puede interesar</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -242,7 +277,7 @@ export default async function TourDetailPage({ params }: RouteParams) {
               ))}
             </div>
           </section>
-        )}
+        )} */}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useScroll, useTransform } from "framer-motion"
-import { useRef, useState, useEffect } from "react"
+import { useRef } from "react"
 import { ArrowRight, Sparkles } from "lucide-react"
 import Link from "next/link"
 import SearchBar from "./SearchBar"
@@ -16,7 +16,6 @@ export default function HeroSection({
 }) {
   const t = useTranslations("Routes")
   const ref = useRef<HTMLDivElement>(null)
-  const [isMounted, setIsMounted] = useState(false)
 
   const handleSearch = (query: string) => {
     if (onSearch) {
@@ -30,10 +29,6 @@ export default function HeroSection({
   })
 
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
 
   return (
     <motion.section ref={ref} style={{ opacity }} className="relative min-h-[80vh] flex items-center justify-center">

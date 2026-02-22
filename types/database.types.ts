@@ -61,6 +61,7 @@ export interface Database {
                     pueblo_slug?: string | null;
                     is_active?: boolean;
                 };
+                Relationships: [];
             };
             tours: {
                 Row: {
@@ -141,6 +142,7 @@ export interface Database {
                     is_active?: boolean;
                     is_featured?: boolean;
                 };
+                Relationships: [];
             };
             accommodations: {
                 Row: {
@@ -215,6 +217,7 @@ export interface Database {
                     reviews_count?: number;
                     is_active?: boolean;
                 };
+                Relationships: [];
             };
             shuttle_routes: {
                 Row: {
@@ -253,6 +256,7 @@ export interface Database {
                     description?: string | null;
                     created_at?: string;
                 };
+                Relationships: [];
             };
             shuttle_bookings: {
                 Row: {
@@ -297,6 +301,7 @@ export interface Database {
                     status?: string | null;
                     created_at?: string;
                 };
+                Relationships: [];
             };
             reservations: {
                 Row: {
@@ -371,6 +376,7 @@ export interface Database {
                     confirmed_at?: string | null;
                     cancelled_at?: string | null;
                 };
+                Relationships: [];
             };
         };
         Views: {

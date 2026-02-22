@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
-import { Star, MessageCircle, Globe, Award, Coffee, Sparkles } from 'lucide-react';
+import { Star, MessageCircle, Globe, Award, Coffee } from 'lucide-react';
 import { Guide } from '../lago-atitlan/data';
 import BookingModal from './BookingModal';
 import { trackEvent } from '../../../lib/analytics';

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect x="60" y="60" width="1080" height="680" rx="48" fill="rgba(0,0,0,0.35)"/>
+  <text x="600" y="400" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="64" fill="#e2e8f0">Hotel Mikaso</text>
+  <text x="600" y="470" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" fill="#cbd5f5">San Pedro La Laguna</text>
+</svg>

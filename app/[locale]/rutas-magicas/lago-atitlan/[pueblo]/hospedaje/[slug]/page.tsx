@@ -1,13 +1,11 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import {
-    ArrowLeft, MapPin, Star, Check, Share2, Heart, Calendar, Users, MessageCircle,
-    Wallet, Moon, ChevronLeft, ChevronRight, Wifi, Coffee, Home, Sparkles, X, Compass
+    ArrowLeft, MapPin, Star, Check, Share2, Heart, Sparkles
 } from 'lucide-react';
 import { pueblosAtitlan } from '../../../../mocks/atitlanData';
-import type { Accommodation } from '../../../../mocks/atitlanData';
+import type { Accommodation, Review } from '../../../../mocks/atitlanData';
 import BookingForm from '../../../../components/BookingForm';
 
 import ClientParticles from '@/app/components/ClientParticles';
@@ -43,7 +41,7 @@ export default async function AccommodationPage({ params }: PageProps) {
 
     if (!accommodation) notFound();
 
-    const { name, type, priceRange, rating, description, amenities, image, gallery, vibeMetrics, contact, bookingUrl, reviews, pricePerNight } = accommodation;
+    const { name, type, description, amenities, image, gallery, vibeMetrics, contact, bookingUrl, reviews } = accommodation;
     const images = gallery && gallery.length > 0 ? gallery : [image];
 
     return (
@@ -206,7 +204,10 @@ export default async function AccommodationPage({ params }: PageProps) {
 }
 
 // Brand-Aligned Vibe Metrics
-function VibeMetrics({ metrics }: { metrics: any }) {
+type VibeMetricsData = NonNullable<Accommodation['vibeMetrics']>;
+
+function VibeMetrics({ metrics }: { metrics: VibeMetricsData }) {
+    const entries = Object.entries(metrics) as Array<[keyof VibeMetricsData, number]>;
     return (
         <section className="py-4">
             <div className="flex items-center gap-3 mb-6">
@@ -219,7 +220,7 @@ function VibeMetrics({ metrics }: { metrics: any }) {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {Object.entries(metrics).map(([key, value]) => (
+                {entries.map(([key, value]) => (
                     <div
                         key={key}
                         className="group relative p-4 rounded-2xl card-glass hover:border-primary/50 transition-all duration-500 overflow-hidden bg-card/40"
@@ -233,7 +234,7 @@ function VibeMetrics({ metrics }: { metrics: any }) {
                                     {key}
                                 </span>
                                 <span className="text-xl font-black text-foreground tabular-nums">
-                                    {value as number}
+                                    {value}
                                 </span>
                             </div>
 
@@ -242,7 +243,7 @@ function VibeMetrics({ metrics }: { metrics: any }) {
                                 {[...Array(10)].map((_, i) => (
                                     <div
                                         key={i}
-                                        className={`flex-1 rounded-full transition-all duration-300 ${i < (value as number)
+                                        className={`flex-1 rounded-full transition-all duration-300 ${i < value
                                             ? 'bg-gradient-to-t from-primary to-accent shadow-[0_0_8px_rgba(var(--primary),0.5)]'
                                             : 'bg-muted/20'
                                             }`}
@@ -258,7 +259,7 @@ function VibeMetrics({ metrics }: { metrics: any }) {
 }
 
 // Reviews Section
-function ReviewsSection({ reviews }: { reviews: any[] }) {
+function ReviewsSection({ reviews }: { reviews: Review[] }) {
     return (
         <section>
             <h2 className="text-2xl font-bold mb-8 flex items-center gap-3 font-display text-foreground">

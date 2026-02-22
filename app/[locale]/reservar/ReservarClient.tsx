@@ -2,10 +2,9 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Calendar, Clock, Users, MapPin, ArrowLeft, Globe, User, Briefcase, Compass, CheckCircle, Sparkles, Shield, Zap } from 'lucide-react';
+import { Calendar, ArrowLeft, Globe, User, Briefcase, Compass, CheckCircle, Sparkles, Shield, Zap } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const travelTypes = [
     {
@@ -114,15 +113,13 @@ const steps = [
 ];
 
 export default function ReservarClient() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
     const [currentStep, setCurrentStep] = useState<'type' | 'details' | 'confirm'>('type');
     const [selectedType, setSelectedType] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Form states
-    const [formData, setFormData] = useState<{
+    type FormDataValue = string | number | string[] | undefined;
+    type FormDataState = {
         name: string;
         email: string;
         phone: string;
@@ -134,8 +131,10 @@ export default function ReservarClient() {
         travelers: string;
         startDate?: string;
         startTime?: string;
-        [key: string]: any;
-    }>({
+    } & Record<string, FormDataValue>;
+
+    // Form states
+    const [formData, setFormData] = useState<FormDataState>({
         name: '',
         email: '',
         phone: '',
@@ -149,7 +148,7 @@ export default function ReservarClient() {
 
     const handleInputChange = (
         keyOrEvent: string | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-        value?: any
+        value?: FormDataValue
     ) => {
         if (typeof keyOrEvent === 'string') {
             setFormData(prev => ({ ...prev, [keyOrEvent]: value }));
@@ -165,21 +164,51 @@ export default function ReservarClient() {
         setError('');
 
         try {
+            const guestsValue = typeof formData.travelers === 'string'
+                ? parseInt(formData.travelers, 10)
+                : typeof formData.travelers === 'number'
+                    ? formData.travelers
+                    : 1;
+            const guests = Number.isFinite(guestsValue) && guestsValue > 0 ? guestsValue : 1;
+            const reservationDate = formData.startDate || new Date().toISOString().split('T')[0];
+            const tourName = selectedTypeData?.name
+                ? `${selectedTypeData.name} - ${formData.destination || 'Solicitud general'}`
+                : formData.destination || 'Solicitud general';
+            const notes = [
+                formData.message && `Mensaje: ${formData.message}`,
+                formData.specialRequirements && `Requisitos: ${formData.specialRequirements}`,
+                formData.duration && `Duración: ${formData.duration}`,
+                formData.budget && `Presupuesto: ${formData.budget}`,
+                formData.startTime && `Hora: ${formData.startTime}`,
+                formData.nationality && `Nacionalidad: ${formData.nationality}`,
+            ]
+                .filter(Boolean)
+                .join(' | ');
+
             const response = await fetch('/api/reservations', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    type: 'general_booking',
-                    bookingType: selectedType,
-                    ...formData,
-                    date: new Date().toISOString()
+                    type: 'tour',
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    country: formData.nationality,
+                    tourName,
+                    date: reservationDate,
+                    guests,
+                    notes: notes || undefined
                 }),
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Error al enviar la solicitud');
+                const apiError = typeof data?.error === 'string'
+                    ? data.error
+                    : 'Error al enviar la solicitud';
+                setError(apiError);
+                return;
             }
 
             setCurrentStep('confirm');
@@ -223,8 +252,8 @@ export default function ReservarClient() {
                         </div>
                     );
 
-                case 'multiselect':
-                    const selectedValues = formData[key] || [];
+                case 'multiselect': {
+                    const selectedValues = (formData[key] as string[] | undefined) || [];
                     return (
                         <div key={key} className="col-span-2">
                             <label className="block text-sm font-medium mb-3">
@@ -252,6 +281,7 @@ export default function ReservarClient() {
                             </div>
                         </div>
                     );
+                }
 
                 case 'number':
                     return (

@@ -233,9 +233,87 @@
         "helpCardText": "Our team is available 24/7 to answer your questions.",
         "supportLink": "Contact support"
     },
+    "ReservationPage": {
+        "backToRoutes": "Back to routes",
+        "backToDetails": "Back to details",
+        "backToTour": "Back to tour",
+        "backToTown": "Back to {town}",
+        "premiumBadge": "Premium Experience",
+        "secureTitle": "Secure Booking",
+        "secureDesc": "Your data is protected and confirmation is immediate.",
+        "fastTitle": "Fast Confirmation",
+        "fastDesc": "Receive your digital voucher instantly by email.",
+        "formTitle": "Complete your booking",
+        "formSubtitle": "You are one step away from your adventure",
+        "pricePerPerson": "Price per person"
+    },
+    "TourDetail": {
+        "backToTown": "Back to {town}",
+        "durationHours": "{hours} hours",
+        "groupRange": "Group: {min}-{max} people",
+        "descriptionTitle": "About this experience",
+        "itineraryTitle": "Itinerary",
+        "includesTitle": "What's included",
+        "faqTitle": "Frequently asked questions",
+        "importantInfoTitle": "Important information",
+        "meetingPointLabel": "Meeting point",
+        "durationLabel": "Duration",
+        "groupSizeLabel": "Group size",
+        "whatToBringTitle": "What to bring"
+    },
     "RouteActions": {
         "exploreTownsAndTours": "Explore towns and tours",
         "reserveNow": "Reserve Now"
+    },
+    "Reservation": {
+        "headerTitle": "Book Your Tour",
+        "headerDesc": "Complete the form to request your spot.",
+        "priceAdult": "Adult Price",
+        "perPerson": "per person",
+        "priceChild": "Child Price",
+        "totalEstimated": "Estimated Total",
+        "dateLabel": "Select Date",
+        "dateHelp": "Reservations must be made at least 24 hours in advance.",
+        "dateTodayDisabled": "Today (not available)",
+        "timeLabel": "Select Time",
+        "timeHelp": "Tour start time.",
+        "adultsLabel": "Adults",
+        "adultsAgeHint": "(13+ years)",
+        "adultsSingular": "adult",
+        "adultsPlural": "adults",
+        "childrenLabel": "Children",
+        "childrenAgeHint": "(6-12 years)",
+        "childrenSingular": "child",
+        "childrenPlural": "children",
+        "childrenPriceHint": "Children pay Q{price}.",
+        "contactTitle": "Contact Information",
+        "nameLabel": "Full Name",
+        "namePlaceholder": "Your full name",
+        "nameErrorRequired": "Full name is required.",
+        "emailLabel": "Email",
+        "emailPlaceholder": "your.email@example.com",
+        "emailErrorRequired": "Email is required.",
+        "emailErrorInvalid": "Please enter a valid email.",
+        "phoneLabel": "WhatsApp Phone",
+        "phonePlaceholder": "+1 (555) 123-4567",
+        "phoneErrorRequired": "A phone number is required.",
+        "phoneErrorInvalid": "Please enter a valid phone number.",
+        "notesLabel": "Special Requests",
+        "notesPlaceholder": "Any allergies, mobility issues, or special requests?",
+        "submitButton": "Request Reservation",
+        "submittingButton": "Processing...",
+        "consentText": "By clicking, you accept our Terms of Service and Privacy Policy.",
+        "successTitle": "Request Sent!",
+        "successDesc": "Our team will contact you shortly via WhatsApp or email to confirm availability and payment details.",
+        "errorGeneric": "An error occurred. Please try again.",
+        "errors": {
+            "requiredName": "Full name is required.",
+            "requiredEmail": "Email is required.",
+            "invalidEmail": "Please enter a valid email address.",
+            "requiredPhone": "A contact phone number is required.",
+            "invalidPhone": "Please enter a valid phone number.",
+            "maxCapacity": "The total number of participants cannot exceed {max}."
+        }
     },
     "Data": {
         "routes": {
@@ -544,6 +622,71 @@
                         "description": "Closing with traditional desserts and coffee tasting."
                     }
                 ]
+            },
+            "amanecer-indian-nose-rostro-maya": {
+                "title": "Indian Nose Sunrise (Mayan Face)",
+                "summary": "A short pre-dawn hike to watch the sun rise over Lake Atitlán.",
+                "description": "Climb the iconic Indian Nose viewpoint for a memorable sunrise over Lake Atitlán and the volcanoes of San Pedro, Tolimán, and Atitlán. The tour includes early pickup, a local guide, park access, and a hot drink at the summit.",
+                "duration": "4 hours",
+                "difficulty": "Easy",
+                "meetingPoint": "Pickup in San Pedro La Laguna",
+                "includes": [
+                    "Round-trip transportation",
+                    "Local guide",
+                    "Park entrance",
+                    "Hot drink"
+                ],
+                "notIncludes": [
+                    "Meals not mentioned",
+                    "Tips",
+                    "Personal expenses"
+                ],
+                "whatToBring": [
+                    "Warm layers",
+                    "Comfortable walking shoes",
+                    "Water",
+                    "Camera",
+                    "Flashlight or headlamp"
+                ],
+                "highlights": [
+                    "Panoramic lake views",
+                    "Sunrise over the volcanoes",
+                    "Easy to moderate hike",
+                    "Spectacular photos",
+                    "Experienced local guide"
+                ],
+                "itinerary": [
+                    {
+                        "time": "3:45 AM",
+                        "title": "Pickup",
+                        "description": "Pickup at your lodging in San Pedro La Laguna."
+                    },
+                    {
+                        "time": "4:30 AM",
+                        "title": "Trailhead",
+                        "description": "Short briefing and start of the hike."
+                    },
+                    {
+                        "time": "5:30 AM",
+                        "title": "Sunrise at the viewpoint",
+                        "description": "Enjoy the sunrise with hot coffee or tea."
+                    },
+                    {
+                        "time": "6:15 AM",
+                        "title": "Return",
+                        "description": "Descend and return to San Pedro."
+                    }
+                ],
+                "faqs": [
+                    {
+                        "question": "Is it suitable for children?",
+                        "answer": "Yes! The trail is short and very safe for families."
+                    },
+                    {
+                        "question": "Do I need to be an athlete?",
+                        "answer": "No, it’s an easy 30-minute walk at a relaxed pace."
+                    }
+                ]
             }
         },
         "points": {
@@ -650,6 +793,7 @@
         "viewDetails": "View details",
         "book": "Book",
         "perPerson": "/ person",
+        "hours": "{count, plural, one {hour} other {hours}}",
         "children": "Children: {price}",
         "maxCapacity": "Up to {max} people",
         "detailsAria": "View details for {title} tour",
@@ -688,11 +832,13 @@
         "nearbyTitle": "Other nearby towns"
     },
     "Reservation": {
-        "successTitle": "Reservation in Progress",
-        "successDesc": "We are processing your reservation request.",
+        "successTitle": "Request Sent!",
+        "successDesc": "We have received your request. Our team will contact you shortly to confirm availability and payment.",
+        "wrapperTitle": "Reserve your tour",
+        "loading": "Loading reservation form...",
         "headerTitle": "Reserve Now",
         "headerDesc": "Fill the form to secure your spot",
-        "priceAdult": "Price per adult",
+        "priceAdult": "Price per person",
         "perPerson": "per person",
         "priceChild": "Child price",
         "totalEstimated": "Estimated total:",
@@ -701,11 +847,11 @@
         "dateTodayDisabled": "Today (not available)",
         "dateHelp": "Select one of the available days",
         "timeLabel": "Start time",
-        "timeHelp": "Choose the start time that suits you",
-        "adultsLabel": "Adults",
-        "adultsAgeHint": "(13+ years)",
-        "adultsSingular": "adult",
-        "adultsPlural": "adults",
+        "timeHelp": "Fixed departure time: 03:40 am",
+        "adultsLabel": "Person",
+        "adultsAgeHint": "",
+        "adultsSingular": "person",
+        "adultsPlural": "people",
         "childrenLabel": "Children",
         "childrenAgeHint": "(4–12 years)",
         "childrenSingular": "child",
@@ -751,11 +897,56 @@
         "remote": "Remote · GT",
         "contact": "Contact page"
     },
+    "ReservationConfirmation": {
+        "title": "Request Sent!",
+        "subtitle": "We have received your request for this tour. Our team will review it and contact you soon.",
+        "emailNotice": "📧 We will send confirmation details to your email",
+        "notFoundTitle": "Tour not found",
+        "notFoundDesc": "Sorry, we couldn’t find the details for this tour.",
+        "backTours": "See more tours",
+        "hoursLabel": "hours",
+        "durationFallback": "Duration to be confirmed",
+        "difficultyFallback": "Difficulty to be confirmed",
+        "dateFallback": "Date not specified",
+        "timeFallback": "03:40 am",
+        "detailsTitle": "Your experience details",
+        "statusConfirmed": "Pending",
+        "dateTimeLabel": "Date and time",
+        "participantsLabel": "Participants",
+        "participantSingular": "Person",
+        "participantPlural": "People",
+        "perPerson": "each",
+        "meetingPointLabel": "Meeting point",
+        "meetingPointFallback": "Location to be confirmed",
+        "viewMap": "View on map",
+        "durationLabel": "Duration",
+        "difficultyWithValue": "Difficulty: {value}",
+        "paymentSummaryTitle": "Payment summary",
+        "totalLabel": "Total",
+        "taxesIncluded": "Taxes included",
+        "paymentMethodTitle": "Payment method",
+        "paymentMethodDesc": "You will pay the guide directly on the day of the tour in cash or by card.",
+        "tipsTitle": "Tips for your adventure",
+        "tipArriveTitle": "Arrive early",
+        "tipArriveDesc": "We recommend arriving 15 minutes before the scheduled time for check-in.",
+        "tipBringTitle": "What to bring",
+        "tipBringDesc": "Comfortable clothes, sunscreen, water, and a camera. Don’t forget your adventurous spirit!",
+        "tipCancelTitle": "Cancellation policy",
+        "tipCancelDesc": "You can cancel up to 24 hours in advance at no charge. After that, 50% of the total value will be charged.",
+        "tipPaymentTitle": "Payment methods",
+        "tipPaymentDesc": "We accept cash (GTQ) and major credit and debit cards.",
+        "ctaTitle": "Ready for your adventure?",
+        "backHome": "Back to home",
+        "questionsHelp": "Have a question? We’re here to help.",
+        "questionsTitle": "Have a question?",
+        "questionsDesc": "We’re here to help. Contact us at",
+        "questionsOr": "or at"
+    },
     "ReservationEmail": {
-      "preview": "Booking confirmation: {{tourName}}",
+      "preview": "Booking confirmation: {tourName}",
       "title": "Your adventure starts here! 🌎",
-      "greeting": "Hello {{customerName}}",
-      "intro": "We have received your booking request for <strong>{{tourName}}</strong>. We are excited to be part of your experience in Guatemala.",
+      "greeting": "Hello {customerName}",
+      "intro": "We have received your booking request for {tourName}. We are excited to be part of your experience in Guatemala.",
       "detailsTitle": "Booking Details",
       "detailsExperience": "Experience",
       "detailsDate": "Date",
@@ -773,5 +964,18 @@
       "manageButton": "Manage my Booking",
       "footerQuestion": "If you have any questions, reply to this email or contact us on WhatsApp.",
       "footerSignature": "Nómada Fantasma - Epic Travels in Guatemala 🇬🇹"
+    },
+    "ReservationApi": {
+      "errors": {
+        "invalidRequest": "Invalid request.",
+        "invalidName": "Name is not valid.",
+        "invalidEmail": "Email is not valid.",
+        "invalidDate": "Date is not valid.",
+        "invalidGuests": "Number of guests is not valid.",
+        "invalidType": "Reservation type is not valid.",
+        "requiredTour": "A tour is required for this reservation.",
+        "requiredAccommodation": "An accommodation is required for this reservation.",
+        "requiredGuide": "A guide is required for this reservation."
+      }
     }
 }

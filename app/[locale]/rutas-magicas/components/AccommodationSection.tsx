@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Accommodation, AccommodationType } from '../mocks/atitlanData';
 import AccommodationCard from './AccommodationCard';
-import { Hotel, Home, Tent, MapPin } from 'lucide-react';
+import { Hotel, Home, MapPin } from 'lucide-react';
 
 interface AccommodationSectionProps {
     accommodations?: Accommodation[];

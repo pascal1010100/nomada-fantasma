@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { SearchInput } from '@/components/ui/SearchInput';
-import { useState, useEffect, useCallback, ChangeEvent, KeyboardEvent } from 'react';
+import { useState, useEffect, useCallback, KeyboardEvent } from 'react';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;

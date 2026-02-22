@@ -22,14 +22,14 @@ export default function NearbyTownCard({ town, locale }: NearbyTownCardProps) {
 
   try {
     title = t(`${town.slug}.title`);
-  } catch (e) {
-    // Si no se encuentra la traducción, se usa el valor original
+  } catch {
+    title = town.title;
   }
 
   try {
     summary = t(`${town.slug}.summary`);
-  } catch (e) {
-    // Si no se encuentra la traducción, se usa el valor original
+  } catch {
+    summary = town.summary;
   }
 
   return (

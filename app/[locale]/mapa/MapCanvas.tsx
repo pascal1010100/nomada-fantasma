@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useRef } from "react";
 import { MapContainer, TileLayer, Marker, Tooltip, Popup } from "react-leaflet";
 import L from "leaflet";
 import Link from "next/link";
@@ -60,6 +60,9 @@ const categoryColor = (cat?: string) => {
   const found = CATEGORIES.find((c) => c.key === cat);
   return found?.color ?? "#38BDF8";
 };
+
+const isCategoryKey = (value: Point["category"]): value is CategoryKey =>
+  CATEGORIES.some((c) => c.key === value);
 
 const PinNeonIcon = ({ color = "#38BDF8" }: { color?: string }) => {
   return L.divIcon({
@@ -141,14 +144,14 @@ export default function MapCanvas({
       // Ghost logic: if point is ghost, only show if mode is ON
       if (p.isGhost && !isGhostMode) return false;
 
-      const category = (p as any).category as CategoryKey | undefined;
+      const categoryKey = isCategoryKey(p.category) ? p.category : undefined;
 
       // Nomad logic: if mode is ON, only show wifi and cowork
       if (isNomadMode) {
-        return category === 'wifi' || category === 'cowork';
+        return categoryKey === 'wifi' || categoryKey === 'cowork';
       }
 
-      return activeCats.has(category || 'wifi');
+      return categoryKey ? activeCats.has(categoryKey) : false;
     });
   }, [points, activeCats, isGhostMode, isNomadMode]);
 
@@ -179,7 +182,7 @@ export default function MapCanvas({
           />
 
           {filteredPoints.map((p, i) => {
-            const category = ((p as any).category as CategoryKey) || 'wifi';
+            const category = p.category;
             // Use a special color for ghost points if needed, or just standard category color
             const color = p.isGhost ? "#A855F7" : categoryColor(category); // Purple for ghosts
 

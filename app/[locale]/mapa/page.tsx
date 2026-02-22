@@ -13,7 +13,7 @@ const ParticlesBackground = dynamic(
   { ssr: false }
 );
 import { samplePoints } from './points';
-import { CategoryKey, CATEGORIES } from './types';
+import { CATEGORIES } from './types';
 import { MapContent } from './components/MapContent';
 
 // Definir las categorías con íconos y colores

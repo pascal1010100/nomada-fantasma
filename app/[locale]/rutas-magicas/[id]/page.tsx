@@ -291,7 +291,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
                   // Tour pricing for other routes
                   <>
                     <div className="flex items-baseline mb-4">
-                      <span className="text-3xl font-bold text-gray-900 dark:text-white">${route.price.toLocaleString()}</span>
+                      <span className="text-3xl font-bold text-gray-900 dark:text-white">Q{route.price.toLocaleString()}</span>
                       <span className="ml-2 text-gray-500 dark:text-gray-400">por persona</span>
                     </div>
 

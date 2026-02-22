@@ -164,7 +164,7 @@ export default function RouteCard({ route }: RouteCardProps) {
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 300 }}
             >
-              ${route.price.toLocaleString()}
+              Q{route.price.toLocaleString()}
             </motion.div>
           )}
         </motion.div>
@@ -280,7 +280,7 @@ export default function RouteCard({ route }: RouteCardProps) {
                 <>
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('from')}</span>
                   <span className="text-lg font-bold text-primary">
-                    ${route.price.toLocaleString()}
+                    Q{route.price.toLocaleString()}
                   </span>
                 </>
               )}

@@ -3,8 +3,9 @@
 import { Search } from 'lucide-react';
 import { Input } from './input';
 import { cn } from '@/lib/utils';
+import type { ChangeEvent, KeyboardEvent, InputHTMLAttributes } from 'react';
 
-interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
+interface SearchInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   placeholder?: string;
   className?: string;
   value: string;
@@ -26,11 +27,11 @@ export function SearchInput({
   iconClassName,
   ...props
 }: SearchInputProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && onSearch) {
       onSearch();
     }
@@ -46,12 +47,8 @@ export function SearchInput({
           type="search"
           placeholder={placeholder}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && onSearch) {
-              onSearch();
-            }
-          }}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
           className={cn(
             'pl-10 pr-10 w-full bg-background/80 backdrop-blur-sm',
             'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',

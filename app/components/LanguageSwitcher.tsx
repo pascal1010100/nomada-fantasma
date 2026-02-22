@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
 import { motion } from 'framer-motion';
 
@@ -13,6 +13,7 @@ export default function LanguageSwitcher() {
     const locale = useLocale();
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const [isPending, startTransition] = useTransition();
 
     const toggleLanguage = () => {
@@ -33,7 +34,9 @@ export default function LanguageSwitcher() {
             }
 
             const newPath = segments.join('/') || '/';
-            router.replace(newPath);
+            const queryString = searchParams.toString();
+            const nextUrl = queryString ? `${newPath}?${queryString}` : newPath;
+            router.replace(nextUrl);
         });
     };
 

@@ -1,18 +1,18 @@
 'use client';
 
-import { getToursByPueblo } from '../mocks/tours';
 import TourCard from './TourCard';
 import { Zap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { Tour } from '@/app/lib/types';
 
 interface ToursSectionProps {
   puebloSlug: string;
   className?: string;
+  tours: Tour[];
 }
 
-export default function ToursSection({ puebloSlug, className = '' }: ToursSectionProps) {
+export default function ToursSection({ puebloSlug, className = '', tours }: ToursSectionProps) {
   const t = useTranslations('Tours');
-  const tours = getToursByPueblo(puebloSlug);
 
   if (tours.length === 0) {
     return null; // No mostrar la sección si no hay tours

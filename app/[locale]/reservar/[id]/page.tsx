@@ -5,6 +5,8 @@ import ReservationForm from '../../rutas-magicas/components/ReservationForm';
 import { ArrowLeft, Star, ShieldCheck, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { getTourById, getPuebloSlugByTourId } from '../../rutas-magicas/mocks/tours';
+import { getTourBySlugFromDB } from '@/app/lib/supabase/tours';
+import { getTranslations } from 'next-intl/server';
 
 // Helper to find a tour by ID across all data sources
 const findTourById = (id: string) => {
@@ -23,9 +25,39 @@ const findTourById = (id: string) => {
     return null;
 };
 
-export default async function TourReservationPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const result = findTourById(id);
+const findSupabaseTour = async (idOrSlug: string) => {
+    const supabaseTour = await getTourBySlugFromDB(idOrSlug);
+    if (!supabaseTour) {
+        return null;
+    }
+    const images = supabaseTour.images ?? (supabaseTour.cover_image ? [supabaseTour.cover_image] : []);
+    return {
+        data: {
+            id: supabaseTour.id,
+            title: supabaseTour.title,
+            slug: supabaseTour.slug,
+            images,
+            price: supabaseTour.price_min ?? 0,
+            capacity: {
+                max: supabaseTour.max_guests ?? 10,
+            },
+            summary: supabaseTour.description ?? '',
+            rating: 5,
+        },
+        type: 'tour' as const,
+        puebloSlug: supabaseTour.pueblo_slug,
+    };
+};
+
+export default async function TourReservationPage({
+    params,
+}: {
+    params: Promise<{ id: string; locale: string }>;
+}) {
+    const { id, locale } = await params;
+    const t = await getTranslations({ locale, namespace: 'ReservationPage' });
+    const localResult = findTourById(id);
+    const result = localResult ?? await findSupabaseTour(id);
 
     if (!result) {
         notFound();
@@ -42,21 +74,22 @@ export default async function TourReservationPage({ params }: { params: Promise<
 
     // Determine back link
     let backLink = '/rutas-magicas';
-    let backLabel = 'Volver a rutas';
+    let backLabel = t('backToRoutes');
 
     if (type === 'route') {
         backLink = `/rutas-magicas/${tour.slug}`;
-        backLabel = 'Volver a detalles';
+        backLabel = t('backToDetails');
     } else if (type === 'pueblo') {
         backLink = `/rutas-magicas/lago-atitlan/${tour.slug}`; // Assuming it's always Atitlan for now
-        backLabel = `Volver a ${tour.title}`;
+        backLabel = t('backToTown', { town: tour.title });
     } else if (type === 'tour') {
-        const puebloSlug = getPuebloSlugByTourId(tour.id);
+        const puebloSlug = ('puebloSlug' in result ? result.puebloSlug : undefined) ?? getPuebloSlugByTourId(tour.id);
         if (puebloSlug) {
             backLink = `/rutas-magicas/lago-atitlan/${puebloSlug}/tours/${tour.slug}`;
-            backLabel = 'Volver al tour';
+            backLabel = t('backToTour');
         }
     }
+    const localizedBackLink = `/${locale}${backLink}`;
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white relative overflow-hidden transition-colors duration-300">
@@ -74,7 +107,7 @@ export default async function TourReservationPage({ params }: { params: Promise<
                 {/* Header Navigation */}
                 <div className="mb-8">
                     <Link
-                        href={backLink}
+                        href={localizedBackLink}
                         className="inline-flex items-center text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors group"
                     >
                         <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" />
@@ -96,7 +129,7 @@ export default async function TourReservationPage({ params }: { params: Promise<
                                 <div className="absolute bottom-0 left-0 right-0 p-6">
                                     <div className="flex items-center gap-2 mb-2">
                                         <span className="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold uppercase tracking-wider border border-cyan-500/30 backdrop-blur-md">
-                                            Experiencia Premium
+                                            {t('premiumBadge')}
                                         </span>
                                         {'rating' in tour && (
                                             <span className="flex items-center text-yellow-400 text-sm font-bold">
@@ -115,13 +148,13 @@ export default async function TourReservationPage({ params }: { params: Promise<
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-white dark:bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-none">
                                 <ShieldCheck className="w-8 h-8 text-emerald-500 dark:text-emerald-400 mb-2" />
-                                <h3 className="font-bold text-gray-900 dark:text-white text-sm">Reserva Segura</h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Tus datos están protegidos y la confirmación es inmediata.</p>
+                                <h3 className="font-bold text-gray-900 dark:text-white text-sm">{t('secureTitle')}</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('secureDesc')}</p>
                             </div>
                             <div className="bg-white dark:bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-none">
                                 <Zap className="w-8 h-8 text-amber-500 dark:text-amber-400 mb-2" />
-                                <h3 className="font-bold text-gray-900 dark:text-white text-sm">Confirmación Rápida</h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Recibe tu voucher digital al instante en tu correo.</p>
+                                <h3 className="font-bold text-gray-900 dark:text-white text-sm">{t('fastTitle')}</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('fastDesc')}</p>
                             </div>
                         </div>
                     </div>
@@ -136,22 +169,20 @@ export default async function TourReservationPage({ params }: { params: Promise<
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-200 dark:border-white/10">
                                     <div>
-                                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Completa tu reserva</h2>
-                                        <p className="text-sm text-cyan-600 dark:text-cyan-300">Estás a un paso de tu aventura</p>
+                                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('formTitle')}</h2>
+                                        <p className="text-sm text-cyan-600 dark:text-cyan-300">{t('formSubtitle')}</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">Precio por persona</p>
-                                        <p className="text-2xl font-bold text-gray-900 dark:text-white">${price}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">{t('pricePerPerson')}</p>
+                                        <p className="text-2xl font-bold text-gray-900 dark:text-white">Q{price}</p>
                                     </div>
                                 </div>
 
                                 <ReservationForm
                                     tourId={tour.id}
                                     price={price}
-                                    childPrice={price * 0.5}
                                     maxCapacity={maxCapacity}
                                     availableDays={['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']}
-                                    startTimes={['08:00', '09:00', '10:00', '14:00']}
                                 />
                             </div>
                         </div>

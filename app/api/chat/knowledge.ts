@@ -7,25 +7,25 @@ INFORMACIÓN DEL PROYECTO NÓMADA FANTASMA - LAGO DE ATITLÁN
 PUEBLOS DISPONIBLES:
 1. San Marcos La Laguna
    - Especialidad: Yoga, meditación, espiritualidad
-   - Tours: Retiro de Yoga ($200), Sanación con Sonido ($120)
+   - Tours: Retiro de Yoga (Q200), Sanación con Sonido (Q120)
    - Ambiente: Tranquilo, místico, wellness
    - WiFi: 3/5 | Ideal para: retiros, desconexión
 
 2. San Pedro La Laguna
    - Especialidad: Vida nocturna, fiesta, mochileros
-   - Tours: Volcán San Pedro ($150-200), Tour de Café ($100-150)
+   - Tours: Volcán San Pedro (Q150-200), Tour de Café (Q100-150)
    - Ambiente: Animado, joven, social
    - WiFi: 4/5 | Ideal para: socializar, aprender español
 
 3. San Juan La Laguna
    - Especialidad: Arte, textiles, café orgánico
-   - Tours: Cooperativas de Tejido ($120), Teñido Natural ($150), Tour de Café ($100)
+   - Tours: Cooperativas de Tejido (Q120), Teñido Natural (Q150), Tour de Café (Q100)
    - Ambiente: Cultural, artístico, auténtico
    - WiFi: 3/5 | Ideal para: arte, cultura maya
 
 4. Santiago Atitlán
    - Especialidad: Cultura tz'utujil, Maximón, tradición
-   - Tours: Ruta de Maximón ($120-150), Taller de Tejido ($100)
+   - Tours: Ruta de Maximón (Q120-150), Taller de Tejido (Q100)
    - Ambiente: Tradicional, espiritual, histórico
    - WiFi: 2/5 | Ideal para: cultura profunda, historia
 
@@ -36,10 +36,10 @@ PUEBLOS DISPONIBLES:
    - WiFi: 5/5 | Ideal para: base de operaciones, compras
 
 RANGOS DE PRECIOS:
-- Tours económicos: $80-150
-- Tours estándar: $150-250
-- Tours premium/retiros: $200-400
-- Hospedaje: $15-80/noche (varía por pueblo)
+- Tours económicos: Q80-150
+- Tours estándar: Q150-250
+- Tours premium/retiros: Q200-400
+- Hospedaje: Q15-80/noche (varía por pueblo)
 
 SERVICIOS DISPONIBLES:
 - Guías locales independientes (sin comisión de Nómada Fantasma)

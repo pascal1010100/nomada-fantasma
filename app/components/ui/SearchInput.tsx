@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { Search, X } from 'lucide-react';
-import { forwardRef, InputHTMLAttributes, useState, ChangeEvent } from 'react';
+import { forwardRef, InputHTMLAttributes, useState, ChangeEvent, MouseEvent } from 'react';
 import { Input } from './input';
 
 export interface SearchInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
@@ -31,7 +31,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
       }
     };
 
-    const handleClear = (e: React.MouseEvent) => {
+    const handleClear = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       if (onChange) onChange('');

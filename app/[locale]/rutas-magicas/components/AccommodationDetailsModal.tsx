@@ -56,7 +56,7 @@ const AccommodationDetailsModal: React.FC<AccommodationDetailsModalProps> = ({ a
 
     if (!isOpen || !accommodation) return null;
 
-    const { name, type, priceRange, rating, description, amenities, image, gallery, vibeMetrics, contact, bookingUrl, reviews, pricePerNight } = accommodation;
+    const { name, type, rating, description, amenities, image, gallery, vibeMetrics, contact, bookingUrl, reviews, pricePerNight } = accommodation;
 
     // Use gallery if available, otherwise fallback to single image
     const images = gallery && gallery.length > 0 ? gallery : [image];

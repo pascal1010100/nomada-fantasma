@@ -6,7 +6,15 @@ import globals from "globals";
 
 export default [
   js.configs.recommended,
-  nextPlugin.flatConfig.coreWebVitals,
+  nextPlugin.configs["core-web-vitals"],
+  {
+    files: ["scripts/**/*.{js,mjs}", "*.mjs"],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
@@ -26,6 +34,7 @@ export default [
     },
     rules: {
       ...tsEslint.configs.recommended.rules,
+      "no-undef": "off",
     },
   },
   {

@@ -34,8 +34,7 @@ export const useMapControls = () => {
       next.size === activeCats.size &&
       setToSortedArray(next).every((k, i) => k === setToSortedArray(activeCats)[i]);
     if (!same) setActiveCats(next);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, activeCats]);
 
   // Sync State -> URL
   useEffect(() => {

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Star, MapPin, Wifi, Utensils, Tent, Home, Hotel, Phone, Globe, ExternalLink, MessageCircle, Info } from 'lucide-react';
+import { Star, Tent, Home, Hotel, Phone, ExternalLink, MessageCircle, Info } from 'lucide-react';
 import { Accommodation } from '../mocks/atitlanData';
 
 interface AccommodationCardProps {

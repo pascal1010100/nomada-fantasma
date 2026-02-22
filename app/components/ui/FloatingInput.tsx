@@ -1,7 +1,7 @@
 // app/components/ui/FloatingInput.tsx
 'use client';
 
-import { useState, useId, InputHTMLAttributes, TextareaHTMLAttributes } from 'react';
+import { useState, useId, InputHTMLAttributes, TextareaHTMLAttributes, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface BaseProps {
@@ -9,7 +9,7 @@ interface BaseProps {
     error?: string;
     helperText?: string;
     required?: boolean;
-    icon?: React.ReactNode;
+    icon?: ReactNode;
 }
 
 type InputProps = BaseProps & InputHTMLAttributes<HTMLInputElement> & {
@@ -39,8 +39,6 @@ export default function FloatingInput({
     const hasValue = value !== '' && value !== undefined && value !== null;
     const isFloating = isFocused || hasValue;
 
-    const InputComponent = as === 'textarea' ? 'textarea' : 'input';
-
     return (
         <div className="relative">
             {/* Input container with liquid effect */}
@@ -54,13 +52,14 @@ export default function FloatingInput({
                     )}
 
                     {/* Input/Textarea */}
-                    <InputComponent
-                        id={id}
-                        {...(props as any)}
-                        className={`
+                    {as === 'textarea' ? (
+                        <textarea
+                            id={id}
+                            {...(props as TextareaHTMLAttributes<HTMLTextAreaElement>)}
+                            className={`
               w-full
               ${icon ? 'pl-12' : 'pl-4'} pr-4
-              ${as === 'textarea' ? 'pt-6 pb-3 min-h-[100px] resize-none' : 'pt-6 pb-2'}
+              pt-6 pb-3 min-h-[100px] resize-none
               rounded-xl
               border border-border
               bg-card/50 backdrop-blur-sm
@@ -71,10 +70,33 @@ export default function FloatingInput({
               ${error ? 'border-red-500 focus:ring-red-500/50' : ''}
               ${className}
             `}
-                        placeholder={label}
-                        onFocus={() => setIsFocused(true)}
-                        onBlur={() => setIsFocused(false)}
-                    />
+                            placeholder={label}
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => setIsFocused(false)}
+                        />
+                    ) : (
+                        <input
+                            id={id}
+                            {...(props as InputHTMLAttributes<HTMLInputElement>)}
+                            className={`
+              w-full
+              ${icon ? 'pl-12' : 'pl-4'} pr-4
+              pt-6 pb-2
+              rounded-xl
+              border border-border
+              bg-card/50 backdrop-blur-sm
+              text-foreground
+              placeholder-transparent
+              focus:outline-none focus:ring-2 focus:ring-primary/50
+              transition-all duration-300
+              ${error ? 'border-red-500 focus:ring-red-500/50' : ''}
+              ${className}
+            `}
+                            placeholder={label}
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => setIsFocused(false)}
+                        />
+                    )}
 
                     {/* Floating Label */}
                     <motion.label

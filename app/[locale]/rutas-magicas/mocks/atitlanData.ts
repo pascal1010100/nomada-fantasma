@@ -137,7 +137,7 @@ export const pueblosAtitlan: (Route & {
       ],
       transportSchedule: [
         { route: 'Lanchas Públicas (Muelle Tzanjuyú)', times: ['Salen cada 20-30 min hacia todos los pueblos (6:30 AM - 7:30 PM). Precio: Q25 extranjeros / Q10 locales.'] },
-        { route: 'Shuttles a Antigua/Guate', times: ['5:30 AM, 8:00 AM, 12:00 PM, 4:00 PM. Precio: $15-25 USD. Reserva en agencias de Calle Santander.'] },
+        { route: 'Shuttles a Antigua/Guate', times: ['5:30 AM, 8:00 AM, 12:00 PM, 4:00 PM. Precio: Q15-25. Reserva en agencias de Calle Santander.'] },
         { route: 'Chicken Bus (La Aventura)', times: ['Salidas frecuentes desde la parada principal. Ruta: Pana -> Sololá -> Los Encuentros -> Destino final. Precio: ~Q50 total.'] }
       ],
       services: {
@@ -169,7 +169,7 @@ export const pueblosAtitlan: (Route & {
           id: 'pana-acc1',
           name: 'Hotel Atitlán',
           type: 'hotel',
-          priceRange: '$$$',
+          priceRange: 'QQQ',
           rating: 4.8,
           description: 'Elegancia colonial con jardines botánicos y vistas impresionantes al lago.',
           amenities: ['Piscina', 'Jardines', 'Restaurante', 'Wifi'],
@@ -181,22 +181,22 @@ export const pueblosAtitlan: (Route & {
           id: 'pana-acc2',
           name: 'Dreamboat Hostel',
           type: 'hostel',
-          priceRange: '$',
+          priceRange: 'Q',
           rating: 4.6,
           description: 'El hostal más social de Pana, famoso por su "family dinner" y ambiente festivo.',
           amenities: ['Bar', 'Wifi', 'Eventos diarios', 'Dormitorios'],
-          image: '/images/rutas/airbnb-lake.jpg',
+          image: '/images/rutas/airbnb-lake.svg',
           contact: '+502 5555-4321'
         },
         {
           id: 'pana-acc3',
           name: 'Reserva Natural Atitlán',
           type: 'camping',
-          priceRange: '$$',
+          priceRange: 'QQ',
           rating: 4.7,
           description: 'Acampa dentro de una reserva natural con cascadas, monos y mariposas.',
           amenities: ['Senderos', 'Playa privada', 'Duchas', 'Fogata'],
-          image: '/images/rutas/camping.jpg',
+          image: '/images/rutas/camping.svg',
           contact: '+502 7762-2565'
         }
       ]
@@ -206,7 +206,7 @@ export const pueblosAtitlan: (Route & {
       slug: 'san-pedro',
       title: 'san-pedro.title',
       summary: 'san-pedro.summary',
-      coverImage: '/images/rutas/atitlan.jpg',
+      coverImage: '/images/tours/san-pedro/volcan-san-pedro-1.jpg',
       region: 'america',
       durationDays: 3,
       groupSize: { min: 1, max: 12 },
@@ -279,11 +279,11 @@ export const pueblosAtitlan: (Route & {
           id: 'acc1',
           name: 'Hotel Mikaso',
           type: 'hotel',
-          priceRange: '$$',
+          priceRange: 'QQ',
           rating: 4.8,
           description: 'Hotel boutique con vistas espectaculares al lago y terraza panorámica.',
           amenities: ['Wifi', 'Restaurante', 'Terraza', 'Baño privado'],
-          image: '/images/rutas/mikaso.jpg',
+          image: '/images/rutas/mikaso.svg',
           contact: '+502 7721-8273',
           bookingUrl: '#'
         },
@@ -291,7 +291,7 @@ export const pueblosAtitlan: (Route & {
           id: 'acc2',
           name: 'Hostal Mandalas',
           type: 'hostel',
-          priceRange: '$',
+          priceRange: 'Q',
           rating: 4.7,
           description: 'Un hogar bohemio lejos de casa. Ambiente tranquilo y artístico, ideal para relajar, cocinar y disfrutar de las vistas desde la terraza.',
           amenities: ['Terraza Panorámica', 'Cocina Compartida', 'Wifi Gratis', 'Jardín', 'Ambiente Bohemio'],
@@ -343,11 +343,11 @@ export const pueblosAtitlan: (Route & {
           id: 'acc3',
           name: 'Camping San Pedro',
           type: 'camping',
-          priceRange: '$',
+          priceRange: 'Q',
           rating: 4.5,
           description: 'Zona de camping segura con baños y duchas calientes.',
           amenities: ['Duchas', 'Seguridad 24h', 'Fogata', 'Alquiler de tiendas'],
-          image: '/images/rutas/camping.jpg',
+          image: '/images/rutas/camping.svg',
           contact: '+502 5555-1234'
         }
       ]
@@ -428,7 +428,7 @@ export const pueblosAtitlan: (Route & {
           id: 'sm-acc1',
           name: 'Lush Atitlán',
           type: 'hotel',
-          priceRange: '$$$',
+          priceRange: 'QQQ',
           rating: 4.9,
           description: 'Suites ecológicas de lujo integradas en la ladera de la montaña.',
           amenities: ['Desayuno orgánico', 'Vistas', 'Jardines', 'Masajes'],
@@ -440,22 +440,22 @@ export const pueblosAtitlan: (Route & {
           id: 'sm-acc2',
           name: "Eagle's Nest",
           type: 'hostel',
-          priceRange: '$$',
+          priceRange: 'QQ',
           rating: 4.8,
           description: 'Famoso por su plataforma de yoga con vista de 360 grados y comunidad vibrante.',
           amenities: ['Yoga ilimitado', 'Sauna', 'Comida vegetariana', 'Eventos'],
-          image: '/images/rutas/airbnb-lake.jpg',
+          image: '/images/rutas/airbnb-lake.svg',
           contact: '+502 5555-8888'
         },
         {
           id: 'sm-acc3',
           name: "Pierre's Place",
           type: 'camping',
-          priceRange: '$',
+          priceRange: 'Q',
           rating: 4.5,
           description: 'Camping económico y céntrico, cerca del muelle y la zona de restaurantes.',
           amenities: ['Cocina compartida', 'Wifi', 'Jardín', 'Seguridad'],
-          image: '/images/rutas/camping.jpg',
+          image: '/images/rutas/camping.svg',
           contact: '+502 5555-9999'
         }
       ]
@@ -536,7 +536,7 @@ export const pueblosAtitlan: (Route & {
           id: 'stg-acc1',
           name: 'Posada de Santiago',
           type: 'hotel',
-          priceRange: '$$',
+          priceRange: 'QQ',
           rating: 4.7,
           description: 'Cabañas de piedra volcánica y jardines frente al lago, muy acogedor.',
           amenities: ['Piscina', 'Restaurante', 'Muelle privado', 'Kayaks'],
@@ -548,22 +548,22 @@ export const pueblosAtitlan: (Route & {
           id: 'stg-acc2',
           name: 'Tiosh Abaj',
           type: 'hotel',
-          priceRange: '$$',
+          priceRange: 'QQ',
           rating: 4.6,
           description: 'Hotel cultural con arquitectura maya y amplios jardines.',
           amenities: ['Piscina', 'Temazcal', 'Restaurante', 'Museo'],
-          image: '/images/rutas/mikaso.jpg',
+          image: '/images/rutas/mikaso.svg',
           contact: '+502 7721-7272'
         },
         {
           id: 'stg-acc3',
           name: 'Camping El Mirador',
           type: 'camping',
-          priceRange: '$',
+          priceRange: 'Q',
           rating: 4.4,
           description: 'Área de camping rústica con las mejores vistas de los tres volcanes.',
           amenities: ['Vistas panorámicas', 'Agua potable', 'Seguridad', 'Fogata'],
-          image: '/images/rutas/camping.jpg',
+          image: '/images/rutas/camping.svg',
           contact: '+502 5555-7777'
         }
       ]
@@ -644,7 +644,7 @@ export const pueblosAtitlan: (Route & {
           id: 'sj-acc1',
           name: 'Eco-Hotel Mayachik',
           type: 'hotel',
-          priceRange: '$$',
+          priceRange: 'QQ',
           rating: 4.8,
           description: 'Bungalows ecológicos rodeados de naturaleza y tranquilidad.',
           amenities: ['Restaurante vegetariano', 'Sauna', 'Jardines', 'Wifi'],
@@ -656,22 +656,22 @@ export const pueblosAtitlan: (Route & {
           id: 'sj-acc2',
           name: 'Posada Mana',
           type: 'hostel',
-          priceRange: '$',
+          priceRange: 'Q',
           rating: 4.5,
           description: 'Hostal familiar y acogedor en el corazón del pueblo.',
           amenities: ['Cocina compartida', 'Terraza', 'Wifi', 'Información turística'],
-          image: '/images/rutas/airbnb-lake.jpg',
+          image: '/images/rutas/airbnb-lake.svg',
           contact: '+502 5555-6666'
         },
         {
           id: 'sj-acc3',
           name: 'Camping La Nariz',
           type: 'camping',
-          priceRange: '$',
+          priceRange: 'Q',
           rating: 4.7,
           description: 'Experiencia única de camping en la cima de la Nariz del Indio (requiere guía).',
           amenities: ['Vistas amanecer', 'Fogata', 'Guía incluido', 'Tiendas'],
-          image: '/images/rutas/camping.jpg',
+          image: '/images/rutas/camping.svg',
           contact: '+502 5555-5555'
         }
       ]
@@ -749,7 +749,7 @@ export const pueblosAtitlan: (Route & {
           id: 'sc-acc1',
           name: 'Laguna Lodge',
           type: 'hotel',
-          priceRange: '$$$',
+          priceRange: 'QQQ',
           rating: 4.9,
           description: 'Reserva natural y hotel de lujo, accesible solo por lancha.',
           amenities: ['Spa', 'Restaurante gourmet', 'Reserva privada', 'Piscina'],
@@ -761,22 +761,22 @@ export const pueblosAtitlan: (Route & {
           id: 'sc-acc2',
           name: 'La Iguana Perdida',
           type: 'hostel',
-          priceRange: '$',
+          priceRange: 'Q',
           rating: 4.7,
           description: 'El hostal legendario de Santa Cruz, hogar de buceadores y viajeros.',
           amenities: ['Escuela de buceo', 'Restaurante familiar', 'Bar', 'Juegos'],
-          image: '/images/rutas/airbnb-lake.jpg',
+          image: '/images/rutas/airbnb-lake.svg',
           contact: '+502 7762-0011'
         },
         {
           id: 'sc-acc3',
           name: 'Free Cerveza',
           type: 'camping',
-          priceRange: '$$',
+          priceRange: 'QQ',
           rating: 4.8,
           description: 'Glamping de lujo frente al lago con ambiente social y divertido.',
           amenities: ['Glamping', 'Paddleboards gratis', 'Cenas comunales', 'Bar'],
-          image: '/images/rutas/camping.jpg',
+          image: '/images/rutas/camping.svg',
           contact: '+502 5555-4444'
         }
       ]

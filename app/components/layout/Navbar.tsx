@@ -3,16 +3,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ComponentType } from "react";
 import { Menu, X, Map, MessageCircle, Home, ChevronRight, Ghost, Compass, Info, Bus } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import ThemeToggle from "../ui/ThemeToggle";
 import LanguageSwitcher from "../LanguageSwitcher";
 import { useTranslations, useLocale } from "next-intl";
 
-type LinkItem = { href: string; label: string; icon: React.ComponentType<any> };
+type TranslationFn = (key: string) => string;
+type LinkItem = { href: string; label: string; icon: ComponentType<{ className?: string }> };
 
-const getLinks = (t: any) => [
+const getLinks = (t: TranslationFn): LinkItem[] => [
   { href: "/", label: t("home"), icon: Home },
   { href: "/mapa", label: t("map"), icon: Map },
   { href: "/rutas-magicas", label: t("routes"), icon: Compass },

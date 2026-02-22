@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { samplePoints, Category } from '../points';
 import { atitlanTowns } from '../../rutas-magicas/lago-atitlan/data';
 

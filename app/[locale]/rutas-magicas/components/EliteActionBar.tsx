@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Map, Sparkles, ArrowRight } from 'lucide-react';
+import { Map, Sparkles } from 'lucide-react';
 
 interface EliteActionBarProps {
     title: string;
