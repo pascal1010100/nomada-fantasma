@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       console.log('=== EMAIL DEBUG: Resend instance created ===');
     }
     const RESEND_FROM = process.env.RESEND_FROM || 'onboarding@resend.dev';
-    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mandalashostal@gmail.com';
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
     
     const {
       customerName,

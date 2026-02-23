@@ -35,7 +35,7 @@ interface SendShuttleRequestEmailProps {
 }
 
 export async function sendShuttleRequestEmail(data: SendShuttleRequestEmailProps) {
-    const adminEmail = process.env.ADMIN_EMAIL || 'mandalashostal@gmail.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
 
     if (!resend) {
         console.log('📧 [SHUTTLE EMAIL SIMULATION] -----------------------------------------');
@@ -112,7 +112,7 @@ interface SendShuttleConfirmationEmailsProps {
 }
 
 export async function sendTourConfirmationEmails(data: SendConfirmationEmailProps) {
-    const adminEmail = process.env.ADMIN_EMAIL || 'mandalashostal@gmail.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
 
     if (!resend) {
         console.log('📧 [TOUR CONFIRMATION SIMULATION] --------------------------------------');
@@ -156,7 +156,7 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
 }
 
 export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmationEmailsProps) {
-    const adminEmail = process.env.ADMIN_EMAIL || 'mandalashostal@gmail.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
 
     if (!resend) {
         console.log('📧 [SHUTTLE CONFIRMATION SIMULATION] ----------------------------');
