@@ -1,4 +1,5 @@
 import { Plus, Minus, Crosshair, RotateCcw, Ghost, Wifi } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface MapControlButtonProps {
   label: string;
@@ -49,23 +50,26 @@ export const MapControls = ({
   isGhostMode,
   onToggleNomad,
   isNomadMode,
-}: MapControlsProps) => (
-  <div
-    className="
-      absolute z-[30] flex flex-col gap-2
-      left-[calc(env(safe-area-inset-left)+14px)]
-      top-[calc(env(safe-area-inset-top)+14px)]
-    "
-  >
-    {[
-      { label: "Acercar", Icon: Plus, onClick: onZoomIn },
-      { label: "Alejar", Icon: Minus, onClick: onZoomOut },
-      { label: "Mi ubicación", Icon: Crosshair, onClick: onLocate },
-      { label: "Volver al inicio", Icon: RotateCcw, onClick: onRecenter },
-      { label: "Modo Fantasma", Icon: Ghost, onClick: onToggleGhost, active: isGhostMode },
-      { label: "Modo Nómada (WiFi/Cowork)", Icon: Wifi, onClick: onToggleNomad, active: isNomadMode },
-    ].map((props) => (
-      <MapControlButton key={props.label} {...props} />
-    ))}
-  </div>
-);
+}: MapControlsProps) => {
+  const t = useTranslations('Map');
+  return (
+    <div
+      className="
+        absolute z-[30] flex flex-col gap-2
+        left-[calc(env(safe-area-inset-left)+14px)]
+        top-[calc(env(safe-area-inset-top)+14px)]
+      "
+    >
+      {[
+        { label: t('controls.zoomIn'), Icon: Plus, onClick: onZoomIn },
+        { label: t('controls.zoomOut'), Icon: Minus, onClick: onZoomOut },
+        { label: t('controls.locate'), Icon: Crosshair, onClick: onLocate },
+        { label: t('controls.recenter'), Icon: RotateCcw, onClick: onRecenter },
+        { label: t('controls.ghostMode'), Icon: Ghost, onClick: onToggleGhost, active: isGhostMode },
+        { label: t('controls.nomadMode'), Icon: Wifi, onClick: onToggleNomad, active: isNomadMode },
+      ].map((props) => (
+        <MapControlButton key={props.label} {...props} />
+      ))}
+    </div>
+  );
+};

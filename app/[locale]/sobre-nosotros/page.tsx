@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Rocket, Users, Heart, Calendar, Star } from 'lucide-react'
+import { Rocket, Users, Heart, Calendar, Star, Compass, MapPin, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import { RippleButton } from '@/app/components/ui'
 import { useTranslations } from 'next-intl'
@@ -46,6 +46,38 @@ const AboutPage = () => {
       title: t('features.transport.title'),
       description: t('features.transport.desc')
     }
+  ]
+  const steps = [
+    {
+      icon: <Compass className="w-6 h-6" />,
+      title: t('steps.explore.title'),
+      description: t('steps.explore.desc')
+    },
+    {
+      icon: <MapPin className="w-6 h-6" />,
+      title: t('steps.choose.title'),
+      description: t('steps.choose.desc')
+    },
+    {
+      icon: <Calendar className="w-6 h-6" />,
+      title: t('steps.book.title'),
+      description: t('steps.book.desc')
+    },
+    {
+      icon: <MessageCircle className="w-6 h-6" />,
+      title: t('steps.support.title'),
+      description: t('steps.support.desc')
+    }
+  ]
+  const services = [
+    { title: t('services.tours.title'), description: t('services.tours.desc') },
+    { title: t('services.shuttles.title'), description: t('services.shuttles.desc') },
+    { title: t('services.routes.title'), description: t('services.routes.desc') },
+    { title: t('services.stays.title'), description: t('services.stays.desc') },
+    { title: t('services.guides.title'), description: t('services.guides.desc') },
+    { title: t('services.map.title'), description: t('services.map.desc') },
+    { title: t('services.chat.title'), description: t('services.chat.desc') },
+    { title: t('services.support.title'), description: t('services.support.desc') }
   ]
 
   return (
@@ -130,8 +162,61 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* Steps Section */}
       <section className="py-24 bg-primary/5">
+        <div className="container px-4 mx-auto">
+          <div className="max-w-4xl mx-auto text-center mb-12">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">{t('stepsTitle')}</h2>
+            <p className="text-lg text-muted-foreground">{t('stepsDesc')}</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {steps.map((step, index) => (
+              <motion.div
+                key={index}
+                className="glass-enhanced rounded-2xl p-6 border border-border/60 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  {step.icon}
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+                <p className="text-sm text-muted-foreground">{step.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section className="py-24">
+        <div className="container px-4 mx-auto">
+          <div className="max-w-4xl mx-auto text-center mb-12">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">{t('servicesTitle')}</h2>
+            <p className="text-lg text-muted-foreground">{t('servicesDesc')}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {services.map((service, index) => (
+              <motion.div
+                key={index}
+                className="glass-enhanced rounded-2xl p-6 border border-border/60"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.04 }}
+              >
+                <h3 className="text-lg font-semibold mb-2">{service.title}</h3>
+                <p className="text-sm text-muted-foreground">{service.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-24">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold">{t('featuresTitle')}</h2>

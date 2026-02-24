@@ -11,6 +11,31 @@ const RESEND_FROM = process.env.RESEND_FROM || 'onboarding@resend.dev';
 
 type TFunction = (key: string, values?: Record<string, string | number>) => string;
 
+function redactForLog(value: unknown): unknown {
+    if (Array.isArray(value)) {
+        return value.map(redactForLog);
+    }
+    if (value && typeof value === 'object') {
+        const entries = Object.entries(value).map(([key, val]) => {
+            if (key.toLowerCase().includes('email')) {
+                return [key, typeof val === 'string' ? val.replace(/(.{2}).+(@.+)/, '$1***$2') : val];
+            }
+            if (key.toLowerCase().includes('name')) {
+                return [key, typeof val === 'string' ? `${val.slice(0, 1)}***` : val];
+            }
+            if (key.toLowerCase().includes('phone') || key.toLowerCase().includes('contact')) {
+                return [key, typeof val === 'string' ? `${val.slice(0, 2)}***` : val];
+            }
+            if (key.toLowerCase().includes('location')) {
+                return [key, typeof val === 'string' ? '[redacted]' : val];
+            }
+            return [key, redactForLog(val)];
+        });
+        return Object.fromEntries(entries);
+    }
+    return value;
+}
+
 interface SendConfirmationEmailProps {
     to: string;
     reservationId: string;
@@ -41,7 +66,7 @@ export async function sendShuttleRequestEmail(data: SendShuttleRequestEmailProps
         console.log('📧 [SHUTTLE EMAIL SIMULATION] -----------------------------------------');
         console.log(`To Admin: ${adminEmail}`);
         console.log(`Subject: Nueva Solicitud de Shuttle [${data.type?.toUpperCase() || 'SHARED'}]: ${data.routeOrigin} -> ${data.routeDestination}`);
-        console.log('Template Data:', JSON.stringify(data, null, 2));
+        console.log('Template Data:', JSON.stringify(redactForLog(data), null, 2));
         console.log('-----------------------------------------------------------------------');
         return { success: true, id: 'simulated_' + Date.now() };
     }
@@ -73,7 +98,7 @@ export async function sendConfirmationEmail(data: SendConfirmationEmailProps) {
         console.log('📧 [EMAIL SIMULATION] ---------------------------------------------------');
         console.log(`To: ${data.to}`);
         console.log(`Subject: ${data.t('preview', { tourName: data.tourName })}`);
-        console.log('Template Data:', JSON.stringify(data, null, 2));
+        console.log('Template Data:', JSON.stringify(redactForLog(data), null, 2));
         console.log('-----------------------------------------------------------------------');
         return { success: true, id: 'simulated_' + Date.now() };
     }
@@ -118,10 +143,10 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
         console.log('📧 [TOUR CONFIRMATION SIMULATION] --------------------------------------');
         console.log(`To Customer: ${data.to}`);
         console.log(`Subject: ${data.t('preview', { tourName: data.tourName })}`);
-        console.log('Customer Template Data:', JSON.stringify(data, null, 2));
+        console.log('Customer Template Data:', JSON.stringify(redactForLog(data), null, 2));
         console.log(`To Admin: ${adminEmail}`);
         console.log(`Subject: Nueva solicitud de tour: ${data.tourName}`);
-        console.log('Admin Template Data:', JSON.stringify(data, null, 2));
+        console.log('Admin Template Data:', JSON.stringify(redactForLog(data), null, 2));
         console.log('-----------------------------------------------------------------------');
         return { success: true, id: 'simulated_' + Date.now() };
     }
@@ -162,10 +187,10 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
         console.log('📧 [SHUTTLE CONFIRMATION SIMULATION] ----------------------------');
         console.log(`To Customer: ${data.customerEmail}`);
         console.log(`Subject: Confirmacion de Shuttle`);
-        console.log('Customer Template Data:', JSON.stringify(data, null, 2));
+        console.log('Customer Template Data:', JSON.stringify(redactForLog(data), null, 2));
         console.log(`To Admin: ${adminEmail}`);
         console.log(`Subject: Nueva Solicitud de Shuttle`);
-        console.log('Admin Template Data:', JSON.stringify(data, null, 2));
+        console.log('Admin Template Data:', JSON.stringify(redactForLog(data), null, 2));
         console.log('----------------------------------------------------------------');
         return { success: true };
     }

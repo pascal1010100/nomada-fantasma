@@ -1,4 +1,4 @@
-import { Wifi, Bed, Coffee, CreditCard, Anchor } from "lucide-react";
+import { Wifi, Bed, Coffee, CreditCard, Anchor, MapPin, Compass } from "lucide-react";
 
 export const HOME_CENTER: [number, number] = [14.6907, -91.2025];
 export const HOME_ZOOM = 12;
@@ -9,6 +9,8 @@ export const CATEGORIES = [
   { key: "cowork" as const, label: "Cowork", icon: Coffee, color: "#E879F9" }, // magenta
   { key: "banco" as const, label: "Banco/ATM", icon: CreditCard, color: "#34D399" }, // verde tesoro
   { key: "puerto" as const, label: "Puerto", icon: Anchor, color: "#EF4444" }, // rojo faro/peligro
+  { key: "landmark" as const, label: "Landmark", icon: MapPin, color: "#22D3EE" },
+  { key: "activity" as const, label: "Actividad", icon: Compass, color: "#F97316" },
 ] as const;
 
 export type CategoryKey = typeof CATEGORIES[number]["key"];

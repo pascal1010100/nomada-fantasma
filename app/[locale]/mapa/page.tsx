@@ -3,29 +3,17 @@
 
 import { useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, X, Loader2, AlertCircle, Compass, Wifi, Home, Anchor, Coffee, CreditCard, Sparkles, Navigation } from 'lucide-react';
+import { Search, MapPin, X, Loader2, AlertCircle, Wifi, Sparkles, Navigation } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { RippleButton, Tooltip, LoadingSpinner } from '../../components/ui';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 const ParticlesBackground = dynamic(
   () => import('./components/ParticlesBackground'),
   { ssr: false }
 );
-import { samplePoints } from './points';
-import { CATEGORIES } from './types';
+import { CATEGORIES, type CategoryKey } from './constants';
 import { MapContent } from './components/MapContent';
-
-// Definir las categorías con íconos y colores
-const CATEGORY_ICONS = {
-  wifi: Wifi,
-  hospedaje: Home,
-  cowork: Coffee,
-  banco: CreditCard,
-  puerto: Anchor,
-  landmark: MapPin,
-  activity: Compass,
-};
 
 // Carga dinámica del cliente del mapa para mejor rendimiento
 const MapClient = dynamic(() => import('./MapClient'), {
@@ -85,10 +73,24 @@ export function MapSearch({
 
 export default function MapaPage() {
   const t = useTranslations('Map');
+  const locale = useLocale();
   const [searchQuery, setSearchQuery] = useState('');
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [mapMeta, setMapMeta] = useState<{
+    totalCount: number;
+    visibleCount: number;
+    isLoading: boolean;
+    hasRealData: boolean;
+  } | null>(null);
+  const getCategoryLabel = (key: CategoryKey, fallback: string) => {
+    try {
+      return t(`categories.${key}`);
+    } catch {
+      return fallback;
+    }
+  };
 
   const handleLocateMe = () => {
     if (!navigator.geolocation) {
@@ -180,7 +182,7 @@ export default function MapaPage() {
                 transition={{ delay: 0.4, duration: 0.6 }}
               >
                 {[
-                  { value: samplePoints.length, label: t('stats.places'), icon: MapPin },
+                  { value: mapMeta?.isLoading ? '—' : (mapMeta?.totalCount ?? 0), label: t('stats.places'), icon: MapPin },
                   { value: '24/7', label: t('stats.wifi'), icon: Wifi },
                   { value: '100%', label: t('stats.verified'), icon: Sparkles }
                 ].map((stat, index) => (
@@ -224,12 +226,33 @@ export default function MapaPage() {
                 <LoadingSpinner variant="glow" size="lg" text={t('locating')} />
               </div>
             }>
-              <MapContent searchQuery={searchQuery}>
-                {(filteredPoints) => (
-                  <MapClient
-                    points={filteredPoints}
-                    key={userLocation ? JSON.stringify(userLocation) : 'no-location'}
-                  />
+              <MapContent searchQuery={searchQuery} onMetaChange={setMapMeta}>
+                {({ points, isLoading, totalCount, visibleCount }) => (
+                  <>
+                    <MapClient
+                      points={points}
+                      initialCenter={userLocation ?? undefined}
+                      zoom={userLocation ? 13 : undefined}
+                      key={userLocation ? JSON.stringify(userLocation) : 'no-location'}
+                    />
+                    {isLoading && (
+                      <div className="absolute inset-0 z-[500] flex items-center justify-center bg-background/40 backdrop-blur-sm">
+                        <LoadingSpinner variant="glow" size="lg" text={t('loadingPoints')} />
+                      </div>
+                    )}
+                    {!isLoading && visibleCount === 0 && (
+                      <div className="absolute inset-0 z-[400] flex items-center justify-center">
+                        <div className="glass-enhanced rounded-2xl px-6 py-4 border border-border/60 text-center max-w-md">
+                          <div className="text-sm font-semibold">
+                            {totalCount === 0 ? t('empty.title') : t('empty.noResultsTitle')}
+                          </div>
+                          <div className="mt-1 text-xs text-muted-foreground">
+                            {totalCount === 0 ? t('empty.description') : t('empty.noResultsDescription')}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </MapContent>
             </Suspense>
@@ -268,7 +291,7 @@ export default function MapaPage() {
                     <button
                       onClick={() => setLocationError(null)}
                       className="text-red-600/70 hover:text-red-600 dark:text-red-400/70 dark:hover:text-red-400 transition-colors"
-                      aria-label="Cerrar"
+                      aria-label={t('close')}
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -296,7 +319,8 @@ export default function MapaPage() {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {CATEGORIES.map((category, index) => {
-                const Icon = CATEGORY_ICONS[category.key as keyof typeof CATEGORY_ICONS] || MapPin;
+                const Icon = category.icon || MapPin;
+                const label = getCategoryLabel(category.key, category.label);
                 return (
                   <motion.div
                     key={category.key}
@@ -314,7 +338,7 @@ export default function MapaPage() {
                     />
                     <Icon className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
                     <span className="text-xs text-foreground font-medium truncate">
-                      {category.label}
+                      {label}
                     </span>
                   </motion.div>
                 );
@@ -336,7 +360,7 @@ export default function MapaPage() {
               </p>
               <RippleButton
                 variant="primary"
-                onClick={() => window.location.href = '/contacto'}
+                onClick={() => window.location.href = `/${locale}/contacto`}
               >
                 <Sparkles className="w-4 h-4" />
                 {t('cta.button')}

@@ -92,36 +92,92 @@
         }
     },
     "About": {
-        "badge": "Our Mission",
-        "titleTop": "Beyond the Tourist Map",
-        "titleGradient": "Discover the Real Guatemala",
-        "description": "Nómada Fantasma is not just a travel platform; it's your compass to the heart of Guatemala. We carefully select the most authentic experiences, from tours that immerse you in local culture to charming accommodations and shuttles that take you to secret destinations. Forget conventional routes and get ready for an unforgettable adventure.",
-        "btnExplore": "Explore Experiences",
+        "badge": "How it works",
+        "titleTop": "Plan, book",
+        "titleGradient": "and travel smoothly",
+        "description": "Nómada Fantasma connects destinations, experiences, stays and transport in one flow. Explore, choose and book with local support.",
+        "btnExplore": "Explore destinations",
         "btnContact": "Contact Us",
-        "philosophyTitle": "Our Mission: Your Authentic Adventure",
-        "philosophyDesc": "We believe that traveling is more than visiting places; it's about connecting with them. That's why our mission is simple: to offer you access to high-quality experiences that respect local culture and allow you to discover the true essence of Guatemala. Every tour, guide, and accommodation on our platform has been verified by our team to ensure your only concern is to enjoy.",
-        "featuresTitle": "Pillars of Your Journey",
-        "features": {
-            "curated": {
-                "title": "Curated Experiences",
-                "desc": "Every tour and activity has been selected for its authenticity and quality."
+        "philosophyTitle": "Business and service logic",
+        "philosophyDesc": "We curate local providers, centralize the offer and simplify bookings. The value is in selection, trust and coordination so the experience flows end to end.",
+        "stepsTitle": "Your journey in 4 steps",
+        "stepsDesc": "From discovery to confirmation, all in one place.",
+        "steps": {
+            "explore": {
+                "title": "Explore",
+                "desc": "Discover destinations, routes and key points on the map."
             },
-            "booking": {
-                "title": "Easy and Secure Bookings",
-                "desc": "Book in a few clicks with our secure platform and receive instant confirmation."
+            "choose": {
+                "title": "Choose",
+                "desc": "Compare experiences, stays and available services."
             },
-            "guides": {
-                "title": "Expert Local Guides",
-                "desc": "Connect with passionate guides who will show you the best-kept secrets of each destination."
+            "book": {
+                "title": "Book",
+                "desc": "Send your request and receive confirmation by email."
             },
-            "transport": {
-                "title": "Hassle-Free Transportation",
-                "desc": "Arrange your transfers between destinations with our trusted shuttles."
+            "support": {
+                "title": "Support",
+                "desc": "Get local support before and during your trip."
             }
         },
-        "ctaTitle": "Ready for Adventure?",
-        "ctaDesc": "Explore our magic routes and discover the Guatemala that few know.",
-        "ctaAction": "See Magic Routes"
+        "servicesTitle": "Available services",
+        "servicesDesc": "Everything essential to plan and execute your trip.",
+        "services": {
+            "map": {
+                "title": "Smart map",
+                "desc": "Wi‑Fi, coworks, banks, docks, key spots and activities."
+            },
+            "routes": {
+                "title": "Magic routes",
+                "desc": "Explore destinations by town with detailed profiles."
+            },
+            "tours": {
+                "title": "Tours and experiences",
+                "desc": "Local activities with booking and confirmation."
+            },
+            "stays": {
+                "title": "Stays",
+                "desc": "Hotels, hostels and curated options per town."
+            },
+            "shuttles": {
+                "title": "Transport",
+                "desc": "Shared and private shuttles between destinations."
+            },
+            "guides": {
+                "title": "Local guides",
+                "desc": "Connect with trusted experts and operators."
+            },
+            "chat": {
+                "title": "AI assistant",
+                "desc": "Get answers and fast recommendations."
+            },
+            "support": {
+                "title": "Direct support",
+                "desc": "Contact and follow‑up before and during the trip."
+            }
+        },
+        "featuresTitle": "What the platform includes",
+        "features": {
+            "curated": {
+                "title": "Curated Selection",
+                "desc": "Experiences and services verified for quality and value."
+            },
+            "booking": {
+                "title": "Guided Booking",
+                "desc": "Clear process with confirmation and follow‑up."
+            },
+            "guides": {
+                "title": "Local Network",
+                "desc": "We connect you with trusted guides, hosts and operators."
+            },
+            "transport": {
+                "title": "Coordinated Transport",
+                "desc": "Shuttles and transfers aligned with your plans."
+            }
+        },
+        "ctaTitle": "Ready to start?",
+        "ctaDesc": "Explore routes and build your trip with confidence.",
+        "ctaAction": "Explore routes"
     },
     "Contact": {
         "badge": "Contact",
@@ -176,15 +232,41 @@
         },
         "search": "Search destinations, places, experiences...",
         "locating": "Loading map...",
+        "loadingPoints": "Loading places...",
         "locateMe": "Center on my location",
+        "close": "Close",
+        "categories": {
+            "wifi": "Wi‑Fi",
+            "hospedaje": "Lodging",
+            "cowork": "Cowork",
+            "banco": "Bank/ATM",
+            "puerto": "Dock",
+            "landmark": "Landmark",
+            "activity": "Activity"
+        },
+        "controls": {
+            "zoomIn": "Zoom in",
+            "zoomOut": "Zoom out",
+            "locate": "My location",
+            "recenter": "Back to start",
+            "ghostMode": "Ghost Mode",
+            "nomadMode": "Nomad Mode (WiFi/Cowork)"
+        },
         "legend": {
             "title": "Map Legend",
+            "category": "Category",
             "categories": "categories"
         },
         "cta": {
             "title": "Can't find what you're looking for?",
             "description": "Help us improve the map by suggesting new places",
             "button": "Suggest a place"
+        },
+        "empty": {
+            "title": "No places yet",
+            "description": "Add places in Supabase to show them on the map.",
+            "noResultsTitle": "No results for this search",
+            "noResultsDescription": "Try other terms or adjust your filters."
         },
         "north": "North Heading"
     },
@@ -817,8 +899,13 @@
         "accommodationIn": "Accommodation in {name}",
         "accommodationSubtitle": "Find the perfect place to stay during your visit",
         "accommodationTip": "We are working to bring you the best options. In the meantime, explore the experiences and activities available.",
+        "actionTitle": "Explore {name}",
+        "actionSubtitle": "Discover hidden spots or live a local experience.",
+        "actionMap": "View map",
+        "actionExperiences": "View experiences",
         "guidesTitle": "Independent Local Guides",
         "guidesSubtitle": "Connect directly with local guides. Nomada Fantasma does not charge commission.",
+        "guideBio": "Local guide expert in the region.",
         "activitiesTitle": "Popular Activities",
         "weatherTitle": "Current Weather",
         "humidity": "Humidity",
@@ -829,7 +916,10 @@
         "atmsTitle": "ATMs",
         "essentialsTitle": "Essentials",
         "noAtms": "No ATMs available. Bring cash.",
-        "nearbyTitle": "Other nearby towns"
+        "nearbyTitle": "Other nearby towns",
+        "badge": "MAGIC TOWN",
+        "backToLake": "Back to {lake}",
+        "viewMore": "View more →"
     },
     "Reservation": {
         "successTitle": "Request Sent!",

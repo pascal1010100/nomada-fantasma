@@ -1,5 +1,7 @@
 // app/mapa/points.ts
-export type Category = "wifi" | "hospedaje" | "cowork" | "banco" | "puerto" | "landmark" | "activity";
+import type { CategoryKey } from "./constants";
+
+export type Category = CategoryKey;
 
 export type Point = {
   id: string;

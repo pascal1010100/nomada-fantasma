@@ -1,11 +1,7 @@
 #!/usr/bin/env tsx
-// @ts-nocheck - Supabase type inference requires real credentials. Will have proper types at runtime.
-// Script to migrate existing reservation data from JSON file to Supabase
-// Run: tsx scripts/migrate-to-supabase.ts
-
 import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
-import { readFileSync, writeFileSync } from 'fs';
+import * as fs from 'fs';
 import path from 'path';
 import type { Database } from '../types/database.types';
 
@@ -57,7 +53,8 @@ async function migrate() {
     try {
         oldReservations = JSON.parse(fileContent);
     } catch (error) {
-        console.error('❌ Error parsing JSON file:', error);
+        const message = error instanceof Error ? error.message : String(error);
+        console.error('❌ Error parsing JSON file:', message);
         process.exit(1);
     }
 
@@ -106,9 +103,10 @@ async function migrate() {
                 successCount++;
                 console.log(`✅ Migrated: ${old.email} - ${old.tourName || 'N/A'}`);
             }
-        } catch (error: any) {
+        } catch (error) {
             errorCount++;
-            const errorMsg = `Failed to migrate ${old.email}: ${error.message}`;
+            const message = error instanceof Error ? error.message : String(error);
+            const errorMsg = `Failed to migrate ${old.email}: ${message}`;
             errors.push(errorMsg);
             console.error(`❌ ${errorMsg}`);
         }
@@ -141,6 +139,7 @@ async function migrate() {
 
 // Run migration
 migrate().catch((error) => {
-    console.error('Fatal error during migration:', error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Fatal error during migration:', message);
     process.exit(1);
 });

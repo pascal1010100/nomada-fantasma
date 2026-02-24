@@ -66,6 +66,10 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
 
   // Obtener los pueblos solo si es la página de Atitlán
   const pueblos = isAtitlanPage ? pueblosAtitlan : [];
+  const puebloMatch = pueblosAtitlan.find(pueblo => pueblo.slug === route.slug);
+  const mapHref = puebloMatch
+    ? `/${locale}/mapa?town=${puebloMatch.slug}`
+    : `/${locale}/mapa?route=${route.slug}`;
 
   // Función para renderizar estrellas de rating
   const renderRatingStars = (rating: number, small = false) => {
@@ -182,7 +186,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
 
               <div className="flex flex-wrap gap-3 relative z-10 w-full sm:w-auto">
                 <Link
-                  href={`/${locale}/mapa?route=${route.slug}`}
+                  href={mapHref}
                   className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-cyan-500 dark:hover:border-cyan-400 text-gray-700 dark:text-gray-200 font-semibold transition-all duration-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20"
                 >
                   <Map className="w-5 h-5 text-cyan-500" />

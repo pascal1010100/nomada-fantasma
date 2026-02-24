@@ -76,7 +76,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
         <div className="absolute inset-0 transition-transform duration-[3000ms] ease-in-out group-hover:scale-105">
           <Image
             src={town.coverImage}
-            alt={town.title}
+            alt={localizedTitle}
             fill
             className="object-cover object-center"
             priority
@@ -94,7 +94,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
               className="inline-flex items-center text-white/90 hover:text-white transition-colors duration-200 group/back"
             >
               <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover/back:-translate-x-1" />
-              Volver al {lakeTitle}
+              {tTown('backToLake', { lake: lakeTitle })}
             </Link>
           </div>
 
@@ -106,7 +106,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75"></span>
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400"></span>
               </span>
-              <span className="tracking-wider">PUEBLO MÁGICO</span>
+              <span className="tracking-wider">{tTown('badge')}</span>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -148,7 +148,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
       <div className="container mx-auto px-4 sm:px-6 py-12">
 
         {/* Elite Action Bar */}
-        <EliteActionBar title={town.title} slug={slug} />
+        <EliteActionBar title={localizedTitle} slug={slug} />
 
         <TownTabs>
           {/* Tab 1: Hospedaje (NEW PRIMARY TAB) */}
@@ -157,7 +157,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
               <div className="text-center mb-8">
                 <h2 className="text-3xl md:text-4xl font-bold mb-3">
                   <span className="bg-gradient-to-r from-purple-600 via-cyan-500 to-purple-600 bg-clip-text text-transparent">
-                    {tTown('accommodationIn', { name: town.title })}
+                    {tTown('accommodationIn', { name: localizedTitle })}
                   </span>
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -168,7 +168,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
               {/* Placeholder content - to be populated with real accommodation data */}
               <AccommodationSection
                 accommodations={town.accommodations}
-                townName={town.title}
+                townName={localizedTitle}
                 townSlug={slug}
               />
 
@@ -187,11 +187,11 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
               <div className="text-center mb-8">
                 <h2 className="text-3xl md:text-4xl font-bold mb-3">
                   <span className="bg-gradient-to-r from-purple-600 via-cyan-500 to-purple-600 bg-clip-text text-transparent">
-                    {tTown('experiencesIn', { name: town.title })}
+                    {tTown('experiencesIn', { name: localizedTitle })}
                   </span>
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                  {tTown('experiencesSubtitle', { name: town.title })}
+                  {tTown('experiencesSubtitle', { name: localizedTitle })}
                 </p>
               </div>
               <ToursSection puebloSlug={slug} tours={tours} className="mb-12" />
@@ -215,7 +215,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
                         id: `guide-${index}`,
                         name: guide.name,
                         photo: '/images/guides/default-avatar.svg',
-                        bio: 'Guía local experto en la región.',
+                        bio: tTown('guideBio'),
                         specialties: guide.tours,
                         languages: guide.languages,
                         contact: guide.contact,
@@ -235,7 +235,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
             <section className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg border border-cyan-200 dark:border-cyan-900/30">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
                 <MapPin className="w-6 h-6 mr-2 text-cyan-500" />
-                {tTown('about', { name: town.title })}
+                {tTown('about', { name: localizedTitle })}
               </h2>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
                 {localizedFull}

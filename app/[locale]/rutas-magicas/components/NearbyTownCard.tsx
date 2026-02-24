@@ -16,6 +16,7 @@ interface NearbyTownCardProps {
 
 export default function NearbyTownCard({ town, locale }: NearbyTownCardProps) {
   const t = useTranslations('Data.routes');
+  const tTown = useTranslations('Town');
 
   let title = town.title;
   let summary = town.summary;
@@ -51,7 +52,7 @@ export default function NearbyTownCard({ town, locale }: NearbyTownCardProps) {
       <div className="p-4">
         <p className="text-sm text-gray-600 dark:text-gray-400">{summary}</p>
         <div className="mt-3 text-sm font-medium text-cyan-600 dark:text-cyan-400 group-hover:underline">
-          Ver más →
+          {tTown('viewMore')}
         </div>
       </div>
     </Link>
