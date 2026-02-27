@@ -2,7 +2,7 @@
 
 import { Search } from 'lucide-react';
 import { Input } from './input';
-import { cn } from '@/lib/utils';
+import { cn } from '@/app/lib/utils';
 import type { ChangeEvent, KeyboardEvent, InputHTMLAttributes } from 'react';
 
 interface SearchInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {

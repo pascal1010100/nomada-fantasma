@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Route } from '../lib/types';
 import { motion, useInView } from 'framer-motion';
 import { Star, MapPin, Calendar, ArrowRight, Zap, Heart } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/app/lib/utils';
 import { RippleButton } from '@/app/components/ui';
 import { useLocale } from 'next-intl';
 

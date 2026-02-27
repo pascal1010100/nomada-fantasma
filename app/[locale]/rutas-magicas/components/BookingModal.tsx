@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Users, MessageSquare, Send, User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { trackEvent } from '../../../lib/analytics';
 
 interface BookingModalProps {
@@ -14,6 +15,7 @@ interface BookingModalProps {
 }
 
 export default function BookingModal({ isOpen, onClose, guideName, guidePhone }: BookingModalProps) {
+    const t = useTranslations('ValidationErrors');
     const [mounted, setMounted] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -48,16 +50,16 @@ export default function BookingModal({ isOpen, onClose, guideName, guidePhone }:
 
         // Validate name
         if (!formData.name.trim()) {
-            newErrors.name = 'El nombre es requerido';
+            newErrors.name = t('nameRequiredField');
             isValid = false;
         } else if (formData.name.trim().length < 2) {
-            newErrors.name = 'El nombre debe tener al menos 2 caracteres';
+            newErrors.name = t('nameMinLength');
             isValid = false;
         }
 
         // Validate date
         if (!formData.date) {
-            newErrors.date = 'La fecha es requerida';
+            newErrors.date = t('dateRequired');
             isValid = false;
         } else {
             const selectedDate = new Date(formData.date);

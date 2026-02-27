@@ -66,18 +66,18 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
 
     const validateEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
     const validateForm = (): string | null => {
-        if (!name.trim() || name.trim().length < 2) return 'Por favor ingresa tu nombre';
-        if (!email || !validateEmail(email)) return 'Ingresa un correo válido';
-        if (!date) return 'Selecciona una fecha';
+        if (!name.trim() || name.trim().length < 2) return t('validationErrors.nameRequired');
+        if (!email || !validateEmail(email)) return t('validationErrors.emailInvalid');
+        if (!date) return t('validationErrors.dateRequired');
         const selected = new Date(date);
         const boundary = new Date(minDate);
-        if (selected < boundary) return 'Selecciona una fecha a partir de mañana';
-        if (!time) return 'Selecciona una hora';
-        if (!pickup || pickup.trim().length < 5) return 'Indica un lugar de recogida claro';
-        if (passengers < 1) return 'Selecciona al menos 1 pasajero';
+        if (selected < boundary) return t('validationErrors.dateFuture');
+        if (!time) return t('validationErrors.timeRequired');
+        if (!pickup || pickup.trim().length < 5) return t('validationErrors.pickupRequired');
+        if (passengers < 1) return t('validationErrors.passengersMin');
         if (isCustom) {
-            if (!customOrigin.trim()) return 'Indica el origen';
-            if (!customDestination.trim()) return 'Indica el destino';
+            if (!customOrigin.trim()) return t('validationErrors.originRequired');
+            if (!customDestination.trim()) return t('validationErrors.destinationRequired');
         }
         return null;
     };

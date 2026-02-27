@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/app/lib/utils';
 import { Search, X } from 'lucide-react';
 import { forwardRef, InputHTMLAttributes, useState, ChangeEvent, MouseEvent } from 'react';
 import { Input } from './input';

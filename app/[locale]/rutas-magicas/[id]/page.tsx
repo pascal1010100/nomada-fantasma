@@ -16,6 +16,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const tData = useTranslations('Data.routes');
   const tRoute = useTranslations('RouteDetail');
+  const tLake = useTranslations('LakeInfo');
   const locale = useLocale();
 
   // Unwrap params Promise using React.use()
@@ -246,47 +247,69 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700/50">
               <div className="p-6">
                 {isAtitlanPage ? (
-                  // Lake Facts for Atitlan
+                  // Lake Facts for Atitlán
                   <>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Datos del Lago</h3>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                      {tLake('title')}
+                    </h3>
                     <div className="space-y-4">
                       <div className="flex items-start text-sm text-gray-600 dark:text-gray-300">
                         <MapPin className="w-4 h-4 mr-2 text-purple-500 mt-0.5 flex-shrink-0" />
                         <div>
-                          <span className="font-medium block">Ubicación</span>
-                          <span className="text-xs">Sierra Madre de Guatemala</span>
+                          <span className="font-medium block">
+                            {tLake('locationLabel')}
+                          </span>
+                          <span className="text-xs">
+                            {tLake('locationValue')}
+                          </span>
                         </div>
                       </div>
 
                       <div className="flex items-start text-sm text-gray-600 dark:text-gray-300">
                         <Mountain className="w-4 h-4 mr-2 text-cyan-500 mt-0.5 flex-shrink-0" />
                         <div>
-                          <span className="font-medium block">Profundidad</span>
-                          <span className="text-xs">340m (más profundo de Centroamérica)</span>
+                          <span className="font-medium block">
+                            {tLake('depthLabel')}
+                          </span>
+                          <span className="text-xs">
+                            {tLake('depthValue')}
+                          </span>
                         </div>
                       </div>
 
                       <div className="flex items-start text-sm text-gray-600 dark:text-gray-300">
                         <Zap className="w-4 h-4 mr-2 text-yellow-500 mt-0.5 flex-shrink-0" />
                         <div>
-                          <span className="font-medium block">Elevación</span>
-                          <span className="text-xs">1,560 metros sobre el nivel del mar</span>
+                          <span className="font-medium block">
+                            {tLake('elevationLabel')}
+                          </span>
+                          <span className="text-xs">
+                            {tLake('elevationValue')}
+                          </span>
                         </div>
                       </div>
 
                       <div className="flex items-start text-sm text-gray-600 dark:text-gray-300">
                         <Calendar className="w-4 h-4 mr-2 text-purple-500 mt-0.5 flex-shrink-0" />
                         <div>
-                          <span className="font-medium block">Mejor época</span>
-                          <span className="text-xs">Noviembre a abril (temporada seca)</span>
+                          <span className="font-medium block">
+                            {tLake('bestSeasonLabel')}
+                          </span>
+                          <span className="text-xs">
+                            {tLake('bestSeasonValue')}
+                          </span>
                         </div>
                       </div>
 
                       <div className="flex items-start text-sm text-gray-600 dark:text-gray-300">
                         <Wifi className="w-4 h-4 mr-2 text-cyan-500 mt-0.5 flex-shrink-0" />
                         <div>
-                          <span className="font-medium block">Conectividad</span>
-                          <span className="text-xs">WiFi excelente en la mayoría de pueblos</span>
+                          <span className="font-medium block">
+                            {tLake('connectivityLabel')}
+                          </span>
+                          <span className="text-xs">
+                            {tLake('connectivityValue')}
+                          </span>
                         </div>
                       </div>
                     </div>

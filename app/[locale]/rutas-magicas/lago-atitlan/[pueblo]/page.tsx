@@ -31,9 +31,7 @@ const getWeatherIcon = (iconName: string) => {
 
 export default async function TownPage({ params }: { params: Promise<{ pueblo: string }> }) {
   const { pueblo: slug } = await params;
-  console.log('TownPage params:', slug);
   const town = atitlanTowns.find(t => t.slug === slug);
-  console.log('Town found:', town?.title);
 
   if (!town) {
     notFound();

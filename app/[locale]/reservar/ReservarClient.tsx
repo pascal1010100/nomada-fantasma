@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, ArrowLeft, Globe, User, Briefcase, Compass, CheckCircle, Sparkles, Shield, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 const travelTypes = [
     {
@@ -113,6 +114,7 @@ const steps = [
 ];
 
 export default function ReservarClient() {
+    const t = useTranslations('Reservar');
     const [currentStep, setCurrentStep] = useState<'type' | 'details' | 'confirm'>('type');
     const [selectedType, setSelectedType] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -206,7 +208,7 @@ export default function ReservarClient() {
             if (!response.ok) {
                 const apiError = typeof data?.error === 'string'
                     ? data.error
-                    : 'Error al enviar la solicitud';
+                    : t('errorSendRequest');
                 setError(apiError);
                 return;
             }
@@ -214,7 +216,7 @@ export default function ReservarClient() {
             setCurrentStep('confirm');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err) {
-            setError('Hubo un error al enviar tu solicitud. Por favor intenta de nuevo.');
+            setError(t('errorGeneric'));
             console.error(err);
         } finally {
             setIsLoading(false);
@@ -777,10 +779,10 @@ export default function ReservarClient() {
                                         </motion.div>
 
                                         <div>
-                                            <h2 className="text-3xl font-bold mb-2">¡Solicitud enviada con éxito!</h2>
-                                            <p className="text-muted-foreground">Hemos recibido tu solicitud de viaje.</p>
+                                            <h2 className="text-3xl font-bold mb-2">{t('successTitle')}</h2>
+                                            <p className="text-muted-foreground">{t('successMessage')}</p>
                                             <p className="text-sm text-muted-foreground mt-1">
-                                                ID de solicitud: TRVL-{Math.random().toString(36).substr(2, 8).toUpperCase()}
+                                                {t('requestId')}: TRVL-{Math.random().toString(36).substr(2, 8).toUpperCase()}
                                             </p>
                                         </div>
 
