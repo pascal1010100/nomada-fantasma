@@ -6,6 +6,7 @@ import { sendTourConfirmationEmails } from '@/app/lib/email';
 import { checkRateLimit, getClientIP } from '@/app/lib/rate-limit';
 import { getLocaleFromRequest } from '@/app/lib/locale';
 import logger from '@/app/lib/logger';
+import { isAdminRequestAuthorized } from '@/app/lib/admin-auth';
 import {
     CreateReservationSchema,
     sanitizeReservationInput,
@@ -33,17 +34,6 @@ type LegacyReservationRow = {
     created_at?: string | null;
 };
 type ReservationRecord = ReservationRow | LegacyReservationRow;
-
-function isAdminRequestAuthorized(request: Request): boolean {
-    const adminToken = process.env.ADMIN_API_TOKEN;
-    if (!adminToken) {
-        logger.error('ADMIN_API_TOKEN is not configured');
-        return false;
-    }
-
-    const requestToken = request.headers.get('x-admin-token');
-    return requestToken === adminToken;
-}
 
 // POST: Create a new reservation
 export async function POST(request: Request) {
@@ -242,9 +232,17 @@ export async function POST(request: Request) {
             ('reservation_date' in reservation ? reservation.reservation_date : reservation.date) || '';
         const reservationGuests =
             ('guests' in reservation ? reservation.guests : reservation.number_of_people) || 1;
+        const currentAttempts =
+            'email_attempts' in reservation && typeof reservation.email_attempts === 'number'
+                ? reservation.email_attempts
+                : 0;
 
         let emailSent: boolean | null = null;
+        let emailError: string | null = null;
+        let emailAttempted = false;
+
         if (reservationEmail) {
+            emailAttempted = true;
             const emailResult = await sendTourConfirmationEmails({
                 to: reservationEmail,
                 reservationId: newReservation.id,
@@ -259,22 +257,68 @@ export async function POST(request: Request) {
             });
             emailSent = emailResult.success;
             if (!emailResult.success) {
+                const rawError = emailResult.error;
+                emailError =
+                    rawError instanceof Error
+                        ? rawError.message
+                        : typeof rawError === 'string'
+                          ? rawError
+                          : rawError
+                            ? JSON.stringify(rawError)
+                            : 'Unknown email error';
                 logger.warn('Email failed but reservation was saved to DB');
             }
         }
 
-        // Update confirmation timestamp only when email was successfully sent
-        if (emailSent === true) {
-            try {
-                const updateConfirmation: ReservationUpdate = { confirmation_sent_at: new Date().toISOString() };
-                await supabaseAdmin
-                    .schema('public')
-                    .from('reservations')
-                    .update(updateConfirmation)
-                    .eq('id', newReservation.id);
-            } catch (updateError) {
-                logger.error('Failed to update confirmation timestamp:', updateError);
+        // Track email delivery outcome for operations
+        try {
+            const nowIso = new Date().toISOString();
+            const updateConfirmation: ReservationUpdate = {
+                email_delivery_status: emailAttempted
+                    ? emailSent
+                        ? 'sent'
+                        : 'failed'
+                    : 'not_requested',
+                email_attempts: currentAttempts + (emailAttempted ? 1 : 0),
+                email_last_attempt_at: emailAttempted ? nowIso : null,
+                email_last_error: emailAttempted && emailSent === false ? emailError : null,
+            };
+
+            // Keep compatibility with legacy schemas where confirmation_sent_at might not exist.
+            if (emailSent === true) {
+                updateConfirmation.confirmation_sent_at = nowIso;
             }
+
+            const updateResult = await supabaseAdmin
+                .schema('public')
+                .from('reservations')
+                .update(updateConfirmation)
+                .eq('id', newReservation.id);
+
+            if (updateResult.error) {
+                const message = updateResult.error.message || '';
+                if (message.includes('confirmation_sent_at')) {
+                    const fallbackUpdate: ReservationUpdate = {
+                        email_delivery_status: updateConfirmation.email_delivery_status,
+                        email_attempts: updateConfirmation.email_attempts,
+                        email_last_attempt_at: updateConfirmation.email_last_attempt_at,
+                        email_last_error: updateConfirmation.email_last_error,
+                    };
+                    const fallbackResult = await supabaseAdmin
+                        .schema('public')
+                        .from('reservations')
+                        .update(fallbackUpdate)
+                        .eq('id', newReservation.id);
+
+                    if (fallbackResult.error) {
+                        logger.error('Failed fallback update for email tracking fields:', fallbackResult.error);
+                    }
+                } else {
+                    logger.error('Failed to update email tracking fields:', updateResult.error);
+                }
+            }
+        } catch (updateError) {
+            logger.error('Failed to update email tracking fields:', updateError);
         }
 
         return NextResponse.json(
@@ -292,6 +336,7 @@ export async function POST(request: Request) {
                 },
                 email: {
                     sent: emailSent,
+                    status: emailAttempted ? (emailSent ? 'sent' : 'failed') : 'not_requested',
                 },
             },
             { status: 201 }

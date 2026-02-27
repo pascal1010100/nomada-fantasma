@@ -271,6 +271,10 @@ export interface Database {
                     pickup_location: string;
                     type: string | null;
                     status: string | null;
+                    email_delivery_status: 'pending' | 'sent' | 'failed' | 'not_requested' | null;
+                    email_attempts: number;
+                    email_last_attempt_at: string | null;
+                    email_last_error: string | null;
                     created_at: string;
                 };
                 Insert: {
@@ -285,6 +289,10 @@ export interface Database {
                     pickup_location: string;
                     type?: string | null;
                     status?: string | null;
+                    email_delivery_status?: 'pending' | 'sent' | 'failed' | 'not_requested' | null;
+                    email_attempts?: number;
+                    email_last_attempt_at?: string | null;
+                    email_last_error?: string | null;
                     created_at?: string;
                 };
                 Update: {
@@ -299,6 +307,10 @@ export interface Database {
                     pickup_location?: string;
                     type?: string | null;
                     status?: string | null;
+                    email_delivery_status?: 'pending' | 'sent' | 'failed' | 'not_requested' | null;
+                    email_attempts?: number;
+                    email_last_attempt_at?: string | null;
+                    email_last_error?: string | null;
                     created_at?: string;
                 };
                 Relationships: [];
@@ -325,6 +337,10 @@ export interface Database {
                     customer_notes: string | null;
                     admin_notes: string | null;
                     confirmation_sent_at: string | null;
+                    email_delivery_status: 'pending' | 'sent' | 'failed' | 'not_requested' | null;
+                    email_attempts: number;
+                    email_last_attempt_at: string | null;
+                    email_last_error: string | null;
                     confirmed_at: string | null;
                     cancelled_at: string | null;
                 };
@@ -349,6 +365,10 @@ export interface Database {
                     customer_notes?: string | null;
                     admin_notes?: string | null;
                     confirmation_sent_at?: string | null;
+                    email_delivery_status?: 'pending' | 'sent' | 'failed' | 'not_requested' | null;
+                    email_attempts?: number;
+                    email_last_attempt_at?: string | null;
+                    email_last_error?: string | null;
                     confirmed_at?: string | null;
                     cancelled_at?: string | null;
                 };
@@ -373,6 +393,10 @@ export interface Database {
                     customer_notes?: string | null;
                     admin_notes?: string | null;
                     confirmation_sent_at?: string | null;
+                    email_delivery_status?: 'pending' | 'sent' | 'failed' | 'not_requested' | null;
+                    email_attempts?: number;
+                    email_last_attempt_at?: string | null;
+                    email_last_error?: string | null;
                     confirmed_at?: string | null;
                     cancelled_at?: string | null;
                 };

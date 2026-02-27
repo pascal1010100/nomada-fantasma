@@ -1,0 +1,227 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { useLocale } from 'next-intl';
+
+type InternalRequestItem = {
+    id: string;
+    kind: 'tour' | 'shuttle';
+    createdAt: string;
+    customerName: string;
+    customerEmail: string;
+    date: string;
+    details: string;
+    status: string | null;
+    emailStatus: string | null;
+    emailAttempts: number;
+    emailLastError: string | null;
+};
+
+type InternalResponse = {
+    success: boolean;
+    summary: {
+        total: number;
+        tours: number;
+        shuttles: number;
+        emailFailed: number;
+    };
+    items: InternalRequestItem[];
+};
+
+const STORAGE_KEY = 'nomada_admin_token';
+
+export default function RecepcionRequestsPage() {
+    const locale = useLocale();
+    const [token, setToken] = useState('');
+    const [tempToken, setTempToken] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [data, setData] = useState<InternalResponse | null>(null);
+
+    useEffect(() => {
+        const stored = sessionStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            setToken(stored);
+            setTempToken(stored);
+        }
+    }, []);
+
+    const canFetch = token.trim().length > 0;
+
+    const summary = useMemo(
+        () =>
+            data?.summary ?? {
+                total: 0,
+                tours: 0,
+                shuttles: 0,
+                emailFailed: 0,
+            },
+        [data]
+    );
+
+    const fetchRequests = async () => {
+        if (!canFetch) return;
+
+        setLoading(true);
+        setError('');
+
+        try {
+            const response = await fetch('/api/internal/requests?limit=100', {
+                headers: {
+                    'x-admin-token': token.trim(),
+                },
+            });
+
+            const payload = (await response.json()) as InternalResponse | { error?: string };
+            if (!response.ok) {
+                setData(null);
+                setError(payload && typeof payload === 'object' && 'error' in payload ? payload.error || 'Error' : 'Error');
+                return;
+            }
+
+            setData(payload as InternalResponse);
+        } catch (requestError) {
+            setData(null);
+            setError(requestError instanceof Error ? requestError.message : 'Error de red');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const saveToken = () => {
+        const normalized = tempToken.trim();
+        setToken(normalized);
+        sessionStorage.setItem(STORAGE_KEY, normalized);
+        setData(null);
+        setError('');
+    };
+
+    const clearToken = () => {
+        setToken('');
+        setTempToken('');
+        setData(null);
+        setError('');
+        sessionStorage.removeItem(STORAGE_KEY);
+    };
+
+    return (
+        <div className="max-w-6xl mx-auto px-4 py-8">
+            <h1 className="text-2xl font-bold mb-2">Panel Recepción San Pedro</h1>
+            <p className="text-sm text-muted-foreground mb-6">
+                Solicitudes recientes de tours y shuttles con estado de envío de email.
+            </p>
+
+            <div className="rounded-xl border p-4 mb-6 bg-card/50">
+                <label htmlFor="admin-token" className="text-sm font-medium block mb-2">
+                    Token de Admin
+                </label>
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                        id="admin-token"
+                        type="password"
+                        value={tempToken}
+                        onChange={(event) => setTempToken(event.target.value)}
+                        placeholder="Pega ADMIN_API_TOKEN"
+                        className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
+                    />
+                    <button
+                        type="button"
+                        onClick={saveToken}
+                        className="rounded-md bg-primary px-4 py-2 text-primary-foreground text-sm"
+                    >
+                        Guardar token
+                    </button>
+                    <button
+                        type="button"
+                        onClick={clearToken}
+                        className="rounded-md border px-4 py-2 text-sm"
+                    >
+                        Limpiar
+                    </button>
+                </div>
+                <div className="mt-3 flex gap-2">
+                    <button
+                        type="button"
+                        onClick={fetchRequests}
+                        disabled={!canFetch || loading}
+                        className="rounded-md border px-4 py-2 text-sm disabled:opacity-50"
+                    >
+                        {loading ? 'Cargando...' : 'Actualizar solicitudes'}
+                    </button>
+                    <a
+                        href={`/${locale}`}
+                        className="rounded-md border px-4 py-2 text-sm"
+                    >
+                        Volver
+                    </a>
+                </div>
+                {error ? <p className="mt-3 text-sm text-red-500">{error}</p> : null}
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Total</p>
+                    <p className="text-xl font-semibold">{summary.total}</p>
+                </div>
+                <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Tours</p>
+                    <p className="text-xl font-semibold">{summary.tours}</p>
+                </div>
+                <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Shuttles</p>
+                    <p className="text-xl font-semibold">{summary.shuttles}</p>
+                </div>
+                <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Email fallido</p>
+                    <p className="text-xl font-semibold">{summary.emailFailed}</p>
+                </div>
+            </div>
+
+            <div className="rounded-xl border overflow-x-auto">
+                <table className="w-full text-sm">
+                    <thead className="bg-muted/40">
+                        <tr>
+                            <th className="text-left px-3 py-2">Fecha</th>
+                            <th className="text-left px-3 py-2">Tipo</th>
+                            <th className="text-left px-3 py-2">Cliente</th>
+                            <th className="text-left px-3 py-2">Detalle</th>
+                            <th className="text-left px-3 py-2">Estado</th>
+                            <th className="text-left px-3 py-2">Email</th>
+                            <th className="text-left px-3 py-2">Intentos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {(data?.items ?? []).map((item) => (
+                            <tr key={`${item.kind}-${item.id}`} className="border-t">
+                                <td className="px-3 py-2 whitespace-nowrap">
+                                    {new Date(item.createdAt).toLocaleString()}
+                                </td>
+                                <td className="px-3 py-2">{item.kind}</td>
+                                <td className="px-3 py-2">
+                                    <div>{item.customerName}</div>
+                                    <div className="text-xs text-muted-foreground">{item.customerEmail}</div>
+                                </td>
+                                <td className="px-3 py-2">{item.details}</td>
+                                <td className="px-3 py-2">{item.status ?? '-'}</td>
+                                <td className="px-3 py-2">
+                                    <div>{item.emailStatus ?? '-'}</div>
+                                    {item.emailLastError ? (
+                                        <div className="text-xs text-red-500">{item.emailLastError}</div>
+                                    ) : null}
+                                </td>
+                                <td className="px-3 py-2">{item.emailAttempts}</td>
+                            </tr>
+                        ))}
+                        {!loading && (data?.items ?? []).length === 0 ? (
+                            <tr>
+                                <td className="px-3 py-6 text-center text-muted-foreground" colSpan={7}>
+                                    Sin solicitudes para mostrar.
+                                </td>
+                            </tr>
+                        ) : null}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}

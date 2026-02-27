@@ -8,6 +8,10 @@ import logger from '@/app/lib/logger';
 import { ShuttleRequestSchema, mapZodErrorToTranslationKey } from '@/app/lib/validations';
 import type { Database } from '@/types/database.types';
 
+type ShuttleBookingInsert = Database['public']['Tables']['shuttle_bookings']['Insert'];
+type ShuttleBookingRow = Database['public']['Tables']['shuttle_bookings']['Row'];
+type ShuttleBookingUpdate = Database['public']['Tables']['shuttle_bookings']['Update'];
+
 export async function POST(request: Request) {
     try {
         // Detect locale FIRST (before rate limiting to use translations)
@@ -54,7 +58,7 @@ export async function POST(request: Request) {
         const data = validation.data;
 
         // 1. Persist to Supabase
-        const payload: Database['public']['Tables']['shuttle_bookings']['Insert'] = {
+        const payload: ShuttleBookingInsert = {
             customer_name: data.customerName,
             customer_email: data.customerEmail,
             route_origin: data.routeOrigin,
@@ -67,9 +71,11 @@ export async function POST(request: Request) {
             status: 'pending',
         };
 
-        const { error: dbError } = await supabaseAdmin
+        const { data: booking, error: dbError } = await supabaseAdmin
             .from('shuttle_bookings')
-            .insert([payload] as unknown as never[]);
+            .insert(payload)
+            .select()
+            .single<ShuttleBookingRow>();
 
         if (dbError) {
             console.error('Error saving to Supabase:', dbError);
@@ -80,6 +86,7 @@ export async function POST(request: Request) {
         }
 
         // 2. Send confirmation to customer and notification to admin
+        let emailError: string | null = null;
         const result = await sendShuttleConfirmationEmails({
             customerName: data.customerName,
             customerEmail: data.customerEmail,
@@ -95,14 +102,42 @@ export async function POST(request: Request) {
         const emailSent = result.success;
 
         if (!result.success) {
+            const rawError = result.error;
+            emailError =
+                rawError instanceof Error
+                    ? rawError.message
+                    : typeof rawError === 'string'
+                      ? rawError
+                      : rawError
+                        ? JSON.stringify(rawError)
+                        : 'Unknown email error';
             logger.warn('Email failed but booking was saved to DB');
+        }
+
+        if (booking?.id) {
+            try {
+                const updateData: ShuttleBookingUpdate = {
+                    email_delivery_status: emailSent ? 'sent' : 'failed',
+                    email_attempts: (booking.email_attempts ?? 0) + 1,
+                    email_last_attempt_at: new Date().toISOString(),
+                    email_last_error: emailSent ? null : emailError,
+                };
+                await supabaseAdmin
+                    .from('shuttle_bookings')
+                    .update(updateData)
+                    .eq('id', booking.id);
+            } catch (updateError) {
+                logger.error('Failed to update shuttle email tracking fields:', updateError);
+            }
         }
 
         return NextResponse.json({
             success: true,
             message: tApi('successMessage'),
+            bookingId: booking?.id ?? null,
             email: {
                 sent: emailSent,
+                status: emailSent ? 'sent' : 'failed',
             },
         });
     } catch (error) {
