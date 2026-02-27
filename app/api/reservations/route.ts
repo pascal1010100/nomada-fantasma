@@ -3,13 +3,16 @@ import { NextResponse } from 'next/server';
 import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/app/lib/supabase/server';
 import { sendTourConfirmationEmails } from '@/app/lib/email';
+import { checkRateLimit, getClientIP } from '@/app/lib/rate-limit';
+import { getLocaleFromRequest } from '@/app/lib/locale';
+import logger from '@/app/lib/logger';
 import {
     CreateReservationSchema,
     sanitizeReservationInput,
     validateRequestBody,
+    mapZodErrorToTranslationKey,
 } from '@/app/lib/validations';
 import type { Database } from '@/types/database.types';
-import type { ZodIssue } from 'zod';
 
 type ReservationInsert = Database['public']['Tables']['reservations']['Insert'];
 type ReservationRow = Database['public']['Tables']['reservations']['Row'];
@@ -31,66 +34,93 @@ type LegacyReservationRow = {
 };
 type ReservationRecord = ReservationRow | LegacyReservationRow;
 
-const rateLimitStore = new Map<string, { count: number; start: number }>();
-const RATE_LIMIT_MAX = 5;
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+function isAdminRequestAuthorized(request: Request): boolean {
+    const adminToken = process.env.ADMIN_API_TOKEN;
+    if (!adminToken) {
+        logger.error('ADMIN_API_TOKEN is not configured');
+        return false;
+    }
+
+    const requestToken = request.headers.get('x-admin-token');
+    return requestToken === adminToken;
+}
 
 // POST: Create a new reservation
 export async function POST(request: Request) {
     try {
-        const ipHeader = request.headers.get('x-forwarded-for') || '';
-        const ip = ipHeader.split(',')[0].trim() || 'unknown';
-        const now = Date.now();
-        const entry = rateLimitStore.get(ip);
-        if (!entry || now - entry.start > RATE_LIMIT_WINDOW_MS) {
-            rateLimitStore.set(ip, { count: 1, start: now });
-        } else {
-            if (entry.count >= RATE_LIMIT_MAX) {
-                return NextResponse.json(
-                    { error: 'Demasiadas solicitudes. Intenta más tarde.' },
-                    { status: 429 }
-                );
-            }
-            entry.count += 1;
-            rateLimitStore.set(ip, entry);
-        }
-
-        const url = new URL(request.url);
-        const urlLocale = url.pathname.split('/')[1];
-        const headerLocale = request.headers.get('x-locale');
-        const acceptLanguage = request.headers.get('accept-language');
-        const candidateLocale = headerLocale || acceptLanguage?.split(',')[0] || urlLocale || 'es';
-        const localeToken = candidateLocale.split('-')[0].toLowerCase();
-        const supportedLocales = ['es', 'en'] as const;
-        const locale = supportedLocales.includes(localeToken as (typeof supportedLocales)[number])
-            ? localeToken
-            : 'es';
-
-        // 2. Load translations
+        // Detect locale FIRST (before rate limiting to use translations)
+        const locale = getLocaleFromRequest(request);
         const t = await getTranslations({ locale, namespace: 'ReservationEmail' });
         const tApi = await getTranslations({ locale, namespace: 'ReservationApi' });
 
-        const getIssueKey = (issue: ZodIssue) => {
-            const field = issue.path[0];
-            if (field === 'tourId') return 'requiredTour';
-            if (field === 'accommodationId') return 'requiredAccommodation';
-            if (field === 'guideId') return 'requiredGuide';
-            if (field === 'email') return 'invalidEmail';
-            if (field === 'date') return 'invalidDate';
-            if (field === 'guests') return 'invalidGuests';
-            if (field === 'type') return 'invalidType';
-            if (field === 'name') return 'invalidName';
-            return 'invalidRequest';
-        };
+        // Rate limiting
+        const ip = getClientIP(request);
+        const rateLimitResult = checkRateLimit(ip);
+        
+        if (!rateLimitResult.allowed) {
+            return NextResponse.json(
+                { 
+                    error: tApi('rateLimitExceeded'),
+                    retryAfter: rateLimitResult.retryAfter 
+                },
+                { 
+                    status: 429,
+                    headers: {
+                        'Retry-After': rateLimitResult.retryAfter?.toString() || '600',
+                        'X-RateLimit-Limit': '5',
+                        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+                        'X-RateLimit-Reset': new Date(rateLimitResult.resetAt).toISOString(),
+                    }
+                }
+            );
+        }
 
         // Validate request body with Zod
         const validation = await validateRequestBody(request, CreateReservationSchema);
 
         if (validation.error || !validation.data) {
             const issue = validation.issues?.[0];
-            const key = issue ? getIssueKey(issue) : 'invalidRequest';
+            if (issue) {
+                // Check if it's a custom error (tourId, accommodationId, guideId)
+                const field = issue.path[0]?.toString() || '';
+                if (field === 'tourId' && issue.code === 'custom') {
+                    return NextResponse.json(
+                        { error: tApi('errors.requiredTour') },
+                        { status: 400 }
+                    );
+                }
+                if (field === 'accommodationId' && issue.code === 'custom') {
+                    return NextResponse.json(
+                        { error: tApi('errors.requiredAccommodation') },
+                        { status: 400 }
+                    );
+                }
+                if (field === 'guideId' && issue.code === 'custom') {
+                    return NextResponse.json(
+                        { error: tApi('errors.requiredGuide') },
+                        { status: 400 }
+                    );
+                }
+                // For other errors, use the mapper
+                const translationKey = mapZodErrorToTranslationKey(issue);
+                const tValidation = await getTranslations({ locale, namespace: 'ValidationErrors' });
+                // Try ValidationErrors first, fallback to ReservationApi.errors
+                try {
+                    return NextResponse.json(
+                        { error: tValidation(translationKey) },
+                        { status: 400 }
+                    );
+                } catch {
+                    // Fallback to ReservationApi if ValidationErrors key doesn't exist
+                    const errorKey = translationKey === 'invalidEmail' ? 'invalidEmail' : 'invalidRequest';
+                    return NextResponse.json(
+                        { error: tApi(`errors.${errorKey}`) },
+                        { status: 400 }
+                    );
+                }
+            }
             return NextResponse.json(
-                { error: tApi(`errors.${key}`) },
+                { error: tApi('errors.invalidRequest') },
                 { status: 400 }
             );
         }
@@ -168,7 +198,7 @@ export async function POST(request: Request) {
                 .single<LegacyReservationRow>();
 
             if (legacyResult.error) {
-                console.error('Supabase error:', dbError, legacyResult.error);
+                logger.error('Supabase error:', dbError, legacyResult.error);
                 const debug =
                     process.env.NODE_ENV !== 'production'
                         ? {
@@ -179,7 +209,7 @@ export async function POST(request: Request) {
                           }
                         : undefined;
                 return NextResponse.json(
-                    { error: 'Error al crear la reserva en la base de datos', debug },
+                    { error: tApi('databaseErrorCreate'), debug },
                     { status: 500 }
                 );
             }
@@ -229,20 +259,22 @@ export async function POST(request: Request) {
             });
             emailSent = emailResult.success;
             if (!emailResult.success) {
-                console.warn('Email failed but reservation was saved to DB');
+                logger.warn('Email failed but reservation was saved to DB');
             }
         }
 
-        // Update the reservation with the confirmation sent timestamp
-        try {
-            const updateConfirmation: ReservationUpdate = { confirmation_sent_at: new Date().toISOString() };
-            await supabaseAdmin
-                .schema('public')
-                .from('reservations')
-                .update(updateConfirmation)
-                .eq('id', newReservation.id);
-        } catch (updateError) {
-            console.error('Failed to update confirmation timestamp:', updateError);
+        // Update confirmation timestamp only when email was successfully sent
+        if (emailSent === true) {
+            try {
+                const updateConfirmation: ReservationUpdate = { confirmation_sent_at: new Date().toISOString() };
+                await supabaseAdmin
+                    .schema('public')
+                    .from('reservations')
+                    .update(updateConfirmation)
+                    .eq('id', newReservation.id);
+            } catch (updateError) {
+                logger.error('Failed to update confirmation timestamp:', updateError);
+            }
         }
 
         return NextResponse.json(
@@ -265,7 +297,7 @@ export async function POST(request: Request) {
             { status: 201 }
         );
     } catch (error) {
-        console.error('Unexpected error creating reservation:', error);
+        logger.error('Unexpected error creating reservation:', error);
         return NextResponse.json(
             { error: 'Error interno del servidor al procesar la reserva' },
             { status: 500 }
@@ -276,6 +308,14 @@ export async function POST(request: Request) {
 // GET: Retrieve all reservations (admin only - requires authentication in future)
 export async function GET(request: Request) {
     try {
+        if (!isAdminRequestAuthorized(request)) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Detect locale from request
+        const locale = getLocaleFromRequest(request);
+        const tApi = await getTranslations({ locale, namespace: 'ReservationApi' });
+
         const { searchParams } = new URL(request.url);
         const status = searchParams.get('status');
         const email = searchParams.get('email');
@@ -308,7 +348,7 @@ export async function GET(request: Request) {
         if (error) {
             console.error('Supabase error:', error);
             return NextResponse.json(
-                { error: 'Error al obtener las reservas' },
+                { error: tApi('databaseErrorFetch') },
                 { status: 500 }
             );
         }
@@ -319,9 +359,11 @@ export async function GET(request: Request) {
             total: reservations?.length || 0,
         });
     } catch (error) {
-        console.error('Unexpected error fetching reservations:', error);
+        logger.error('Unexpected error fetching reservations:', error);
+        const locale = getLocaleFromRequest(request);
+        const tApi = await getTranslations({ locale, namespace: 'ReservationApi' });
         return NextResponse.json(
-            { error: 'Error interno del servidor' },
+            { error: tApi('internalError') },
             { status: 500 }
         );
     }
@@ -330,12 +372,20 @@ export async function GET(request: Request) {
 // PATCH: Update reservation status (for future admin dashboard)
 export async function PATCH(request: Request) {
     try {
+        if (!isAdminRequestAuthorized(request)) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Detect locale from request
+        const locale = getLocaleFromRequest(request);
+        const tApi = await getTranslations({ locale, namespace: 'ReservationApi' });
+
         const body = await request.json();
         const { id, status, admin_notes } = body;
 
         if (!id || !status) {
             return NextResponse.json(
-                { error: 'Se requiere ID y status' },
+                { error: tApi('idAndStatusRequired') },
                 { status: 400 }
             );
         }
@@ -345,7 +395,7 @@ export async function PATCH(request: Request) {
         const statusValue = typeof status === 'string' ? status : '';
         if (!validStatuses.includes(statusValue as (typeof validStatuses)[number])) {
             return NextResponse.json(
-                { error: 'Status inválido' },
+                { error: tApi('invalidStatus') },
                 { status: 400 }
             );
         }
@@ -375,20 +425,22 @@ export async function PATCH(request: Request) {
         if (error) {
             console.error('Supabase error:', error);
             return NextResponse.json(
-                { error: 'Error al actualizar la reserva' },
+                { error: tApi('databaseErrorUpdate') },
                 { status: 500 }
             );
         }
 
         return NextResponse.json({
             success: true,
-            message: 'Reserva actualizada exitosamente',
+            message: tApi('updateSuccess'),
             reservation: data,
         });
     } catch (error) {
-        console.error('Unexpected error updating reservation:', error);
+        logger.error('Unexpected error updating reservation:', error);
+        const locale = getLocaleFromRequest(request);
+        const tApi = await getTranslations({ locale, namespace: 'ReservationApi' });
         return NextResponse.json(
-            { error: 'Error interno del servidor' },
+            { error: tApi('internalError') },
             { status: 500 }
         );
     }

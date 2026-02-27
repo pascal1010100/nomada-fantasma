@@ -74,4 +74,4 @@ CREATE POLICY "Anyone can create leads" ON public.reservations
 
 DROP POLICY IF EXISTS "Only service role can view leads" ON public.reservations;
 CREATE POLICY "Only service role can view leads" ON public.reservations
-  FOR SELECT USING (true); -- Note: Adjust if you want stricter select in Phase 1
+  FOR SELECT USING (auth.role() = 'service_role');

@@ -121,8 +121,102 @@ export const GuideFilterSchema = z.object({
 export type GuideFilters = z.infer<typeof GuideFilterSchema>;
 
 // =====================================================
+// SHUTTLE SCHEMAS
+// =====================================================
+
+// ShuttleRequestSchema - Messages are generic since we map to translations
+// The mapZodErrorToTranslationKey function will provide localized messages
+export const ShuttleRequestSchema = z.object({
+    customerName: z.string().min(2), // Mapped to 'nameTooShort'
+    customerEmail: z.string().email(), // Mapped to 'invalidEmail'
+    routeOrigin: z.string().min(1), // Mapped to 'originRequired'
+    routeDestination: z.string().min(1), // Mapped to 'destinationRequired'
+    date: z.string().min(1), // Mapped to 'dateRequired'
+    time: z.string().min(1), // Mapped to 'timeRequired'
+    passengers: z.number().int().min(1), // Mapped to 'minPassengers'
+    pickupLocation: z.string().min(5), // Mapped to 'pickupLocationRequired'
+    type: z.enum(['shared', 'private']).optional(),
+});
+
+export type ShuttleRequestInput = z.infer<typeof ShuttleRequestSchema>;
+
+// =====================================================
 // HELPER FUNCTIONS
 // =====================================================
+
+/**
+ * Maps Zod validation errors to translation keys
+ * This allows us to use translations for validation messages
+ * 
+ * @param issue - Zod validation issue
+ * @returns Translation key for the error
+ */
+export function mapZodErrorToTranslationKey(issue: z.ZodIssue): string {
+    const field = issue.path[0]?.toString() || '';
+    const code = issue.code;
+
+    // Map field names to translation keys
+    const fieldMap: Record<string, string> = {
+        'customerName': 'name',
+        'name': 'name',
+        'customerEmail': 'email',
+        'email': 'email',
+        'routeOrigin': 'origin',
+        'routeDestination': 'destination',
+        'date': 'date',
+        'time': 'time',
+        'passengers': 'passengers',
+        'pickupLocation': 'pickupLocation',
+    };
+
+    const mappedField = fieldMap[field] || field;
+
+    // Map error codes to translation keys
+    switch (code) {
+        case z.ZodIssueCode.too_small:
+            if (mappedField === 'name') return 'nameTooShort';
+            if (mappedField === 'passengers') return 'minPassengers';
+            if (mappedField === 'pickupLocation') return 'pickupLocationRequired';
+            return 'nameTooShort'; // fallback
+
+        case z.ZodIssueCode.invalid_type:
+            if (mappedField === 'email') return 'invalidEmail';
+            return 'invalidEmail'; // fallback
+
+        case z.ZodIssueCode.invalid_format:
+            if (mappedField === 'email') return 'invalidEmail';
+            return 'invalidEmail'; // fallback
+
+        case z.ZodIssueCode.too_big:
+            // Handle max length errors if needed
+            return 'nameTooShort'; // fallback
+
+        case z.ZodIssueCode.invalid_value:
+            return 'invalidEmail'; // fallback
+
+        case z.ZodIssueCode.custom: {
+            // For custom errors, try to extract from message
+            const message = issue.message.toLowerCase();
+            if (message.includes('origen')) return 'originRequired';
+            if (message.includes('destino')) return 'destinationRequired';
+            if (message.includes('fecha')) return 'dateRequired';
+            if (message.includes('hora')) return 'timeRequired';
+            if (message.includes('nombre')) return 'nameRequired';
+            if (message.includes('email')) return 'invalidEmail';
+            return 'nameRequired'; // fallback
+        }
+
+        default:
+            // Default mappings based on field
+            if (mappedField === 'origin') return 'originRequired';
+            if (mappedField === 'destination') return 'destinationRequired';
+            if (mappedField === 'date') return 'dateRequired';
+            if (mappedField === 'time') return 'timeRequired';
+            if (mappedField === 'name') return 'nameRequired';
+            if (mappedField === 'email') return 'invalidEmail';
+            return 'nameRequired'; // fallback
+    }
+}
 
 // Validate and parse request body
 export async function validateRequestBody<T>(
