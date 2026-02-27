@@ -3,6 +3,7 @@ import ReservationTemplate from '../components/emails/ReservationTemplate';
 import ShuttleRequestTemplate from '../components/emails/ShuttleRequestTemplate';
 import ShuttleConfirmationEmail from '../components/emails/ShuttleConfirmationEmail';
 import ShuttleAdminNotification from '../components/emails/ShuttleAdminNotification';
+import logger from './logger';
 
 // Initialize Resend only if API key is present
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -63,11 +64,11 @@ export async function sendShuttleRequestEmail(data: SendShuttleRequestEmailProps
     const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
 
     if (!resend) {
-        console.log('📧 [SHUTTLE EMAIL SIMULATION] -----------------------------------------');
-        console.log(`To Admin: ${adminEmail}`);
-        console.log(`Subject: Nueva Solicitud de Shuttle [${data.type?.toUpperCase() || 'SHARED'}]: ${data.routeOrigin} -> ${data.routeDestination}`);
-        console.log('Template Data:', JSON.stringify(redactForLog(data), null, 2));
-        console.log('-----------------------------------------------------------------------');
+        logger.info('📧 [SHUTTLE EMAIL SIMULATION] -----------------------------------------');
+        logger.info(`To Admin: ${adminEmail}`);
+        logger.info(`Subject: Nueva Solicitud de Shuttle [${data.type?.toUpperCase() || 'SHARED'}]: ${data.routeOrigin} -> ${data.routeDestination}`);
+        logger.info('Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        logger.info('-----------------------------------------------------------------------');
         return { success: true, id: 'simulated_' + Date.now() };
     }
 
@@ -81,13 +82,13 @@ export async function sendShuttleRequestEmail(data: SendShuttleRequestEmailProps
         });
 
         if (error) {
-            console.error('Error sending shuttle email:', error);
+            logger.error('Error sending shuttle email:', error);
             return { success: false, error };
         }
 
         return { success: true, id: emailData?.id };
     } catch (error) {
-        console.error('Exception sending shuttle email:', error);
+        logger.error('Exception sending shuttle email:', error);
         return { success: false, error };
     }
 }
@@ -95,11 +96,11 @@ export async function sendShuttleRequestEmail(data: SendShuttleRequestEmailProps
 export async function sendConfirmationEmail(data: SendConfirmationEmailProps) {
     // SIMULATION MODE: If no API key, log to console and return success
     if (!resend) {
-        console.log('📧 [EMAIL SIMULATION] ---------------------------------------------------');
-        console.log(`To: ${data.to}`);
-        console.log(`Subject: ${data.t('preview', { tourName: data.tourName })}`);
-        console.log('Template Data:', JSON.stringify(redactForLog(data), null, 2));
-        console.log('-----------------------------------------------------------------------');
+        logger.info('📧 [EMAIL SIMULATION] ---------------------------------------------------');
+        logger.info(`To: ${data.to}`);
+        logger.info(`Subject: ${data.t('preview', { tourName: data.tourName })}`);
+        logger.info('Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        logger.info('-----------------------------------------------------------------------');
         return { success: true, id: 'simulated_' + Date.now() };
     }
 
@@ -112,13 +113,13 @@ export async function sendConfirmationEmail(data: SendConfirmationEmailProps) {
         });
 
         if (error) {
-            console.error('Error sending email:', error);
+            logger.error('Error sending email:', error);
             return { success: false, error };
         }
 
         return { success: true, id: emailData?.id };
     } catch (error) {
-        console.error('Exception sending email:', error);
+        logger.error('Exception sending email:', error);
         return { success: false, error };
     }
 }
@@ -140,14 +141,14 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
     const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
 
     if (!resend) {
-        console.log('📧 [TOUR CONFIRMATION SIMULATION] --------------------------------------');
-        console.log(`To Customer: ${data.to}`);
-        console.log(`Subject: ${data.t('preview', { tourName: data.tourName })}`);
-        console.log('Customer Template Data:', JSON.stringify(redactForLog(data), null, 2));
-        console.log(`To Admin: ${adminEmail}`);
-        console.log(`Subject: Nueva solicitud de tour: ${data.tourName}`);
-        console.log('Admin Template Data:', JSON.stringify(redactForLog(data), null, 2));
-        console.log('-----------------------------------------------------------------------');
+        logger.info('📧 [TOUR CONFIRMATION SIMULATION] --------------------------------------');
+        logger.info(`To Customer: ${data.to}`);
+        logger.info(`Subject: ${data.t('preview', { tourName: data.tourName })}`);
+        logger.info('Customer Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        logger.info(`To Admin: ${adminEmail}`);
+        logger.info(`Subject: Nueva solicitud de tour: ${data.tourName}`);
+        logger.info('Admin Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        logger.info('-----------------------------------------------------------------------');
         return { success: true, id: 'simulated_' + Date.now() };
     }
 
@@ -175,7 +176,7 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
 
         return { success: true };
     } catch (error) {
-        console.error('Error sending tour confirmation emails:', error);
+        logger.error('Error sending tour confirmation emails:', error);
         return { success: false, error };
     }
 }
@@ -184,14 +185,14 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
     const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
 
     if (!resend) {
-        console.log('📧 [SHUTTLE CONFIRMATION SIMULATION] ----------------------------');
-        console.log(`To Customer: ${data.customerEmail}`);
-        console.log(`Subject: Confirmacion de Shuttle`);
-        console.log('Customer Template Data:', JSON.stringify(redactForLog(data), null, 2));
-        console.log(`To Admin: ${adminEmail}`);
-        console.log(`Subject: Nueva Solicitud de Shuttle`);
-        console.log('Admin Template Data:', JSON.stringify(redactForLog(data), null, 2));
-        console.log('----------------------------------------------------------------');
+        logger.info('📧 [SHUTTLE CONFIRMATION SIMULATION] ----------------------------');
+        logger.info(`To Customer: ${data.customerEmail}`);
+        logger.info(`Subject: Confirmacion de Shuttle`);
+        logger.info('Customer Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        logger.info(`To Admin: ${adminEmail}`);
+        logger.info(`Subject: Nueva Solicitud de Shuttle`);
+        logger.info('Admin Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        logger.info('----------------------------------------------------------------');
         return { success: true };
     }
 
@@ -240,7 +241,7 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
 
         return { success: true };
     } catch (error) {
-        console.error('Error sending shuttle confirmation emails:', error);
+        logger.error('Error sending shuttle confirmation emails:', error);
         return { success: false, error };
     }
 }

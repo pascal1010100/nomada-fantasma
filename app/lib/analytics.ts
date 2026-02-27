@@ -22,11 +22,13 @@ interface EventProperties {
     [key: string]: string | number | boolean | undefined;
 }
 
+import logger from './logger';
+
 export const trackEvent = (name: EventName, properties?: EventProperties) => {
     // In a real app, this would send data to Google Analytics, Mixpanel, etc.
-    // For now, we log to console to verify it works.
+    // For now, we log in development via our structured logger.
     if (process.env.NODE_ENV === 'development') {
-        console.log(`[Analytics] ${name}`, properties);
+        logger.debug(`[Analytics] ${name}`, properties);
     }
 
     // Placeholder for future integration

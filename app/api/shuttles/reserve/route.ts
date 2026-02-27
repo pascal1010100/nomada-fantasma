@@ -1,50 +1,52 @@
 import { NextResponse } from 'next/server';
+import { getTranslations } from 'next-intl/server';
 import { sendShuttleConfirmationEmails } from '@/app/lib/email';
 import { supabaseAdmin } from '@/app/lib/supabase/server';
+import { checkRateLimit, getClientIP } from '@/app/lib/rate-limit';
+import { getLocaleFromRequest } from '@/app/lib/locale';
+import logger from '@/app/lib/logger';
+import { ShuttleRequestSchema, mapZodErrorToTranslationKey } from '@/app/lib/validations';
 import type { Database } from '@/types/database.types';
-import { z } from 'zod';
-
-const rateLimitStore = new Map<string, { count: number; start: number }>();
-const RATE_LIMIT_MAX = 5;
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
-
-const ShuttleRequestSchema = z.object({
-    customerName: z.string().min(2, 'El nombre es muy corto'),
-    customerEmail: z.string().email('Email inválido'),
-    routeOrigin: z.string(),
-    routeDestination: z.string(),
-    date: z.string(),
-    time: z.string(),
-    passengers: z.number().min(1),
-    pickupLocation: z.string().min(5, 'Por favor indica un lugar de recogida claro'),
-    type: z.enum(['shared', 'private']).optional(),
-});
 
 export async function POST(request: Request) {
     try {
-        const ipHeader = request.headers.get('x-forwarded-for') || '';
-        const ip = ipHeader.split(',')[0].trim() || 'unknown';
-        const now = Date.now();
-        const entry = rateLimitStore.get(ip);
-        if (!entry || now - entry.start > RATE_LIMIT_WINDOW_MS) {
-            rateLimitStore.set(ip, { count: 1, start: now });
-        } else {
-            if (entry.count >= RATE_LIMIT_MAX) {
-                return NextResponse.json(
-                    { error: 'Demasiadas solicitudes. Intenta más tarde.' },
-                    { status: 429 }
-                );
-            }
-            entry.count += 1;
-            rateLimitStore.set(ip, entry);
+        // Detect locale FIRST (before rate limiting to use translations)
+        const locale = getLocaleFromRequest(request);
+        const tApi = await getTranslations({ locale, namespace: 'ReservationApi' });
+
+        // Rate limiting
+        const ip = getClientIP(request);
+        const rateLimitResult = checkRateLimit(ip);
+        
+        if (!rateLimitResult.allowed) {
+            return NextResponse.json(
+                { 
+                    error: tApi('rateLimitExceeded'),
+                    retryAfter: rateLimitResult.retryAfter 
+                },
+                { 
+                    status: 429,
+                    headers: {
+                        'Retry-After': rateLimitResult.retryAfter?.toString() || '600',
+                        'X-RateLimit-Limit': '5',
+                        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+                        'X-RateLimit-Reset': new Date(rateLimitResult.resetAt).toISOString(),
+                    }
+                }
+            );
         }
 
         const body = await request.json();
         const validation = ShuttleRequestSchema.safeParse(body);
 
         if (!validation.success) {
+            // Map Zod error to translation key
+            const firstIssue = validation.error.issues[0];
+            const translationKey = mapZodErrorToTranslationKey(firstIssue);
+            const tValidation = await getTranslations({ locale, namespace: 'ValidationErrors' });
+            
             return NextResponse.json(
-                { error: validation.error.issues[0].message },
+                { error: tValidation(translationKey) },
                 { status: 400 }
             );
         }
@@ -72,7 +74,7 @@ export async function POST(request: Request) {
         if (dbError) {
             console.error('Error saving to Supabase:', dbError);
             return NextResponse.json(
-                { error: 'Error al registrar la reserva en la base de datos.' },
+                { error: tApi('databaseError') },
                 { status: 500 }
             );
         }
@@ -93,20 +95,23 @@ export async function POST(request: Request) {
         const emailSent = result.success;
 
         if (!result.success) {
-            console.warn('Email failed but booking was saved to DB');
+            logger.warn('Email failed but booking was saved to DB');
         }
 
         return NextResponse.json({
             success: true,
-            message: 'Solicitud enviada exitosamente. Nos pondremos en contacto contigo pronto.',
+            message: tApi('successMessage'),
             email: {
                 sent: emailSent,
             },
         });
     } catch (error) {
-        console.error('Error in shuttle reserve API:', error);
+        logger.error('Error in shuttle reserve API:', error);
+        // Need locale in catch block too
+        const locale = getLocaleFromRequest(request);
+        const tApi = await getTranslations({ locale, namespace: 'ReservationApi' });
         return NextResponse.json(
-            { error: 'Error interno del servidor' },
+            { error: tApi('internalError') },
             { status: 500 }
         );
     }

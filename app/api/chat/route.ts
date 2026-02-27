@@ -1,6 +1,9 @@
 export const runtime = "edge";
 
 import { PROJECT_KNOWLEDGE, CHAT_PERSONALITY } from './knowledge';
+import { checkRateLimit, getClientIP } from '@/app/lib/rate-limit';
+import { getLocaleFromRequest } from '@/app/lib/locale';
+import logger from '@/app/lib/logger';
 
 // Basic schema for incoming chat messages
 // We'll keep it flexible for now and validate lightly.
@@ -14,6 +17,22 @@ type ChatRequest = {
 
 export async function POST(req: Request): Promise<Response> {
   try {
+    // rate limit by client IP
+    const ip = getClientIP(req);
+    const rate = checkRateLimit(ip);
+    if (!rate.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded" }),
+        {
+          status: 429,
+          headers: {
+            "content-type": "application/json",
+            "Retry-After": rate.retryAfter?.toString() || '600',
+          },
+        }
+      );
+    }
+
     const contentType = req.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
       return new Response(
@@ -34,7 +53,9 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     // Language handling
-    const locale = (body?.locale || detectLocale(text) || "es") as "es" | "en" | "fr";
+    // allow explicit locale in body, else fall back to header/url, auto-detect from text, default to 'es'
+    const headerLocale = getLocaleFromRequest(req);
+    const locale = (body?.locale || headerLocale || detectLocale(text) || "es") as "es" | "en" | "fr";
 
     // Compose system prompt with project knowledge
     // We explicitly tell the AI to respond in the target language even if knowledge is in Spanish
@@ -157,6 +178,7 @@ export async function POST(req: Request): Promise<Response> {
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
+    logger.error('Chat API error:', message);
     return new Response(
       JSON.stringify({ error: message }),
       { status: 500, headers: { "content-type": "application/json" } }
