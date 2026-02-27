@@ -86,8 +86,11 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  // Providing all messages to the client
-  const messages = await getMessages();
+  // Load messages for the current locale
+  // `getMessages` expects an options object; passing the locale string directly does
+  // nothing because the function reads `opts?.locale`. We need to use
+  // `{ locale }` so the correct translation file is loaded.
+  const messages = await getMessages({ locale });
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -105,7 +108,7 @@ export default async function LocaleLayout({
         suppressHydrationWarning
         className={`${inter.variable} font-sans antialiased bg-background text-foreground min-h-screen flex flex-col`}
       >
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"

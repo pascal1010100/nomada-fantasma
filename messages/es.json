@@ -88,7 +88,18 @@
             "submitBtn": "Solicitar Reserva",
             "submitting": "Procesando...",
             "footerInfo": "Confirmación Elite • Respuesta en < 24h",
-            "errorGeneric": "Error al enviar la solicitud"
+            "errorGeneric": "Error al enviar la solicitud",
+            "validationErrors": {
+                "nameRequired": "Por favor ingresa tu nombre",
+                "emailInvalid": "Ingresa un correo válido",
+                "dateRequired": "Selecciona una fecha",
+                "dateFuture": "Selecciona una fecha a partir de mañana",
+                "timeRequired": "Selecciona una hora",
+                "pickupRequired": "Indica un lugar de recogida claro",
+                "passengersMin": "Selecciona al menos 1 pasajero",
+                "originRequired": "Indica el origen",
+                "destinationRequired": "Indica el destino"
+            }
         }
     },
     "About": {
@@ -313,7 +324,9 @@
         "highlightsTitle": "Lo más destacado",
         "helpCardTitle": "¿Necesitas ayuda?",
         "helpCardText": "Nuestro equipo está disponible 24/7 para responder tus preguntas.",
-        "supportLink": "Contactar con soporte"
+        "supportLink": "Contactar con soporte",
+        "durationDescription": "{days, plural, one {# día} other {# días}}",
+        "groupDescription": "Grupo de {min}-{max} personas"
     },
     "ReservationPage": {
         "backToRoutes": "Volver a rutas",
@@ -346,56 +359,6 @@
     "RouteActions": {
         "exploreTownsAndTours": "Explorar pueblos y tours",
         "reserveNow": "Reservar Ahora"
-    },
-    "Reservation": {
-        "headerTitle": "Reserva tu Tour",
-        "headerDesc": "Completa el formulario para solicitar tu cupo.",
-        "priceAdult": "Precio Adulto",
-        "perPerson": "por persona",
-        "priceChild": "Precio Niño",
-        "totalEstimated": "Total Estimado",
-        "dateLabel": "Selecciona la Fecha",
-        "dateHelp": "Las reservas deben hacerse con al menos 24 horas de antelación.",
-        "dateTodayDisabled": "Hoy (no disponible)",
-        "timeLabel": "Selecciona la Hora",
-        "timeHelp": "Hora de inicio del tour.",
-        "adultsLabel": "Adultos",
-        "adultsAgeHint": "(13+ años)",
-        "adultsSingular": "adulto",
-        "adultsPlural": "adultos",
-        "childrenLabel": "Niños",
-        "childrenAgeHint": "(6-12 años)",
-        "childrenSingular": "niño",
-        "childrenPlural": "niños",
-        "childrenPriceHint": "Los niños pagan Q{price}.",
-        "contactTitle": "Información de Contacto",
-        "nameLabel": "Nombre Completo",
-        "namePlaceholder": "Tu nombre completo",
-        "nameErrorRequired": "El nombre completo es obligatorio.",
-        "emailLabel": "Correo Electrónico",
-        "emailPlaceholder": "tu.email@ejemplo.com",
-        "emailErrorRequired": "El correo electrónico es obligatorio.",
-        "emailErrorInvalid": "Por favor, introduce un email válido.",
-        "phoneLabel": "Teléfono de WhatsApp",
-        "phonePlaceholder": "+1 (555) 123-4567",
-        "phoneErrorRequired": "Se requiere un número de teléfono.",
-        "phoneErrorInvalid": "Por favor, introduce un número de teléfono válido.",
-        "notesLabel": "Solicitudes Especiales",
-        "notesPlaceholder": "¿Alergias, problemas de movilidad o peticiones especiales?",
-        "submitButton": "Solicitar Reserva",
-        "submittingButton": "Procesando...",
-        "consentText": "Al hacer clic, aceptas nuestros Términos de Servicio y Política de Privacidad.",
-        "successTitle": "¡Solicitud Enviada!",
-        "successDesc": "Hemos recibido tu solicitud. Nuestro equipo te contactará en breve para confirmar disponibilidad y pago.",
-        "errorGeneric": "Ocurrió un error. Por favor, inténtalo de nuevo.",
-        "errors": {
-            "requiredName": "El nombre completo es obligatorio.",
-            "requiredEmail": "El correo electrónico es obligatorio.",
-            "invalidEmail": "Por favor, introduce una dirección de correo electrónico válida.",
-            "requiredPhone": "Se requiere un número de teléfono de contacto.",
-            "invalidPhone": "Por favor, introduce un número de teléfono válido.",
-            "maxCapacity": "El número total de participantes no puede exceder {max}."
-        }
     },
     "Data": {
         "routes": {
@@ -917,6 +880,19 @@
         "current": "Español",
         "other": "English"
     },
+    "LakeInfo": {
+        "title": "Datos del Lago",
+        "locationLabel": "Ubicación",
+        "depthLabel": "Profundidad",
+        "elevationLabel": "Elevación",
+        "bestSeasonLabel": "Mejor época",
+        "connectivityLabel": "Conectividad",
+        "locationValue": "Sierra Madre de Guatemala",
+        "depthValue": "340m (más profundo de Centroamérica)",
+        "elevationValue": "1,560 metros sobre el nivel del mar",
+        "bestSeasonValue": "Noviembre a abril (temporada seca)",
+        "connectivityValue": "WiFi excelente en la mayoría de pueblos"
+    },
     "Footer": {
         "rights": "© {year} Nómada Fantasma",
         "remote": "Remoto · GT",
@@ -990,6 +966,13 @@
       "footerQuestion": "Si tienes alguna pregunta, responde a este correo o contáctanos por WhatsApp.",
       "footerSignature": "Nómada Fantasma - Viajes Épicos en Guatemala 🇬🇹"
     },
+    "Reservar": {
+        "errorSendRequest": "Error al enviar la solicitud",
+        "errorGeneric": "Hubo un error al enviar tu solicitud. Por favor intenta de nuevo.",
+        "successTitle": "¡Solicitud enviada con éxito!",
+        "successMessage": "Hemos recibido tu solicitud de viaje.",
+        "requestId": "ID de solicitud"
+    },
     "ReservationApi": {
       "errors": {
         "invalidRequest": "Solicitud inválida.",
@@ -1001,6 +984,34 @@
         "requiredTour": "Se requiere un tour para esta reserva.",
         "requiredAccommodation": "Se requiere un hospedaje para esta reserva.",
         "requiredGuide": "Se requiere un guía para esta reserva."
-      }
+      },
+      "rateLimitExceeded": "Demasiadas solicitudes. Intenta más tarde.",
+      "databaseError": "Error al registrar la reserva en la base de datos.",
+      "databaseErrorCreate": "Error al crear la reserva en la base de datos",
+      "databaseErrorFetch": "Error al obtener las reservas",
+      "databaseErrorUpdate": "Error al actualizar la reserva",
+      "successMessage": "Solicitud enviada exitosamente. Nos pondremos en contacto contigo pronto.",
+      "internalError": "Error interno del servidor",
+      "emailNotConfigured": "El servicio de email no está configurado",
+      "missingFields": "Faltan campos requeridos",
+      "emailSendFailed": "Error al enviar el email de confirmación",
+      "idAndStatusRequired": "Se requiere ID y status",
+      "invalidStatus": "Status inválido",
+      "updateSuccess": "Reserva actualizada exitosamente"
+    },
+    "ValidationErrors": {
+      "nameTooShort": "El nombre es muy corto",
+      "invalidEmail": "Email inválido",
+      "originRequired": "El origen es requerido",
+      "destinationRequired": "El destino es requerido",
+      "dateRequired": "La fecha es requerida",
+      "timeRequired": "La hora es requerida",
+      "minPassengers": "Debe haber al menos 1 pasajero",
+      "pickupLocationRequired": "Por favor indica un lugar de recogida claro",
+      "nameRequired": "Por favor ingresa tu nombre",
+      "emailInvalid": "Ingresa un correo válido",
+      "dateRequiredSelect": "Selecciona una fecha",
+      "nameMinLength": "El nombre debe tener al menos 2 caracteres",
+      "nameRequiredField": "El nombre es requerido"
     }
 }

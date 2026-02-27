@@ -88,7 +88,18 @@
             "submitting": "Processing...",
             "submitBtn": "Request Booking",
             "footerInfo": "Elite Confirmation • Response in < 24h",
-            "errorGeneric": "Error sending request"
+            "errorGeneric": "Error sending request",
+            "validationErrors": {
+                "nameRequired": "Please enter your name",
+                "emailInvalid": "Enter a valid email",
+                "dateRequired": "Select a date",
+                "dateFuture": "Select a date starting from tomorrow",
+                "timeRequired": "Select a time",
+                "pickupRequired": "Indicate a clear pickup location",
+                "passengersMin": "Select at least 1 passenger",
+                "originRequired": "Indicate the origin",
+                "destinationRequired": "Indicate the destination"
+            }
         }
     },
     "About": {
@@ -346,56 +357,6 @@
     "RouteActions": {
         "exploreTownsAndTours": "Explore towns and tours",
         "reserveNow": "Reserve Now"
-    },
-    "Reservation": {
-        "headerTitle": "Book Your Tour",
-        "headerDesc": "Complete the form to request your spot.",
-        "priceAdult": "Adult Price",
-        "perPerson": "per person",
-        "priceChild": "Child Price",
-        "totalEstimated": "Estimated Total",
-        "dateLabel": "Select Date",
-        "dateHelp": "Reservations must be made at least 24 hours in advance.",
-        "dateTodayDisabled": "Today (not available)",
-        "timeLabel": "Select Time",
-        "timeHelp": "Tour start time.",
-        "adultsLabel": "Adults",
-        "adultsAgeHint": "(13+ years)",
-        "adultsSingular": "adult",
-        "adultsPlural": "adults",
-        "childrenLabel": "Children",
-        "childrenAgeHint": "(6-12 years)",
-        "childrenSingular": "child",
-        "childrenPlural": "children",
-        "childrenPriceHint": "Children pay Q{price}.",
-        "contactTitle": "Contact Information",
-        "nameLabel": "Full Name",
-        "namePlaceholder": "Your full name",
-        "nameErrorRequired": "Full name is required.",
-        "emailLabel": "Email",
-        "emailPlaceholder": "your.email@example.com",
-        "emailErrorRequired": "Email is required.",
-        "emailErrorInvalid": "Please enter a valid email.",
-        "phoneLabel": "WhatsApp Phone",
-        "phonePlaceholder": "+1 (555) 123-4567",
-        "phoneErrorRequired": "A phone number is required.",
-        "phoneErrorInvalid": "Please enter a valid phone number.",
-        "notesLabel": "Special Requests",
-        "notesPlaceholder": "Any allergies, mobility issues, or special requests?",
-        "submitButton": "Request Reservation",
-        "submittingButton": "Processing...",
-        "consentText": "By clicking, you accept our Terms of Service and Privacy Policy.",
-        "successTitle": "Request Sent!",
-        "successDesc": "Our team will contact you shortly via WhatsApp or email to confirm availability and payment details.",
-        "errorGeneric": "An error occurred. Please try again.",
-        "errors": {
-            "requiredName": "Full name is required.",
-            "requiredEmail": "Email is required.",
-            "invalidEmail": "Please enter a valid email address.",
-            "requiredPhone": "A contact phone number is required.",
-            "invalidPhone": "Please enter a valid phone number.",
-            "maxCapacity": "The total number of participants cannot exceed {max}."
-        }
     },
     "Data": {
         "routes": {
@@ -982,6 +943,19 @@
         "current": "English",
         "other": "Español"
     },
+    "LakeInfo": {
+        "title": "Lake Facts",
+        "locationLabel": "Location",
+        "depthLabel": "Depth",
+        "elevationLabel": "Elevation",
+        "bestSeasonLabel": "Best season",
+        "connectivityLabel": "Connectivity",
+        "locationValue": "Sierra Madre de Guatemala",
+        "depthValue": "340m (deepest in Central America)",
+        "elevationValue": "1,560 meters above sea level",
+        "bestSeasonValue": "November to April (dry season)",
+        "connectivityValue": "Excellent WiFi in most towns"
+    },
     "Footer": {
         "rights": "© {year} Nomada Fantasma",
         "remote": "Remote · GT",
@@ -1055,6 +1029,13 @@
       "footerQuestion": "If you have any questions, reply to this email or contact us on WhatsApp.",
       "footerSignature": "Nómada Fantasma - Epic Travels in Guatemala 🇬🇹"
     },
+    "Reservar": {
+        "errorSendRequest": "Error sending request",
+        "errorGeneric": "There was an error sending your request. Please try again.",
+        "successTitle": "Request sent successfully!",
+        "successMessage": "We have received your travel request.",
+        "requestId": "Request ID"
+    },
     "ReservationApi": {
       "errors": {
         "invalidRequest": "Invalid request.",
@@ -1066,6 +1047,34 @@
         "requiredTour": "A tour is required for this reservation.",
         "requiredAccommodation": "An accommodation is required for this reservation.",
         "requiredGuide": "A guide is required for this reservation."
-      }
+      },
+      "rateLimitExceeded": "Too many requests. Please try again later.",
+      "databaseError": "Error saving the reservation to the database.",
+      "databaseErrorCreate": "Error creating the reservation in the database",
+      "databaseErrorFetch": "Error fetching reservations",
+      "databaseErrorUpdate": "Error updating the reservation",
+      "successMessage": "Request sent successfully. We will contact you soon.",
+      "internalError": "Internal server error",
+      "emailNotConfigured": "Email service is not configured",
+      "missingFields": "Missing required fields",
+      "emailSendFailed": "Error sending confirmation email",
+      "idAndStatusRequired": "ID and status are required",
+      "invalidStatus": "Invalid status",
+      "updateSuccess": "Reservation updated successfully"
+    },
+    "ValidationErrors": {
+      "nameTooShort": "Name is too short",
+      "invalidEmail": "Invalid email",
+      "originRequired": "Origin is required",
+      "destinationRequired": "Destination is required",
+      "dateRequired": "Date is required",
+      "timeRequired": "Time is required",
+      "minPassengers": "There must be at least 1 passenger",
+      "pickupLocationRequired": "Please indicate a clear pickup location",
+      "nameRequired": "Please enter your name",
+      "emailInvalid": "Enter a valid email",
+      "dateRequiredSelect": "Select a date",
+      "nameMinLength": "Name must be at least 2 characters",
+      "nameRequiredField": "Name is required"
     }
 }
