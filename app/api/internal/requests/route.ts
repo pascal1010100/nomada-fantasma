@@ -6,6 +6,7 @@ import type { Database } from '@/types/database.types';
 
 type ReservationRow = Database['public']['Tables']['reservations']['Row'];
 type ShuttleBookingRow = Database['public']['Tables']['shuttle_bookings']['Row'];
+type TourRow = Database['public']['Tables']['tours']['Row'];
 type LegacyReservationRow = {
     id: string;
     created_at: string;
@@ -94,13 +95,26 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Error fetching shuttles' }, { status: 500 });
         }
 
+        const sanPedroToursResult = await supabaseAdmin
+            .from('tours')
+            .select('id')
+            .eq('pueblo_slug', 'san-pedro');
+
+        if (sanPedroToursResult.error) {
+            logger.error('Error fetching San Pedro tours for internal requests:', sanPedroToursResult.error);
+            return NextResponse.json({ error: 'Error fetching tours' }, { status: 500 });
+        }
+
+        const sanPedroTourIds = new Set(
+            (sanPedroToursResult.data ?? []).map((tour) => (tour as Pick<TourRow, 'id'>).id)
+        );
+
         const reservationsResult = await supabaseAdmin
             .from('reservations')
             .select('*')
             .eq('reservation_type', 'tour')
-            .or('tour_name.ilike.%san%pedro%,customer_notes.ilike.%san%pedro%')
             .order('created_at', { ascending: false })
-            .limit(limit);
+            .limit(Math.min(Math.max(limit * 6, 120), 500));
 
         let reservationItems: InternalRequestItem[] = [];
         if (reservationsResult.error) {
@@ -117,11 +131,22 @@ export async function GET(request: Request) {
                 return NextResponse.json({ error: 'Error fetching reservations' }, { status: 500 });
             }
 
-            reservationItems = (legacyResult.data ?? []).map((row) =>
-                mapReservation(row as LegacyReservationRow)
-            );
+            reservationItems = (legacyResult.data ?? [])
+                .map((row) => mapReservation(row as LegacyReservationRow))
+                .slice(0, limit);
         } else {
-            reservationItems = (reservationsResult.data ?? []).map((row) =>
+            const scopedReservations = (reservationsResult.data ?? [])
+                .filter((row) => {
+                    const typedRow = row as ReservationRow;
+                    const matchesTourId = typedRow.tour_id ? sanPedroTourIds.has(typedRow.tour_id) : false;
+                    const tourName = typedRow.tour_name?.toLowerCase() ?? '';
+                    const customerNotes = typedRow.customer_notes?.toLowerCase() ?? '';
+                    const matchesText = tourName.includes('san pedro') || customerNotes.includes('san pedro');
+                    return matchesTourId || matchesText;
+                })
+                .slice(0, limit);
+
+            reservationItems = scopedReservations.map((row) =>
                 mapReservation(row as ReservationRow)
             );
         }
