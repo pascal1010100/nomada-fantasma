@@ -16,6 +16,7 @@ type InternalRequestItem = {
     emailAttempts: number;
     emailLastError: string | null;
 };
+type RequestStatus = 'pending' | 'processing' | 'confirmed' | 'cancelled' | 'completed';
 
 type InternalResponse = {
     success: boolean;
@@ -34,7 +35,9 @@ export default function RecepcionRequestsPage() {
     const locale = useLocale();
     const [token, setToken] = useState('');
     const [tempToken, setTempToken] = useState('');
+    const [actor, setActor] = useState('recepcion');
     const [loading, setLoading] = useState(false);
+    const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [data, setData] = useState<InternalResponse | null>(null);
 
@@ -104,6 +107,69 @@ export default function RecepcionRequestsPage() {
         sessionStorage.removeItem(STORAGE_KEY);
     };
 
+    const normalizeStatus = (status: string | null): RequestStatus => {
+        if (status === 'processing' || status === 'confirmed' || status === 'cancelled' || status === 'completed') {
+            return status;
+        }
+        return 'pending';
+    };
+
+    const getActions = (status: RequestStatus): Array<{ label: string; to: RequestStatus }> => {
+        if (status === 'pending') return [{ label: 'Iniciar gestión', to: 'processing' }, { label: 'Cancelar', to: 'cancelled' }];
+        if (status === 'processing') return [{ label: 'Confirmar', to: 'confirmed' }, { label: 'Cancelar', to: 'cancelled' }];
+        if (status === 'confirmed') return [{ label: 'Completar', to: 'completed' }, { label: 'Cancelar', to: 'cancelled' }];
+        return [];
+    };
+
+    const updateStatus = async (item: InternalRequestItem, nextStatus: RequestStatus) => {
+        if (!token.trim()) return;
+        const currentStatus = normalizeStatus(item.status);
+        if (currentStatus === nextStatus) return;
+
+        const requiresNote = nextStatus === 'confirmed' || nextStatus === 'cancelled' || nextStatus === 'completed';
+        let note = '';
+        if (requiresNote) {
+            const prompted = window.prompt(`Nota obligatoria para cambiar a ${nextStatus}:`, '');
+            if (prompted === null) return;
+            note = prompted.trim();
+            if (!note) {
+                setError(`Debes agregar una nota para cambiar a ${nextStatus}.`);
+                return;
+            }
+        }
+
+        setActionLoadingId(`${item.kind}-${item.id}-${nextStatus}`);
+        setError('');
+        try {
+            const response = await fetch('/api/internal/requests/status', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-admin-token': token.trim(),
+                    'x-admin-actor': actor.trim() || 'recepcion',
+                },
+                body: JSON.stringify({
+                    kind: item.kind,
+                    id: item.id,
+                    nextStatus,
+                    note: note || undefined,
+                }),
+            });
+
+            const payload = await response.json();
+            if (!response.ok) {
+                setError(payload?.error || 'No se pudo actualizar estado.');
+                return;
+            }
+
+            await fetchRequests();
+        } catch (requestError) {
+            setError(requestError instanceof Error ? requestError.message : 'Error de red');
+        } finally {
+            setActionLoadingId(null);
+        }
+    };
+
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
             <h1 className="text-2xl font-bold mb-2">Panel Recepción San Pedro</h1>
@@ -138,6 +204,19 @@ export default function RecepcionRequestsPage() {
                     >
                         Limpiar
                     </button>
+                </div>
+                <div className="mt-3">
+                    <label htmlFor="admin-actor" className="text-sm font-medium block mb-2">
+                        Operador
+                    </label>
+                    <input
+                        id="admin-actor"
+                        type="text"
+                        value={actor}
+                        onChange={(event) => setActor(event.target.value)}
+                        placeholder="Nombre de quien opera"
+                        className="w-full sm:max-w-xs rounded-md border bg-background px-3 py-2 text-sm"
+                    />
                 </div>
                 <div className="mt-3 flex gap-2">
                     <button
@@ -188,6 +267,7 @@ export default function RecepcionRequestsPage() {
                             <th className="text-left px-3 py-2">Estado</th>
                             <th className="text-left px-3 py-2">Email</th>
                             <th className="text-left px-3 py-2">Intentos</th>
+                            <th className="text-left px-3 py-2">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -210,11 +290,32 @@ export default function RecepcionRequestsPage() {
                                     ) : null}
                                 </td>
                                 <td className="px-3 py-2">{item.emailAttempts}</td>
+                                <td className="px-3 py-2">
+                                    <div className="flex flex-wrap gap-2">
+                                        {getActions(normalizeStatus(item.status)).map((action) => {
+                                            const actionKey = `${item.kind}-${item.id}-${action.to}`;
+                                            return (
+                                                <button
+                                                    key={actionKey}
+                                                    type="button"
+                                                    onClick={() => updateStatus(item, action.to)}
+                                                    disabled={Boolean(actionLoadingId) || !token.trim()}
+                                                    className="rounded border px-2 py-1 text-xs disabled:opacity-50"
+                                                >
+                                                    {actionLoadingId === actionKey ? '...' : action.label}
+                                                </button>
+                                            );
+                                        })}
+                                        {getActions(normalizeStatus(item.status)).length === 0 ? (
+                                            <span className="text-xs text-muted-foreground">Sin acciones</span>
+                                        ) : null}
+                                    </div>
+                                </td>
                             </tr>
                         ))}
                         {!loading && (data?.items ?? []).length === 0 ? (
                             <tr>
-                                <td className="px-3 py-6 text-center text-muted-foreground" colSpan={7}>
+                                <td className="px-3 py-6 text-center text-muted-foreground" colSpan={8}>
                                     Sin solicitudes para mostrar.
                                 </td>
                             </tr>

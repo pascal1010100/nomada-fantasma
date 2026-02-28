@@ -378,7 +378,7 @@ export async function GET(request: Request) {
 
         // Apply filters if provided
         if (status) {
-            const validStatuses = ['pending', 'confirmed', 'cancelled', 'completed'] as const;
+            const validStatuses = ['pending', 'processing', 'confirmed', 'cancelled', 'completed'] as const;
             if (validStatuses.includes(status as (typeof validStatuses)[number])) {
                 query = query.eq('status', status as (typeof validStatuses)[number]);
             }
@@ -436,7 +436,7 @@ export async function PATCH(request: Request) {
         }
 
         // Validate status
-        const validStatuses = ['pending', 'confirmed', 'cancelled', 'completed'] as const;
+        const validStatuses = ['pending', 'processing', 'confirmed', 'cancelled', 'completed'] as const;
         const statusValue = typeof status === 'string' ? status : '';
         if (!validStatuses.includes(statusValue as (typeof validStatuses)[number])) {
             return NextResponse.json(

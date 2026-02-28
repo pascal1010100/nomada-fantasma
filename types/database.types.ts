@@ -324,6 +324,39 @@ export interface Database {
                 };
                 Relationships: [];
             };
+            internal_request_transitions: {
+                Row: {
+                    id: string;
+                    created_at: string;
+                    request_kind: 'tour' | 'shuttle';
+                    request_id: string;
+                    from_status: string | null;
+                    to_status: string;
+                    note: string | null;
+                    actor: string;
+                };
+                Insert: {
+                    id?: string;
+                    created_at?: string;
+                    request_kind: 'tour' | 'shuttle';
+                    request_id: string;
+                    from_status?: string | null;
+                    to_status: string;
+                    note?: string | null;
+                    actor?: string;
+                };
+                Update: {
+                    id?: string;
+                    created_at?: string;
+                    request_kind?: 'tour' | 'shuttle';
+                    request_id?: string;
+                    from_status?: string | null;
+                    to_status?: string;
+                    note?: string | null;
+                    actor?: string;
+                };
+                Relationships: [];
+            };
             reservations: {
                 Row: {
                     id: string;
@@ -342,7 +375,7 @@ export interface Database {
                     tour_name: string | null;
                     total_price: number | null;
                     currency: string;
-                    status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+                    status: 'pending' | 'processing' | 'confirmed' | 'cancelled' | 'completed';
                     customer_notes: string | null;
                     admin_notes: string | null;
                     confirmation_sent_at: string | null;
@@ -370,7 +403,7 @@ export interface Database {
                     tour_name?: string | null;
                     total_price?: number | null;
                     currency?: string;
-                    status?: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+                    status?: 'pending' | 'processing' | 'confirmed' | 'cancelled' | 'completed';
                     customer_notes?: string | null;
                     admin_notes?: string | null;
                     confirmation_sent_at?: string | null;
@@ -398,7 +431,7 @@ export interface Database {
                     tour_name?: string | null;
                     total_price?: number | null;
                     currency?: string;
-                    status?: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+                    status?: 'pending' | 'processing' | 'confirmed' | 'cancelled' | 'completed';
                     customer_notes?: string | null;
                     admin_notes?: string | null;
                     confirmation_sent_at?: string | null;
