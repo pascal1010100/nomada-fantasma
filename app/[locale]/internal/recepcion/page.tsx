@@ -30,6 +30,40 @@ type InternalResponse = {
 };
 
 const STORAGE_KEY = 'nomada_admin_token';
+const PROCESSING_STALE_HOURS = 8;
+
+function toStartOfDay(date: Date) {
+    const clone = new Date(date);
+    clone.setHours(0, 0, 0, 0);
+    return clone;
+}
+
+function parseRequestDate(item: InternalRequestItem): Date | null {
+    if (!item.date) return null;
+    const parsed = new Date(item.date);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
+
+    // fallback for YYYY-MM-DD values
+    const fallback = new Date(`${item.date}T00:00:00`);
+    if (!Number.isNaN(fallback.getTime())) return fallback;
+    return null;
+}
+
+function getStatusBadgeClasses(status: RequestStatus): string {
+    if (status === 'pending') return 'bg-amber-500/15 text-amber-300 border-amber-400/30';
+    if (status === 'processing') return 'bg-sky-500/15 text-sky-300 border-sky-400/30';
+    if (status === 'confirmed') return 'bg-emerald-500/15 text-emerald-300 border-emerald-400/30';
+    if (status === 'cancelled') return 'bg-rose-500/15 text-rose-300 border-rose-400/30';
+    return 'bg-slate-500/15 text-slate-300 border-slate-400/30';
+}
+
+function getChecklist(status: RequestStatus): string {
+    if (status === 'pending') return 'Validar datos e iniciar gestion con agencia.';
+    if (status === 'processing') return 'Esperando respuesta de agencia y resolver confirmacion/cancelacion.';
+    if (status === 'confirmed') return 'Confirmar logistica final y cerrar al completar servicio.';
+    if (status === 'cancelled') return 'Caso cancelado. Verificar motivo en nota.';
+    return 'Caso finalizado. Sin acciones pendientes.';
+}
 
 export default function RecepcionRequestsPage() {
     const locale = useLocale();
@@ -61,6 +95,48 @@ export default function RecepcionRequestsPage() {
             },
         [data]
     );
+
+    const normalizeStatus = (status: string | null): RequestStatus => {
+        if (status === 'processing' || status === 'confirmed' || status === 'cancelled' || status === 'completed') {
+            return status;
+        }
+        return 'pending';
+    };
+
+    const operations = useMemo(() => {
+        const items = data?.items ?? [];
+        const now = new Date();
+        const todayStart = toStartOfDay(now);
+        const staleThreshold = new Date(now.getTime() - PROCESSING_STALE_HOURS * 60 * 60 * 1000);
+
+        let pendingToday = 0;
+        let processingStale = 0;
+        let confirmedOverdue = 0;
+
+        for (const item of items) {
+            const status = normalizeStatus(item.status);
+            const createdAt = new Date(item.createdAt);
+            const requestDate = parseRequestDate(item);
+
+            if (status === 'pending' && !Number.isNaN(createdAt.getTime()) && createdAt >= todayStart) {
+                pendingToday += 1;
+            }
+
+            if (status === 'processing' && !Number.isNaN(createdAt.getTime()) && createdAt < staleThreshold) {
+                processingStale += 1;
+            }
+
+            if (status === 'confirmed' && requestDate && requestDate < todayStart) {
+                confirmedOverdue += 1;
+            }
+        }
+
+        return {
+            pendingToday,
+            processingStale,
+            confirmedOverdue,
+        };
+    }, [data]);
 
     const fetchRequests = async () => {
         if (!canFetch) return;
@@ -105,13 +181,6 @@ export default function RecepcionRequestsPage() {
         setData(null);
         setError('');
         sessionStorage.removeItem(STORAGE_KEY);
-    };
-
-    const normalizeStatus = (status: string | null): RequestStatus => {
-        if (status === 'processing' || status === 'confirmed' || status === 'cancelled' || status === 'completed') {
-            return status;
-        }
-        return 'pending';
     };
 
     const getActions = (status: RequestStatus): Array<{ label: string; to: RequestStatus }> => {
@@ -256,6 +325,21 @@ export default function RecepcionRequestsPage() {
                 </div>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Pending hoy</p>
+                    <p className="text-xl font-semibold">{operations.pendingToday}</p>
+                </div>
+                <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Processing &gt; {PROCESSING_STALE_HOURS}h</p>
+                    <p className="text-xl font-semibold">{operations.processingStale}</p>
+                </div>
+                <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Confirmed vencidas</p>
+                    <p className="text-xl font-semibold">{operations.confirmedOverdue}</p>
+                </div>
+            </div>
+
             <div className="rounded-xl border overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead className="bg-muted/40">
@@ -265,6 +349,7 @@ export default function RecepcionRequestsPage() {
                             <th className="text-left px-3 py-2">Cliente</th>
                             <th className="text-left px-3 py-2">Detalle</th>
                             <th className="text-left px-3 py-2">Estado</th>
+                            <th className="text-left px-3 py-2">Checklist</th>
                             <th className="text-left px-3 py-2">Email</th>
                             <th className="text-left px-3 py-2">Intentos</th>
                             <th className="text-left px-3 py-2">Acciones</th>
@@ -282,7 +367,14 @@ export default function RecepcionRequestsPage() {
                                     <div className="text-xs text-muted-foreground">{item.customerEmail}</div>
                                 </td>
                                 <td className="px-3 py-2">{item.details}</td>
-                                <td className="px-3 py-2">{item.status ?? '-'}</td>
+                                <td className="px-3 py-2">
+                                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getStatusBadgeClasses(normalizeStatus(item.status))}`}>
+                                        {normalizeStatus(item.status)}
+                                    </span>
+                                </td>
+                                <td className="px-3 py-2 text-xs text-muted-foreground">
+                                    {getChecklist(normalizeStatus(item.status))}
+                                </td>
                                 <td className="px-3 py-2">
                                     <div>{item.emailStatus ?? '-'}</div>
                                     {item.emailLastError ? (
@@ -315,7 +407,7 @@ export default function RecepcionRequestsPage() {
                         ))}
                         {!loading && (data?.items ?? []).length === 0 ? (
                             <tr>
-                                <td className="px-3 py-6 text-center text-muted-foreground" colSpan={8}>
+                                <td className="px-3 py-6 text-center text-muted-foreground" colSpan={9}>
                                     Sin solicitudes para mostrar.
                                 </td>
                             </tr>
