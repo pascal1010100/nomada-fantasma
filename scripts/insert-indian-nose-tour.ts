@@ -23,9 +23,12 @@ async function insertTour() {
     // 1. Data gathered from es.json and our generated images
     const indianNoseTour = {
         title: 'Amanecer Indian Nose (Rostro Maya)',
+        title_en: 'Indian Nose Sunrise (Mayan Face)',
         slug: 'amanecer-indian-nose-rostro-maya',
         description: 'La vista más espectacular del Lago de Atitlán al amanecer. Una caminata corta pero gratificante para ver el sol salir sobre los volcanes.',
+        description_en: 'A short pre-dawn hike to watch the sun rise over Lake Atitlan.',
         full_description: 'Disfruta de una experiencia inolvidable ascendiendo al famoso "Rostro Maya" o Indian Nose. Desde la cima (2,200m), presenciarás cómo el sol ilumina el lago y los volcanes San Pedro, Tolimán y Atitlán. Incluye transporte desde tu hostal y un café caliente en la cima para disfrutar del espectáculo.',
+        full_description_en: 'Climb the iconic Indian Nose viewpoint for a memorable sunrise over Lake Atitlan and the volcanoes of San Pedro, Toliman, and Atitlan. The tour includes early pickup, a local guide, park access, and a hot drink at the summit.',
         price_min: 150,
         price_max: 1000, // Private group price
         currency: 'GTQ',

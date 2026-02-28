@@ -69,9 +69,12 @@ export interface Database {
                     created_at: string;
                     updated_at: string;
                     title: string;
+                    title_en: string | null;
                     slug: string;
                     description: string | null;
+                    description_en: string | null;
                     full_description: string | null;
+                    full_description_en: string | null;
                     price_min: number | null;
                     price_max: number | null;
                     currency: string;
@@ -95,9 +98,12 @@ export interface Database {
                     created_at?: string;
                     updated_at?: string;
                     title: string;
+                    title_en?: string | null;
                     slug: string;
                     description?: string | null;
+                    description_en?: string | null;
                     full_description?: string | null;
+                    full_description_en?: string | null;
                     price_min?: number | null;
                     price_max?: number | null;
                     currency?: string;
@@ -121,9 +127,12 @@ export interface Database {
                     created_at?: string;
                     updated_at?: string;
                     title?: string;
+                    title_en?: string | null;
                     slug?: string;
                     description?: string | null;
+                    description_en?: string | null;
                     full_description?: string | null;
+                    full_description_en?: string | null;
                     price_min?: number | null;
                     price_max?: number | null;
                     currency?: string;

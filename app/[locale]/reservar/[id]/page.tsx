@@ -25,23 +25,30 @@ const findTourById = (id: string) => {
     return null;
 };
 
-const findSupabaseTour = async (idOrSlug: string) => {
+const findSupabaseTour = async (idOrSlug: string, locale: string) => {
     const supabaseTour = await getTourBySlugFromDB(idOrSlug);
     if (!supabaseTour) {
         return null;
     }
+    const isEnglish = locale === 'en';
+    const localizedTitle = isEnglish
+        ? (supabaseTour.title_en ?? supabaseTour.title)
+        : supabaseTour.title;
+    const localizedSummary = isEnglish
+        ? (supabaseTour.description_en ?? supabaseTour.description ?? '')
+        : (supabaseTour.description ?? '');
     const images = supabaseTour.images ?? (supabaseTour.cover_image ? [supabaseTour.cover_image] : []);
     return {
         data: {
             id: supabaseTour.id,
-            title: supabaseTour.title,
+            title: localizedTitle,
             slug: supabaseTour.slug,
             images,
             price: supabaseTour.price_min ?? 0,
             capacity: {
                 max: supabaseTour.max_guests ?? 10,
             },
-            summary: supabaseTour.description ?? '',
+            summary: localizedSummary,
             rating: 5,
         },
         type: 'tour' as const,
@@ -57,7 +64,7 @@ export default async function TourReservationPage({
     const { id, locale } = await params;
     const t = await getTranslations({ locale, namespace: 'ReservationPage' });
     const localResult = findTourById(id);
-    const result = localResult ?? await findSupabaseTour(id);
+    const result = localResult ?? await findSupabaseTour(id, locale);
 
     if (!result) {
         notFound();
