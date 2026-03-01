@@ -19,6 +19,9 @@ type LegacyReservationRow = {
     email_delivery_status?: 'pending' | 'sent' | 'failed' | 'not_requested' | null;
     email_attempts?: number | null;
     email_last_error?: string | null;
+    admin_notes?: string | null;
+    confirmed_at?: string | null;
+    cancelled_at?: string | null;
 };
 
 type InternalRequestItem = {
@@ -33,6 +36,9 @@ type InternalRequestItem = {
     emailStatus: string | null;
     emailAttempts: number;
     emailLastError: string | null;
+    adminNotes: string | null;
+    confirmedAt: string | null;
+    cancelledAt: string | null;
 };
 
 function normalizeLimit(rawValue: string | null): number {
@@ -55,6 +61,9 @@ function mapReservation(row: ReservationRow | LegacyReservationRow): InternalReq
         emailStatus: row.email_delivery_status ?? null,
         emailAttempts: row.email_attempts ?? 0,
         emailLastError: row.email_last_error ?? null,
+        adminNotes: isModern ? row.admin_notes : (row.admin_notes ?? null),
+        confirmedAt: isModern ? row.confirmed_at : (row.confirmed_at ?? null),
+        cancelledAt: isModern ? row.cancelled_at : (row.cancelled_at ?? null),
     };
 }
 
@@ -71,6 +80,9 @@ function mapShuttle(row: ShuttleBookingRow): InternalRequestItem {
         emailStatus: row.email_delivery_status,
         emailAttempts: row.email_attempts,
         emailLastError: row.email_last_error,
+        adminNotes: row.admin_notes,
+        confirmedAt: row.confirmed_at,
+        cancelledAt: row.cancelled_at,
     };
 }
 

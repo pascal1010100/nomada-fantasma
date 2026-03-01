@@ -15,6 +15,9 @@ type InternalRequestItem = {
     emailStatus: string | null;
     emailAttempts: number;
     emailLastError: string | null;
+    adminNotes: string | null;
+    confirmedAt: string | null;
+    cancelledAt: string | null;
 };
 type RequestStatus = 'pending' | 'processing' | 'confirmed' | 'cancelled' | 'completed';
 
@@ -65,6 +68,18 @@ function getChecklist(status: RequestStatus): string {
     return 'Caso finalizado. Sin acciones pendientes.';
 }
 
+function formatTimestamp(value: string | null): string {
+    if (!value) return '-';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '-';
+    return parsed.toLocaleString();
+}
+
+function getNotePreview(note: string, limit = 110): string {
+    if (note.length <= limit) return note;
+    return `${note.slice(0, limit)}...`;
+}
+
 export default function RecepcionRequestsPage() {
     const locale = useLocale();
     const [token, setToken] = useState('');
@@ -72,6 +87,7 @@ export default function RecepcionRequestsPage() {
     const [actor, setActor] = useState('recepcion');
     const [loading, setLoading] = useState(false);
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+    const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
     const [error, setError] = useState('');
     const [data, setData] = useState<InternalResponse | null>(null);
 
@@ -188,6 +204,14 @@ export default function RecepcionRequestsPage() {
         if (status === 'processing') return [{ label: 'Confirmar', to: 'confirmed' }, { label: 'Cancelar', to: 'cancelled' }];
         if (status === 'confirmed') return [{ label: 'Completar', to: 'completed' }, { label: 'Cancelar', to: 'cancelled' }];
         return [];
+    };
+
+    const toggleNote = (item: InternalRequestItem) => {
+        const key = `${item.kind}-${item.id}`;
+        setExpandedNotes((prev) => ({
+            ...prev,
+            [key]: !prev[key],
+        }));
     };
 
     const updateStatus = async (item: InternalRequestItem, nextStatus: RequestStatus) => {
@@ -371,6 +395,56 @@ export default function RecepcionRequestsPage() {
                                     <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getStatusBadgeClasses(normalizeStatus(item.status))}`}>
                                         {normalizeStatus(item.status)}
                                     </span>
+                                    <div className="mt-1 text-xs text-muted-foreground space-y-1">
+                                        {normalizeStatus(item.status) === 'confirmed' ? (
+                                            <div>
+                                                Confirmado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : (
+                                                    <span className="text-amber-400">Pendiente de fecha</span>
+                                                )}
+                                            </div>
+                                        ) : null}
+                                        {normalizeStatus(item.status) === 'cancelled' ? (
+                                            <div>
+                                                Cancelado: {item.cancelledAt ? formatTimestamp(item.cancelledAt) : (
+                                                    <span className="text-amber-400">Pendiente de fecha</span>
+                                                )}
+                                            </div>
+                                        ) : null}
+                                        {normalizeStatus(item.status) === 'completed' ? (
+                                            <div>
+                                                Confirmado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : (
+                                                    <span className="text-amber-400">Sin fecha de confirmación</span>
+                                                )}
+                                            </div>
+                                        ) : null}
+                                        {(normalizeStatus(item.status) === 'confirmed' ||
+                                            normalizeStatus(item.status) === 'cancelled' ||
+                                            normalizeStatus(item.status) === 'completed') ? (
+                                            <div>
+                                                Nota:{' '}
+                                                {item.adminNotes ? (
+                                                    <>
+                                                        <span>
+                                                            {expandedNotes[`${item.kind}-${item.id}`]
+                                                                ? item.adminNotes
+                                                                : getNotePreview(item.adminNotes)}
+                                                        </span>{' '}
+                                                        {item.adminNotes.length > 110 ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => toggleNote(item)}
+                                                                className="underline text-cyan-300 hover:text-cyan-200"
+                                                            >
+                                                                {expandedNotes[`${item.kind}-${item.id}`] ? 'ver menos' : 'ver más'}
+                                                            </button>
+                                                        ) : null}
+                                                    </>
+                                                ) : (
+                                                    <span className="text-amber-400">Sin nota</span>
+                                                )}
+                                            </div>
+                                        ) : null}
+                                    </div>
                                 </td>
                                 <td className="px-3 py-2 text-xs text-muted-foreground">
                                     {getChecklist(normalizeStatus(item.status))}
