@@ -667,6 +667,71 @@
                         "description": "Cierre con postres tradicionales y degustación de café."
                     }
                 ]
+            },
+            "amanecer-indian-nose-rostro-maya": {
+                "title": "Amanecer Indian Nose (Rostro Maya)",
+                "summary": "Una caminata corta de madrugada para ver el amanecer sobre el Lago de Atitlán.",
+                "description": "Sube al icónico mirador de Indian Nose para disfrutar un amanecer inolvidable sobre el Lago de Atitlán y los volcanes San Pedro, Tolimán y Atitlán. El tour incluye recojo temprano, guía local, ingreso al parque y bebida caliente en la cima.",
+                "duration": "4 horas",
+                "difficulty": "Fácil",
+                "meetingPoint": "Recogida en San Pedro La Laguna",
+                "includes": [
+                    "Transporte ida y vuelta",
+                    "Guía local",
+                    "Entrada al parque",
+                    "Bebida caliente"
+                ],
+                "notIncludes": [
+                    "Comidas no mencionadas",
+                    "Propinas",
+                    "Gastos personales"
+                ],
+                "whatToBring": [
+                    "Ropa abrigada",
+                    "Zapatos cómodos para caminar",
+                    "Agua",
+                    "Cámara",
+                    "Linterna o frontal"
+                ],
+                "highlights": [
+                    "Vistas panorámicas del lago",
+                    "Amanecer sobre los volcanes",
+                    "Caminata fácil a moderada",
+                    "Fotos espectaculares",
+                    "Guía local con experiencia"
+                ],
+                "itinerary": [
+                    {
+                        "time": "3:45 AM",
+                        "title": "Recogida",
+                        "description": "Recogida en tu hospedaje en San Pedro La Laguna."
+                    },
+                    {
+                        "time": "4:30 AM",
+                        "title": "Inicio del sendero",
+                        "description": "Breve charla y comienzo de la caminata."
+                    },
+                    {
+                        "time": "5:30 AM",
+                        "title": "Amanecer en el mirador",
+                        "description": "Disfruta el amanecer con café o té caliente."
+                    },
+                    {
+                        "time": "6:15 AM",
+                        "title": "Regreso",
+                        "description": "Descenso y retorno a San Pedro."
+                    }
+                ],
+                "faqs": [
+                    {
+                        "question": "¿Es apto para niños?",
+                        "answer": "Sí. El sendero es corto y seguro para familias."
+                    },
+                    {
+                        "question": "¿Necesito estar en gran forma física?",
+                        "answer": "No. Es una caminata de aproximadamente 30 minutos a ritmo tranquilo."
+                    }
+                ]
             }
         },
         "points": {
