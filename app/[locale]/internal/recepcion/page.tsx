@@ -244,6 +244,7 @@ export default function RecepcionRequestsPage() {
                 body: JSON.stringify({
                     kind: item.kind,
                     id: item.id,
+                    currentStatus,
                     nextStatus,
                     note: note || undefined,
                 }),
@@ -251,6 +252,10 @@ export default function RecepcionRequestsPage() {
 
             const payload = await response.json();
             if (!response.ok) {
+                if (response.status === 409) {
+                    setError('Este caso fue actualizado por otro operador. Actualiza solicitudes.');
+                    return;
+                }
                 setError(payload?.error || 'No se pudo actualizar estado.');
                 return;
             }
