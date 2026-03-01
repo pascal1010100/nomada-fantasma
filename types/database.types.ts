@@ -284,6 +284,9 @@ export interface Database {
                     email_attempts: number;
                     email_last_attempt_at: string | null;
                     email_last_error: string | null;
+                    admin_notes: string | null;
+                    confirmed_at: string | null;
+                    cancelled_at: string | null;
                     created_at: string;
                 };
                 Insert: {
@@ -302,6 +305,9 @@ export interface Database {
                     email_attempts?: number;
                     email_last_attempt_at?: string | null;
                     email_last_error?: string | null;
+                    admin_notes?: string | null;
+                    confirmed_at?: string | null;
+                    cancelled_at?: string | null;
                     created_at?: string;
                 };
                 Update: {
@@ -320,6 +326,9 @@ export interface Database {
                     email_attempts?: number;
                     email_last_attempt_at?: string | null;
                     email_last_error?: string | null;
+                    admin_notes?: string | null;
+                    confirmed_at?: string | null;
+                    cancelled_at?: string | null;
                     created_at?: string;
                 };
                 Relationships: [];

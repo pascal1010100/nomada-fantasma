@@ -167,9 +167,22 @@ export async function PATCH(request: Request) {
             return NextResponse.json({ error: transitionError }, { status: 400 });
         }
 
+        const updatePayload: Database['public']['Tables']['shuttle_bookings']['Update'] = {
+            status: nextStatusRaw,
+        };
+
+        if (nextStatusRaw === 'confirmed') updatePayload.confirmed_at = new Date().toISOString();
+        if (nextStatusRaw === 'cancelled') updatePayload.cancelled_at = new Date().toISOString();
+        if (note) {
+            const previous = shuttleResult.data.admin_notes?.trim();
+            updatePayload.admin_notes = previous
+                ? `${previous}\n[${new Date().toISOString()}] (${actor}) ${nextStatusRaw}: ${note}`
+                : `[${new Date().toISOString()}] (${actor}) ${nextStatusRaw}: ${note}`;
+        }
+
         const updateResult = await supabaseAdmin
             .from('shuttle_bookings')
-            .update({ status: nextStatusRaw })
+            .update(updatePayload)
             .eq('id', id)
             .select('id,status')
             .single();
