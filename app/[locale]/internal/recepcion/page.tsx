@@ -181,6 +181,10 @@ export default function RecepcionRequestsPage() {
     const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
     const [error, setError] = useState('');
     const [data, setData] = useState<InternalResponse | null>(null);
+    const [statusFilter, setStatusFilter] = useState<'all' | RequestStatus>('all');
+    const [kindFilter, setKindFilter] = useState<'all' | InternalRequestItem['kind']>('all');
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
 
     useEffect(() => {
         const stored = sessionStorage.getItem(STORAGE_KEY);
@@ -192,17 +196,6 @@ export default function RecepcionRequestsPage() {
 
     const canFetch = token.trim().length > 0;
 
-    const summary = useMemo(
-        () =>
-            data?.summary ?? {
-                total: 0,
-                tours: 0,
-                shuttles: 0,
-                emailFailed: 0,
-            },
-        [data]
-    );
-
     const normalizeStatus = (status: string | null): RequestStatus => {
         if (status === 'processing' || status === 'confirmed' || status === 'cancelled' || status === 'completed') {
             return status;
@@ -210,8 +203,41 @@ export default function RecepcionRequestsPage() {
         return 'pending';
     };
 
-    const operations = useMemo(() => {
+    const filteredItems = useMemo(() => {
         const items = data?.items ?? [];
+        return items.filter((item) => {
+            const normalizedStatus = normalizeStatus(item.status);
+            if (statusFilter !== 'all' && normalizedStatus !== statusFilter) return false;
+            if (kindFilter !== 'all' && item.kind !== kindFilter) return false;
+
+            const createdAt = new Date(item.createdAt);
+            if (Number.isNaN(createdAt.getTime())) return false;
+
+            if (dateFrom) {
+                const fromStart = new Date(`${dateFrom}T00:00:00`);
+                if (!Number.isNaN(fromStart.getTime()) && createdAt < fromStart) return false;
+            }
+
+            if (dateTo) {
+                const toEnd = new Date(`${dateTo}T23:59:59.999`);
+                if (!Number.isNaN(toEnd.getTime()) && createdAt > toEnd) return false;
+            }
+
+            return true;
+        });
+    }, [data, statusFilter, kindFilter, dateFrom, dateTo]);
+
+    const summary = useMemo(
+        () => ({
+            total: filteredItems.length,
+            tours: filteredItems.filter((item) => item.kind === 'tour').length,
+            shuttles: filteredItems.filter((item) => item.kind === 'shuttle').length,
+            emailFailed: filteredItems.filter((item) => item.emailStatus === 'failed').length,
+        }),
+        [filteredItems]
+    );
+
+    const operations = useMemo(() => {
         const now = new Date();
         const todayStart = toStartOfDay(now);
         const staleThreshold = new Date(now.getTime() - PROCESSING_STALE_HOURS * 60 * 60 * 1000);
@@ -220,7 +246,7 @@ export default function RecepcionRequestsPage() {
         let processingStale = 0;
         let confirmedOverdue = 0;
 
-        for (const item of items) {
+        for (const item of filteredItems) {
             const status = normalizeStatus(item.status);
             const createdAt = new Date(item.createdAt);
             const requestDate = parseRequestDate(item);
@@ -243,7 +269,7 @@ export default function RecepcionRequestsPage() {
             processingStale,
             confirmedOverdue,
         };
-    }, [data]);
+    }, [filteredItems]);
 
     const fetchRequests = async () => {
         if (!canFetch) return;
@@ -432,6 +458,71 @@ export default function RecepcionRequestsPage() {
                 {error ? <p className="mt-3 text-sm text-red-500">{error}</p> : null}
             </div>
 
+            <div className="rounded-xl border p-4 mb-6 bg-card/50">
+                <p className="text-sm font-medium mb-3">Filtros operativos</p>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <label className="text-sm">
+                        <span className="block text-xs text-muted-foreground mb-1">Estado</span>
+                        <select
+                            value={statusFilter}
+                            onChange={(event) => setStatusFilter(event.target.value as 'all' | RequestStatus)}
+                            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                        >
+                            <option value="all">Todos</option>
+                            <option value="pending">pending</option>
+                            <option value="processing">processing</option>
+                            <option value="confirmed">confirmed</option>
+                            <option value="completed">completed</option>
+                            <option value="cancelled">cancelled</option>
+                        </select>
+                    </label>
+                    <label className="text-sm">
+                        <span className="block text-xs text-muted-foreground mb-1">Tipo</span>
+                        <select
+                            value={kindFilter}
+                            onChange={(event) => setKindFilter(event.target.value as 'all' | InternalRequestItem['kind'])}
+                            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                        >
+                            <option value="all">Todos</option>
+                            <option value="tour">Tours</option>
+                            <option value="shuttle">Shuttles</option>
+                        </select>
+                    </label>
+                    <label className="text-sm">
+                        <span className="block text-xs text-muted-foreground mb-1">Desde</span>
+                        <input
+                            type="date"
+                            value={dateFrom}
+                            onChange={(event) => setDateFrom(event.target.value)}
+                            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                        />
+                    </label>
+                    <label className="text-sm">
+                        <span className="block text-xs text-muted-foreground mb-1">Hasta</span>
+                        <input
+                            type="date"
+                            value={dateTo}
+                            onChange={(event) => setDateTo(event.target.value)}
+                            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                        />
+                    </label>
+                </div>
+                <div className="mt-3">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setStatusFilter('all');
+                            setKindFilter('all');
+                            setDateFrom('');
+                            setDateTo('');
+                        }}
+                        className="rounded-md border px-3 py-1.5 text-xs"
+                    >
+                        Limpiar filtros
+                    </button>
+                </div>
+            </div>
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                 <div className="rounded-lg border p-3">
                     <p className="text-xs text-muted-foreground">Total operativas</p>
@@ -452,7 +543,7 @@ export default function RecepcionRequestsPage() {
             </div>
 
             <p className="text-xs text-muted-foreground mb-6">
-                Estas métricas corresponden a solicitudes operativas de San Pedro (no son totales globales históricos).
+                Estas métricas corresponden exactamente a la tabla visible (solicitudes operativas de San Pedro).
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
@@ -487,7 +578,7 @@ export default function RecepcionRequestsPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {(data?.items ?? []).map((item) => (
+                        {filteredItems.map((item) => (
                             <tr key={`${item.kind}-${item.id}`} className="border-t">
                                 <td className="px-3 py-2 whitespace-nowrap">
                                     {new Date(item.createdAt).toLocaleString()}
@@ -589,7 +680,7 @@ export default function RecepcionRequestsPage() {
                                 </td>
                             </tr>
                         ))}
-                        {!loading && (data?.items ?? []).length === 0 ? (
+                        {!loading && filteredItems.length === 0 ? (
                             <tr>
                                 <td className="px-3 py-6 text-center text-muted-foreground" colSpan={10}>
                                     Sin solicitudes para mostrar.
