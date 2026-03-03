@@ -414,78 +414,22 @@ export async function GET(request: Request) {
     }
 }
 
-// PATCH: Update reservation status (for future admin dashboard)
+// PATCH: Deprecated for status updates.
+// Status transitions must go through /api/internal/requests/status
+// to enforce operational rules, audit trail, and conflict handling.
 export async function PATCH(request: Request) {
     try {
         if (!isAdminRequestAuthorized(request)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Detect locale from request
-        const locale = getLocaleFromRequest(request);
-        const tApi = await getTranslations({ locale, namespace: 'ReservationApi' });
-
-        const body = await request.json();
-        const { id, status, admin_notes } = body;
-
-        if (!id || !status) {
-            return NextResponse.json(
-                { error: tApi('idAndStatusRequired') },
-                { status: 400 }
-            );
-        }
-
-        // Validate status
-        const validStatuses = ['pending', 'processing', 'confirmed', 'cancelled', 'completed'] as const;
-        const statusValue = typeof status === 'string' ? status : '';
-        if (!validStatuses.includes(statusValue as (typeof validStatuses)[number])) {
-            return NextResponse.json(
-                { error: tApi('invalidStatus') },
-                { status: 400 }
-            );
-        }
-
-        const updateData: ReservationUpdate = { status: statusValue as (typeof validStatuses)[number] };
-
-        if (status === 'confirmed' && !body.confirmed_at) {
-            updateData.confirmed_at = new Date().toISOString();
-        }
-
-        if (status === 'cancelled' && !body.cancelled_at) {
-            updateData.cancelled_at = new Date().toISOString();
-        }
-
-        if (admin_notes) {
-            updateData.admin_notes = admin_notes;
-        }
-
-        const { data, error } = await supabaseAdmin
-            .schema('public')
-            .from('reservations')
-            .update(updateData)
-            .eq('id', id)
-            .select()
-            .single<ReservationRow>();
-
-        if (error) {
-            console.error('Supabase error:', error);
-            return NextResponse.json(
-                { error: tApi('databaseErrorUpdate') },
-                { status: 500 }
-            );
-        }
-
         return NextResponse.json({
-            success: true,
-            message: tApi('updateSuccess'),
-            reservation: data,
-        });
+            error: 'Deprecated endpoint. Use /api/internal/requests/status for operational transitions.',
+        }, { status: 410 });
     } catch (error) {
-        logger.error('Unexpected error updating reservation:', error);
-        const locale = getLocaleFromRequest(request);
-        const tApi = await getTranslations({ locale, namespace: 'ReservationApi' });
+        logger.error('Unexpected error in deprecated reservations PATCH endpoint:', error);
         return NextResponse.json(
-            { error: tApi('internalError') },
+            { error: 'Internal server error' },
             { status: 500 }
         );
     }
