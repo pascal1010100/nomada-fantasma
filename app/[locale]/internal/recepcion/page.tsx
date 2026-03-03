@@ -31,6 +31,7 @@ type InternalResponse = {
     };
     items: InternalRequestItem[];
 };
+type NoteQuality = 'strong' | 'weak' | 'risk';
 
 const STORAGE_KEY = 'nomada_admin_token';
 const PROCESSING_STALE_HOURS = 8;
@@ -78,6 +79,96 @@ function formatTimestamp(value: string | null): string {
 function getNotePreview(note: string, limit = 110): string {
     if (note.length <= limit) return note;
     return `${note.slice(0, limit)}...`;
+}
+
+function noteHasAgencyEvidence(note: string): boolean {
+    return /\bagencia\b/i.test(note);
+}
+
+function noteHasConfirmationEvidence(note: string): boolean {
+    return /\bconfirm\w*\b/i.test(note);
+}
+
+function noteHasServiceExecutionEvidence(note: string): boolean {
+    return /\b(servicio|tour|shuttle|traslado|realiz\w*|ejecut\w*|complet\w*)\b/i.test(note);
+}
+
+function noteHasReasonEvidence(note: string): boolean {
+    return /\b(motivo|raz[oó]n|cancel\w*|cliente|agencia|no\s+disponible)\b/i.test(note);
+}
+
+function noteHasTemporalEvidence(note: string): boolean {
+    return /\b(fecha|hora|hoy|ayer)\b/i.test(note) || /\b\d{1,2}:\d{2}\b/.test(note) || /\b\d{4}-\d{2}-\d{2}\b/.test(note);
+}
+
+function getTransitionHelper(fromStatus: RequestStatus, toStatus: RequestStatus): string {
+    if (fromStatus === 'processing' && toStatus === 'confirmed') {
+        return 'Debes confirmar que la agencia respondió. Incluye agencia, confirmación y fecha/hora.';
+    }
+    if (fromStatus === 'processing' && toStatus === 'cancelled') {
+        return 'Debes registrar motivo de cancelación y contexto (cliente/agencia).';
+    }
+    if (fromStatus === 'confirmed' && toStatus === 'completed') {
+        return 'Confirma que el servicio YA ocurrió. No usar para cierre administrativo.';
+    }
+    if (fromStatus === 'confirmed' && toStatus === 'cancelled') {
+        return 'Registra por qué se cayó un caso ya confirmado.';
+    }
+    return `Debes documentar el cambio a ${toStatus} con contexto claro.`;
+}
+
+function validateTransitionNoteClient(fromStatus: RequestStatus, toStatus: RequestStatus, note: string): string | null {
+    if (note.length < 18) {
+        return 'La nota debe tener al menos 18 caracteres.';
+    }
+    if (fromStatus === 'processing' && toStatus === 'confirmed') {
+        if (!noteHasAgencyEvidence(note)) return 'Incluye la agencia en la nota.';
+        if (!noteHasConfirmationEvidence(note)) return 'Incluye evidencia de confirmación en la nota.';
+        if (!noteHasTemporalEvidence(note)) return 'Incluye fecha u hora de confirmación en la nota.';
+    }
+    if (toStatus === 'cancelled' && !noteHasReasonEvidence(note)) {
+        return 'Incluye motivo o contexto claro de cancelación en la nota.';
+    }
+    if (fromStatus === 'confirmed' && toStatus === 'completed') {
+        if (!noteHasServiceExecutionEvidence(note)) return 'Incluye evidencia de ejecución del servicio en la nota.';
+        if (!noteHasTemporalEvidence(note)) return 'Incluye fecha u hora de ejecución en la nota.';
+    }
+    return null;
+}
+
+function getNoteQuality(status: RequestStatus, note: string | null): NoteQuality {
+    if (!(status === 'confirmed' || status === 'cancelled' || status === 'completed')) return 'strong';
+    if (!note || note.trim().length < 18) return 'risk';
+
+    const normalized = note.trim();
+    const hasTime = noteHasTemporalEvidence(normalized);
+    if (status === 'confirmed') {
+        if (noteHasAgencyEvidence(normalized) && noteHasConfirmationEvidence(normalized) && hasTime) return 'strong';
+        if (noteHasAgencyEvidence(normalized) || noteHasConfirmationEvidence(normalized)) return 'weak';
+        return 'risk';
+    }
+    if (status === 'cancelled') {
+        if (noteHasReasonEvidence(normalized) && hasTime) return 'strong';
+        if (noteHasReasonEvidence(normalized)) return 'weak';
+        return 'risk';
+    }
+    if (status === 'completed') {
+        if (noteHasServiceExecutionEvidence(normalized) && hasTime) return 'strong';
+        if (noteHasServiceExecutionEvidence(normalized)) return 'weak';
+        return 'risk';
+    }
+    return 'weak';
+}
+
+function renderQualityBadge(status: RequestStatus, note: string | null) {
+    const quality = getNoteQuality(status, note);
+    if (quality === 'strong') {
+        return <span className="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-300">🟢 Confiable</span>;
+    }
+    if (quality === 'weak') {
+        return <span className="inline-flex items-center rounded-full border border-amber-400/30 bg-amber-500/15 px-2 py-0.5 text-xs text-amber-300">🟡 Débil</span>;
+    }
+    return <span className="inline-flex items-center rounded-full border border-rose-400/30 bg-rose-500/15 px-2 py-0.5 text-xs text-rose-300">🔴 Riesgo</span>;
 }
 
 export default function RecepcionRequestsPage() {
@@ -222,11 +313,17 @@ export default function RecepcionRequestsPage() {
         const requiresNote = nextStatus === 'confirmed' || nextStatus === 'cancelled' || nextStatus === 'completed';
         let note = '';
         if (requiresNote) {
-            const prompted = window.prompt(`Nota obligatoria para cambiar a ${nextStatus}:`, '');
+            const helper = getTransitionHelper(currentStatus, nextStatus);
+            const prompted = window.prompt(`Nota obligatoria para cambiar a ${nextStatus}:\n${helper}`, '');
             if (prompted === null) return;
             note = prompted.trim();
             if (!note) {
                 setError(`Debes agregar una nota para cambiar a ${nextStatus}.`);
+                return;
+            }
+            const noteValidationError = validateTransitionNoteClient(currentStatus, nextStatus, note);
+            if (noteValidationError) {
+                setError(noteValidationError);
                 return;
             }
         }
@@ -337,22 +434,26 @@ export default function RecepcionRequestsPage() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                 <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">Total</p>
+                    <p className="text-xs text-muted-foreground">Total operativas</p>
                     <p className="text-xl font-semibold">{summary.total}</p>
                 </div>
                 <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">Tours</p>
+                    <p className="text-xs text-muted-foreground">Tours operativos</p>
                     <p className="text-xl font-semibold">{summary.tours}</p>
                 </div>
                 <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">Shuttles</p>
+                    <p className="text-xs text-muted-foreground">Shuttles operativos</p>
                     <p className="text-xl font-semibold">{summary.shuttles}</p>
                 </div>
                 <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">Email fallido</p>
+                    <p className="text-xs text-muted-foreground">Email fallido (operativo)</p>
                     <p className="text-xl font-semibold">{summary.emailFailed}</p>
                 </div>
             </div>
+
+            <p className="text-xs text-muted-foreground mb-6">
+                Estas métricas corresponden a solicitudes operativas de San Pedro (no son totales globales históricos).
+            </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
                 <div className="rounded-lg border p-3">
@@ -379,6 +480,7 @@ export default function RecepcionRequestsPage() {
                             <th className="text-left px-3 py-2">Detalle</th>
                             <th className="text-left px-3 py-2">Estado</th>
                             <th className="text-left px-3 py-2">Checklist</th>
+                            <th className="text-left px-3 py-2">Calidad</th>
                             <th className="text-left px-3 py-2">Email</th>
                             <th className="text-left px-3 py-2">Intentos</th>
                             <th className="text-left px-3 py-2">Acciones</th>
@@ -455,6 +557,9 @@ export default function RecepcionRequestsPage() {
                                     {getChecklist(normalizeStatus(item.status))}
                                 </td>
                                 <td className="px-3 py-2">
+                                    {renderQualityBadge(normalizeStatus(item.status), item.adminNotes)}
+                                </td>
+                                <td className="px-3 py-2">
                                     <div>{item.emailStatus ?? '-'}</div>
                                     {item.emailLastError ? (
                                         <div className="text-xs text-red-500">{item.emailLastError}</div>
@@ -486,7 +591,7 @@ export default function RecepcionRequestsPage() {
                         ))}
                         {!loading && (data?.items ?? []).length === 0 ? (
                             <tr>
-                                <td className="px-3 py-6 text-center text-muted-foreground" colSpan={9}>
+                                <td className="px-3 py-6 text-center text-muted-foreground" colSpan={10}>
                                     Sin solicitudes para mostrar.
                                 </td>
                             </tr>
