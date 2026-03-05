@@ -153,6 +153,72 @@ export interface Database {
                 };
                 Relationships: [];
             };
+            places: {
+                Row: {
+                    id: string;
+                    created_at: string;
+                    updated_at: string;
+                    name: string;
+                    slug: string;
+                    category: 'wifi' | 'cowork' | 'hospedaje' | 'banco' | 'puerto' | 'landmark' | 'activity';
+                    description: string | null;
+                    town_slug: string;
+                    address: string | null;
+                    lat: number;
+                    lng: number;
+                    google_maps_url: string | null;
+                    website: string | null;
+                    phone: string | null;
+                    source: string | null;
+                    last_verified_at: string | null;
+                    verified_by: string | null;
+                    notes: string | null;
+                    is_active: boolean;
+                };
+                Insert: {
+                    id?: string;
+                    created_at?: string;
+                    updated_at?: string;
+                    name: string;
+                    slug: string;
+                    category: 'wifi' | 'cowork' | 'hospedaje' | 'banco' | 'puerto' | 'landmark' | 'activity';
+                    description?: string | null;
+                    town_slug?: string;
+                    address?: string | null;
+                    lat: number;
+                    lng: number;
+                    google_maps_url?: string | null;
+                    website?: string | null;
+                    phone?: string | null;
+                    source?: string | null;
+                    last_verified_at?: string | null;
+                    verified_by?: string | null;
+                    notes?: string | null;
+                    is_active?: boolean;
+                };
+                Update: {
+                    id?: string;
+                    created_at?: string;
+                    updated_at?: string;
+                    name?: string;
+                    slug?: string;
+                    category?: 'wifi' | 'cowork' | 'hospedaje' | 'banco' | 'puerto' | 'landmark' | 'activity';
+                    description?: string | null;
+                    town_slug?: string;
+                    address?: string | null;
+                    lat?: number;
+                    lng?: number;
+                    google_maps_url?: string | null;
+                    website?: string | null;
+                    phone?: string | null;
+                    source?: string | null;
+                    last_verified_at?: string | null;
+                    verified_by?: string | null;
+                    notes?: string | null;
+                    is_active?: boolean;
+                };
+                Relationships: [];
+            };
             accommodations: {
                 Row: {
                     id: string;

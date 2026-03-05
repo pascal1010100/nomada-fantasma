@@ -7,6 +7,20 @@ import type { CategoryKey } from '../constants';
 import { atitlanTowns } from '../../rutas-magicas/lago-atitlan/data';
 import { supabase } from '@/app/lib/supabase/client';
 
+const includesAny = (value: string, terms: string[]) => terms.some((t) => value.includes(t));
+
+const toCategory = (typeValue: string, amenities: string[]): CategoryKey => {
+    const merged = [typeValue, ...amenities].join(' ');
+
+    if (includesAny(merged, ['cowork', 'co-work', 'co work'])) return 'cowork';
+    if (includesAny(merged, ['banco', 'atm', 'bank'])) return 'banco';
+    if (includesAny(merged, ['puerto', 'muelle', 'dock', 'port'])) return 'puerto';
+    if (includesAny(merged, ['actividad', 'activity', 'tour', 'adventure', 'hike', 'kayak'])) return 'activity';
+    if (includesAny(merged, ['mirador', 'landmark', 'viewpoint', 'monument'])) return 'landmark';
+    if (includesAny(merged, ['wifi', 'wi-fi', 'internet', 'fiber', 'fibre', 'starlink', 'cafe', 'coffee'])) return 'wifi';
+    return 'hospedaje';
+};
+
 interface MapContentProps {
     searchQuery: string;
     children: (data: {
@@ -27,36 +41,64 @@ interface MapContentProps {
 export function MapContent({ searchQuery, children, onMetaChange }: MapContentProps) {
     const searchParams = useSearchParams();
     const townParam = searchParams?.get('town');
-    const routeParam = searchParams?.get('route');
+    const microRouteParam = searchParams?.get('microRoute');
     const [realPoints, setRealPoints] = useState<Point[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         let cancelled = false;
         setIsLoading(true);
-        const resolvedTownParam = townParam || (routeParam && atitlanTowns.some(t => t.slug === routeParam) ? routeParam : null);
         const load = async () => {
-            let query = supabase
+            let placesQuery = supabase
+                .from('places')
+                .select('id,name,category,lat,lng,town_slug,is_active')
+                .eq('is_active', true);
+            if (townParam) {
+                placesQuery = placesQuery.eq('town_slug', townParam);
+            }
+
+            const { data: placesData, error: placesError } = await placesQuery;
+            if (cancelled) return;
+
+            if (!placesError && placesData) {
+                const mappedPlaces = placesData
+                    .filter(item => typeof item.lat === 'number' && typeof item.lng === 'number')
+                    .map((item) => ({
+                        id: item.id,
+                        name: item.name,
+                        category: item.category as CategoryKey,
+                        lat: item.lat as number,
+                        lng: item.lng as number,
+                        townSlug: item.town_slug || undefined
+                    }));
+                setRealPoints(mappedPlaces);
+                setIsLoading(false);
+                return;
+            }
+
+            // Fallback to accommodations while places is being rolled out in environments.
+            let accommodationsQuery = supabase
                 .from('accommodations')
                 .select('id,name,lat,lng,pueblo_slug,type,amenities,is_active')
                 .eq('is_active', true);
-            if (resolvedTownParam) {
-                query = query.eq('pueblo_slug', resolvedTownParam);
+            if (townParam) {
+                accommodationsQuery = accommodationsQuery.eq('pueblo_slug', townParam);
             }
-            const { data, error } = await query;
+
+            const { data: accommodationsData, error: accommodationsError } = await accommodationsQuery;
             if (cancelled) return;
-            if (error || !data) {
+            if (accommodationsError || !accommodationsData) {
                 setRealPoints([]);
                 setIsLoading(false);
                 return;
             }
-            const mapped = data
+
+            const mapped = accommodationsData
                 .filter(item => typeof item.lat === 'number' && typeof item.lng === 'number')
                 .map((item) => {
                     const typeValue = (item.type ?? '').toLowerCase();
                     const amenities = (item.amenities ?? []).map(a => a.toLowerCase());
-                    const isCowork = typeValue.includes('cowork') || amenities.some(a => a.includes('cowork'));
-                    const category: CategoryKey = isCowork ? 'cowork' : 'hospedaje';
+                    const category = toCategory(typeValue, amenities);
                     return {
                         id: item.id,
                         name: item.name,
@@ -73,12 +115,12 @@ export function MapContent({ searchQuery, children, onMetaChange }: MapContentPr
         return () => {
             cancelled = true;
         };
-    }, [townParam, routeParam]);
+    }, [townParam]);
 
     const basePoints = useMemo(() => {
-        if (routeParam) {
+        if (microRouteParam) {
             const town = townParam ? atitlanTowns.find(t => t.slug === townParam) : null;
-            const route = town?.microRoutes.find(r => r.id === routeParam);
+            const route = town?.microRoutes.find(r => r.id === microRouteParam);
 
             if (route && town) {
                 return route.points.map(p => ({
@@ -93,33 +135,30 @@ export function MapContent({ searchQuery, children, onMetaChange }: MapContentPr
                 }));
             }
 
-            if (!townParam) {
-                const townWithRoute = atitlanTowns.find(t => t.microRoutes.some(r => r.id === routeParam));
-                const routeFromTown = townWithRoute?.microRoutes.find(r => r.id === routeParam);
-                if (townWithRoute && routeFromTown) {
-                    return routeFromTown.points.map(p => ({
-                        id: p.id,
-                        name: p.title,
-                        category: (p.type === 'viewpoint' ? 'landmark' :
-                            p.type === 'activity' ? 'activity' :
-                                p.type === 'food' ? 'wifi' : 'landmark') as CategoryKey,
-                        lat: p.lat,
-                        lng: p.lng,
-                        townSlug: townWithRoute.slug
-                    }));
-                }
+            const townWithRoute = atitlanTowns.find(t => t.microRoutes.some(r => r.id === microRouteParam));
+            const routeFromTown = townWithRoute?.microRoutes.find(r => r.id === microRouteParam);
+            if (townWithRoute && routeFromTown) {
+                return routeFromTown.points.map(p => ({
+                    id: p.id,
+                    name: p.title,
+                    category: (p.type === 'viewpoint' ? 'landmark' :
+                        p.type === 'activity' ? 'activity' :
+                            p.type === 'food' ? 'wifi' : 'landmark') as CategoryKey,
+                    lat: p.lat,
+                    lng: p.lng,
+                    townSlug: townWithRoute.slug
+                }));
             }
         }
 
         let points = realPoints;
 
-        const resolvedTownParam = townParam || (routeParam && atitlanTowns.some(t => t.slug === routeParam) ? routeParam : null);
-        if (resolvedTownParam) {
-            points = points.filter(p => p.townSlug?.includes(resolvedTownParam) || resolvedTownParam.includes(p.townSlug || ''));
+        if (townParam) {
+            points = points.filter(p => p.townSlug?.includes(townParam) || townParam.includes(p.townSlug || ''));
         }
 
         return points;
-    }, [townParam, routeParam, realPoints]);
+    }, [townParam, microRouteParam, realPoints]);
 
     const filteredPoints = useMemo(() => {
         const normalizedQuery = searchQuery.trim().toLowerCase();

@@ -104,11 +104,11 @@ export default function MapCanvas({
   const tm = useTranslations('Data.points');
   const locale = useLocale();
   const getPointName = React.useCallback((point: Point) => {
-    try {
-      return tm(`${point.id}.name`);
-    } catch {
-      return point.name;
+    const key = `${point.id}.name`;
+    if (typeof tm.has === 'function' && tm.has(key)) {
+      return tm(key);
     }
+    return point.name;
   }, [tm]);
   const getCategoryLabel = React.useCallback((key: string) => {
     try {
@@ -129,8 +129,8 @@ export default function MapCanvas({
   const zoomOut = React.useCallback(() => mapRef.current?.zoomOut(), []);
 
   const recenter = React.useCallback(() => {
-    mapRef.current?.setView(initialCenter || HOME_CENTER, HOME_ZOOM, { animate: true });
-  }, [initialCenter]);
+    mapRef.current?.setView(initialCenter || HOME_CENTER, zoom || HOME_ZOOM, { animate: true });
+  }, [initialCenter, zoom]);
 
   const locate = React.useCallback(() => {
     if (!navigator.geolocation) return;
@@ -169,6 +169,16 @@ export default function MapCanvas({
       return categoryKey ? activeCats.has(categoryKey) : false;
     });
   }, [points, activeCats, isGhostMode, isNomadMode]);
+
+  const categoryCounts = React.useMemo(() => {
+    return points.reduce<Partial<Record<CategoryKey, number>>>((acc, point) => {
+      if (isCategoryKey(point.category)) {
+        const key = point.category;
+        acc[key] = (acc[key] ?? 0) + 1;
+      }
+      return acc;
+    }, {});
+  }, [points]);
 
   return (
     <div className={`relative rounded-3xl overflow-hidden z-0 ${compact ? 'h-[300px]' : 'h-[62vh] min-h-[420px]'}`}>
@@ -289,6 +299,7 @@ export default function MapCanvas({
         <CategoryFilter
           activeCats={activeCats}
           onToggleCategory={toggleCat}
+          categoryCounts={categoryCounts}
         />
       )}
     </div>

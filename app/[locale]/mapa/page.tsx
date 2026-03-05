@@ -1,12 +1,13 @@
 // app/[locale]/mapa/page.tsx
 'use client';
 
-import { useState, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, X, Loader2, AlertCircle, Wifi, Sparkles, Navigation } from 'lucide-react';
+import { useEffect, useState, Suspense } from 'react';
+import { motion } from 'framer-motion';
+import { Search, MapPin, X, Wifi, Sparkles } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { RippleButton, Tooltip, LoadingSpinner } from '../../components/ui';
 import { useTranslations, useLocale } from 'next-intl';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 const ParticlesBackground = dynamic(
   () => import('./components/ParticlesBackground'),
@@ -14,6 +15,7 @@ const ParticlesBackground = dynamic(
 );
 import { CATEGORIES, type CategoryKey } from './constants';
 import { MapContent } from './components/MapContent';
+import { atitlanTowns } from '../rutas-magicas/lago-atitlan/data';
 
 // Carga dinámica del cliente del mapa para mejor rendimiento
 const MapClient = dynamic(() => import('./MapClient'), {
@@ -38,6 +40,7 @@ export function MapSearch({
   onSearchChange
 }: MapSearchProps) {
   const t = useTranslations('Map');
+  const searchInputId = 'map-search-input';
   return (
     <div className="mb-8 max-w-2xl mx-auto px-4 sm:px-6 relative z-10">
       <motion.div
@@ -49,9 +52,14 @@ export function MapSearch({
         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-5 z-10">
           <Search className="h-5 w-5 text-primary" />
         </div>
+        <label htmlFor={searchInputId} className="visually-hidden">
+          {t('search')}
+        </label>
         <input
+          id={searchInputId}
           type="text"
           placeholder={t('search')}
+          aria-label={t('search')}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-full rounded-2xl border border-border/50 glass-enhanced py-4 pl-14 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/60 transition-all"
@@ -62,6 +70,7 @@ export function MapSearch({
             animate={{ scale: 1 }}
             onClick={() => onSearchChange('')}
             className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-muted/50 transition-colors"
+            aria-label={t('clearSearch')}
           >
             <X className="h-4 w-4 text-muted-foreground" />
           </motion.button>
@@ -74,10 +83,10 @@ export function MapSearch({
 export default function MapaPage() {
   const t = useTranslations('Map');
   const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [isLocating, setIsLocating] = useState(false);
-  const [locationError, setLocationError] = useState<string | null>(null);
   const [mapMeta, setMapMeta] = useState<{
     totalCount: number;
     visibleCount: number;
@@ -92,33 +101,23 @@ export default function MapaPage() {
     }
   };
 
-  const handleLocateMe = () => {
-    if (!navigator.geolocation) {
-      setLocationError(t('locationError.notSupported'));
-      return;
-    }
+  useEffect(() => {
+    const legacyRoute = searchParams?.get('route');
+    if (!legacyRoute) return;
 
-    setIsLocating(true);
-    setLocationError(null);
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation([latitude, longitude]);
-        setIsLocating(false);
-      },
-      (error) => {
-        console.error('Error al obtener la ubicación:', error);
-        setLocationError(t('locationError.failed'));
-        setIsLocating(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
+    const isTown = atitlanTowns.some((town) => town.slug === legacyRoute);
+    const townWithMicroRoute = atitlanTowns.find((town) =>
+      town.microRoutes.some((route) => route.id === legacyRoute)
     );
-  };
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('route');
+    if (isTown) params.set('town', legacyRoute);
+    else if (townWithMicroRoute) params.set('microRoute', legacyRoute);
+
+    const next = params.toString();
+    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+  }, [pathname, router, searchParams]);
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -231,9 +230,6 @@ export default function MapaPage() {
                   <>
                     <MapClient
                       points={points}
-                      initialCenter={userLocation ?? undefined}
-                      zoom={userLocation ? 13 : undefined}
-                      key={userLocation ? JSON.stringify(userLocation) : 'no-location'}
                     />
                     {isLoading && (
                       <div className="absolute inset-0 z-[500] flex items-center justify-center bg-background/40 backdrop-blur-sm">
@@ -257,48 +253,6 @@ export default function MapaPage() {
               </MapContent>
             </Suspense>
 
-            {/* Botón de ubicación mejorado */}
-            <Tooltip content={t('locateMe')} position="left">
-              <motion.button
-                onClick={handleLocateMe}
-                disabled={isLocating}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="absolute bottom-6 right-6 z-[1000] flex h-12 w-12 items-center justify-center rounded-xl glass-enhanced shadow-lg transition-all hover:border-primary/50 disabled:opacity-50 group"
-                aria-label={t('locateMe')}
-              >
-                {isLocating ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                ) : (
-                  <Navigation className="h-5 w-5 text-foreground group-hover:text-primary transition-colors" />
-                )}
-              </motion.button>
-            </Tooltip>
-
-            {/* Error notification */}
-            <AnimatePresence>
-              {locationError && (
-                <motion.div
-                  className="absolute bottom-6 left-1/2 z-[9999] -translate-x-1/2 transform max-w-md"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="glass-enhanced rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-400 flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                    <span className="flex-1">{locationError}</span>
-                    <button
-                      onClick={() => setLocationError(null)}
-                      className="text-red-600/70 hover:text-red-600 dark:text-red-400/70 dark:hover:text-red-400 transition-colors"
-                      aria-label={t('close')}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
 
           {/* Leyenda mejorada */}

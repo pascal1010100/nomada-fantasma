@@ -242,9 +242,14 @@
             "verified": "Verified"
         },
         "search": "Search destinations, places, experiences...",
+        "clearSearch": "Clear search",
         "locating": "Loading map...",
         "loadingPoints": "Loading places...",
         "locateMe": "Center on my location",
+        "locationError": {
+            "notSupported": "Your browser does not support geolocation.",
+            "failed": "We couldn't get your location. Please try again."
+        },
         "close": "Close",
         "categories": {
             "wifi": "Wi‑Fi",

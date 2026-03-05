@@ -70,7 +70,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
   const puebloMatch = pueblosAtitlan.find(pueblo => pueblo.slug === route.slug);
   const mapHref = puebloMatch
     ? `/${locale}/mapa?town=${puebloMatch.slug}`
-    : `/${locale}/mapa?route=${route.slug}`;
+    : `/${locale}/mapa`;
 
   // Función para renderizar estrellas de rating
   const renderRatingStars = (rating: number, small = false) => {

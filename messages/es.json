@@ -242,9 +242,14 @@
             "verified": "Verificado"
         },
         "search": "Buscar destinos, lugares, experiencias...",
+        "clearSearch": "Limpiar búsqueda",
         "locating": "Cargando mapa...",
         "loadingPoints": "Cargando lugares...",
         "locateMe": "Centrar en mi ubicación",
+        "locationError": {
+            "notSupported": "Tu navegador no soporta geolocalización.",
+            "failed": "No pudimos obtener tu ubicación. Inténtalo de nuevo."
+        },
         "close": "Cerrar",
         "categories": {
             "wifi": "Wi‑Fi",

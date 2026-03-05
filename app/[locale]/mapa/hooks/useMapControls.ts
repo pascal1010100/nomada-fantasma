@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CategoryKey, CATEGORIES } from "../constants";
 
 const ALL_CATS = CATEGORIES.map((c) => c.key);
@@ -19,49 +19,27 @@ const setToSortedArray = (s: Set<CategoryKey>) => ALL_CATS.filter((k) => s.has(k
 
 export const useMapControls = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Initialize from URL
-  const [activeCats, setActiveCats] = useState<Set<CategoryKey>>(() => {
-    if (typeof window === "undefined") return new Set(ALL_CATS);
-    return parseCatsFromParams(new URLSearchParams(window.location.search));
-  });
+  const activeCats = useMemo(
+    () => parseCatsFromParams(searchParams),
+    [searchParams]
+  );
 
-  // Sync URL -> State (navigation)
-  useEffect(() => {
-    const next = parseCatsFromParams(searchParams);
-    const same =
-      next.size === activeCats.size &&
-      setToSortedArray(next).every((k, i) => k === setToSortedArray(activeCats)[i]);
-    if (!same) setActiveCats(next);
-  }, [searchParams, activeCats]);
-
-  // Sync State -> URL
-  useEffect(() => {
-    const current = parseCatsFromParams(searchParams);
-    const same =
-      current.size === activeCats.size &&
-      setToSortedArray(current).every((k, i) => k === setToSortedArray(activeCats)[i]);
-    if (same) return;
+  const toggleCat = useCallback((key: CategoryKey) => {
+    const next = new Set(activeCats);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
 
     const params = new URLSearchParams(searchParams.toString());
-    const arr = setToSortedArray(activeCats);
+    const arr = setToSortedArray(next);
     if (arr.length === ALL_CATS.length) params.delete("cats");
     else params.set("cats", arr.join(","));
 
-    const pathname = typeof window !== "undefined" ? window.location.pathname : "/mapa";
     const qs = params.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [activeCats, router, searchParams]);
-
-  const toggleCat = useCallback((key: CategoryKey) => {
-    setActiveCats((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  }, []);
+  }, [activeCats, pathname, router, searchParams]);
 
   return {
     activeCats,
