@@ -17,25 +17,29 @@
         "skip": "Saltar al contenido"
     },
     "Hero": {
-        "badge": "PLATAFORMA PARA NÓMADAS DIGITALES",
+        "badge": "MAPA VERIFICADO · SAN PEDRO LA LAGUNA",
         "title1": "Nómada",
         "title2": "Fantasma",
-        "description": "La plataforma definitiva para nómadas digitales que buscan los mejores destinos, conexiones y experiencias alrededor del mundo.",
-        "explore": "Explorar destinos",
+        "description": "Comenzamos en San Pedro La Laguna con lugares reales y verificados para nómadas digitales. Sin humo, solo datos útiles para decidir mejor.",
+        "explore": "Explorar San Pedro",
         "chat": "Chatear con IA",
         "stats": {
-            "destinations": "Destinos",
-            "support": "Soporte",
-            "members": "Miembros",
-            "rating": "Valoración",
-            "destinationsTooltip": "Más de 500 destinos verificados",
-            "supportTooltip": "Asistencia disponible las 24 horas",
-            "membersTooltip": "Comunidad de más de 1 millón de nómadas",
-            "ratingTooltip": "Valoración promedio de usuarios"
+            "coverageValue": "San Pedro",
+            "coverageLabel": "Cobertura actual",
+            "coverageTooltip": "Fase actual del producto: San Pedro La Laguna",
+            "categoriesValue": "7 categorías",
+            "categoriesLabel": "Capas del mapa",
+            "categoriesTooltip": "Wi‑Fi, cowork, hospedaje, banco, puerto, landmark y actividad",
+            "dataValue": "Datos reales",
+            "dataLabel": "Fuente validada",
+            "dataTooltip": "Cada lugar incluye fuente y fecha de verificación",
+            "nextValue": "En expansión",
+            "nextLabel": "Próximo paso",
+            "nextTooltip": "Después de San Pedro, sumamos más pueblos de Atitlán"
         },
         "trust": {
-            "happyNomads": "+10,000 nómadas felices",
-            "ratings": "4.9/5 en valoraciones"
+            "happyNomads": "Curaduría local y actualización continua",
+            "ratings": "Datos trazables por lugar"
         }
     },
     "Shuttles": {

@@ -184,10 +184,10 @@ export default function Hero() {
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               {[
-                { value: '500+', label: t('stats.destinations'), color: 'from-cyan-400 to-blue-500', tooltip: t('stats.destinationsTooltip') },
-                { value: '24/7', label: t('stats.support'), color: 'from-purple-400 to-pink-500', tooltip: t('stats.supportTooltip') },
-                { value: '1M+', label: t('stats.members'), color: 'from-amber-400 to-orange-500', tooltip: t('stats.membersTooltip') },
-                { value: '4.9/5', label: t('stats.rating'), color: 'from-green-400 to-emerald-500', tooltip: t('stats.ratingTooltip') }
+                { value: t('stats.coverageValue'), label: t('stats.coverageLabel'), color: 'from-cyan-400 to-blue-500', tooltip: t('stats.coverageTooltip') },
+                { value: t('stats.categoriesValue'), label: t('stats.categoriesLabel'), color: 'from-purple-400 to-pink-500', tooltip: t('stats.categoriesTooltip') },
+                { value: t('stats.dataValue'), label: t('stats.dataLabel'), color: 'from-amber-400 to-orange-500', tooltip: t('stats.dataTooltip') },
+                { value: t('stats.nextValue'), label: t('stats.nextLabel'), color: 'from-green-400 to-emerald-500', tooltip: t('stats.nextTooltip') }
               ].map((stat, index) => (
                 <Tooltip key={index} content={stat.tooltip} position="bottom">
                   <motion.div
