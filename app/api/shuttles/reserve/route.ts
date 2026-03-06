@@ -12,6 +12,45 @@ type ShuttleBookingInsert = Database['public']['Tables']['shuttle_bookings']['In
 type ShuttleBookingRow = Database['public']['Tables']['shuttle_bookings']['Row'];
 type ShuttleBookingUpdate = Database['public']['Tables']['shuttle_bookings']['Update'];
 
+async function getShuttleAgencyEmail(
+    origin: string,
+    destination: string,
+    type: string
+): Promise<string | null> {
+    const routeResult = await supabaseAdmin
+        .schema('public')
+        .from('shuttle_routes')
+        .select('agency_id')
+        .eq('origin', origin)
+        .eq('destination', destination)
+        .eq('type', type)
+        .limit(1)
+        .maybeSingle<{ agency_id: string | null }>();
+
+    if (routeResult.error) {
+        logger.warn('Unable to resolve shuttle route agency assignment:', routeResult.error);
+        return null;
+    }
+
+    const agencyId = routeResult.data?.agency_id;
+    if (!agencyId) return null;
+
+    const agencyResult = await supabaseAdmin
+        .schema('public')
+        .from('agencies')
+        .select('email, is_active')
+        .eq('id', agencyId)
+        .maybeSingle<{ email: string | null; is_active: boolean | null }>();
+
+    if (agencyResult.error) {
+        logger.warn('Unable to resolve agency email for shuttle route:', agencyResult.error);
+        return null;
+    }
+
+    if (!agencyResult.data?.is_active) return null;
+    return agencyResult.data.email?.trim() || null;
+}
+
 export async function POST(request: Request) {
     try {
         // Detect locale FIRST (before rate limiting to use translations)
@@ -87,16 +126,19 @@ export async function POST(request: Request) {
 
         // 2. Send confirmation to customer and notification to admin
         let emailError: string | null = null;
+        const bookingType = data.type || 'shared';
+        const agencyEmail = await getShuttleAgencyEmail(data.routeOrigin, data.routeDestination, bookingType);
         const result = await sendShuttleConfirmationEmails({
             customerName: data.customerName,
             customerEmail: data.customerEmail,
+            agencyEmail,
             origin: data.routeOrigin,
             destination: data.routeDestination,
             travelDate: data.date,
             travelTime: data.time,
             passengers: data.passengers,
             pickupLocation: data.pickupLocation,
-            type: data.type || 'shared',
+            type: bookingType,
             price: undefined,
         });
         const emailSent = result.success;

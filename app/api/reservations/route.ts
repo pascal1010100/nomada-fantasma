@@ -35,6 +35,40 @@ type LegacyReservationRow = {
 };
 type ReservationRecord = ReservationRow | LegacyReservationRow;
 
+async function getTourAgencyEmail(tourId: string | null | undefined): Promise<string | null> {
+    if (!tourId) return null;
+
+    const tourResult = await supabaseAdmin
+        .schema('public')
+        .from('tours')
+        .select('agency_id')
+        .eq('id', tourId)
+        .maybeSingle<{ agency_id: string | null }>();
+
+    if (tourResult.error) {
+        logger.warn('Unable to resolve tour agency assignment:', tourResult.error);
+        return null;
+    }
+
+    const agencyId = tourResult.data?.agency_id;
+    if (!agencyId) return null;
+
+    const agencyResult = await supabaseAdmin
+        .schema('public')
+        .from('agencies')
+        .select('email, is_active')
+        .eq('id', agencyId)
+        .maybeSingle<{ email: string | null; is_active: boolean | null }>();
+
+    if (agencyResult.error) {
+        logger.warn('Unable to resolve agency email for tour:', agencyResult.error);
+        return null;
+    }
+
+    if (!agencyResult.data?.is_active) return null;
+    return agencyResult.data.email?.trim() || null;
+}
+
 // POST: Create a new reservation
 export async function POST(request: Request) {
     try {
@@ -154,6 +188,7 @@ export async function POST(request: Request) {
             tour_name: sanitizedData.tour_name,
             total_price: sanitizedData.total_price,
             customer_notes: sanitizedData.customer_notes,
+            status: 'pending',
         };
 
         // Insert into Supabase
@@ -178,6 +213,7 @@ export async function POST(request: Request) {
                 total_price: sanitizedData.total_price,
                 reservation_type: sanitizedData.reservation_type,
                 notes: sanitizedData.customer_notes,
+                status: 'pending',
             } as unknown as ReservationInsert;
 
             const legacyResult = await supabaseAdmin
@@ -243,8 +279,11 @@ export async function POST(request: Request) {
 
         if (reservationEmail) {
             emailAttempted = true;
+            const reservationTourId = 'tour_id' in reservation ? reservation.tour_id : null;
+            const agencyEmail = await getTourAgencyEmail(reservationTourId);
             const emailResult = await sendTourConfirmationEmails({
                 to: reservationEmail,
+                agencyEmail,
                 reservationId: newReservation.id,
                 customerName: reservationName,
                 tourName:

@@ -39,9 +39,10 @@ function redactForLog(value: unknown): unknown {
 
 interface SendConfirmationEmailProps {
     to: string;
+    agencyEmail?: string | null;
     reservationId: string;
     customerName: string;
-    tourName:string;
+    tourName: string;
     date: string;
     guests: number;
     totalPrice: number;
@@ -127,6 +128,7 @@ export async function sendConfirmationEmail(data: SendConfirmationEmailProps) {
 interface SendShuttleConfirmationEmailsProps {
     customerName: string;
     customerEmail: string;
+    agencyEmail?: string | null;
     origin: string;
     destination: string;
     travelDate: string;
@@ -139,6 +141,7 @@ interface SendShuttleConfirmationEmailsProps {
 
 export async function sendTourConfirmationEmails(data: SendConfirmationEmailProps) {
     const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
+    const agencyEmail = data.agencyEmail?.trim() || null;
 
     if (!resend) {
         logger.info('📧 [TOUR CONFIRMATION SIMULATION] --------------------------------------');
@@ -148,12 +151,17 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
         logger.info(`To Admin: ${adminEmail}`);
         logger.info(`Subject: Nueva solicitud de tour: ${data.tourName}`);
         logger.info('Admin Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        if (agencyEmail) {
+            logger.info(`To Agency: ${agencyEmail}`);
+            logger.info(`Subject: Solicitud de tour asignada: ${data.tourName}`);
+            logger.info('Agency Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        }
         logger.info('-----------------------------------------------------------------------');
         return { success: true, id: 'simulated_' + Date.now() };
     }
 
     try {
-        const [customerRes, adminRes] = await Promise.all([
+        const sendOperations: Array<Promise<{ error?: unknown | null }>> = [
             resend.emails.send({
                 from: RESEND_FROM,
                 to: [data.to],
@@ -166,12 +174,23 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
                 subject: `Nueva solicitud de tour: ${data.tourName}`,
                 react: ReservationTemplate(data),
             }),
-        ]);
+        ];
 
-        const customerError = customerRes?.error;
-        const adminError = adminRes?.error;
-        if (customerError || adminError) {
-            return { success: false, error: customerError || adminError };
+        if (agencyEmail) {
+            sendOperations.push(
+                resend.emails.send({
+                    from: RESEND_FROM,
+                    to: [agencyEmail],
+                    subject: `Solicitud de tour asignada: ${data.tourName}`,
+                    react: ReservationTemplate(data),
+                })
+            );
+        }
+
+        const results = await Promise.all(sendOperations);
+        const failedResult = results.find((result) => result?.error);
+        if (failedResult?.error) {
+            return { success: false, error: failedResult.error };
         }
 
         return { success: true };
@@ -183,6 +202,7 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
 
 export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmationEmailsProps) {
     const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
+    const agencyEmail = data.agencyEmail?.trim() || null;
 
     if (!resend) {
         logger.info('📧 [SHUTTLE CONFIRMATION SIMULATION] ----------------------------');
@@ -192,12 +212,17 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
         logger.info(`To Admin: ${adminEmail}`);
         logger.info(`Subject: Nueva Solicitud de Shuttle`);
         logger.info('Admin Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        if (agencyEmail) {
+            logger.info(`To Agency: ${agencyEmail}`);
+            logger.info('Subject: Nueva Solicitud de Shuttle Asignada');
+            logger.info('Agency Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        }
         logger.info('----------------------------------------------------------------');
         return { success: true };
     }
 
     try {
-        const [customerRes, adminRes] = await Promise.all([
+        const sendOperations: Array<Promise<{ error?: unknown | null }>> = [
             resend.emails.send({
                 from: RESEND_FROM,
                 to: [data.customerEmail],
@@ -231,12 +256,34 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
                     price: data.price,
                 }),
             }),
-        ]);
+        ];
 
-        const customerError = customerRes?.error;
-        const adminError = adminRes?.error;
-        if (customerError || adminError) {
-            return { success: false, error: customerError || adminError };
+        if (agencyEmail) {
+            sendOperations.push(
+                resend.emails.send({
+                    from: RESEND_FROM,
+                    to: [agencyEmail],
+                    subject: 'Nueva Solicitud de Shuttle Asignada',
+                    react: ShuttleAdminNotification({
+                        customerName: data.customerName,
+                        customerEmail: data.customerEmail,
+                        origin: data.origin,
+                        destination: data.destination,
+                        travelDate: data.travelDate,
+                        travelTime: data.travelTime,
+                        passengers: data.passengers,
+                        pickupLocation: data.pickupLocation,
+                        type: data.type,
+                        price: data.price,
+                    }),
+                })
+            );
+        }
+
+        const results = await Promise.all(sendOperations);
+        const failedResult = results.find((result) => result?.error);
+        if (failedResult?.error) {
+            return { success: false, error: failedResult.error };
         }
 
         return { success: true };

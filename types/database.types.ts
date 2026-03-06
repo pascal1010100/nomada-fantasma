@@ -63,6 +63,48 @@ export interface Database {
                 };
                 Relationships: [];
             };
+            agencies: {
+                Row: {
+                    id: string;
+                    created_at: string;
+                    updated_at: string;
+                    name: string;
+                    slug: string;
+                    contact_name: string | null;
+                    email: string;
+                    phone: string | null;
+                    whatsapp: string | null;
+                    notes: string | null;
+                    is_active: boolean;
+                };
+                Insert: {
+                    id?: string;
+                    created_at?: string;
+                    updated_at?: string;
+                    name: string;
+                    slug: string;
+                    contact_name?: string | null;
+                    email: string;
+                    phone?: string | null;
+                    whatsapp?: string | null;
+                    notes?: string | null;
+                    is_active?: boolean;
+                };
+                Update: {
+                    id?: string;
+                    created_at?: string;
+                    updated_at?: string;
+                    name?: string;
+                    slug?: string;
+                    contact_name?: string | null;
+                    email?: string;
+                    phone?: string | null;
+                    whatsapp?: string | null;
+                    notes?: string | null;
+                    is_active?: boolean;
+                };
+                Relationships: [];
+            };
             tours: {
                 Row: {
                     id: string;
@@ -85,6 +127,7 @@ export interface Database {
                     max_guests: number;
                     pueblo_slug: string;
                     guide_id: string | null;
+                    agency_id: string | null;
                     cover_image: string | null;
                     images: string[];
                     highlights: string[];
@@ -114,6 +157,7 @@ export interface Database {
                     max_guests?: number;
                     pueblo_slug: string;
                     guide_id?: string | null;
+                    agency_id?: string | null;
                     cover_image?: string | null;
                     images?: string[];
                     highlights?: string[];
@@ -143,6 +187,7 @@ export interface Database {
                     max_guests?: number;
                     pueblo_slug?: string;
                     guide_id?: string | null;
+                    agency_id?: string | null;
                     cover_image?: string | null;
                     images?: string[];
                     highlights?: string[];
@@ -305,6 +350,7 @@ export interface Database {
                     image: string | null;
                     type: string | null;
                     description: string | null;
+                    agency_id: string | null;
                     created_at: string;
                 };
                 Insert: {
@@ -317,6 +363,7 @@ export interface Database {
                     image?: string | null;
                     type?: string | null;
                     description?: string | null;
+                    agency_id?: string | null;
                     created_at?: string;
                 };
                 Update: {
@@ -329,6 +376,7 @@ export interface Database {
                     image?: string | null;
                     type?: string | null;
                     description?: string | null;
+                    agency_id?: string | null;
                     created_at?: string;
                 };
                 Relationships: [];
