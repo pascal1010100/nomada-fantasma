@@ -9,6 +9,9 @@ import logger from './logger';
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 const RESEND_FROM = process.env.RESEND_FROM || 'onboarding@resend.dev';
+const EMAIL_SEND_SPACING_MS = 650;
+const EMAIL_RATE_LIMIT_RETRY_MS = 1200;
+const EMAIL_RATE_LIMIT_MAX_RETRIES = 2;
 
 type TFunction = (key: string, values?: Record<string, string | number>) => string;
 
@@ -61,6 +64,51 @@ interface SendShuttleRequestEmailProps {
     type?: 'shared' | 'private';
 }
 
+type SendEmailResult = {
+    success: boolean;
+    error?: unknown;
+    id?: string;
+};
+
+function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRateLimitError(error: unknown): boolean {
+    if (!error || typeof error !== 'object') return false;
+    const typed = error as { statusCode?: number; name?: string; message?: string };
+    return (
+        typed.statusCode === 429 ||
+        typed.name === 'rate_limit_exceeded' ||
+        (typeof typed.message === 'string' && typed.message.toLowerCase().includes('rate limit'))
+    );
+}
+
+async function sendEmailWithRetry(
+    label: string,
+    send: () => Promise<{ data?: { id?: string } | null; error?: unknown | null }>
+): Promise<SendEmailResult> {
+    let attempt = 0;
+    while (attempt <= EMAIL_RATE_LIMIT_MAX_RETRIES) {
+        const response = await send();
+        const error = response?.error ?? null;
+        if (!error) {
+            return { success: true, id: response?.data?.id };
+        }
+
+        if (!isRateLimitError(error) || attempt === EMAIL_RATE_LIMIT_MAX_RETRIES) {
+            return { success: false, error };
+        }
+
+        attempt += 1;
+        const waitMs = EMAIL_RATE_LIMIT_RETRY_MS * attempt;
+        logger.warn(`[email:${label}] rate limit detected, retrying in ${waitMs}ms`);
+        await sleep(waitMs);
+    }
+
+    return { success: false, error: new Error('Unknown email retry state') };
+}
+
 export async function sendShuttleRequestEmail(data: SendShuttleRequestEmailProps) {
     const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
 
@@ -106,19 +154,14 @@ export async function sendConfirmationEmail(data: SendConfirmationEmailProps) {
     }
 
     try {
-        const { data: emailData, error } = await resend.emails.send({
-            from: RESEND_FROM,
-            to: [data.to],
-            subject: data.t('preview', { tourName: data.tourName }),
-            react: ReservationTemplate(data),
-        });
-
-        if (error) {
-            logger.error('Error sending email:', error);
-            return { success: false, error };
-        }
-
-        return { success: true, id: emailData?.id };
+        return await sendEmailWithRetry('generic_confirmation', () =>
+            resend.emails.send({
+                from: RESEND_FROM,
+                to: [data.to],
+                subject: data.t('preview', { tourName: data.tourName }),
+                react: ReservationTemplate(data),
+            })
+        );
     } catch (error) {
         logger.error('Exception sending email:', error);
         return { success: false, error };
@@ -161,36 +204,44 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
     }
 
     try {
-        const sendOperations: Array<Promise<{ error?: unknown | null }>> = [
-            resend.emails.send({
-                from: RESEND_FROM,
-                to: [data.to],
+        const queue = [
+            {
+                label: 'tour_customer',
+                to: data.to,
                 subject: data.t('preview', { tourName: data.tourName }),
-                react: ReservationTemplate(data),
-            }),
-            resend.emails.send({
-                from: RESEND_FROM,
-                to: [adminEmail],
+            },
+            {
+                label: 'tour_admin',
+                to: adminEmail,
                 subject: `Nueva solicitud de tour: ${data.tourName}`,
-                react: ReservationTemplate(data),
-            }),
+            },
         ];
 
         if (agencyEmail) {
-            sendOperations.push(
+            queue.push({
+                label: 'tour_agency',
+                to: agencyEmail,
+                subject: `Solicitud de tour asignada: ${data.tourName}`,
+            });
+        }
+
+        for (let i = 0; i < queue.length; i += 1) {
+            const item = queue[i];
+            const result = await sendEmailWithRetry(item.label, () =>
                 resend.emails.send({
                     from: RESEND_FROM,
-                    to: [agencyEmail],
-                    subject: `Solicitud de tour asignada: ${data.tourName}`,
+                    to: [item.to],
+                    subject: item.subject,
                     react: ReservationTemplate(data),
                 })
             );
-        }
+            if (!result.success) {
+                return { success: false, error: result.error };
+            }
 
-        const results = await Promise.all(sendOperations);
-        const failedResult = results.find((result) => result?.error);
-        if (failedResult?.error) {
-            return { success: false, error: failedResult.error };
+            if (i < queue.length - 1) {
+                await sleep(EMAIL_SEND_SPACING_MS);
+            }
         }
 
         return { success: true };
@@ -222,68 +273,79 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
     }
 
     try {
-        const sendOperations: Array<Promise<{ error?: unknown | null }>> = [
-            resend.emails.send({
-                from: RESEND_FROM,
-                to: [data.customerEmail],
+        const queue: Array<{
+            label: string;
+            to: string;
+            subject: string;
+            kind: 'customer' | 'operations';
+        }> = [
+            {
+                label: 'shuttle_customer',
+                to: data.customerEmail,
                 subject: 'Confirmacion de Shuttle',
-                react: ShuttleConfirmationEmail({
-                    customerName: data.customerName,
-                    origin: data.origin,
-                    destination: data.destination,
-                    travelDate: data.travelDate,
-                    travelTime: data.travelTime,
-                    passengers: data.passengers,
-                    pickupLocation: data.pickupLocation,
-                    type: data.type,
-                    price: data.price,
-                }),
-            }),
-            resend.emails.send({
-                from: RESEND_FROM,
-                to: [adminEmail],
+                kind: 'customer',
+            },
+            {
+                label: 'shuttle_admin',
+                to: adminEmail,
                 subject: 'Nueva Solicitud de Shuttle',
-                react: ShuttleAdminNotification({
-                    customerName: data.customerName,
-                    customerEmail: data.customerEmail,
-                    origin: data.origin,
-                    destination: data.destination,
-                    travelDate: data.travelDate,
-                    travelTime: data.travelTime,
-                    passengers: data.passengers,
-                    pickupLocation: data.pickupLocation,
-                    type: data.type,
-                    price: data.price,
-                }),
-            }),
+                kind: 'operations',
+            },
         ];
 
         if (agencyEmail) {
-            sendOperations.push(
-                resend.emails.send({
-                    from: RESEND_FROM,
-                    to: [agencyEmail],
-                    subject: 'Nueva Solicitud de Shuttle Asignada',
-                    react: ShuttleAdminNotification({
-                        customerName: data.customerName,
-                        customerEmail: data.customerEmail,
-                        origin: data.origin,
-                        destination: data.destination,
-                        travelDate: data.travelDate,
-                        travelTime: data.travelTime,
-                        passengers: data.passengers,
-                        pickupLocation: data.pickupLocation,
-                        type: data.type,
-                        price: data.price,
-                    }),
-                })
-            );
+            queue.push({
+                label: 'shuttle_agency',
+                to: agencyEmail,
+                subject: 'Nueva Solicitud de Shuttle Asignada',
+                kind: 'operations',
+            });
         }
 
-        const results = await Promise.all(sendOperations);
-        const failedResult = results.find((result) => result?.error);
-        if (failedResult?.error) {
-            return { success: false, error: failedResult.error };
+        for (let i = 0; i < queue.length; i += 1) {
+            const item = queue[i];
+            const reactComponent =
+                item.kind === 'customer'
+                    ? ShuttleConfirmationEmail({
+                          customerName: data.customerName,
+                          origin: data.origin,
+                          destination: data.destination,
+                          travelDate: data.travelDate,
+                          travelTime: data.travelTime,
+                          passengers: data.passengers,
+                          pickupLocation: data.pickupLocation,
+                          type: data.type,
+                          price: data.price,
+                      })
+                    : ShuttleAdminNotification({
+                          customerName: data.customerName,
+                          customerEmail: data.customerEmail,
+                          origin: data.origin,
+                          destination: data.destination,
+                          travelDate: data.travelDate,
+                          travelTime: data.travelTime,
+                          passengers: data.passengers,
+                          pickupLocation: data.pickupLocation,
+                          type: data.type,
+                          price: data.price,
+                      });
+
+            const result = await sendEmailWithRetry(item.label, () =>
+                resend.emails.send({
+                    from: RESEND_FROM,
+                    to: [item.to],
+                    subject: item.subject,
+                    react: reactComponent,
+                })
+            );
+
+            if (!result.success) {
+                return { success: false, error: result.error };
+            }
+
+            if (i < queue.length - 1) {
+                await sleep(EMAIL_SEND_SPACING_MS);
+            }
         }
 
         return { success: true };
