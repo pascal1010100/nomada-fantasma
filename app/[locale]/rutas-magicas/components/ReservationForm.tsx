@@ -359,10 +359,13 @@ export default function ReservationForm({
       }
 
       const emailStatus =
-        data?.email && typeof data.email.sent === 'boolean'
-          ? String(data.email.sent)
-          : 'unknown';
-      console.warn('Reservation email status:', emailStatus);
+        data?.email && typeof data.email.status === 'string'
+          ? data.email.status
+          : data?.email && typeof data.email.sent === 'boolean'
+            ? data.email.sent
+              ? 'sent'
+              : 'failed'
+            : 'unknown';
 
       // Redirigir a la página de confirmación con los parámetros necesarios
       const searchParams = new URLSearchParams({

@@ -1,4 +1,7 @@
 {
+    "Common": {
+        "loading": "Cargando..."
+    },
     "HomePage": {
         "title": "Bienvenido a Nómada Fantasma",
         "description": "Una experiencia única en el Lago Atitlán"
@@ -42,6 +45,51 @@
             "ratings": "Datos trazables por lugar"
         }
     },
+    "HomeConversion": {
+        "quick": {
+            "title": "Planifica tu viaje en minutos",
+            "desc": "Empieza por lo que más impacto tiene en tu viaje: experiencias, transporte y puntos clave en mapa.",
+            "cardBadge": "Acceso rápido",
+            "cards": {
+                "tours": {
+                    "title": "Tours y experiencias",
+                    "desc": "Explora actividades por pueblo con detalle de duración, dificultad y reservas.",
+                    "cta": "Ver tours"
+                },
+                "shuttles": {
+                    "title": "Shuttles y transporte",
+                    "desc": "Conecta pueblos y destinos con rutas compartidas o traslados privados.",
+                    "cta": "Reservar shuttle"
+                },
+                "map": {
+                    "title": "Mapa verificado",
+                    "desc": "Consulta lugares reales en San Pedro: hospedaje, Wi‑Fi, puertos, bancos y más.",
+                    "cta": "Abrir mapa"
+                }
+            }
+        },
+        "itinerary": {
+            "badge": "Ruta sugerida",
+            "title": "Itinerario base de 3 días en San Pedro",
+            "desc": "Una estructura simple para combinar actividades, movilidad y descanso sin perder tiempo.",
+            "items": {
+                "day1": "Día 1: Llegada, check-in, reconocimiento del pueblo y puntos útiles.",
+                "day2": "Día 2: Tour principal + comida local + tarde libre en lago.",
+                "day3": "Día 3: Plan corto (mirador/café) + shuttle al siguiente destino."
+            }
+        },
+        "transport": {
+            "badge": "Logística clara",
+            "title": "Movilidad que sí te lleva",
+            "desc": "Conecta tu plan con transporte real y horarios útiles para no improvisar al final.",
+            "items": {
+                "item1": "Rutas entre pueblos de Atitlán",
+                "item2": "Shuttles a Antigua y Ciudad de Guatemala",
+                "item3": "Opciones privadas para grupos"
+            },
+            "cta": "Ver opciones de transporte"
+        }
+    },
     "Shuttles": {
         "badge": "Traslados Premium Atitlán",
         "title": "Cruza el Lago,",
@@ -75,6 +123,9 @@
             "successTitle": "¡Solicitud Enviada!",
             "successDesc": "Hemos recibido tu solicitud para el shuttle de {origin} a {destination}.",
             "successSubDesc": "Nuestro equipo revisará la disponibilidad con la agencia y te contactaremos en {email} en breve.",
+            "successEmailSent": "Correo enviado correctamente",
+            "successEmailPending": "Correo en proceso de entrega. Te contactaremos igual.",
+            "successEmailProcessing": "Preparando confirmación por correo",
             "successBtn": "Entendido, gracias",
             "title": "Reserva Elite",
             "titlePrivate": "Consulta Traslado Privado",
@@ -976,6 +1027,9 @@
         "title": "¡Solicitud Enviada!",
         "subtitle": "Hemos recibido tu solicitud para este tour. Nuestro equipo la revisará y te contactará pronto.",
         "emailNotice": "📧 Te enviaremos los detalles de confirmación a tu correo",
+        "emailStatusSent": "Correo enviado correctamente",
+        "emailStatusPending": "Correo en proceso de entrega. Te contactaremos igual.",
+        "emailStatusProcessing": "Preparando confirmación por correo",
         "notFoundTitle": "Tour no encontrado",
         "notFoundDesc": "Lo sentimos, no pudimos encontrar los detalles de este tour.",
         "backTours": "Ver más tours",

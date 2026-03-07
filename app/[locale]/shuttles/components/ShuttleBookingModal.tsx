@@ -28,6 +28,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState('');
     const [showBank, setShowBank] = useState(false);
+    const [emailStatus, setEmailStatus] = useState<'sent' | 'failed' | 'not_requested' | 'unknown'>('unknown');
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const minDate = tomorrow.toISOString().split('T')[0];
@@ -128,11 +129,17 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
 
             if (!reserveResponse.ok) throw new Error(reserveData.error || t('errorGeneric'));
 
-            const emailStatus =
-                reserveData?.email && typeof reserveData.email.sent === 'boolean'
-                    ? String(reserveData.email.sent)
+            const rawEmailStatus =
+                reserveData?.email && typeof reserveData.email.status === 'string'
+                    ? reserveData.email.status
+                    : reserveData?.email && typeof reserveData.email.sent === 'boolean'
+                        ? (reserveData.email.sent ? 'sent' : 'failed')
+                        : 'unknown';
+            const normalizedEmailStatus: 'sent' | 'failed' | 'not_requested' | 'unknown' =
+                rawEmailStatus === 'sent' || rawEmailStatus === 'failed' || rawEmailStatus === 'not_requested'
+                    ? rawEmailStatus
                     : 'unknown';
-            console.warn('Shuttle email status:', emailStatus);
+            setEmailStatus(normalizedEmailStatus);
 
             setIsSuccess(true);
             trackEvent('complete_booking', {
@@ -182,6 +189,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
         setCustomOrigin('');
         setCustomDestination('');
         setError('');
+        setEmailStatus('unknown');
         onClose();
     };
 
@@ -212,6 +220,21 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                     </p>
                                     <p className="text-sm bg-muted/50 p-4 rounded-2xl border border-border mt-4">
                                         {t('successSubDesc', { email: email })}
+                                    </p>
+                                    <p
+                                        className={`text-xs font-semibold mt-2 rounded-full px-3 py-1 inline-flex ${
+                                            emailStatus === 'sent'
+                                                ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-400/20'
+                                                : emailStatus === 'failed'
+                                                  ? 'bg-amber-500/15 text-amber-300 border border-amber-400/20'
+                                                  : 'bg-sky-500/15 text-sky-300 border border-sky-400/20'
+                                        }`}
+                                    >
+                                        {emailStatus === 'sent'
+                                            ? t('successEmailSent')
+                                            : emailStatus === 'failed'
+                                              ? t('successEmailPending')
+                                              : t('successEmailProcessing')}
                                     </p>
                                 </div>
                                 {paymentLink && (

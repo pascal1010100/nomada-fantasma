@@ -1,4 +1,7 @@
 {
+    "Common": {
+        "loading": "Loading..."
+    },
     "HomePage": {
         "title": "Welcome to Nómada Fantasma",
         "description": "A unique experience at Lake Atitlán"
@@ -42,6 +45,51 @@
             "ratings": "Traceable place-level data"
         }
     },
+    "HomeConversion": {
+        "quick": {
+            "title": "Plan your trip in minutes",
+            "desc": "Start with the decisions that matter most: experiences, transport, and verified map points.",
+            "cardBadge": "Quick access",
+            "cards": {
+                "tours": {
+                    "title": "Tours and experiences",
+                    "desc": "Explore activities by town with duration, difficulty, and booking details.",
+                    "cta": "View tours"
+                },
+                "shuttles": {
+                    "title": "Shuttles and transport",
+                    "desc": "Connect towns and destinations with shared routes or private transfers.",
+                    "cta": "Book shuttle"
+                },
+                "map": {
+                    "title": "Verified map",
+                    "desc": "Browse real places in San Pedro: stays, Wi‑Fi, docks, banks, and more.",
+                    "cta": "Open map"
+                }
+            }
+        },
+        "itinerary": {
+            "badge": "Suggested route",
+            "title": "3-day base itinerary in San Pedro",
+            "desc": "A simple structure to combine activities, mobility, and rest without wasting time.",
+            "items": {
+                "day1": "Day 1: Arrival, check-in, town orientation, and key utility spots.",
+                "day2": "Day 2: Main tour + local food + free afternoon by the lake.",
+                "day3": "Day 3: Short plan (viewpoint/coffee) + shuttle to your next destination."
+            }
+        },
+        "transport": {
+            "badge": "Clear logistics",
+            "title": "Mobility that actually works",
+            "desc": "Connect your plan with real transport options and useful schedules.",
+            "items": {
+                "item1": "Routes between Atitlán towns",
+                "item2": "Shuttles to Antigua and Guatemala City",
+                "item3": "Private options for groups"
+            },
+            "cta": "View transport options"
+        }
+    },
     "Shuttles": {
         "badge": "Atitlán Premium Transfers",
         "title": "Cross the Lake,",
@@ -75,6 +123,9 @@
             "successTitle": "Request Sent!",
             "successDesc": "We have received your request for the shuttle from {origin} to {destination}.",
             "successSubDesc": "Our team will check availability with the agency and contact you at {email} shortly.",
+            "successEmailSent": "Email sent successfully",
+            "successEmailPending": "Email delivery is in progress. We will contact you anyway.",
+            "successEmailProcessing": "Preparing email confirmation",
             "successBtn": "Got it, thanks",
             "title": "Elite Booking",
             "titlePrivate": "Private Transfer Inquiry",
@@ -974,6 +1025,9 @@
         "title": "Request Sent!",
         "subtitle": "We have received your request for this tour. Our team will review it and contact you soon.",
         "emailNotice": "📧 We will send confirmation details to your email",
+        "emailStatusSent": "Email sent successfully",
+        "emailStatusPending": "Email delivery is in progress. We will contact you anyway.",
+        "emailStatusProcessing": "Preparing email confirmation",
         "notFoundTitle": "Tour not found",
         "notFoundDesc": "Sorry, we couldn’t find the details for this tour.",
         "backTours": "See more tours",

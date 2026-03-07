@@ -1,7 +1,6 @@
 import { CheckCircle2, ArrowLeft, Calendar, Users, MapPin, Clock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import Script from 'next/script';
 import { getTourById } from '@/app/[locale]/rutas-magicas/mocks/tours';
 import { getTourBySlugFromDB } from '@/app/lib/supabase/tours';
 import type { Database } from '@/types/database.types';
@@ -111,6 +110,18 @@ export default async function ConfirmationPage({
     total: total ? parseFloat(total) : 0,
   };
   const emailStatus = emailSent ?? 'unknown';
+  const emailBadgeClass =
+    emailStatus === 'sent'
+      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
+      : emailStatus === 'failed'
+        ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
+        : 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300';
+  const emailStatusMessage =
+    emailStatus === 'sent'
+      ? t('emailStatusSent')
+      : emailStatus === 'failed'
+        ? t('emailStatusPending')
+        : t('emailStatusProcessing');
 
   const adultPrice = displayTour.adultPrice;
   const totalAdults = reservation.adults * adultPrice;
@@ -119,13 +130,6 @@ export default async function ConfirmationPage({
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cyan-50 to-white dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-      <Script
-        id="reservation-email-status"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `console.warn('Reservation email status:', ${JSON.stringify(emailStatus)});`,
-        }}
-      />
       <div className="max-w-3xl mx-auto">
         {/* Encabezado */}
         <div className="text-center mb-12">
@@ -148,6 +152,9 @@ export default async function ConfirmationPage({
           <div className="mt-6 p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg inline-block">
             <p className="text-sm font-medium text-cyan-800 dark:text-cyan-200">
               {t('emailNotice')}
+            </p>
+            <p className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${emailBadgeClass}`}>
+              {emailStatusMessage}
             </p>
           </div>
         </div>
