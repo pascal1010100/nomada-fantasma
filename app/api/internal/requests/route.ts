@@ -49,13 +49,15 @@ function normalizeLimit(rawValue: string | null): number {
 
 function mapReservation(row: ReservationRow | LegacyReservationRow): InternalRequestItem {
     const isModern = 'full_name' in row;
+    const createdAt = row.created_at ?? '';
+    const fallbackDate = createdAt ? createdAt.slice(0, 10) : '';
     return {
         id: row.id,
         kind: 'tour',
-        createdAt: row.created_at,
+        createdAt,
         customerName: isModern ? row.full_name : (row.customer_name ?? 'Sin nombre'),
         customerEmail: isModern ? row.email : (row.customer_email ?? ''),
-        date: isModern ? row.date : (row.reservation_date ?? row.created_at.slice(0, 10)),
+        date: isModern ? (row.date ?? fallbackDate) : (row.reservation_date ?? fallbackDate),
         details: isModern ? (row.tour_name || row.notes || 'Reserva de tour') : (row.tour_name || row.customer_notes || 'Reserva de tour'),
         status: row.status ?? null,
         emailStatus: row.email_delivery_status ?? null,
@@ -68,17 +70,18 @@ function mapReservation(row: ReservationRow | LegacyReservationRow): InternalReq
 }
 
 function mapShuttle(row: ShuttleBookingRow): InternalRequestItem {
+    const createdAt = row.created_at ?? '';
     return {
         id: row.id,
         kind: 'shuttle',
-        createdAt: row.created_at,
-        customerName: row.customer_name,
-        customerEmail: row.customer_email,
-        date: row.travel_date,
-        details: `${row.route_origin} -> ${row.route_destination} (${row.passengers})`,
+        createdAt,
+        customerName: row.customer_name ?? 'Sin nombre',
+        customerEmail: row.customer_email ?? '',
+        date: row.travel_date ?? '',
+        details: `${row.route_origin ?? ''} -> ${row.route_destination ?? ''} (${row.passengers ?? 0})`,
         status: row.status,
         emailStatus: row.email_delivery_status,
-        emailAttempts: row.email_attempts,
+        emailAttempts: row.email_attempts ?? 0,
         emailLastError: row.email_last_error,
         adminNotes: row.admin_notes,
         confirmedAt: row.confirmed_at,
