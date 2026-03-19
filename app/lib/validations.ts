@@ -76,19 +76,18 @@ export type CreateReservationInput = z.infer<typeof CreateReservationSchema>;
 // Sanitize and normalize reservation data
 export function sanitizeReservationInput(input: CreateReservationInput) {
     return {
-        customer_name: input.name.trim(),
-        customer_email: input.email.toLowerCase().trim(),
-        customer_phone: input.phone?.trim() || null,
-        customer_country: input.country?.trim() || null,
-        reservation_date: input.date,
-        guests: input.guests,
+        full_name: input.name.trim(),
+        email: input.email.toLowerCase().trim(),
+        whatsapp: input.phone?.trim() || null,
+        date: input.date,
+        number_of_people: input.guests,
         reservation_type: input.type,
         tour_id: input.tourId || null,
         accommodation_id: input.accommodationId || null,
         guide_id: input.guideId || null,
         tour_name: input.tourName?.trim() || null,
         total_price: input.totalPrice || null,
-        customer_notes: input.notes?.trim() || null,
+        notes: input.notes?.trim() || null,
     };
 }
 

@@ -1,6 +1,7 @@
 import { Html, Head, Body, Container, Section, Text, Heading, Font } from '@react-email/components';
 
 interface ShuttleAdminNotificationProps {
+  bookingId?: string;
   customerName: string;
   customerEmail: string;
   origin: string;
@@ -11,9 +12,13 @@ interface ShuttleAdminNotificationProps {
   pickupLocation: string;
   type: string;
   price?: number;
+  roleLabel?: string;
+  showAdminPanel?: boolean;
+  showAgencyInstructions?: boolean;
 }
 
 export default function ShuttleAdminNotification({
+  bookingId,
   customerName,
   customerEmail,
   origin,
@@ -23,10 +28,16 @@ export default function ShuttleAdminNotification({
   passengers,
   pickupLocation,
   type,
-  price
+  price,
+  roleLabel,
+  showAdminPanel,
+  showAgencyInstructions
 }: ShuttleAdminNotificationProps) {
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    const parts = dateString.split('-').map(Number);
+    const date = parts.length === 3
+      ? new Date(parts[0], parts[1] - 1, parts[2], 12)
+      : new Date(dateString);
     return date.toLocaleDateString('es-ES', {
       weekday: 'long',
       year: 'numeric',
@@ -66,6 +77,11 @@ export default function ShuttleAdminNotification({
             <Heading style={{ color: '#1e293b', fontSize: '24px', fontWeight: 600, marginBottom: '20px' }}>
               📋 Detalles de la Solicitud
             </Heading>
+            {roleLabel ? (
+              <Text style={{ color: '#dc2626', fontSize: '12px', fontWeight: 700, marginBottom: '12px' }}>
+                {roleLabel}
+              </Text>
+            ) : null}
             
             {/* Customer Info */}
             <Section style={{ backgroundColor: '#fef2f2', padding: '25px', borderRadius: '8px', marginBottom: '25px' }}>
@@ -73,21 +89,31 @@ export default function ShuttleAdminNotification({
                 👤 Información del Cliente
               </Heading>
               
-              <div style={{ display: 'grid', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={{ color: '#7f1d1d', fontSize: '14px', fontWeight: 500 }}>NOMBRE</Text>
-                  <Text style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600 }}>
-                    {customerName}
-                  </Text>
-                </div>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={{ color: '#7f1d1d', fontSize: '14px', fontWeight: 500 }}>EMAIL</Text>
-                  <a href={`mailto:${customerEmail}`} style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600, textDecoration: 'underline' }}>
-                    {customerEmail}
-                  </a>
-                </div>
-              </div>
+              <table width="100%" cellPadding="0" cellSpacing="0" role="presentation">
+                <tbody>
+                  <tr>
+                    <td style={{ color: '#7f1d1d', fontSize: '14px', fontWeight: 600, paddingBottom: '8px' }}>
+                      NOMBRE
+                    </td>
+                    <td style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600, textAlign: 'right', paddingBottom: '8px' }}>
+                      {customerName}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ color: '#7f1d1d', fontSize: '14px', fontWeight: 600 }}>
+                      EMAIL
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <a
+                        href={`mailto:${customerEmail}`}
+                        style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600, textDecoration: 'underline' }}
+                      >
+                        {customerEmail}
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </Section>
 
             {/* Trip Details */}
@@ -96,74 +122,99 @@ export default function ShuttleAdminNotification({
                 📍 Detalles del Viaje
               </Heading>
               
-              <div style={{ display: 'grid', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 500 }}>RUTA</Text>
-                  <Text style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600 }}>
-                    {origin} → {destination}
-                  </Text>
-                </div>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 500 }}>FECHA</Text>
-                  <Text style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600 }}>
-                    {formatDate(travelDate)}
-                  </Text>
-                </div>
-
-                {travelTime && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 500 }}>HORA</Text>
-                    <Text style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600 }}>
-                      {travelTime}
-                    </Text>
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 500 }}>PASAJEROS</Text>
-                  <Text style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600 }}>
-                    {passengers} {passengers === 1 ? 'persona' : 'personas'}
-                  </Text>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 500 }}>TIPO</Text>
-                  <Text style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600 }}>
-                    {type === 'shared' ? 'Shuttle Compartido' : 'Traslado Privado'}
-                  </Text>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Text style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 500 }}>RECOGIDA</Text>
-                  <Text style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600, textAlign: 'right', maxWidth: '250px' }}>
-                    {pickupLocation}
-                  </Text>
-                </div>
+              <table width="100%" cellPadding="0" cellSpacing="0" role="presentation">
+                <tbody>
+                  <tr>
+                    <td style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 600, paddingBottom: '8px' }}>
+                      RUTA
+                    </td>
+                    <td style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600, textAlign: 'right', paddingBottom: '8px' }}>
+                      {origin} → {destination}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 600, paddingBottom: '8px' }}>
+                      FECHA
+                    </td>
+                    <td style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600, textAlign: 'right', paddingBottom: '8px' }}>
+                      {formatDate(travelDate)}
+                    </td>
+                  </tr>
+                  {travelTime ? (
+                    <tr>
+                      <td style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 600, paddingBottom: '8px' }}>
+                        HORA
+                      </td>
+                      <td style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600, textAlign: 'right', paddingBottom: '8px' }}>
+                        {travelTime}
+                      </td>
+                    </tr>
+                  ) : null}
+                  <tr>
+                    <td style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 600, paddingBottom: '8px' }}>
+                      PASAJEROS
+                    </td>
+                    <td style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600, textAlign: 'right', paddingBottom: '8px' }}>
+                      {passengers} {passengers === 1 ? 'persona' : 'personas'}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 600, paddingBottom: '8px' }}>
+                      TIPO
+                    </td>
+                    <td style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600, textAlign: 'right', paddingBottom: '8px' }}>
+                      {type === 'shared' ? 'Shuttle Compartido' : 'Traslado Privado'}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 600, verticalAlign: 'top' }}>
+                      RECOGIDA
+                    </td>
+                    <td style={{ color: '#1e293b', fontSize: '16px', fontWeight: 600, textAlign: 'right', maxWidth: '250px' }}>
+                      {pickupLocation}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
                 {price && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #bae6fd' }}>
-                    <Text style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 500 }}>PRECIO</Text>
-                    <Text style={{ color: '#059669', fontSize: '18px', fontWeight: 700 }}>
-                      Q{price}
-                    </Text>
-                  </div>
+                  <table width="100%" cellPadding="0" cellSpacing="0" role="presentation" style={{ marginTop: '12px', borderTop: '1px solid #bae6fd', paddingTop: '12px' }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 600 }}>PRECIO</td>
+                        <td style={{ color: '#059669', fontSize: '18px', fontWeight: 700, textAlign: 'right' }}>Q{price}</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 )}
-              </div>
+
+                {bookingId ? (
+                  <table width="100%" cellPadding="0" cellSpacing="0" role="presentation" style={{ marginTop: '12px', borderTop: '1px dashed #bae6fd', paddingTop: '12px' }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ color: '#0c4a6e', fontSize: '14px', fontWeight: 600 }}>ID SOLICITUD</td>
+                        <td style={{ color: '#1e293b', fontSize: '14px', fontWeight: 600, fontFamily: 'monospace', textAlign: 'right' }}>
+                          {bookingId}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                ) : null}
             </Section>
 
             {/* Action Required */}
-            <Section style={{ backgroundColor: '#fef3c7', padding: '25px', borderRadius: '8px', marginBottom: '25px' }}>
-              <Heading style={{ color: '#92400e', fontSize: '16px', fontWeight: 600, marginBottom: '15px' }}>
-                ⚡ Acción Requerida
-              </Heading>
-              <Text style={{ color: '#78350f', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
-                1. Contactar a agencias de transporte para verificar disponibilidad<br />
-                2. Confirmar precio y horario exacto<br />
-                3. Responder al cliente con confirmación o alternativas<br />
-                4. Coordinar detalles de pago y recogida
-              </Text>
-            </Section>
+            {showAgencyInstructions ? (
+              <Section style={{ backgroundColor: '#fef3c7', padding: '25px', borderRadius: '8px', marginBottom: '25px' }}>
+                <Heading style={{ color: '#92400e', fontSize: '16px', fontWeight: 600, marginBottom: '15px' }}>
+                  ⚡ Acción Requerida
+                </Heading>
+                <Text style={{ color: '#78350f', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
+                  1. Confirmar disponibilidad y horario exacto<br />
+                  2. Responder al cliente con confirmación o alternativas<br />
+                  3. Coordinar detalles de pago y recogida
+                </Text>
+              </Section>
+            ) : null}
 
             {/* Quick Actions */}
             <Section style={{ textAlign: 'center', marginBottom: '25px' }}>
@@ -184,23 +235,24 @@ export default function ShuttleAdminNotification({
               >
                 📧 Responder al Cliente
               </a>
-              
-              <a
-                href="https://nomadafantasma.com/admin"
-                style={{
-                  backgroundColor: '#64748b',
-                  color: '#ffffff',
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  textDecoration: 'none',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                  display: 'inline-block',
-                  marginBottom: '10px'
-                }}
-              >
-                📊 Ver en Panel Admin
-              </a>
+              {showAdminPanel ? (
+                <a
+                  href="https://nomadafantasma.com/es/internal/recepcion"
+                  style={{
+                    backgroundColor: '#64748b',
+                    color: '#ffffff',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    display: 'inline-block',
+                    marginBottom: '10px'
+                  }}
+                >
+                  📊 Ver en Panel Admin
+                </a>
+              ) : null}
             </Section>
 
             {/* Timestamp */}

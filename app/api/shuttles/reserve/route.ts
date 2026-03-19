@@ -11,12 +11,20 @@ import type { Database } from '@/types/database.types';
 type ShuttleBookingInsert = Database['public']['Tables']['shuttle_bookings']['Insert'];
 type ShuttleBookingRow = Database['public']['Tables']['shuttle_bookings']['Row'];
 type ShuttleBookingUpdate = Database['public']['Tables']['shuttle_bookings']['Update'];
+const DEFAULT_AGENCY_EMAIL = process.env.DEFAULT_AGENCY_EMAIL?.trim() || null;
+
+function normalizeEmail(value: string | null | undefined): string | null {
+    const candidate = value?.trim();
+    if (!candidate) return null;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate) ? candidate : null;
+}
 
 async function getShuttleAgencyEmail(
     origin: string,
     destination: string,
     type: string
 ): Promise<string | null> {
+    const fallbackAgencyEmail = normalizeEmail(DEFAULT_AGENCY_EMAIL);
     const routeResult = await supabaseAdmin
         .schema('public')
         .from('shuttle_routes')
@@ -29,11 +37,11 @@ async function getShuttleAgencyEmail(
 
     if (routeResult.error) {
         logger.warn('Unable to resolve shuttle route agency assignment:', routeResult.error);
-        return null;
+        return fallbackAgencyEmail;
     }
 
     const agencyId = routeResult.data?.agency_id;
-    if (!agencyId) return null;
+    if (!agencyId) return fallbackAgencyEmail;
 
     const agencyResult = await supabaseAdmin
         .schema('public')
@@ -44,11 +52,11 @@ async function getShuttleAgencyEmail(
 
     if (agencyResult.error) {
         logger.warn('Unable to resolve agency email for shuttle route:', agencyResult.error);
-        return null;
+        return fallbackAgencyEmail;
     }
 
-    if (!agencyResult.data?.is_active) return null;
-    return agencyResult.data.email?.trim() || null;
+    if (!agencyResult.data?.is_active) return fallbackAgencyEmail;
+    return normalizeEmail(agencyResult.data.email) ?? fallbackAgencyEmail;
 }
 
 export async function POST(request: Request) {
@@ -95,6 +103,7 @@ export async function POST(request: Request) {
         }
 
         const data = validation.data;
+        const tEmail = await getTranslations({ locale, namespace: 'ShuttleEmail' });
 
         // 1. Persist to Supabase
         const payload: ShuttleBookingInsert = {
@@ -129,6 +138,7 @@ export async function POST(request: Request) {
         const bookingType = data.type || 'shared';
         const agencyEmail = await getShuttleAgencyEmail(data.routeOrigin, data.routeDestination, bookingType);
         const result = await sendShuttleConfirmationEmails({
+            bookingId: booking?.id ?? undefined,
             customerName: data.customerName,
             customerEmail: data.customerEmail,
             agencyEmail,
@@ -140,8 +150,16 @@ export async function POST(request: Request) {
             pickupLocation: data.pickupLocation,
             type: bookingType,
             price: undefined,
+            t: tEmail,
+            locale,
         });
         const emailSent = result.success;
+        const customerRecipient = result.recipients.find((recipient) => recipient.label === 'shuttle_customer');
+        const customerEmailSent = customerRecipient ? customerRecipient.success : result.success;
+        const emailRecipientStatuses = result.recipients.map((recipient) => ({
+            label: recipient.label,
+            status: recipient.success ? 'sent' : 'failed',
+        }));
 
         if (!result.success) {
             const rawError = result.error;
@@ -178,8 +196,9 @@ export async function POST(request: Request) {
             message: tApi('successMessage'),
             bookingId: booking?.id ?? null,
             email: {
-                sent: emailSent,
-                status: emailSent ? 'sent' : 'failed',
+                sent: customerEmailSent,
+                status: customerEmailSent ? 'sent' : 'failed',
+                recipients: emailRecipientStatuses,
             },
         });
     } catch (error) {

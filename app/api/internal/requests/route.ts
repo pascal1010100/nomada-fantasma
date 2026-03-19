@@ -10,11 +10,11 @@ type TourRow = Database['public']['Tables']['tours']['Row'];
 type LegacyReservationRow = {
     id: string;
     created_at: string;
-    full_name?: string | null;
-    email?: string | null;
-    date?: string | null;
+    customer_name?: string | null;
+    customer_email?: string | null;
+    reservation_date?: string | null;
     tour_name?: string | null;
-    notes?: string | null;
+    customer_notes?: string | null;
     status?: string | null;
     email_delivery_status?: 'pending' | 'sent' | 'failed' | 'not_requested' | null;
     email_attempts?: number | null;
@@ -48,22 +48,22 @@ function normalizeLimit(rawValue: string | null): number {
 }
 
 function mapReservation(row: ReservationRow | LegacyReservationRow): InternalRequestItem {
-    const isModern = 'customer_name' in row;
+    const isModern = 'full_name' in row;
     return {
         id: row.id,
         kind: 'tour',
         createdAt: row.created_at,
-        customerName: isModern ? row.customer_name : (row.full_name ?? 'Sin nombre'),
-        customerEmail: isModern ? row.customer_email : (row.email ?? ''),
-        date: isModern ? row.reservation_date : (row.date ?? row.created_at.slice(0, 10)),
-        details: isModern ? (row.tour_name || row.customer_notes || 'Reserva de tour') : (row.tour_name || row.notes || 'Reserva de tour'),
+        customerName: isModern ? row.full_name : (row.customer_name ?? 'Sin nombre'),
+        customerEmail: isModern ? row.email : (row.customer_email ?? ''),
+        date: isModern ? row.date : (row.reservation_date ?? row.created_at.slice(0, 10)),
+        details: isModern ? (row.tour_name || row.notes || 'Reserva de tour') : (row.tour_name || row.customer_notes || 'Reserva de tour'),
         status: row.status ?? null,
         emailStatus: row.email_delivery_status ?? null,
         emailAttempts: row.email_attempts ?? 0,
         emailLastError: row.email_last_error ?? null,
-        adminNotes: isModern ? row.admin_notes : (row.admin_notes ?? null),
-        confirmedAt: isModern ? row.confirmed_at : (row.confirmed_at ?? null),
-        cancelledAt: isModern ? row.cancelled_at : (row.cancelled_at ?? null),
+        adminNotes: row.admin_notes ?? null,
+        confirmedAt: row.confirmed_at ?? null,
+        cancelledAt: row.cancelled_at ?? null,
     };
 }
 
@@ -152,7 +152,7 @@ export async function GET(request: Request) {
                     const typedRow = row as ReservationRow;
                     const matchesTourId = typedRow.tour_id ? sanPedroTourIds.has(typedRow.tour_id) : false;
                     const tourName = typedRow.tour_name?.toLowerCase() ?? '';
-                    const customerNotes = typedRow.customer_notes?.toLowerCase() ?? '';
+                    const customerNotes = typedRow.notes?.toLowerCase() ?? '';
                     const matchesText = tourName.includes('san pedro') || customerNotes.includes('san pedro');
                     return matchesTourId || matchesText;
                 })

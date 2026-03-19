@@ -9,7 +9,6 @@ import {
     Preview,
     Section,
     Text,
-    Tailwind,
 } from '@react-email/components';
 
 interface ShuttleRequestTemplateProps {
@@ -24,6 +23,69 @@ interface ShuttleRequestTemplateProps {
     type?: string;
 }
 
+const styles = {
+    body: {
+        backgroundColor: '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+        margin: '0',
+        padding: '0',
+    },
+    container: {
+        border: '1px solid #eaeaea',
+        borderRadius: '12px',
+        margin: '32px auto',
+        padding: '24px',
+        maxWidth: '520px',
+    },
+    title: {
+        color: '#111827',
+        fontSize: '20px',
+        fontWeight: '700',
+        textAlign: 'center' as const,
+        margin: '8px 0',
+    },
+    subtitle: {
+        color: '#6b7280',
+        fontSize: '13px',
+        textAlign: 'center' as const,
+        margin: '0 0 12px',
+    },
+    card: {
+        backgroundColor: '#f9fafb',
+        border: '1px solid #f1f5f9',
+        borderRadius: '12px',
+        padding: '16px',
+        margin: '16px 0',
+    },
+    label: {
+        color: '#6b7280',
+        fontSize: '11px',
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase' as const,
+        margin: '0 0 6px',
+        fontWeight: '700',
+    },
+    text: {
+        color: '#111827',
+        fontSize: '14px',
+        lineHeight: '20px',
+        margin: '6px 0',
+    },
+    value: {
+        color: '#111827',
+        fontSize: '14px',
+        fontWeight: '600',
+        margin: '0',
+    },
+    footer: {
+        color: '#6b7280',
+        fontSize: '12px',
+        lineHeight: '18px',
+        textAlign: 'center' as const,
+        margin: '8px 0',
+    },
+};
+
 export const ShuttleRequestTemplate = ({
     customerName,
     customerEmail,
@@ -35,104 +97,52 @@ export const ShuttleRequestTemplate = ({
     pickupLocation,
     type,
 }: ShuttleRequestTemplateProps) => {
-    const previewText = `Nueva Solicitud de Shuttle: ${routeOrigin} ➡️ ${routeDestination}`;
+    const previewText = `Nueva Solicitud de Shuttle: ${routeOrigin} -> ${routeDestination}`;
 
     return (
         <Html>
             <Head />
             <Preview>{previewText}</Preview>
-            <Tailwind
-                config={{
-                    theme: {
-                        extend: {
-                            colors: {
-                                ghostPrimary: '#7c3aed',
-                                ghostAccent: '#06b6d4',
-                                darkBg: '#111827',
-                            },
-                        },
-                    },
-                }}
-            >
-                <Body className="bg-white my-auto mx-auto font-sans">
-                    <Container className="border border-solid border-[#eaeaea] rounded my-[40px] mx-auto p-[20px] max-w-[500px]">
-                        <Section className="mt-[32px] text-center">
-                            <Text className="text-[28px] font-black text-ghostPrimary m-0">Nómada Fantasma 👻</Text>
-                            <Heading className="text-black text-[20px] font-bold text-center p-0 my-[10px] mx-0">
-                                Nueva Solicitud de Transporte
-                            </Heading>
-                        </Section>
+            <Body style={styles.body}>
+                <Container style={styles.container}>
+                    <Section>
+                        <Heading style={styles.title}>Nomada Fantasma</Heading>
+                        <Text style={styles.subtitle}>Nueva solicitud de transporte</Text>
+                    </Section>
 
-                        <Section className="bg-gray-50 rounded-2xl p-6 my-6 border border-gray-100 shadow-sm">
-                            <Text className="text-ghostAccent text-xs uppercase tracking-[0.2em] mb-4 font-black">
-                                Detalles del Cliente
-                            </Text>
-                            <div className="mb-4">
-                                <Text className="text-gray-500 text-xs m-0">Nombre</Text>
-                                <Text className="text-gray-900 text-base font-bold m-0">{customerName}</Text>
-                            </div>
-                            <div className="mb-4">
-                                <Text className="text-gray-500 text-xs m-0">Email de Contacto</Text>
-                                <Text className="text-gray-900 text-base font-bold m-0">{customerEmail}</Text>
-                            </div>
+                    <Section style={styles.card}>
+                        <Text style={styles.label}>Detalles del cliente</Text>
+                        <Text style={styles.text}>Nombre</Text>
+                        <Text style={styles.value}>{customerName}</Text>
+                        <Text style={{ ...styles.text, marginTop: '10px' }}>Email</Text>
+                        <Text style={styles.value}>{customerEmail}</Text>
+                    </Section>
 
-                            <Hr className="border-gray-200 my-6" />
+                    <Section style={styles.card}>
+                        <Text style={styles.label}>Informacion del trayecto</Text>
+                        <Text style={styles.text}>Origen</Text>
+                        <Text style={styles.value}>{routeOrigin}</Text>
+                        <Text style={{ ...styles.text, marginTop: '10px' }}>Destino</Text>
+                        <Text style={styles.value}>{routeDestination}</Text>
+                        <Text style={{ ...styles.text, marginTop: '10px' }}>Fecha</Text>
+                        <Text style={styles.value}>{date}</Text>
+                        <Text style={{ ...styles.text, marginTop: '10px' }}>Hora</Text>
+                        <Text style={styles.value}>{time}</Text>
+                        <Text style={{ ...styles.text, marginTop: '10px' }}>Pasajeros</Text>
+                        <Text style={styles.value}>{passengers} {passengers === 1 ? 'persona' : 'personas'}</Text>
+                        <Text style={{ ...styles.text, marginTop: '10px' }}>Tipo</Text>
+                        <Text style={styles.value}>{type === 'private' ? 'Traslado Privado' : 'Shuttle Compartido'}</Text>
+                        <Text style={{ ...styles.text, marginTop: '10px' }}>Recogida</Text>
+                        <Text style={styles.value}>{pickupLocation}</Text>
+                    </Section>
 
-                            <Text className="text-ghostAccent text-xs uppercase tracking-[0.2em] mb-4 font-black">
-                                Información del Trayecto
-                            </Text>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="mb-4">
-                                    <Text className="text-gray-500 text-xs m-0">Origen</Text>
-                                    <Text className="text-gray-900 text-sm font-bold m-0">{routeOrigin}</Text>
-                                </div>
-                                <div className="mb-4">
-                                    <Text className="text-gray-500 text-xs m-0">Destino</Text>
-                                    <Text className="text-gray-900 text-sm font-bold m-0">{routeDestination}</Text>
-                                </div>
-                            </div>
+                    <Hr style={{ borderColor: '#e5e7eb', margin: '16px 0' }} />
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="mb-4">
-                                    <Text className="text-gray-500 text-xs m-0">Fecha</Text>
-                                    <Text className="text-gray-900 text-sm font-bold m-0">{date}</Text>
-                                </div>
-                                <div className="mb-4">
-                                    <Text className="text-gray-500 text-xs m-0">Hora</Text>
-                                    <Text className="text-gray-900 text-sm font-bold m-0">{time}</Text>
-                                </div>
-                            </div>
-
-                            <div className="mb-4">
-                                <Text className="text-gray-500 text-xs m-0">Pasajeros</Text>
-                                <Text className="text-gray-900 text-sm font-bold m-0">
-                                    {passengers} {passengers === 1 ? 'persona' : 'personas'}
-                                </Text>
-                            </div>
-
-                            <div className="mb-4">
-                                <Text className="text-gray-500 text-xs m-0">Tipo de Servicio</Text>
-                                <Text className="text-gray-900 text-sm font-bold m-0 uppercase tracking-tight">
-                                    {type === 'private' ? '🚐 TRASLADO PRIVADO' : '🚌 SHUTTLE COMPARTIDO'}
-                                </Text>
-                            </div>
-
-                            <div className="p-3 bg-white border border-dashed border-gray-200 rounded-xl">
-                                <Text className="text-gray-500 text-xs mb-1 m-0 italic text-center">Lugar de Recogida</Text>
-                                <Text className="text-gray-900 text-sm font-black m-0 text-center">{pickupLocation}</Text>
-                            </div>
-                        </Section>
-
-                        <Text className="text-[#666666] text-[12px] leading-[20px] text-center">
-                            Procesa esta solicitud con la agencia de viajes correspondiente lo antes posible.
-                        </Text>
-                        <Hr className="border border-solid border-[#eaeaea] my-[20px] mx-0 w-full" />
-                        <Text className="text-[#9ca3af] text-[10px] text-center uppercase tracking-widest font-bold">
-                            Nómada Fantasma - Operaciones Lago Atitlán
-                        </Text>
-                    </Container>
-                </Body>
-            </Tailwind>
+                    <Text style={styles.footer}>
+                        Procesa esta solicitud con la agencia correspondiente lo antes posible.
+                    </Text>
+                </Container>
+            </Body>
         </Html>
     );
 };

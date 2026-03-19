@@ -3,12 +3,14 @@ import ReservationTemplate from '../components/emails/ReservationTemplate';
 import ShuttleRequestTemplate from '../components/emails/ShuttleRequestTemplate';
 import ShuttleConfirmationEmail from '../components/emails/ShuttleConfirmationEmail';
 import ShuttleAdminNotification from '../components/emails/ShuttleAdminNotification';
+import TourLeadNotification from '../components/emails/TourLeadNotification';
 import logger from './logger';
 
 // Initialize Resend only if API key is present
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 const RESEND_FROM = process.env.RESEND_FROM || 'onboarding@resend.dev';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nomadafantasma.com';
 const EMAIL_SEND_SPACING_MS = 650;
 const EMAIL_RATE_LIMIT_RETRY_MS = 1200;
 const EMAIL_RATE_LIMIT_MAX_RETRIES = 2;
@@ -45,6 +47,8 @@ interface SendConfirmationEmailProps {
     agencyEmail?: string | null;
     reservationId: string;
     customerName: string;
+    customerPhone?: string | null;
+    customerNotes?: string | null;
     tourName: string;
     date: string;
     guests: number;
@@ -68,6 +72,21 @@ type SendEmailResult = {
     success: boolean;
     error?: unknown;
     id?: string;
+};
+
+type RecipientDeliveryResult = {
+    label: string;
+    to: string;
+    subject: string;
+    success: boolean;
+    id?: string;
+    error?: unknown;
+};
+
+type MultiRecipientSendResult = {
+    success: boolean;
+    recipients: RecipientDeliveryResult[];
+    error?: unknown;
 };
 
 function sleep(ms: number): Promise<void> {
@@ -180,9 +199,11 @@ interface SendShuttleConfirmationEmailsProps {
     pickupLocation: string;
     type: string;
     price?: number;
+    t: TFunction;
+    locale?: string;
 }
 
-export async function sendTourConfirmationEmails(data: SendConfirmationEmailProps) {
+export async function sendTourConfirmationEmails(data: SendConfirmationEmailProps): Promise<MultiRecipientSendResult> {
     const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
     const agencyEmail = data.agencyEmail?.trim() || null;
 
@@ -200,20 +221,52 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
             logger.info('Agency Template Data:', JSON.stringify(redactForLog(data), null, 2));
         }
         logger.info('-----------------------------------------------------------------------');
-        return { success: true, id: 'simulated_' + Date.now() };
-    }
-
-    try {
-        const queue = [
+        const simulatedRecipients: RecipientDeliveryResult[] = [
             {
                 label: 'tour_customer',
                 to: data.to,
                 subject: data.t('preview', { tourName: data.tourName }),
+                success: true,
+                id: 'simulated_' + Date.now(),
             },
             {
                 label: 'tour_admin',
                 to: adminEmail,
                 subject: `Nueva solicitud de tour: ${data.tourName}`,
+                success: true,
+                id: 'simulated_' + Date.now(),
+            },
+        ];
+        if (agencyEmail) {
+            simulatedRecipients.push({
+                label: 'tour_agency',
+                to: agencyEmail,
+                subject: `Solicitud de tour asignada: ${data.tourName}`,
+                success: true,
+                id: 'simulated_' + Date.now(),
+            });
+        }
+        return { success: true, recipients: simulatedRecipients };
+    }
+
+    try {
+        const queue: Array<{
+            label: string;
+            to: string;
+            subject: string;
+            kind: 'customer' | 'operations';
+        }> = [
+            {
+                label: 'tour_customer',
+                to: data.to,
+                subject: data.t('preview', { tourName: data.tourName }),
+                kind: 'customer',
+            },
+            {
+                label: 'tour_admin',
+                to: adminEmail,
+                subject: `Nueva solicitud de tour: ${data.tourName}`,
+                kind: 'operations',
             },
         ];
 
@@ -222,36 +275,77 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
                 label: 'tour_agency',
                 to: agencyEmail,
                 subject: `Solicitud de tour asignada: ${data.tourName}`,
+                kind: 'operations',
             });
         }
 
+        const recipients: RecipientDeliveryResult[] = [];
+
         for (let i = 0; i < queue.length; i += 1) {
             const item = queue[i];
+            const roleLabel =
+                item.label === 'tour_admin'
+                    ? 'ADMIN'
+                    : item.label === 'tour_agency'
+                        ? 'AGENCIA'
+                        : undefined;
+            const reactComponent =
+                item.kind === 'customer'
+                    ? ReservationTemplate({
+                          ...data,
+                          manageUrl: `${SITE_URL}/reservas/${data.reservationId}`,
+                      })
+                    : TourLeadNotification({
+                          customerName: data.customerName,
+                          customerEmail: data.to,
+                          customerWhatsapp: data.customerPhone || '',
+                          tourName: data.tourName,
+                          tourDate: data.date,
+                          notes: data.customerNotes || undefined,
+                          reservationId: data.reservationId,
+                          adminPanelUrl: item.label === 'tour_admin'
+                              ? `${SITE_URL}/es/internal/recepcion`
+                              : undefined,
+                          roleLabel,
+                          showAdminPanel: item.label === 'tour_admin',
+                          showAgencyInstructions: item.label === 'tour_agency',
+                      });
+
             const result = await sendEmailWithRetry(item.label, () =>
                 resend.emails.send({
                     from: RESEND_FROM,
                     to: [item.to],
                     subject: item.subject,
-                    react: ReservationTemplate(data),
+                    react: reactComponent,
                 })
             );
-            if (!result.success) {
-                return { success: false, error: result.error };
-            }
+            recipients.push({
+                label: item.label,
+                to: item.to,
+                subject: item.subject,
+                success: result.success,
+                id: result.id,
+                error: result.error,
+            });
 
             if (i < queue.length - 1) {
                 await sleep(EMAIL_SEND_SPACING_MS);
             }
         }
 
-        return { success: true };
+        const allOk = recipients.every((entry) => entry.success);
+        return {
+            success: allOk,
+            recipients,
+            error: allOk ? undefined : recipients.find((entry) => !entry.success)?.error,
+        };
     } catch (error) {
         logger.error('Error sending tour confirmation emails:', error);
-        return { success: false, error };
+        return { success: false, recipients: [], error };
     }
 }
 
-export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmationEmailsProps) {
+export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmationEmailsProps & { bookingId?: string }): Promise<MultiRecipientSendResult> {
     const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
     const agencyEmail = data.agencyEmail?.trim() || null;
 
@@ -269,7 +363,32 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
             logger.info('Agency Template Data:', JSON.stringify(redactForLog(data), null, 2));
         }
         logger.info('----------------------------------------------------------------');
-        return { success: true };
+        const simulatedRecipients: RecipientDeliveryResult[] = [
+            {
+                label: 'shuttle_customer',
+                to: data.customerEmail,
+                subject: 'Confirmacion de Shuttle',
+                success: true,
+                id: 'simulated_' + Date.now(),
+            },
+            {
+                label: 'shuttle_admin',
+                to: adminEmail,
+                subject: 'Nueva Solicitud de Shuttle',
+                success: true,
+                id: 'simulated_' + Date.now(),
+            },
+        ];
+        if (agencyEmail) {
+            simulatedRecipients.push({
+                label: 'shuttle_agency',
+                to: agencyEmail,
+                subject: 'Nueva Solicitud de Shuttle Asignada',
+                success: true,
+                id: 'simulated_' + Date.now(),
+            });
+        }
+        return { success: true, recipients: simulatedRecipients };
     }
 
     try {
@@ -282,7 +401,7 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
             {
                 label: 'shuttle_customer',
                 to: data.customerEmail,
-                subject: 'Confirmacion de Shuttle',
+                subject: data.t('subject', { origin: data.origin, destination: data.destination }),
                 kind: 'customer',
             },
             {
@@ -302,11 +421,20 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
             });
         }
 
+        const recipients: RecipientDeliveryResult[] = [];
+
         for (let i = 0; i < queue.length; i += 1) {
             const item = queue[i];
+            const roleLabel =
+                item.label === 'shuttle_admin'
+                    ? 'ADMIN'
+                    : item.label === 'shuttle_agency'
+                        ? 'AGENCIA'
+                        : undefined;
             const reactComponent =
                 item.kind === 'customer'
                     ? ShuttleConfirmationEmail({
+                          bookingId: data.bookingId,
                           customerName: data.customerName,
                           origin: data.origin,
                           destination: data.destination,
@@ -316,8 +444,11 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
                           pickupLocation: data.pickupLocation,
                           type: data.type,
                           price: data.price,
+                          t: data.t,
+                          locale: data.locale,
                       })
                     : ShuttleAdminNotification({
+                          bookingId: data.bookingId,
                           customerName: data.customerName,
                           customerEmail: data.customerEmail,
                           origin: data.origin,
@@ -328,6 +459,9 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
                           pickupLocation: data.pickupLocation,
                           type: data.type,
                           price: data.price,
+                          roleLabel,
+                          showAdminPanel: item.label === 'shuttle_admin',
+                          showAgencyInstructions: item.label === 'shuttle_agency',
                       });
 
             const result = await sendEmailWithRetry(item.label, () =>
@@ -338,19 +472,28 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
                     react: reactComponent,
                 })
             );
-
-            if (!result.success) {
-                return { success: false, error: result.error };
-            }
+            recipients.push({
+                label: item.label,
+                to: item.to,
+                subject: item.subject,
+                success: result.success,
+                id: result.id,
+                error: result.error,
+            });
 
             if (i < queue.length - 1) {
                 await sleep(EMAIL_SEND_SPACING_MS);
             }
         }
 
-        return { success: true };
+        const allOk = recipients.every((entry) => entry.success);
+        return {
+            success: allOk,
+            recipients,
+            error: allOk ? undefined : recipients.find((entry) => !entry.success)?.error,
+        };
     } catch (error) {
         logger.error('Error sending shuttle confirmation emails:', error);
-        return { success: false, error };
+        return { success: false, recipients: [], error };
     }
 }

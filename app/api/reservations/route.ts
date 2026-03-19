@@ -20,38 +20,45 @@ type ReservationRow = Database['public']['Tables']['reservations']['Row'];
 type ReservationUpdate = Database['public']['Tables']['reservations']['Update'];
 type LegacyReservationRow = {
     id: string;
-    full_name?: string | null;
-    email?: string | null;
-    whatsapp?: string | null;
-    date?: string | null;
-    number_of_people?: number | null;
+    customer_name?: string | null;
+    customer_email?: string | null;
+    customer_phone?: string | null;
+    reservation_date?: string | null;
+    guests?: number | null;
     tour_id?: string | null;
     tour_name?: string | null;
     total_price?: number | null;
     reservation_type?: string | null;
     status?: string | null;
-    notes?: string | null;
+    customer_notes?: string | null;
     created_at?: string | null;
 };
 type ReservationRecord = ReservationRow | LegacyReservationRow;
+const DEFAULT_AGENCY_EMAIL = process.env.DEFAULT_AGENCY_EMAIL?.trim() || null;
+
+function normalizeEmail(value: string | null | undefined): string | null {
+    const candidate = value?.trim();
+    if (!candidate) return null;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate) ? candidate : null;
+}
 
 async function getTourAgencyEmail(tourId: string | null | undefined): Promise<string | null> {
-    if (!tourId) return null;
+    if (!tourId) return normalizeEmail(DEFAULT_AGENCY_EMAIL);
 
     const tourResult = await supabaseAdmin
         .schema('public')
         .from('tours')
-        .select('agency_id')
+        .select('agency_id, title')
         .eq('id', tourId)
-        .maybeSingle<{ agency_id: string | null }>();
+        .maybeSingle<{ agency_id: string | null; title: string | null }>();
 
     if (tourResult.error) {
         logger.warn('Unable to resolve tour agency assignment:', tourResult.error);
-        return null;
+        return normalizeEmail(DEFAULT_AGENCY_EMAIL);
     }
 
     const agencyId = tourResult.data?.agency_id;
-    if (!agencyId) return null;
+    if (!agencyId) return normalizeEmail(DEFAULT_AGENCY_EMAIL);
 
     const agencyResult = await supabaseAdmin
         .schema('public')
@@ -62,11 +69,11 @@ async function getTourAgencyEmail(tourId: string | null | undefined): Promise<st
 
     if (agencyResult.error) {
         logger.warn('Unable to resolve agency email for tour:', agencyResult.error);
-        return null;
+        return normalizeEmail(DEFAULT_AGENCY_EMAIL);
     }
 
-    if (!agencyResult.data?.is_active) return null;
-    return agencyResult.data.email?.trim() || null;
+    if (!agencyResult.data?.is_active) return normalizeEmail(DEFAULT_AGENCY_EMAIL);
+    return normalizeEmail(agencyResult.data.email) ?? normalizeEmail(DEFAULT_AGENCY_EMAIL);
 }
 
 // POST: Create a new reservation
@@ -175,19 +182,18 @@ export async function POST(request: Request) {
 
         // Explicitly create an object with only the fields for insertion
         const dataToInsert: ReservationInsert = {
-            customer_name: sanitizedData.customer_name,
-            customer_email: sanitizedData.customer_email,
-            customer_phone: sanitizedData.customer_phone,
-            customer_country: sanitizedData.customer_country,
-            reservation_date: sanitizedData.reservation_date,
-            guests: sanitizedData.guests,
+            full_name: sanitizedData.full_name,
+            email: sanitizedData.email,
+            whatsapp: sanitizedData.whatsapp,
+            date: sanitizedData.date,
+            number_of_people: sanitizedData.number_of_people,
             reservation_type: sanitizedData.reservation_type,
             tour_id: sanitizedData.tour_id,
             accommodation_id: sanitizedData.accommodation_id,
             guide_id: sanitizedData.guide_id,
             tour_name: sanitizedData.tour_name,
             total_price: sanitizedData.total_price,
-            customer_notes: sanitizedData.customer_notes,
+            notes: sanitizedData.notes,
             status: 'pending',
         };
 
@@ -203,16 +209,16 @@ export async function POST(request: Request) {
 
         if (dbError) {
             const legacyInsert = {
-                full_name: sanitizedData.customer_name,
-                email: sanitizedData.customer_email,
-                whatsapp: sanitizedData.customer_phone,
-                date: sanitizedData.reservation_date,
-                number_of_people: sanitizedData.guests,
+                customer_name: sanitizedData.full_name,
+                customer_email: sanitizedData.email,
+                customer_phone: sanitizedData.whatsapp,
+                reservation_date: sanitizedData.date,
+                guests: sanitizedData.number_of_people,
                 tour_id: sanitizedData.tour_id,
                 tour_name: sanitizedData.tour_name,
                 total_price: sanitizedData.total_price,
                 reservation_type: sanitizedData.reservation_type,
-                notes: sanitizedData.customer_notes,
+                customer_notes: sanitizedData.notes,
                 status: 'pending',
             } as unknown as ReservationInsert;
 
@@ -261,40 +267,73 @@ export async function POST(request: Request) {
 
         const reservation = newReservation as ReservationRecord;
         const reservationEmail =
-            ('customer_email' in reservation ? reservation.customer_email : reservation.email) || '';
+            ('email' in reservation ? reservation.email : reservation.customer_email) || '';
         const reservationName =
-            ('customer_name' in reservation ? reservation.customer_name : reservation.full_name) || '';
+            ('full_name' in reservation ? reservation.full_name : reservation.customer_name) || '';
         const reservationDate =
-            ('reservation_date' in reservation ? reservation.reservation_date : reservation.date) || '';
+            ('date' in reservation ? reservation.date : reservation.reservation_date) || '';
         const reservationGuests =
-            ('guests' in reservation ? reservation.guests : reservation.number_of_people) || 1;
+            ('number_of_people' in reservation ? reservation.number_of_people : reservation.guests) || 1;
+        const reservationPhone =
+            ('whatsapp' in reservation ? reservation.whatsapp : reservation.customer_phone) || '';
+        const reservationNotes =
+            ('notes' in reservation ? reservation.notes : reservation.customer_notes) || '';
         const currentAttempts =
             'email_attempts' in reservation && typeof reservation.email_attempts === 'number'
                 ? reservation.email_attempts
                 : 0;
 
         let emailSent: boolean | null = null;
+        let customerEmailSent: boolean | null = null;
+        let emailRecipientStatuses: Array<{ label: string; status: 'sent' | 'failed' }> = [];
         let emailError: string | null = null;
         let emailAttempted = false;
 
         if (reservationEmail) {
             emailAttempted = true;
             const reservationTourId = 'tour_id' in reservation ? reservation.tour_id : null;
+            let resolvedTourName =
+                ('tour_name' in reservation ? reservation.tour_name : reservation.tour_name) ||
+                null;
+
+            if (!resolvedTourName && reservationTourId) {
+                const tourLookup = await supabaseAdmin
+                    .schema('public')
+                    .from('tours')
+                    .select('title')
+                    .eq('id', reservationTourId)
+                    .maybeSingle<{ title: string | null }>();
+
+                if (tourLookup.data?.title) {
+                    resolvedTourName = tourLookup.data.title;
+                }
+            }
+
+            if (!resolvedTourName) {
+                resolvedTourName = 'Tour Nómada Fantasma';
+            }
+
             const agencyEmail = await getTourAgencyEmail(reservationTourId);
             const emailResult = await sendTourConfirmationEmails({
                 to: reservationEmail,
                 agencyEmail,
                 reservationId: newReservation.id,
                 customerName: reservationName,
-                tourName:
-                    ('tour_name' in reservation ? reservation.tour_name : reservation.tour_name) ||
-                    'Tour Nómada Fantasma',
+                customerPhone: reservationPhone,
+                customerNotes: reservationNotes,
+                tourName: resolvedTourName,
                 date: reservationDate,
                 guests: reservationGuests,
                 totalPrice: ('total_price' in reservation ? reservation.total_price : reservation.total_price) || 0,
                 t: t,
             });
             emailSent = emailResult.success;
+            const customerRecipient = emailResult.recipients.find((recipient) => recipient.label === 'tour_customer');
+            customerEmailSent = customerRecipient ? customerRecipient.success : emailResult.success;
+            emailRecipientStatuses = emailResult.recipients.map((recipient) => ({
+                label: recipient.label,
+                status: recipient.success ? 'sent' : 'failed',
+            }));
             if (!emailResult.success) {
                 const rawError = emailResult.error;
                 emailError =
@@ -323,11 +362,6 @@ export async function POST(request: Request) {
                 email_last_error: emailAttempted && emailSent === false ? emailError : null,
             };
 
-            // Keep compatibility with legacy schemas where confirmation_sent_at might not exist.
-            if (emailSent === true) {
-                updateConfirmation.confirmation_sent_at = nowIso;
-            }
-
             const updateResult = await supabaseAdmin
                 .schema('public')
                 .from('reservations')
@@ -335,26 +369,7 @@ export async function POST(request: Request) {
                 .eq('id', newReservation.id);
 
             if (updateResult.error) {
-                const message = updateResult.error.message || '';
-                if (message.includes('confirmation_sent_at')) {
-                    const fallbackUpdate: ReservationUpdate = {
-                        email_delivery_status: updateConfirmation.email_delivery_status,
-                        email_attempts: updateConfirmation.email_attempts,
-                        email_last_attempt_at: updateConfirmation.email_last_attempt_at,
-                        email_last_error: updateConfirmation.email_last_error,
-                    };
-                    const fallbackResult = await supabaseAdmin
-                        .schema('public')
-                        .from('reservations')
-                        .update(fallbackUpdate)
-                        .eq('id', newReservation.id);
-
-                    if (fallbackResult.error) {
-                        logger.error('Failed fallback update for email tracking fields:', fallbackResult.error);
-                    }
-                } else {
-                    logger.error('Failed to update email tracking fields:', updateResult.error);
-                }
+                logger.error('Failed to update email tracking fields:', updateResult.error);
             }
         } catch (updateError) {
             logger.error('Failed to update email tracking fields:', updateError);
@@ -374,8 +389,9 @@ export async function POST(request: Request) {
                     created_at: newReservation.created_at,
                 },
                 email: {
-                    sent: emailSent,
-                    status: emailAttempted ? (emailSent ? 'sent' : 'failed') : 'not_requested',
+                    sent: emailAttempted ? (customerEmailSent ?? emailSent) : null,
+                    status: emailAttempted ? ((customerEmailSent ?? emailSent) ? 'sent' : 'failed') : 'not_requested',
+                    recipients: emailRecipientStatuses,
                 },
             },
             { status: 201 }
@@ -424,7 +440,7 @@ export async function GET(request: Request) {
         }
 
         if (email) {
-            query = query.eq('customer_email', email.toLowerCase());
+            query = query.eq('email', email.toLowerCase());
         }
 
         const { data: reservations, error } = await query;

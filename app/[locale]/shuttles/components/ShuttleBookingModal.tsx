@@ -5,7 +5,7 @@ import { ShuttleRoute } from '@/types/shuttle';
 import { X, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { trackEvent } from '../../../lib/analytics';
 
 interface ShuttleBookingModalProps {
@@ -16,6 +16,7 @@ interface ShuttleBookingModalProps {
 
 export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: ShuttleBookingModalProps) {
     const t = useTranslations('Shuttles.modal');
+    const locale = useLocale();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [date, setDate] = useState('');
@@ -111,7 +112,10 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
             // First, save to database
             const reserveResponse = await fetch('/api/shuttles/reserve', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-locale': locale,
+                },
                 body: JSON.stringify({
                     customerName: name,
                     customerEmail: email,
