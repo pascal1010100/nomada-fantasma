@@ -90,7 +90,7 @@ async function migrate() {
 
             const { error } = await supabase
                 .from('reservations')
-                .insert(newReservation);
+                .insert([newReservation]);
 
             if (error) {
                 if (error.code === '23505') {
