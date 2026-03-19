@@ -201,7 +201,7 @@ export async function POST(request: Request) {
         const insertResult = await supabaseAdmin
             .schema('public')
             .from('reservations')
-            .insert(dataToInsert)
+            .insert([dataToInsert])
             .select()
             .single<ReservationRow>();
         let newReservation: ReservationRecord | null = insertResult.data;
@@ -225,7 +225,7 @@ export async function POST(request: Request) {
             const legacyResult = await supabaseAdmin
                 .schema('public')
                 .from('reservations')
-                .insert(legacyInsert)
+                .insert([legacyInsert])
                 .select()
                 .single<LegacyReservationRow>();
 
