@@ -4,6 +4,9 @@
 import { motion } from 'framer-motion';
 import { useState, useRef, MouseEvent, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { buttonClassNames, type ButtonVariant } from './Button';
+import { cn } from '@/app/lib/utils';
 
 interface RippleButtonProps {
     children: ReactNode;
@@ -11,8 +14,9 @@ interface RippleButtonProps {
     className?: string;
     type?: 'button' | 'submit' | 'reset';
     disabled?: boolean;
-    variant?: 'primary' | 'secondary' | 'ghost';
+    variant?: ButtonVariant;
     isLoading?: boolean;
+    loadingText?: string;
 }
 
 interface Ripple {
@@ -29,8 +33,10 @@ export default function RippleButton({
     type = 'button',
     disabled = false,
     variant = 'primary',
-    isLoading = false
+    isLoading = false,
+    loadingText
 }: RippleButtonProps) {
+    const t = useTranslations('Common');
     const [ripples, setRipples] = useState<Ripple[]>();
     const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -65,28 +71,17 @@ export default function RippleButton({
         }
     };
 
-    const variantClasses = {
-        primary: 'bg-gradient-to-r from-primary to-accent text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40',
-        secondary: 'border border-border bg-card/50 hover:bg-card hover:border-primary/50',
-        ghost: 'hover:bg-muted/50'
-    };
-
     return (
         <button
             ref={buttonRef}
             type={type}
             onClick={handleClick}
             disabled={disabled || isLoading}
-            className={`
-        relative overflow-hidden
-        px-6 py-3 rounded-xl
-        font-semibold
-        transition-all duration-300
-        disabled:opacity-50 disabled:cursor-not-allowed
-        hover:scale-105 active:scale-95
-        ${variantClasses[variant]}
-        ${className}
-      `}
+            className={cn(
+                buttonClassNames(variant, 'md'),
+                'relative overflow-hidden hover:scale-105 active:scale-95',
+                className
+            )}
         >
             {/* Ripple effects */}
             {ripples?.map((ripple) => (
@@ -110,7 +105,7 @@ export default function RippleButton({
                 {isLoading ? (
                     <>
                         <Loader2 className="h-5 w-5 animate-spin" />
-                        <span>Cargando...</span>
+                        <span>{loadingText || t('loading')}</span>
                     </>
                 ) : (
                     children

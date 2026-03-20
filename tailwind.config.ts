@@ -104,11 +104,6 @@ const config: Config = {
       backdropBlur: {
         xs: "2px",
       },
-      container: {
-        center: true,
-        padding: "1rem",
-        screens: { "2xl": "1200px" },
-      },
     },
   },
   plugins: [],

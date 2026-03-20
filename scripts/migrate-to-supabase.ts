@@ -76,16 +76,16 @@ async function migrate() {
             const newReservation = {
                 id: old.id,
                 created_at: old.createdAt,
-                customer_name: old.name,
-                customer_email: old.email.toLowerCase(),
-                customer_phone: old.phone || null,
-                reservation_date: old.date,
-                guests: old.guests || 1,
+                full_name: old.name,
+                email: old.email.toLowerCase(),
+                whatsapp: old.phone || null,
+                date: old.date,
+                number_of_people: old.guests || 1,
                 reservation_type: (old.type as 'tour' | 'accommodation' | 'guide') || 'tour',
                 tour_name: old.tourName || null,
                 total_price: old.totalPrice || null,
                 status: (old.status as 'pending' | 'confirmed' | 'cancelled') || 'pending',
-                customer_notes: old.notes || null,
+                notes: old.notes || null,
             };
 
             const { error } = await supabase

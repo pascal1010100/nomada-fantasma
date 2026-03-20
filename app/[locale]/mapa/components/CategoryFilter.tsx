@@ -1,5 +1,7 @@
 import { CATEGORIES, CategoryKey } from "../constants";
 import { useTranslations } from "next-intl";
+import { buttonClassNames } from "@/app/components/ui/Button";
+import { cn } from "@/app/lib/utils";
 
 interface CategoryFilterProps {
   activeCats: Set<CategoryKey>;
@@ -39,19 +41,17 @@ export const CategoryFilter = ({
             onClick={() => onToggleCategory(key)}
             disabled={isUnavailable && !active}
             aria-pressed={active}
-            className={`
-              group flex items-center gap-1 rounded-full px-3 py-1.5 text-xs
-              transition-all backdrop-blur border
-              ${
-                active
-                  ? "bg-white/10 dark:bg-white/10 border-white/30 text-white"
-                  : isUnavailable
-                    ? "bg-[color:var(--card,rgba(17,24,39,0.35))] border-[color:var(--border,#334155)] text-slate-400/60"
-                    : "bg-[color:var(--card,rgba(17,24,39,0.55))] border-[color:var(--border,#334155)] text-slate-200/80"
-              }
-              ${(isUnavailable && !active) ? "cursor-not-allowed opacity-60" : "hover:scale-[1.02] active:scale-95"}
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60
-            `}
+            className={cn(
+              buttonClassNames("ghost", "sm"),
+              "group rounded-full px-3 py-1.5 text-xs transition-all backdrop-blur border",
+              active
+                ? "bg-white/10 dark:bg-white/10 border-white/30 text-white"
+                : isUnavailable
+                  ? "bg-[color:var(--card,rgba(17,24,39,0.35))] border-[color:var(--border,#334155)] text-slate-400/60"
+                  : "bg-[color:var(--card,rgba(17,24,39,0.55))] border-[color:var(--border,#334155)] text-slate-200/80",
+              (isUnavailable && !active) ? "cursor-not-allowed opacity-60" : "hover:scale-[1.02] active:scale-95",
+              "focus-visible:ring-cyan-400/60"
+            )}
             title={`${localizedLabel} (${count})`}
           >
             <span

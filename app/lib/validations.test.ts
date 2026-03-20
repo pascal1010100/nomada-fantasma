@@ -230,7 +230,7 @@ describe('Validations', () => {
         tourId: '550e8400-e29b-41d4-a716-446655440000',
       };
       const sanitized = sanitizeReservationInput(input);
-      expect(sanitized.customer_email).toBe('john@example.com');
+      expect(sanitized.email).toBe('john@example.com');
     });
 
     it('should trim name', () => {
@@ -243,7 +243,7 @@ describe('Validations', () => {
         tourId: '550e8400-e29b-41d4-a716-446655440000',
       };
       const sanitized = sanitizeReservationInput(input);
-      expect(sanitized.customer_name).toBe('John Doe');
+      expect(sanitized.full_name).toBe('John Doe');
     });
 
     it('should handle optional fields', () => {
@@ -255,7 +255,7 @@ describe('Validations', () => {
         guests: 1,
       };
       const sanitized = sanitizeReservationInput(input);
-      expect(sanitized.customer_phone).toBeNull();
+      expect(sanitized.whatsapp).toBeNull();
       expect(sanitized.tour_id).toBeNull();
     });
   });

@@ -81,19 +81,6 @@
   ::selection {
     @apply bg-primary/20 text-primary-foreground;
   }
-
-  /* Scrollbar personalizada */
-  ::-webkit-scrollbar {
-    @apply w-2 h-2;
-  }
-
-  ::-webkit-scrollbar-track {
-    @apply bg-background;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30;
-  }
 }
 
 /* Clases de utilidad */
@@ -204,27 +191,6 @@
 
   .btn-elite:active {
     transform: scale(0.96);
-  }
-}
-
-/* Scrollbar refinado */
-@layer base {
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.3);
-    border-radius: 10px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(156, 163, 175, 0.5);
   }
 }
 
@@ -1095,7 +1061,7 @@ html.dark .leaflet-tile {
     var(--nf-grid-step) var(--nf-grid-step),
     100% 100%, 100% 100%;
   mix-blend-mode: multiply;
-  opacity: .55;
+  opacity: .42;
 }
 
 html.dark .nf-map-overlay {
@@ -1108,7 +1074,7 @@ html.dark .nf-map-overlay {
     var(--nf-grid-step) var(--nf-grid-step),
     100% 100%, 100% 100%;
   mix-blend-mode: screen;
-  opacity: .38;
+  opacity: .30;
 }
 
 /* Vignette suave para “enmarcar” el mapa */

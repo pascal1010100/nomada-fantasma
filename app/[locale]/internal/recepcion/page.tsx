@@ -32,6 +32,13 @@ type InternalResponse = {
     items: InternalRequestItem[];
 };
 type NoteQuality = 'strong' | 'weak' | 'risk';
+type ToastKind = 'success' | 'error' | 'info';
+type ToastMessage = {
+    id: number;
+    kind: ToastKind;
+    title: string;
+    message?: string;
+};
 
 const STORAGE_KEY = 'nomada_admin_token';
 const PROCESSING_STALE_HOURS = 8;
@@ -185,6 +192,21 @@ export default function RecepcionRequestsPage() {
     const [kindFilter, setKindFilter] = useState<'all' | InternalRequestItem['kind']>('all');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
+    const [toasts, setToasts] = useState<ToastMessage[]>([]);
+    const [lastSyncAt, setLastSyncAt] = useState<string | null>(null);
+
+    const pushToast = (kind: ToastKind, title: string, message?: string) => {
+        const toast: ToastMessage = {
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            kind,
+            title,
+            message,
+        };
+        setToasts((prev) => [...prev, toast]);
+        window.setTimeout(() => {
+            setToasts((prev) => prev.filter((entry) => entry.id !== toast.id));
+        }, 3600);
+    };
 
     useEffect(() => {
         const stored = sessionStorage.getItem(STORAGE_KEY);
@@ -287,14 +309,20 @@ export default function RecepcionRequestsPage() {
             const payload = (await response.json()) as InternalResponse | { error?: string };
             if (!response.ok) {
                 setData(null);
-                setError(payload && typeof payload === 'object' && 'error' in payload ? payload.error || 'Error' : 'Error');
+                const message = payload && typeof payload === 'object' && 'error' in payload ? payload.error || 'Error' : 'Error';
+                setError(message);
+                pushToast('error', 'No se pudo cargar el panel', message);
                 return;
             }
 
             setData(payload as InternalResponse);
+            setLastSyncAt(new Date().toLocaleString());
+            pushToast('success', 'Panel actualizado', 'Solicitudes sincronizadas correctamente.');
         } catch (requestError) {
             setData(null);
-            setError(requestError instanceof Error ? requestError.message : 'Error de red');
+            const message = requestError instanceof Error ? requestError.message : 'Error de red';
+            setError(message);
+            pushToast('error', 'Error de red', message);
         } finally {
             setLoading(false);
         }
@@ -306,6 +334,7 @@ export default function RecepcionRequestsPage() {
         sessionStorage.setItem(STORAGE_KEY, normalized);
         setData(null);
         setError('');
+        pushToast('success', 'Token guardado', 'Ya puedes actualizar solicitudes.');
     };
 
     const clearToken = () => {
@@ -314,6 +343,7 @@ export default function RecepcionRequestsPage() {
         setData(null);
         setError('');
         sessionStorage.removeItem(STORAGE_KEY);
+        pushToast('info', 'Token limpiado', 'La sesión operativa fue cerrada.');
     };
 
     const getActions = (status: RequestStatus): Array<{ label: string; to: RequestStatus }> => {
@@ -338,7 +368,7 @@ export default function RecepcionRequestsPage() {
 
         const requiresNote = nextStatus === 'confirmed' || nextStatus === 'cancelled' || nextStatus === 'completed';
         let note = '';
-        if (requiresNote) {
+            if (requiresNote) {
             const helper = getTransitionHelper(currentStatus, nextStatus);
             const prompted = window.prompt(`Nota obligatoria para cambiar a ${nextStatus}:\n${helper}`, '');
             if (prompted === null) return;
@@ -377,26 +407,55 @@ export default function RecepcionRequestsPage() {
             if (!response.ok) {
                 if (response.status === 409) {
                     setError('Este caso fue actualizado por otro operador. Actualiza solicitudes.');
+                    pushToast('error', 'Conflicto de actualización', 'Otro operador ya cambió este caso.');
                     return;
                 }
-                setError(payload?.error || 'No se pudo actualizar estado.');
+                const message = payload?.error || 'No se pudo actualizar estado.';
+                setError(message);
+                pushToast('error', 'No se pudo actualizar el estado', message);
                 return;
             }
 
+            pushToast('success', `Estado actualizado a ${nextStatus}`, 'Cambio guardado correctamente.');
             await fetchRequests();
         } catch (requestError) {
-            setError(requestError instanceof Error ? requestError.message : 'Error de red');
+            const message = requestError instanceof Error ? requestError.message : 'Error de red';
+            setError(message);
+            pushToast('error', 'Error de red', message);
         } finally {
             setActionLoadingId(null);
         }
     };
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="relative max-w-6xl mx-auto px-4 py-8">
+            <div className="pointer-events-none fixed right-4 top-4 z-50 flex w-full max-w-sm flex-col gap-2">
+                {toasts.map((toast) => (
+                    <div
+                        key={toast.id}
+                        className={`pointer-events-auto rounded-xl border px-3 py-2 text-sm shadow-lg backdrop-blur-sm transition-all ${
+                            toast.kind === 'success'
+                                ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald-100'
+                                : toast.kind === 'error'
+                                    ? 'border-rose-400/40 bg-rose-500/15 text-rose-100'
+                                    : 'border-sky-400/40 bg-sky-500/15 text-sky-100'
+                        }`}
+                    >
+                        <p className="font-medium">{toast.title}</p>
+                        {toast.message ? <p className="text-xs opacity-90 mt-0.5">{toast.message}</p> : null}
+                    </div>
+                ))}
+            </div>
             <h1 className="text-2xl font-bold mb-2">Panel Recepción San Pedro</h1>
             <p className="text-sm text-muted-foreground mb-6">
                 Solicitudes recientes de tours y shuttles con estado de envío de email.
             </p>
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-200">
+                <span className="h-2 w-2 rounded-full bg-cyan-300 animate-pulse" />
+                <span>
+                    {lastSyncAt ? `Última actualización: ${lastSyncAt}` : 'Sincronización pendiente'}
+                </span>
+            </div>
 
             <div className="rounded-xl border p-4 mb-6 bg-card/50">
                 <label htmlFor="admin-token" className="text-sm font-medium block mb-2">
@@ -444,7 +503,7 @@ export default function RecepcionRequestsPage() {
                         type="button"
                         onClick={fetchRequests}
                         disabled={!canFetch || loading}
-                        className="rounded-md border px-4 py-2 text-sm disabled:opacity-50"
+                        className="rounded-md border px-4 py-2 text-sm transition hover:border-cyan-400/40 hover:text-cyan-100 disabled:opacity-50"
                     >
                         {loading ? 'Cargando...' : 'Actualizar solicitudes'}
                     </button>
@@ -524,19 +583,19 @@ export default function RecepcionRequestsPage() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                <div className="rounded-lg border p-3">
+                <div className="rounded-lg border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:shadow-md hover:shadow-cyan-500/10">
                     <p className="text-xs text-muted-foreground">Total operativas</p>
                     <p className="text-xl font-semibold">{summary.total}</p>
                 </div>
-                <div className="rounded-lg border p-3">
+                <div className="rounded-lg border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:shadow-md hover:shadow-cyan-500/10">
                     <p className="text-xs text-muted-foreground">Tours operativos</p>
                     <p className="text-xl font-semibold">{summary.tours}</p>
                 </div>
-                <div className="rounded-lg border p-3">
+                <div className="rounded-lg border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:shadow-md hover:shadow-cyan-500/10">
                     <p className="text-xs text-muted-foreground">Shuttles operativos</p>
                     <p className="text-xl font-semibold">{summary.shuttles}</p>
                 </div>
-                <div className="rounded-lg border p-3">
+                <div className="rounded-lg border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:shadow-md hover:shadow-cyan-500/10">
                     <p className="text-xs text-muted-foreground">Email fallido (operativo)</p>
                     <p className="text-xl font-semibold">{summary.emailFailed}</p>
                 </div>
@@ -579,7 +638,7 @@ export default function RecepcionRequestsPage() {
                     </thead>
                     <tbody>
                         {filteredItems.map((item) => (
-                            <tr key={`${item.kind}-${item.id}`} className="border-t">
+                            <tr key={`${item.kind}-${item.id}`} className="border-t transition-colors hover:bg-white/5">
                                 <td className="px-3 py-2 whitespace-nowrap">
                                     {new Date(item.createdAt).toLocaleString()}
                                 </td>

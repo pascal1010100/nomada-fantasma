@@ -67,8 +67,8 @@ export default function Hero() {
   const mapAnimProps: MotionProps = reduce
     ? {}
     : {
-      animate: { scale: [1.02, 1, 1.02], x: [-4, 0, -4], y: [0, -2, 0] },
-      transition: { duration: 16, repeat: Infinity, ease: "easeInOut" },
+      animate: { scale: [1.01, 1, 1.01], x: [-2, 0, -2], y: [0, -1, 0] },
+      transition: { duration: 22, repeat: Infinity, ease: "easeInOut" },
     };
 
   // Rosa náutica (rotación lenta)
@@ -96,7 +96,7 @@ export default function Hero() {
         />
 
         {/* HUD SONAR */}
-        <div className="theme--sonar sonar-hud absolute inset-0 z-20" aria-hidden="true" />
+        <div className="theme--sonar sonar-hud absolute inset-0 z-20 opacity-70" aria-hidden="true" />
 
         {/* ➕ Rosa náutica (debajo de las ondas, integrada) */}
         <motion.div
@@ -123,16 +123,14 @@ export default function Hero() {
             </defs>
 
             <g transform="translate(520 270)">
-              {/* glows */}
+              {/* glows (reduced for readability) */}
               <motion.circle r={160} fill={`url(#${ids.glow})`} filter={`url(#${ids.soft})`} {...glow(0.1)} />
-              <motion.circle r={235} fill={`url(#${ids.glow})`} filter={`url(#${ids.soft})`} {...glow(1.0)} />
-              <motion.circle r={320} fill={`url(#${ids.glow})`} filter={`url(#${ids.soft})`} {...glow(2.1)} />
+              <motion.circle r={260} fill={`url(#${ids.glow})`} filter={`url(#${ids.soft})`} {...glow(1.2)} />
 
-              {/* anillos */}
+              {/* rings (reduced for readability) */}
               <motion.circle r={160} fill="none" stroke={`url(#${ids.stroke})`} strokeWidth={1.8} {...ring(0.0)} />
               <motion.circle r={235} fill="none" stroke={`url(#${ids.stroke})`} strokeWidth={1.6} {...ring(0.9)} />
-              <motion.circle r={320} fill="none" stroke={`url(#${ids.stroke})`} strokeWidth={1.5} {...ring(1.8)} />
-              <motion.circle r={410} fill="none" stroke={`url(#${ids.stroke})`} strokeWidth={1.3} {...ring(2.7)} />
+              <motion.circle r={320} fill="none" stroke={`url(#${ids.stroke})`} strokeWidth={1.4} {...ring(1.8)} />
             </g>
           </svg>
         </div>
@@ -223,7 +221,7 @@ export default function Hero() {
             >
               <Link
               href={`/${locale}/mapa`}
-                className="shimmer group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-primary to-accent px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 sm:w-auto"
+                className="btn-cta shimmer group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full px-8 py-4 text-sm font-semibold transition-all duration-300 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 sm:w-auto"
               >
                 <Compass className="h-5 w-5 transition-transform group-hover:rotate-12" />
                 <span>{t('explore')}</span>
@@ -232,7 +230,7 @@ export default function Hero() {
 
               <button
                 onClick={() => setIsChatOpen(true)}
-                className="group flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card/50 backdrop-blur-sm px-8 py-4 text-sm font-medium transition-all duration-300 hover:bg-card hover:border-primary/50 hover:scale-105 sm:w-auto"
+                className="btn-ghost group flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-sm font-medium transition-all duration-300 hover:border-primary/50 hover:scale-105 sm:w-auto"
               >
                 <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
                 <span>{t('chat')}</span>

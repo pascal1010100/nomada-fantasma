@@ -9,6 +9,8 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import ThemeToggle from "../ui/ThemeToggle";
 import LanguageSwitcher from "../LanguageSwitcher";
 import { useTranslations, useLocale } from "next-intl";
+import { buttonClassNames } from "../ui/Button";
+import { cn } from "@/app/lib/utils";
 
 type TranslationFn = (key: string) => string;
 type LinkItem = { href: string; label: string; icon: ComponentType<{ className?: string }> };
@@ -162,7 +164,7 @@ export default function Navbar() {
               aria-expanded={open}
               aria-controls="mobile-drawer"
               onClick={() => setOpen((v) => !v)}
-              className="pill inline-flex items-center justify-center"
+              className={cn(buttonClassNames("ghost", "sm"), "rounded-2xl")}
             >
               {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -175,7 +177,7 @@ export default function Navbar() {
           <>
             <motion.button
               key="overlay"
-              aria-label="Cerrar menú"
+              aria-label={t("closeMenu")}
               onClick={() => setOpen(false)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.5 }}
@@ -200,7 +202,11 @@ export default function Navbar() {
               <nav className="flex h-full flex-col">
                 <div className="flex items-center justify-between p-4 border-b border-border">
                   <span id="mobile-menu-title" className="font-semibold">{t("menu")}</span>
-                  <button onClick={() => setOpen(false)} aria-label={t("closeMenu")} className="pill">
+                  <button
+                    onClick={() => setOpen(false)}
+                    aria-label={t("closeMenu")}
+                    className={cn(buttonClassNames("ghost", "sm"), "rounded-2xl")}
+                  >
                     <X className="h-5 w-5" />
                   </button>
                 </div>
