@@ -73,11 +73,11 @@ export const shuttles: ShuttleRoute[] = [
         origin: 'San Pedro La Laguna',
         destination: 'Antigua Guatemala',
         price: 175,
-        schedule: ['08:30', '13:30', '17:00'],
-        duration: '4 horas',
+        schedule: ['5:00 AM → 8:30 AM', '7:00 AM → 10:30 AM', '9:30 AM → 1:00 PM', '2:30 PM → 6:00 PM'],
+        duration: '3.5 horas',
         image: getDestinationImage('Antigua Guatemala'),
         type: 'shared',
-        description: 'Salidas cómodas desde San Pedro La Laguna. Evita el viaje en lancha y viaja directo por carretera hacia la Ciudad Colonial.'
+        description: 'Todos los días. Recogemos en hoteles; llegada frente al parque o en hoteles cercanos al parque en Antigua. Si hay tráfico, puede tardar 30 minutos más.'
     },
     {
         id: 'san-pedro-guatemala',

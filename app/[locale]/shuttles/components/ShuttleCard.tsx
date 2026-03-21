@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Users, ArrowRight, Star } from 'lucide-react';
 import { ShuttleRoute } from '@/types/shuttle';
 import { motion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { getDestinationImage } from '../utils/destinationImages';
 
 interface ShuttleCardProps {
@@ -15,7 +15,25 @@ interface ShuttleCardProps {
 
 export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
     const t = useTranslations('Shuttles.card');
+    const locale = useLocale();
     const [imageError, setImageError] = useState(false);
+    const scheduleText = shuttle.schedule.join(' ').toLowerCase();
+    const hasScale = (shuttle.description || '').toLowerCase().includes('escala') || scheduleText.includes('escala') || scheduleText.includes('cambio') || scheduleText.includes('opción') || scheduleText.includes('stopover') || scheduleText.includes('transfer');
+    const isDirect = scheduleText.includes('directo');
+    const translateSchedule = (value: string) => {
+        if (!locale.startsWith('en')) return value;
+        return value
+            .replace(/^Opción\s*(\d+)/i, 'Option $1')
+            .replace(/^Directo:/i, 'Direct:')
+            .replace(/\bcambio\b/gi, 'transfer')
+            .replace(/\bescala\b/gi, 'stopover');
+    };
+    const summarizeSchedule = (value: string) => {
+        const firstChunk = value.split('|')[0].trim();
+        const trimmed = firstChunk.length > 58 ? `${firstChunk.slice(0, 55).trim()}…` : firstChunk;
+        return translateSchedule(trimmed);
+    };
+    const extraOptions = shuttle.schedule.length > 1 ? shuttle.schedule.length - 1 : 0;
 
     // Usar imagen del destino específico
     const remote = (shuttle.image || '').trim();
@@ -68,6 +86,9 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
                             <p className="text-[10px] text-gray-300 uppercase font-bold tracking-widest leading-tight">
                                 {t('from')} / {t('perPerson')}
                             </p>
+                            <p className="text-sm text-white/90 font-bold tracking-tight truncate max-w-[14rem]" title={shuttle.destination}>
+                                {shuttle.destination}
+                            </p>
                         </div>
                         <span className="text-[9px] text-white uppercase font-bold tracking-widest pb-1 border-b border-white/20 leading-none hidden">{t('perPerson')}</span>
                     </div>
@@ -87,18 +108,32 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
                     </div>
                 </div>
 
-                <div className="pt-8 border-t border-white/5 flex items-center justify-center text-center gap-4">
-                    <div className="space-y-1">
+                <div className="pt-8 border-t border-white/5 flex flex-col items-center text-center gap-4">
+                    <div className="flex items-center justify-center text-center gap-4">
+                        <div className="space-y-1">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">{t('durationLabel')}</span>
                         <p className="font-bold text-sm text-muted-foreground/80">{shuttle.duration}</p>
-                    </div>
-                    <div className="text-muted-foreground/30 text-xl font-thin">•</div>
-                    <div className="space-y-1">
+                        </div>
+                        <div className="text-muted-foreground/30 text-xl font-thin">•</div>
+                        <div className="space-y-1">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">{t('scheduleLabel')}</span>
                         <p className="font-bold text-sm text-muted-foreground/80">
-                            {shuttle.schedule[0]} <span className="text-[10px] opacity-40">...</span>
+                            {summarizeSchedule(shuttle.schedule[0] || '')}
+                            {extraOptions > 0 && (
+                                <span className="text-[10px] opacity-50 ml-1">
+                                    {locale.startsWith('en') ? `+${extraOptions} options` : `+${extraOptions} opciones`}
+                                </span>
+                            )}
                         </p>
                     </div>
+                </div>
+                    {(hasScale || isDirect) && (
+                        <div className="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-300/80 bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 rounded-full">
+                            {isDirect
+                                ? (locale.startsWith('en') ? 'Direct' : 'Directo')
+                                : (locale.startsWith('en') ? 'Stopover' : 'Con escala')}
+                        </div>
+                    )}
                 </div>
 
                 <motion.button

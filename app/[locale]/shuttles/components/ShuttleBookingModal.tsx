@@ -61,6 +61,15 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
     }, [name, email, date, time, pickup, shuttle]);
 
     const isCustom = shuttle?.id === 'custom-private';
+    const hasScale = (shuttle?.description || '').toLowerCase().includes('escala');
+    const translateSchedule = (value: string) => {
+        if (!locale.startsWith('en')) return value;
+        return value
+            .replace(/^Opción\s*(\d+)/i, 'Option $1')
+            .replace(/^Directo:/i, 'Direct:')
+            .replace(/\bcambio\b/gi, 'transfer')
+            .replace(/\bescala\b/gi, 'stopover');
+    };
 
     if (!isOpen || !shuttle) return null;
 
@@ -456,7 +465,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                                     >
                                                         <option value="" className="bg-card">{t('timePlaceholder')}</option>
                                                         {shuttle.schedule.map((t) => (
-                                                            <option key={t} value={t} className="bg-card">{t}</option>
+                                                            <option key={t} value={t} className="bg-card">{translateSchedule(t)}</option>
                                                         ))}
                                                     </select>
                                                 )}
@@ -477,6 +486,14 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                             </div>
                                         </div>
                                     </div>
+
+                                    {hasScale && (
+                                        <div className="mt-6 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 p-4 text-[11px] font-bold text-yellow-200/90">
+                                            {locale.startsWith('en')
+                                                ? 'This shuttle has a stopover in Antigua (vehicle change). Please review the full schedules before booking.'
+                                                : 'Este shuttle tiene escala en Antigua (cambio de vehículo). Revisa los horarios completos antes de reservar.'}
+                                        </div>
+                                    )}
 
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 pl-1">
