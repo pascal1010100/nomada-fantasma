@@ -138,6 +138,8 @@
             "timeLabel": "Time",
             "timePlaceholder": "Time",
             "passengersLabel": "Passengers",
+            "durationLabel": "Duration",
+            "scheduleLabel": "Schedule",
             "pickupLabel": "Pickup Location",
             "pickupPlaceholder": "Hotel name or exact address",
             "submitting": "Processing...",

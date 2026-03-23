@@ -65,10 +65,43 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
     const translateSchedule = (value: string) => {
         if (!locale.startsWith('en')) return value;
         return value
+            .replace(/^Opción\s*([A-Z])/i, 'Option $1')
             .replace(/^Opción\s*(\d+)/i, 'Option $1')
             .replace(/^Directo:/i, 'Direct:')
+            .replace(/\bpernocta en antigua\b/gi, 'overnight in Antigua')
+            .replace(/\bdía siguiente\b/gi, 'next day')
+            .replace(/\bsolo jueves y domingos\b/gi, 'Only Thu & Sun')
             .replace(/\bcambio\b/gi, 'transfer')
             .replace(/\bescala\b/gi, 'stopover');
+    };
+    const compactSchedule = (value: string) => {
+        const parts = value.split('|').map((p) => p.trim());
+        const label = parts[0] || value;
+        const compact = label.length > 64 ? `${label.slice(0, 61).trim()}…` : label;
+        return translateSchedule(compact);
+    };
+    const emphasizeTimes = (value: string) => {
+        return translateSchedule(value).replace(/(\d{1,2}:\d{2}\s?(?:AM|PM)?)/gi, '<strong>$1</strong>');
+    };
+    const translateDuration = (value: string) => {
+        if (!locale.startsWith('en')) return value;
+        return value
+            .replace(/\bnoche\b/gi, 'Night')
+            .replace(/\bdía completo\b/gi, 'Full day')
+            .replace(/\bhoras\b/gi, 'hours')
+            .replace(/\baprox\.\b/gi, 'approx.')
+            .replace(/\bpernocta\b/gi, 'overnight');
+    };
+    const translateDescription = (value: string) => {
+        if (!locale.startsWith('en')) return value;
+        return value
+            .replace(/\btodos los días\b/gi, 'Every day')
+            .replace(/\bsolo jueves y domingos\b/gi, 'Only Thu & Sun')
+            .replace(/\bse recoge en hoteles\b/gi, 'Hotel pickup')
+            .replace(/\brecogemos en hoteles\b/gi, 'Hotel pickup')
+            .replace(/\bcambio\b/gi, 'transfer')
+            .replace(/\bescala\b/gi, 'stopover')
+            .replace(/\bpernocta\b/gi, 'overnight');
     };
 
     if (!isOpen || !shuttle) return null;
@@ -465,7 +498,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                                     >
                                                         <option value="" className="bg-card">{t('timePlaceholder')}</option>
                                                         {shuttle.schedule.map((t) => (
-                                                            <option key={t} value={t} className="bg-card">{translateSchedule(t)}</option>
+                                                            <option key={t} value={t} className="bg-card">{compactSchedule(t)}</option>
                                                         ))}
                                                     </select>
                                                 )}
@@ -485,6 +518,46 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                                 </select>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+                                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50">
+                                            <span>{locale.startsWith('en') ? 'Route details' : 'Detalle del shuttle'}</span>
+                                            <span className="text-primary/80">{shuttle.type === 'shared' ? 'Shared' : 'Private'}</span>
+                                        </div>
+                                        <div className="mt-4 flex items-center gap-3 text-sm font-semibold text-white/90">
+                                            <span className="truncate">{shuttle.origin}</span>
+                                            <span className="text-primary/60">→</span>
+                                            <span className="truncate">{shuttle.destination}</span>
+                                        </div>
+                                        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground/80">
+                                            <div>
+                                                <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 font-black">
+                                                    {t('durationLabel')}
+                                                </div>
+                                                <div className="mt-1 font-semibold text-white/80">
+                                                    {translateDuration(shuttle.duration)}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 font-black">
+                                                    {t('scheduleLabel')}
+                                                </div>
+                                                <ul className="mt-1 space-y-2">
+                                                    {shuttle.schedule.map((item) => (
+                                                        <li key={item} className="font-semibold text-white/80 leading-snug">
+                                                            <span className="mr-2 text-primary/70">•</span>
+                                                            <span dangerouslySetInnerHTML={{ __html: emphasizeTimes(item) }} />
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        {shuttle.description && (
+                                            <p className="mt-4 text-xs text-muted-foreground/80">
+                                                {translateDescription(shuttle.description)}
+                                            </p>
+                                        )}
                                     </div>
 
                                     {hasScale && (

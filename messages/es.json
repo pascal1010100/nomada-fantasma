@@ -138,6 +138,8 @@
             "timeLabel": "Hora",
             "timePlaceholder": "Hora",
             "passengersLabel": "Pasajeros",
+            "durationLabel": "Duración",
+            "scheduleLabel": "Salidas",
             "pickupLabel": "Lugar de Recogida",
             "pickupPlaceholder": "Nombre del Hotel o dirección exacta",
             "submitBtn": "Solicitar Reserva",

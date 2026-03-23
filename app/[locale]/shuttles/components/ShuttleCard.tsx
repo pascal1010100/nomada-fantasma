@@ -20,13 +20,28 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
     const scheduleText = shuttle.schedule.join(' ').toLowerCase();
     const hasScale = (shuttle.description || '').toLowerCase().includes('escala') || scheduleText.includes('escala') || scheduleText.includes('cambio') || scheduleText.includes('opción') || scheduleText.includes('stopover') || scheduleText.includes('transfer');
     const isDirect = scheduleText.includes('directo');
+    const isOvernight = scheduleText.includes('pernocta') || scheduleText.includes('día siguiente') || scheduleText.includes('night') || scheduleText.includes('overnight') || scheduleText.includes('noche');
+    const isLimitedDays = scheduleText.includes('jueves') || scheduleText.includes('domingos') || scheduleText.includes('thursday') || scheduleText.includes('sunday') || scheduleText.includes('thu') || scheduleText.includes('sun');
     const translateSchedule = (value: string) => {
         if (!locale.startsWith('en')) return value;
         return value
+            .replace(/^Opción\s*([A-Z])/i, 'Option $1')
             .replace(/^Opción\s*(\d+)/i, 'Option $1')
             .replace(/^Directo:/i, 'Direct:')
+            .replace(/\bpernocta en antigua\b/gi, 'overnight in Antigua')
+            .replace(/\bdía siguiente\b/gi, 'next day')
+            .replace(/\bsolo jueves y domingos\b/gi, 'Only Thu & Sun')
             .replace(/\bcambio\b/gi, 'transfer')
             .replace(/\bescala\b/gi, 'stopover');
+    };
+    const translateDuration = (value: string) => {
+        if (!locale.startsWith('en')) return value;
+        return value
+            .replace(/\bnoche\b/gi, 'Night')
+            .replace(/\bdía completo\b/gi, 'Full day')
+            .replace(/\bhoras\b/gi, 'hours')
+            .replace(/\baprox\.\b/gi, 'approx.')
+            .replace(/\bpernocta\b/gi, 'overnight');
     };
     const summarizeSchedule = (value: string) => {
         const firstChunk = value.split('|')[0].trim();
@@ -62,10 +77,12 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
                     alt={`${shuttle.origin} a ${shuttle.destination}`}
                     fill
                     className={`transition-transform duration-700 group-hover:scale-105 ${isSVG ? 'object-contain p-2' : 'object-cover'} ${isFallback && !isSVG ? 'filter brightness-[1.25] contrast-[1.1]' : ''}`}
+                    style={{ filter: 'saturate(1.05) contrast(1.08)' }}
                     onError={handleImageError}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
                 <div className={`absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent ${isFallback ? 'opacity-50' : isSVG ? 'opacity-40' : 'opacity-80'}`} />
+                <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/40 mix-blend-soft-light" />
 
                 {/* Badge Elite */}
                 <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white text-[9px] font-black uppercase tracking-widest">
@@ -86,7 +103,7 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
                             <p className="text-[10px] text-gray-300 uppercase font-bold tracking-widest leading-tight">
                                 {t('from')} / {t('perPerson')}
                             </p>
-                            <p className="text-sm text-white/90 font-bold tracking-tight truncate max-w-[14rem]" title={shuttle.destination}>
+                            <p className="text-sm text-white/90 font-bold tracking-tight truncate max-w-[16rem]" title={shuttle.destination}>
                                 {shuttle.destination}
                             </p>
                         </div>
@@ -96,28 +113,46 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
             </div>
 
             {/* Content Section */}
-            <div className="p-10 space-y-10 flex-1 flex flex-col justify-between bg-card">
-                <div className="space-y-8">
-                    <div className="relative flex flex-col gap-6">
-                        {/* Route representation - Minimalist Elite Style */}
-                        <div className="flex items-center justify-center text-center gap-3">
-                            <p className="font-extrabold text-lg text-foreground tracking-tight truncate">{shuttle.origin}</p>
-                            <ArrowRight className="w-4 h-4 text-primary/50 flex-shrink-0" />
-                            <p className="font-extrabold text-lg text-foreground tracking-tight truncate">{shuttle.destination}</p>
-                        </div>
+            <div className="p-10 space-y-8 flex-1 flex flex-col justify-between bg-card">
+                <div className="space-y-4">
+                    <div className="flex items-center justify-center text-center gap-3">
+                        <p className="font-semibold text-sm text-muted-foreground/80 uppercase tracking-[0.2em] max-w-[10rem] text-center leading-snug break-words">
+                            {shuttle.origin}
+                        </p>
+                        <ArrowRight className="w-4 h-4 text-primary/50 flex-shrink-0" />
+                        <p className="font-semibold text-sm text-muted-foreground/80 uppercase tracking-[0.2em] max-w-[10rem] text-center leading-snug break-words">
+                            {shuttle.destination}
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                        {(hasScale || isDirect) && (
+                            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-yellow-300/90 bg-yellow-500/10 border border-yellow-500/20 px-2.5 py-1 rounded-full">
+                                {isDirect
+                                    ? (locale.startsWith('en') ? 'Direct' : 'Directo')
+                                    : (locale.startsWith('en') ? 'Stopover' : 'Con escala')}
+                            </span>
+                        )}
+                        {isLimitedDays && (
+                            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-cyan-200/90 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-full">
+                                {locale.startsWith('en') ? 'Thu & Sun' : 'Jue & Dom'}
+                            </span>
+                        )}
+                        {isOvernight && (
+                            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-emerald-200/90 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+                                {locale.startsWith('en') ? 'Overnight' : 'Pernocta'}
+                            </span>
+                        )}
                     </div>
                 </div>
 
-                <div className="pt-8 border-t border-white/5 flex flex-col items-center text-center gap-4">
-                    <div className="flex items-center justify-center text-center gap-4">
-                        <div className="space-y-1">
+                <div className="pt-6 border-t border-white/5 grid grid-cols-2 gap-6 text-center">
+                    <div className="space-y-1">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">{t('durationLabel')}</span>
-                        <p className="font-bold text-sm text-muted-foreground/80">{shuttle.duration}</p>
-                        </div>
-                        <div className="text-muted-foreground/30 text-xl font-thin">•</div>
-                        <div className="space-y-1">
+                        <p className="font-bold text-sm text-muted-foreground/80">{translateDuration(shuttle.duration)}</p>
+                    </div>
+                    <div className="space-y-1">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">{t('scheduleLabel')}</span>
-                        <p className="font-bold text-sm text-muted-foreground/80">
+                        <p className="font-bold text-sm text-muted-foreground/80 leading-snug">
                             {summarizeSchedule(shuttle.schedule[0] || '')}
                             {extraOptions > 0 && (
                                 <span className="text-[10px] opacity-50 ml-1">
@@ -126,14 +161,6 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
                             )}
                         </p>
                     </div>
-                </div>
-                    {(hasScale || isDirect) && (
-                        <div className="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-300/80 bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 rounded-full">
-                            {isDirect
-                                ? (locale.startsWith('en') ? 'Direct' : 'Directo')
-                                : (locale.startsWith('en') ? 'Stopover' : 'Con escala')}
-                        </div>
-                    )}
                 </div>
 
                 <motion.button
