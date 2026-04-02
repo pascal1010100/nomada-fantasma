@@ -149,34 +149,6 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
         <EliteActionBar title={localizedTitle} slug={slug} />
 
         <TownTabs>
-          {/* Tab 1: Hospedaje (NEW PRIMARY TAB) */}
-          <div className="space-y-8">
-            <section className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg border border-purple-200 dark:border-purple-900/30">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-bold mb-3">
-                  <span className="bg-gradient-to-r from-purple-600 via-cyan-500 to-purple-600 bg-clip-text text-transparent">
-                    {tTown('accommodationIn', { name: localizedTitle })}
-                  </span>
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                  {tTown('accommodationSubtitle')}
-                </p>
-              </div>
-
-              {/* Placeholder content - to be populated with real accommodation data */}
-              <AccommodationSection
-                accommodations={town.accommodations}
-                townName={localizedTitle}
-                townSlug={slug}
-              />
-
-              <div className="mt-8 p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800/30">
-                <p className="text-sm text-gray-700 dark:text-gray-300 text-center">
-                  {tTown('accommodationTip')}
-                </p>
-              </div>
-            </section>
-          </div>
 
           {/* Tab 2: Experiencias */}
           <div className="space-y-8">
