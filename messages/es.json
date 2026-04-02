@@ -377,6 +377,7 @@
         "comingSoon": "Próximamente"
     },
     "RouteDetail": {
+        "townsAroundLake": "Pueblos alrededor del lago",
         "backToRoutes": "Volver a rutas",
         "readyTitle": "¿Listo para la aventura?",
         "readySubtitle": "Reserva tu lugar ahora o explora el mapa.",

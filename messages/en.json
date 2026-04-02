@@ -377,6 +377,7 @@
         "comingSoon": "Coming Soon"
     },
     "RouteDetail": {
+        "townsAroundLake": "Towns around the lake",
         "backToRoutes": "Back to routes",
         "readyTitle": "Ready for the adventure?",
         "readySubtitle": "Book your spot now or explore the map.",

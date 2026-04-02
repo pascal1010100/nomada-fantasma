@@ -372,7 +372,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
       {isAtitlanPage && (
         <div id="pueblos-section" className="py-16 bg-white dark:bg-gray-900">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Pueblos alrededor del lago</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">{tRoute('townsAroundLake')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {pueblos.map((pueblo) => (
                 <div key={pueblo.id} className="group">
