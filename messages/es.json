@@ -373,7 +373,8 @@
         "addToFavorites": "Añadir a favoritos",
         "viewDetailsOf": "Ver detalles de {title}",
         "day": "día",
-        "days": "días"
+        "days": "días",
+        "comingSoon": "Próximamente"
     },
     "RouteDetail": {
         "backToRoutes": "Volver a rutas",

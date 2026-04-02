@@ -20,4 +20,5 @@ export interface Route {
   isSubRoute?: boolean;
   tags?: string[];
   vibe?: string;
+  isComingSoon?: boolean;
 }

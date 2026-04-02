@@ -63,6 +63,7 @@ export default function RouteCard({ route }: RouteCardProps) {
 
   const handleClick = (e: MouseEvent) => {
     e.preventDefault();
+    if (route.isComingSoon) return;
     const isAtitlanTown = route.region === 'america' &&
       (route.slug.includes('san-') || route.slug === 'santiago' || route.slug === 'panajachel' || route.slug === 'santa-cruz');
 
@@ -76,6 +77,7 @@ export default function RouteCard({ route }: RouteCardProps) {
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
+      if (route.isComingSoon) return;
       const isAtitlanTown = route.region === 'america' &&
         (route.slug.includes('san-') || route.slug === 'santiago' || route.slug === 'panajachel' || route.slug === 'santa-cruz');
 
@@ -91,10 +93,9 @@ export default function RouteCard({ route }: RouteCardProps) {
     <motion.div
       ref={ref}
       className={cn(
-        "group relative overflow-hidden rounded-2xl glass-enhanced",
-        "h-full flex flex-col cursor-pointer",
-        "hover-lift",
-        "border border-white/10 dark:border-white/5",
+        "group relative overflow-hidden rounded-2xl glass-enhanced h-full flex flex-col",
+        !route.isComingSoon && "cursor-pointer hover-lift border border-white/10 dark:border-white/5",
+        route.isComingSoon && "opacity-80 border-dashed border-white/20 filter grayscale-[0.3]",
         route.isRecommended && "ring-2 ring-primary/50 shadow-lg shadow-primary/10",
       )}
       initial="hidden"
@@ -111,7 +112,10 @@ export default function RouteCard({ route }: RouteCardProps) {
       {/* Image with overlay */}
       <div className="relative h-52 overflow-hidden group">
         <motion.div
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-[1.5s] ease-out group-hover:scale-110"
+          className={cn(
+            "absolute inset-0 bg-cover bg-center transition-transform duration-[1.5s] ease-out",
+            !route.isComingSoon && "group-hover:scale-110"
+          )}
           style={{
             backgroundImage: `url(${route.coverImage})`,
             backgroundSize: 'cover',
@@ -274,7 +278,9 @@ export default function RouteCard({ route }: RouteCardProps) {
         >
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col">
-              {vibe ? (
+              {route.isComingSoon ? (
+                <span className="text-sm font-bold text-muted-foreground uppercase opacity-70 tracking-widest">{t('comingSoon')}</span>
+              ) : vibe ? (
                 <span className="text-xs text-muted-foreground">{t('viewFullGuide')}</span>
               ) : (
                 <>
@@ -292,9 +298,10 @@ export default function RouteCard({ route }: RouteCardProps) {
             }}>
               <RippleButton
                 variant="primary"
-                className="!py-2 !px-4 !text-sm !rounded-lg"
+                className={cn("!py-2 !px-4 !text-sm !rounded-lg", route.isComingSoon && "cursor-not-allowed opacity-60 bg-transparent border border-white/20 shadow-none")}
               >
-                {vibe ? t('discover') : t('explore')} <ArrowRight className="w-4 h-4 ml-1" />
+                {route.isComingSoon ? t('comingSoon') : vibe ? t('discover') : t('explore')}
+                {!route.isComingSoon && <ArrowRight className="w-4 h-4 ml-1" />}
               </RippleButton>
             </div>
           </div>

@@ -41,7 +41,8 @@ export const mockRoutes: Route[] = [
     fullDescription: 'Adéntrate en el corazón verde de Guatemala, donde la niebla besa las montañas y las aguas cristalinas de Semuc Champey te invitan a la aventura.',
     price: 600,
     vibe: 'Naturaleza & Grutas',
-    rating: 4.8
+    rating: 4.8,
+    isComingSoon: true
   },
   {
     id: '3',
@@ -62,7 +63,8 @@ export const mockRoutes: Route[] = [
     fullDescription: 'Recorre las calles de una de las ciudades coloniales más bellas del mundo, rodeada de volcanes y llena de historia en cada rincón.',
     price: 450,
     vibe: 'Historia Colonial',
-    rating: 4.9
+    rating: 4.9,
+    isComingSoon: true
   },
   {
     id: '4',
