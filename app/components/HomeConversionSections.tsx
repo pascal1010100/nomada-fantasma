@@ -70,42 +70,7 @@ export default function HomeConversionSections() {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-border/60 bg-card/40 p-6 backdrop-blur-sm">
-          <div className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
-            <Clock3 className="h-4 w-4" />
-            {t("itinerary.badge")}
-          </div>
-          <h3 className="mt-3 text-xl font-bold">{t("itinerary.title")}</h3>
-          <p className="mt-2 text-sm text-muted-foreground">{t("itinerary.desc")}</p>
-          <div className="mt-4 space-y-2 text-sm">
-            <p className="rounded-lg border border-border/50 px-3 py-2">{t("itinerary.items.day1")}</p>
-            <p className="rounded-lg border border-border/50 px-3 py-2">{t("itinerary.items.day2")}</p>
-            <p className="rounded-lg border border-border/50 px-3 py-2">{t("itinerary.items.day3")}</p>
-          </div>
-        </div>
 
-        <div className="rounded-2xl border border-border/60 bg-card/40 p-6 backdrop-blur-sm">
-          <div className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
-            <Route className="h-4 w-4" />
-            {t("transport.badge")}
-          </div>
-          <h3 className="mt-3 text-xl font-bold">{t("transport.title")}</h3>
-          <p className="mt-2 text-sm text-muted-foreground">{t("transport.desc")}</p>
-          <div className="mt-4 space-y-2 text-sm text-muted-foreground">
-            <p className="rounded-lg border border-border/50 px-3 py-2">{t("transport.items.item1")}</p>
-            <p className="rounded-lg border border-border/50 px-3 py-2">{t("transport.items.item2")}</p>
-            <p className="rounded-lg border border-border/50 px-3 py-2">{t("transport.items.item3")}</p>
-          </div>
-          <Link
-            href={`/${locale}/shuttles`}
-            className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-primary"
-          >
-            {t("transport.cta")}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
     </section>
   );
 }
