@@ -2,14 +2,12 @@
 
 import { motion, type MotionProps, useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import { Compass, MessageCircle } from "lucide-react";
-import { useId, useMemo, useState } from "react";
-import ChatModal from "./ChatModal";
+import { Compass, Bus } from "lucide-react";
+import { useId, useMemo } from "react";
 import Tooltip from "./ui/Tooltip";
 import { useTranslations, useLocale } from "next-intl";
 
 export default function Hero() {
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const reduce = useReducedMotion();
   const t = useTranslations('Hero');
   const locale = useLocale();
@@ -174,43 +172,7 @@ export default function Hero() {
               {t('description')}
             </motion.p>
 
-            {/* Stats */}
-            <motion.div
-              className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              {[
-                { value: t('stats.coverageValue'), label: t('stats.coverageLabel'), color: 'from-cyan-400 to-blue-500', tooltip: t('stats.coverageTooltip') },
-                { value: t('stats.categoriesValue'), label: t('stats.categoriesLabel'), color: 'from-purple-400 to-pink-500', tooltip: t('stats.categoriesTooltip') },
-                { value: t('stats.dataValue'), label: t('stats.dataLabel'), color: 'from-amber-400 to-orange-500', tooltip: t('stats.dataTooltip') },
-                { value: t('stats.nextValue'), label: t('stats.nextLabel'), color: 'from-green-400 to-emerald-500', tooltip: t('stats.nextTooltip') }
-              ].map((stat, index) => (
-                <Tooltip key={index} content={stat.tooltip} position="bottom">
-                  <motion.div
-                    className="glass-enhanced rounded-2xl p-4 relative group overflow-hidden cursor-help"
-                    whileHover={{ y: -4, scale: 1.02 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    {/* Gradient background on hover */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
 
-                    <div className="relative">
-                      <div className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
-                        {stat.value}
-                      </div>
-                      <div className="mt-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        {stat.label}
-                      </div>
-                    </div>
-
-                    {/* Subtle scan line */}
-                    <div className="scan-line absolute inset-0 opacity-10 pointer-events-none" />
-                  </motion.div>
-                </Tooltip>
-              ))}
-            </motion.div>
 
             {/* CTA Buttons */}
             <motion.div
@@ -220,60 +182,28 @@ export default function Hero() {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <Link
-              href={`/${locale}/mapa`}
+                href={`/${locale}/rutas-magicas`}
                 className="btn-cta shimmer group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full px-8 py-4 text-sm font-semibold transition-all duration-300 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 sm:w-auto"
               >
                 <Compass className="h-5 w-5 transition-transform group-hover:rotate-12" />
-                <span>{t('explore')}</span>
+                <span>{t('magicalRoutes')}</span>
                 <span className="absolute right-4 transition-transform duration-300 group-hover:translate-x-1">→</span>
               </Link>
 
-              <button
-                onClick={() => setIsChatOpen(true)}
+              <Link
+                href={`/${locale}/shuttles`}
                 className="btn-ghost group flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-sm font-medium transition-all duration-300 hover:border-primary/50 hover:scale-105 sm:w-auto"
               >
-                <MessageCircle className="h-5 w-5 transition-transform group-hover:scale-110" />
-                <span>{t('chat')}</span>
-              </button>
+                <Bus className="h-5 w-5 transition-transform group-hover:scale-110" />
+                <span>{t('shuttles')}</span>
+              </Link>
             </motion.div>
 
-            {/* Trust Badges */}
-            <motion.div
-              className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-8 w-8 rounded-full border-2 border-white bg-gray-200 dark:border-gray-800 dark:bg-gray-700"></div>
-                  ))}
-                </div>
-                <span>{t('trust.happyNomads')}</span>
-              </div>
-              <div className="hidden h-4 w-px bg-gray-300 sm:block"></div>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <svg key={i} className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <span>{t('trust.ratings')}</span>
-              </div>
-            </motion.div>
+
           </div>
         </div>
       </div>
 
-      {/* Chat Modal */}
-      <ChatModal
-        open={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        variant="ghost"
-      />
     </section>
   );
 }

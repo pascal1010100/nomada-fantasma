@@ -24,8 +24,8 @@
         "title1": "Nomad",
         "title2": "Ghost",
         "description": "We are starting in San Pedro La Laguna with real, verified places for digital nomads. No inflated claims, just useful data.",
-        "explore": "Explore San Pedro",
-        "chat": "Chat with AI",
+        "magicalRoutes": "Magical Routes",
+        "shuttles": "Shuttles & Transport",
         "stats": {
             "coverageValue": "San Pedro",
             "coverageLabel": "Current coverage",
