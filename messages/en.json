@@ -376,6 +376,13 @@
         "days": "days",
         "comingSoon": "Coming Soon"
     },
+    "GuideCard": {
+        "reviews": "{count} reviews",
+        "book": "Book",
+        "tipCoffee": "Buy me a coffee",
+        "specialties": "Specialties:",
+        "languages": "Languages:"
+    },
     "RouteDetail": {
         "townsAroundLake": "Towns around the lake",
         "backToRoutes": "Back to routes",
@@ -468,7 +475,53 @@
                     "Tzankujil Hill",
                     "Yoga",
                     "Cacao"
-                ]
+                ],
+                "activities": [
+                    "Sunrise yoga classes",
+                    "Guided meditation sessions",
+                    "Massages and alternative therapies",
+                    "Singing and sound circles",
+                    "Personal growth workshops",
+                    "Sunset kayaking",
+                    "Walks along nature trails",
+                    "Acroyoga classes"
+                ],
+                "weather": {
+                    "condition": "Partly cloudy"
+                },
+                "transportSchedule": [
+                    {
+                        "route": "Boats (Main Dock)",
+                        "times": [
+                            "To Pana or San Pedro every 30 min (6:30 AM - 6:30 PM). Price: Q25/Q15."
+                        ]
+                    },
+                    {
+                        "route": "Tuk-tuks to Tzununá",
+                        "times": [
+                            "Short 10 min ride. Price: Q10 per person."
+                        ]
+                    },
+                    {
+                        "route": "Walk to Tzununá",
+                        "times": [
+                            "Safe lakeside trail, about 45 min with incredible views."
+                        ]
+                    }
+                ],
+                "services": {
+                    "atms": [
+                        "Banco Industrial",
+                        "Banrural"
+                    ],
+                    "essentials": [
+                        "Pharmacy: Farmacia San Marcos",
+                        "Natural products stores",
+                        "Cafes with vegan options",
+                        "Yoga and wellness centers",
+                        "Local tourism office"
+                    ]
+                }
             },
             "san-pedro": {
                 "title": "San Pedro La Laguna",
@@ -478,7 +531,60 @@
                 "highlights": [
                     "San Pedro Volcano",
                     "Nightlife"
-                ]
+                ],
+                "activities": [
+                    "Hike San Pedro Volcano (4-6 hour ascent)",
+                    "Sunrise kayaking on the lake",
+                    "Spanish classes at local schools",
+                    "Coffee tours through local farms",
+                    "Visit the local artisan market",
+                    "Traditional cooking classes",
+                    "Sunrise yoga with lake views",
+                    "Boat trip to other lake villages"
+                ],
+                "weather": {
+                    "condition": "Sunny"
+                },
+                "transportSchedule": [
+                    {
+                        "route": "Boats to Panajachel",
+                        "times": [
+                            "Depart every 20 min from the main dock (6:00 AM - 5:00 PM). Price: Q25."
+                        ]
+                    },
+                    {
+                        "route": "Boats to Santiago",
+                        "times": [
+                            "Direct every hour or via other villages. Last boat around 4:30 PM."
+                        ]
+                    },
+                    {
+                        "route": "Tuk-tuks to San Juan",
+                        "times": [
+                            "10 min ride. Price: Q10-15 per person. Available all day."
+                        ]
+                    },
+                    {
+                        "route": "Shuttles to Antigua",
+                        "times": [
+                            "Daily departures at 4:30 AM, 8:30 AM, and 2:00 PM. Book with your hostel."
+                        ]
+                    }
+                ],
+                "services": {
+                    "atms": [
+                        "Banco Industrial",
+                        "Banrural",
+                        "5B"
+                    ],
+                    "essentials": [
+                        "Pharmacies: Farmacia San Pedro, Farmacia La Bendicion",
+                        "Laundries: Lavanderia La Esquina, Lavanderia Central",
+                        "Supermarkets: Despensa Familiar, Supermercado San Pedro",
+                        "Medical center: San Pedro La Laguna Health Center",
+                        "Post office: In the town center"
+                    ]
+                }
             },
             "san-juan": {
                 "title": "San Juan La Laguna",
@@ -489,7 +595,53 @@
                     "Textiles",
                     "Galleries",
                     "Lookout"
-                ]
+                ],
+                "activities": [
+                    "Visit weaving cooperatives",
+                    "Natural dye workshop",
+                    "Organic coffee farm tour",
+                    "Art gallery walk",
+                    "Walk through the village and its murals",
+                    "Traditional weaving class",
+                    "Local coffee tasting",
+                    "Sunset boat ride"
+                ],
+                "weather": {
+                    "condition": "Partly cloudy"
+                },
+                "transportSchedule": [
+                    {
+                        "route": "Tuk-tuks to San Pedro",
+                        "times": [
+                            "Fast and fun (10 min). Price: Q10-15."
+                        ]
+                    },
+                    {
+                        "route": "Boats (Dock)",
+                        "times": [
+                            "To Pana every 30-45 min. Price: Q25."
+                        ]
+                    },
+                    {
+                        "route": "Walk to San Pedro",
+                        "times": [
+                            "Pleasant 30-40 min walk along the paved road."
+                        ]
+                    }
+                ],
+                "services": {
+                    "atms": [
+                        "Banco Industrial",
+                        "Banrural"
+                    ],
+                    "essentials": [
+                        "Pharmacy: Farmacia San Juan",
+                        "Artisan shops",
+                        "Local cafes",
+                        "Tourist information office",
+                        "Organic product stores"
+                    ]
+                }
             },
             "santiago": {
                 "title": "Santiago Atitlán",
@@ -500,7 +652,54 @@
                     "Maximón",
                     "Church",
                     "Culture"
-                ]
+                ],
+                "activities": [
+                    "Tour through the indigenous market",
+                    "Visit Santiago Apostol Church",
+                    "Mayan brotherhoods tour",
+                    "Local crafts workshop",
+                    "Boat ride on the lake",
+                    "Visit the local museum",
+                    "Traditional food tasting",
+                    "Walk through the historic center"
+                ],
+                "weather": {
+                    "condition": "Sunny"
+                },
+                "transportSchedule": [
+                    {
+                        "route": "Boats to Panajachel",
+                        "times": [
+                            "Direct (30 min) every hour. Last boat around 5:00 PM. Price: Q25."
+                        ]
+                    },
+                    {
+                        "route": "Boats to San Pedro",
+                        "times": [
+                            "Frequent departures from the dock near the market. Price: Q25."
+                        ]
+                    },
+                    {
+                        "route": "Chicken Bus to San Lucas",
+                        "times": [
+                            "Depart from the central park. Connection to the south coast."
+                        ]
+                    }
+                ],
+                "services": {
+                    "atms": [
+                        "Banco Industrial",
+                        "Banrural",
+                        "BAM"
+                    ],
+                    "essentials": [
+                        "Pharmacy: Farmacia Santiago",
+                        "Local health center",
+                        "Municipal market",
+                        "Post office",
+                        "Artisan shops"
+                    ]
+                }
             },
             "panajachel": {
                 "title": "Panajachel",
@@ -513,7 +712,55 @@
                     "Panoramic lake views",
                     "Access to other lake villages",
                     "Artisans market"
-                ]
+                ],
+                "activities": [
+                    "Walk along Santander Street",
+                    "Artisan shopping tour",
+                    "Boat ride on the lake",
+                    "Food tour",
+                    "Birdwatching",
+                    "Sunset kayaking",
+                    "Visit nearby nature reserves",
+                    "Photography tour"
+                ],
+                "weather": {
+                    "condition": "Partly cloudy"
+                },
+                "transportSchedule": [
+                    {
+                        "route": "Public Boats (Tzanjuyu Dock)",
+                        "times": [
+                            "Depart every 20-30 min to all villages (6:30 AM - 7:30 PM). Price: Q25 foreigners / Q10 locals."
+                        ]
+                    },
+                    {
+                        "route": "Shuttles to Antigua/Guatemala City",
+                        "times": [
+                            "5:30 AM, 8:00 AM, 12:00 PM, 4:00 PM. Price: Q15-25. Book at agencies on Santander Street."
+                        ]
+                    },
+                    {
+                        "route": "Chicken Bus (La Aventura)",
+                        "times": [
+                            "Frequent departures from the main stop. Route: Pana -> Solola -> Los Encuentros -> final destination. Price: ~Q50 total."
+                        ]
+                    }
+                ],
+                "services": {
+                    "atms": [
+                        "Banco Industrial",
+                        "Banrural",
+                        "BAC",
+                        "Banco G&T"
+                    ],
+                    "essentials": [
+                        "Pharmacy: Farmacia Pana",
+                        "Hospital: Panajachel Health Center",
+                        "Supermarkets: Despensa Familiar",
+                        "Laundry services",
+                        "Tourist office"
+                    ]
+                }
             },
             "santa-cruz": {
                 "title": "Santa Cruz La Laguna",
@@ -525,7 +772,47 @@
                     "Incredible panoramic views",
                     "Hiking to Jaibalito",
                     "Hotels with direct lake access"
-                ]
+                ],
+                "activities": [
+                    "Diving and snorkeling",
+                    "Kayaking and paddleboarding",
+                    "Lakeside hiking",
+                    "Mayan cooking classes",
+                    "Relaxing in hammocks by the lake",
+                    "Visit the CECAP vocational center"
+                ],
+                "weather": {
+                    "condition": "Sunny"
+                },
+                "transportSchedule": [
+                    {
+                        "route": "Boats to Panajachel",
+                        "times": [
+                            "Very frequent (every 20 min). Price: Q10 (local/short fare). Last boat 7:00 PM."
+                        ]
+                    },
+                    {
+                        "route": "Boats to San Pedro",
+                        "times": [
+                            "Pass every 30 min heading west. Wave from the dock. Price: Q20-25."
+                        ]
+                    },
+                    {
+                        "route": "Walk to Jaibalito",
+                        "times": [
+                            "Scenic 20-30 min trail. Incredible views!"
+                        ]
+                    }
+                ],
+                "services": {
+                    "atms": [],
+                    "essentials": [
+                        "Health center",
+                        "Small local shops",
+                        "Diving school",
+                        "Hotel restaurants"
+                    ]
+                }
             }
         },
         "tours": {

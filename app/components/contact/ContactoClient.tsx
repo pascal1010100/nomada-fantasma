@@ -51,21 +51,27 @@ const ContactoClient = () => {
       title: t('cardChat.title'),
       description: t('cardChat.desc'),
       action: t('cardChat.action'),
-      color: "bg-blue-500"
+      color: "bg-blue-500",
+      href: "https://wa.me/50242900009",
+      isExternal: true
     },
     {
       icon: <Mail className="h-6 w-6" />,
       title: t('cardMail.title'),
       description: t('cardMail.desc'),
       action: t('cardMail.action'),
-      color: "bg-purple-500"
+      color: "bg-purple-500",
+      href: "mailto:hola@nomadafantasma.com",
+      isExternal: false
     },
     {
       icon: <MapPin className="h-6 w-6" />,
       title: t('cardVisit.title'),
       description: t('cardVisit.desc'),
       action: t('cardVisit.action'),
-      color: "bg-cyan-500"
+      color: "bg-cyan-500",
+      href: "",
+      isExternal: false
     }
   ];
 
@@ -133,9 +139,15 @@ const ContactoClient = () => {
               <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
                 {card.description}
               </p>
-              <button className="flex items-center text-sm font-bold text-primary group-hover:gap-2 transition-all">
-                {card.action} <ChevronRight className="h-4 w-4" />
-              </button>
+              {card.href ? (
+                <a href={card.href} target={card.isExternal ? "_blank" : "_self"} rel="noopener noreferrer" className="flex items-center text-sm font-bold text-primary group-hover:gap-2 transition-all">
+                  {card.action} <ChevronRight className="h-4 w-4" />
+                </a>
+              ) : (
+                <button className="flex items-center text-sm font-bold text-primary group-hover:gap-2 transition-all">
+                  {card.action} <ChevronRight className="h-4 w-4" />
+                </button>
+              )}
             </motion.div>
           ))}
         </div>
@@ -247,11 +259,21 @@ const ContactoClient = () => {
 
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary flex-shrink-0">
+                  <MessageSquare className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold">WhatsApp Directo</h4>
+                  <a href="https://wa.me/50242900009" target="_blank" rel="noopener noreferrer" className="text-muted-foreground text-sm hover:text-primary transition-colors">+502 4290 0009</a>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary flex-shrink-0">
                   <Mail className="h-5 w-5" />
                 </div>
                 <div>
                   <h4 className="font-bold">{t('infoEmail')}</h4>
-                  <p className="text-muted-foreground text-sm">hola@nomadafantasma.com</p>
+                  <a href="mailto:hola@nomadafantasma.com" className="text-muted-foreground text-sm hover:text-primary transition-colors">hola@nomadafantasma.com</a>
                 </div>
               </div>
 

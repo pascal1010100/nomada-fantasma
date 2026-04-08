@@ -376,6 +376,13 @@
         "days": "días",
         "comingSoon": "Próximamente"
     },
+    "GuideCard": {
+        "reviews": "{count} reseñas",
+        "book": "Reservar",
+        "tipCoffee": "Invítame un café",
+        "specialties": "Especialidades:",
+        "languages": "Idiomas:"
+    },
     "RouteDetail": {
         "townsAroundLake": "Pueblos alrededor del lago",
         "backToRoutes": "Volver a rutas",
@@ -470,7 +477,53 @@
                     "Cerro Tzankujil",
                     "Yoga",
                     "Cacao"
-                ]
+                ],
+                "activities": [
+                    "Clases de yoga al amanecer",
+                    "Sesiones de meditación guiada",
+                    "Masajes y terapias alternativas",
+                    "Círculos de canto y sonido",
+                    "Talleres de crecimiento personal",
+                    "Paseos en kayak al atardecer",
+                    "Caminatas por senderos naturales",
+                    "Clases de acroyoga"
+                ],
+                "weather": {
+                    "condition": "Parcialmente nublado"
+                },
+                "transportSchedule": [
+                    {
+                        "route": "Lanchas (Muelle Principal)",
+                        "times": [
+                            "Hacia Pana o San Pedro cada 30 min (6:30 AM - 6:30 PM). Precio: Q25/Q15."
+                        ]
+                    },
+                    {
+                        "route": "Tuk-tuks a Tzununá",
+                        "times": [
+                            "Viaje corto de 10 min. Precio: Q10 por persona."
+                        ]
+                    },
+                    {
+                        "route": "Caminata a Tzununá",
+                        "times": [
+                            "Sendero seguro por la costa, aprox 45 min con vistas increíbles."
+                        ]
+                    }
+                ],
+                "services": {
+                    "atms": [
+                        "Banco Industrial",
+                        "Banrural"
+                    ],
+                    "essentials": [
+                        "Farmacia: Farmacia San Marcos",
+                        "Tiendas de productos naturales",
+                        "Cafeterías con opciones veganas",
+                        "Centros de yoga y bienestar",
+                        "Oficina de turismo local"
+                    ]
+                }
             },
             "san-pedro": {
                 "title": "San Pedro La Laguna",
@@ -480,7 +533,60 @@
                 "highlights": [
                     "Volcán San Pedro",
                     "Vida Nocturna"
-                ]
+                ],
+                "activities": [
+                    "Senderismo al Volcán San Pedro (4-6 horas de subida)",
+                    "Kayak al amanecer en el lago",
+                    "Clases de español en escuelas locales",
+                    "Tours de café por fincas locales",
+                    "Visita al mercado local de artesanías",
+                    "Clases de cocina tradicional",
+                    "Yoga al amanecer con vista al lago",
+                    "Paseo en bote a otros pueblos del lago"
+                ],
+                "weather": {
+                    "condition": "Soleado"
+                },
+                "transportSchedule": [
+                    {
+                        "route": "Lanchas a Panajachel",
+                        "times": [
+                            "Salen cada 20 min desde el muelle principal (6:00 AM - 5:00 PM). Precio: Q25."
+                        ]
+                    },
+                    {
+                        "route": "Lanchas a Santiago",
+                        "times": [
+                            "Directo cada hora o vía otros pueblos. Última lancha ~4:30 PM."
+                        ]
+                    },
+                    {
+                        "route": "Tuk-tuks a San Juan",
+                        "times": [
+                            "Trayecto de 10 min. Precio: Q10-15 por persona. Disponible todo el día."
+                        ]
+                    },
+                    {
+                        "route": "Shuttles a Antigua",
+                        "times": [
+                            "Salidas diarias 4:30 AM, 8:30 AM, 2:00 PM. Reserva con tu hostal."
+                        ]
+                    }
+                ],
+                "services": {
+                    "atms": [
+                        "Banco Industrial",
+                        "Banrural",
+                        "5B"
+                    ],
+                    "essentials": [
+                        "Farmacias: Farmacia San Pedro, Farmacia La Bendición",
+                        "Lavanderías: Lavandería La Esquina, Lavandería Central",
+                        "Supermercados: Despensa Familiar, Supermercado San Pedro",
+                        "Centro médico: Centro de Salud San Pedro La Laguna",
+                        "Oficina de correos: En el centro del pueblo"
+                    ]
+                }
             },
             "san-juan": {
                 "title": "San Juan La Laguna",
@@ -491,7 +597,53 @@
                     "Textiles",
                     "Galerías",
                     "Mirador"
-                ]
+                ],
+                "activities": [
+                    "Visita a cooperativas de tejido",
+                    "Taller de teñido natural",
+                    "Tour por cafetales orgánicos",
+                    "Recorrido por galerías de arte",
+                    "Caminata por el pueblo y sus murales",
+                    "Clase de tejido tradicional",
+                    "Degustación de café local",
+                    "Paseo en bote al atardecer"
+                ],
+                "weather": {
+                    "condition": "Parcialmente nublado"
+                },
+                "transportSchedule": [
+                    {
+                        "route": "Tuk-tuks a San Pedro",
+                        "times": [
+                            "Rápido y divertido (10 min). Precio: Q10-15."
+                        ]
+                    },
+                    {
+                        "route": "Lanchas (Muelle)",
+                        "times": [
+                            "Hacia Pana cada 30-45 min. Precio: Q25."
+                        ]
+                    },
+                    {
+                        "route": "Caminata a San Pedro",
+                        "times": [
+                            "Agradable paseo de 30-40 min por la carretera pavimentada."
+                        ]
+                    }
+                ],
+                "services": {
+                    "atms": [
+                        "Banco Industrial",
+                        "Banrural"
+                    ],
+                    "essentials": [
+                        "Farmacia: Farmacia San Juan",
+                        "Tiendas de artesanías",
+                        "Cafeterías locales",
+                        "Oficina de información turística",
+                        "Tiendas de productos orgánicos"
+                    ]
+                }
             },
             "santiago": {
                 "title": "Santiago Atitlán",
@@ -502,7 +654,54 @@
                     "Maximón",
                     "Iglesia",
                     "Cultura"
-                ]
+                ],
+                "activities": [
+                    "Recorrido por el mercado indígena",
+                    "Visita a la Iglesia de Santiago Apóstol",
+                    "Tour por las cofradías mayas",
+                    "Taller de artesanías locales",
+                    "Paseo en bote por el lago",
+                    "Visita al museo local",
+                    "Degustación de comida típica",
+                    "Caminata por el centro histórico"
+                ],
+                "weather": {
+                    "condition": "Soleado"
+                },
+                "transportSchedule": [
+                    {
+                        "route": "Lanchas a Panajachel",
+                        "times": [
+                            "Directo (30 min) cada hora. Última lancha ~5:00 PM. Precio: Q25."
+                        ]
+                    },
+                    {
+                        "route": "Lanchas a San Pedro",
+                        "times": [
+                            "Frecuentes desde el muelle cerca del mercado. Precio: Q25."
+                        ]
+                    },
+                    {
+                        "route": "Chicken Bus a San Lucas",
+                        "times": [
+                            "Salen del parque central. Conexión a la costa sur."
+                        ]
+                    }
+                ],
+                "services": {
+                    "atms": [
+                        "Banco Industrial",
+                        "Banrural",
+                        "BAM"
+                    ],
+                    "essentials": [
+                        "Farmacia: Farmacia Santiago",
+                        "Centro de salud local",
+                        "Mercado municipal",
+                        "Oficina de correos",
+                        "Tiendas de artesanías"
+                    ]
+                }
             },
             "panajachel": {
                 "title": "Panajachel",
@@ -515,7 +714,55 @@
                     "Vistas panorámicas del lago",
                     "Acceso a otros pueblos del lago",
                     "Mercado de artesanías"
-                ]
+                ],
+                "activities": [
+                    "Paseo por la Calle Santander",
+                    "Tour de compras de artesanías",
+                    "Paseo en bote por el lago",
+                    "Tour gastronómico",
+                    "Observación de aves",
+                    "Kayak al atardecer",
+                    "Visita a reservas naturales cercanas",
+                    "Tour fotográfico"
+                ],
+                "weather": {
+                    "condition": "Parcialmente nublado"
+                },
+                "transportSchedule": [
+                    {
+                        "route": "Lanchas Públicas (Muelle Tzanjuyú)",
+                        "times": [
+                            "Salen cada 20-30 min hacia todos los pueblos (6:30 AM - 7:30 PM). Precio: Q25 extranjeros / Q10 locales."
+                        ]
+                    },
+                    {
+                        "route": "Shuttles a Antigua/Guate",
+                        "times": [
+                            "5:30 AM, 8:00 AM, 12:00 PM, 4:00 PM. Precio: Q15-25. Reserva en agencias de Calle Santander."
+                        ]
+                    },
+                    {
+                        "route": "Chicken Bus (La Aventura)",
+                        "times": [
+                            "Salidas frecuentes desde la parada principal. Ruta: Pana -> Sololá -> Los Encuentros -> Destino final. Precio: ~Q50 total."
+                        ]
+                    }
+                ],
+                "services": {
+                    "atms": [
+                        "Banco Industrial",
+                        "Banrural",
+                        "BAC",
+                        "Banco G&T"
+                    ],
+                    "essentials": [
+                        "Farmacia: Farmacia Pana",
+                        "Hospital: Centro de Salud Panajachel",
+                        "Supermercados: Despensa Familiar",
+                        "Lavanderías",
+                        "Oficina de turismo"
+                    ]
+                }
             },
             "santa-cruz": {
                 "title": "Santa Cruz La Laguna",
@@ -527,7 +774,47 @@
                     "Vistas panorámicas increíbles",
                     "Senderismo a Jaibalito",
                     "Hoteles con acceso directo al lago"
-                ]
+                ],
+                "activities": [
+                    "Buceo y snorkeling",
+                    "Kayak y paddleboard",
+                    "Senderismo por la costa",
+                    "Clases de cocina maya",
+                    "Relajación en hamacas frente al lago",
+                    "Visita al centro vocacional CECAP"
+                ],
+                "weather": {
+                    "condition": "Soleado"
+                },
+                "transportSchedule": [
+                    {
+                        "route": "Lanchas a Panajachel",
+                        "times": [
+                            "Muy frecuentes (cada 20 min). Precio: Q10 (tarifa local/corta). Última lancha 7:00 PM."
+                        ]
+                    },
+                    {
+                        "route": "Lanchas a San Pedro",
+                        "times": [
+                            "Pasan cada 30 min rumbo oeste. Haz señas desde el muelle. Precio: Q20-25."
+                        ]
+                    },
+                    {
+                        "route": "Caminata a Jaibalito",
+                        "times": [
+                            "Sendero escénico de 20-30 min. ¡Vistas increíbles!"
+                        ]
+                    }
+                ],
+                "services": {
+                    "atms": [],
+                    "essentials": [
+                        "Centro de Salud",
+                        "Pequeñas tiendas locales",
+                        "Escuela de buceo",
+                        "Restaurantes de hoteles"
+                    ]
+                }
             }
         },
         "tours": {

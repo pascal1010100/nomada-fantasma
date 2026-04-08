@@ -400,11 +400,11 @@ export default async function ConfirmationPage({
                 hola@nomadafantasma.com
               </a>
               <span className="hidden sm:inline text-gray-400">•</span>
-              <a href="tel:+50212345678" className="text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 flex items-center">
+              <a href="tel:+50242900009" className="text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 flex items-center">
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
-                +502 1234 5678
+                +502 4290 0009
               </a>
             </div>
           </div>
@@ -419,8 +419,8 @@ export default async function ConfirmationPage({
               hola@nomadafantasma.com
             </a>{' '}
             {t('questionsOr')}{' '}
-            <a href="tel:+50212345678" className="text-cyan-600 dark:text-cyan-400 hover:underline">
-              +502 1234 5678
+            <a href="tel:+50242900009" className="text-cyan-600 dark:text-cyan-400 hover:underline">
+              +502 4290 0009
             </a>
           </p>
         </div>

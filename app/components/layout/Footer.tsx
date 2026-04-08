@@ -18,11 +18,11 @@ export default function Footer() {
 
           <div className="flex flex-wrap items-center gap-3 text-sm">
             <a
-              href="mailto:hola@nomadafantasma.io"
+              href="mailto:hola@nomadafantasma.com"
               className="inline-flex items-center gap-2 underline-offset-2 hover:underline"
             >
               <Mail className="h-4 w-4" />
-              hola@nomadafantasma.io
+              hola@nomadafantasma.com
             </a>
             <span className="opacity-40">•</span>
             <span className="inline-flex items-center gap-2">

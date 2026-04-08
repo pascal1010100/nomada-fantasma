@@ -6,6 +6,7 @@ import { Guide } from '../lago-atitlan/data';
 import BookingModal from './BookingModal';
 import { trackEvent } from '../../../lib/analytics';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 interface GuideCardProps {
     guide: Guide;
@@ -13,6 +14,7 @@ interface GuideCardProps {
 
 const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const t = useTranslations('GuideCard');
 
     const handleOpenBooking = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -79,7 +81,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
                                         {guide.rating}
                                     </span>
                                     <span>•</span>
-                                    <span>{guide.reviews} reseñas</span>
+                                    <span>{t('reviews', { count: guide.reviews })}</span>
                                 </div>
                             </div>
 
@@ -91,7 +93,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
                                     className="shimmer inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 text-green-400 border border-green-500/30 rounded-xl text-sm font-medium transition-all shadow-lg shadow-green-500/10"
                                 >
                                     <MessageCircle className="w-4 h-4 mr-2" />
-                                    Reservar
+                                    {t('book')}
                                 </motion.button>
                                 <motion.button
                                     whileHover={{ scale: 1.02 }}
@@ -100,7 +102,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
                                     className="inline-flex items-center justify-center px-4 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 hover:text-amber-400 border border-amber-500/20 rounded-lg text-xs font-medium transition-all"
                                 >
                                     <Coffee className="w-3 h-3 mr-1.5" />
-                                    Invítame un café
+                                    {t('tipCoffee')}
                                 </motion.button>
                             </div>
                         </div>
@@ -114,7 +116,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
                             <div className="flex items-start gap-2 text-xs">
                                 <Award className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                                 <div className="flex-1">
-                                    <span className="font-semibold text-foreground">Especialidades:</span>
+                                    <span className="font-semibold text-foreground">{t('specialties')}</span>
                                     <div className="flex flex-wrap gap-1.5 mt-1">
                                         {guide.specialties.map((spec, idx) => (
                                             <motion.span
@@ -134,7 +136,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
                             {/* Languages */}
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                 <Globe className="w-4 h-4 text-accent" />
-                                <span className="font-semibold text-foreground">Idiomas:</span>
+                                <span className="font-semibold text-foreground">{t('languages')}</span>
                                 <span>{guide.languages.join(', ')}</span>
                             </div>
                         </div>

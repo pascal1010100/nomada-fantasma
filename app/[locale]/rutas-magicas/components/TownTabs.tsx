@@ -2,32 +2,36 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Compass, Info, Hotel } from 'lucide-react';
+import { Sparkles, Compass, Info } from 'lucide-react';
 import React from 'react';
 import { useTranslations } from 'next-intl';
 
+export type TownTabId = 'experiences' | 'discover' | 'info';
+
 interface Tab {
-    id: string;
+    id: TownTabId;
     label: string;
     icon: React.ReactNode;
 }
 
 interface TownTabsProps {
-    children: React.ReactNode[];
+    panels: Record<TownTabId, React.ReactNode>;
+    defaultTabId?: TownTabId;
 }
 
-export default function TownTabs({ children }: TownTabsProps) {
+export default function TownTabs({ panels, defaultTabId = 'experiences' }: TownTabsProps) {
     const t = useTranslations('TownTabs');
-    const [activeTab, setActiveTab] = useState('experiences');
-
     const tabs: Tab[] = [
         { id: 'experiences', label: t('experiences'), icon: <Sparkles className="w-4 h-4" /> },
         { id: 'discover', label: t('discover'), icon: <Compass className="w-4 h-4" /> },
         { id: 'info', label: t('practicalInfo'), icon: <Info className="w-4 h-4" /> },
     ];
 
-    // Calculate active index for rendering the correct child
-    const activeTabIndex = tabs.findIndex(tab => tab.id === activeTab);
+    const [activeTab, setActiveTab] = useState<TownTabId>(
+        tabs.some((tab) => tab.id === defaultTabId) ? defaultTabId : tabs[0].id
+    );
+
+    const activePanel = panels[activeTab] ?? panels[tabs[0].id];
 
     return (
         <div className="w-full">
@@ -73,7 +77,7 @@ export default function TownTabs({ children }: TownTabsProps) {
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                     >
-                        {activeTabIndex !== -1 && children[activeTabIndex]}
+                        {activePanel}
                     </motion.div>
                 </AnimatePresence>
             </div>
