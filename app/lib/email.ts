@@ -53,6 +53,7 @@ interface SendConfirmationEmailProps {
     date: string;
     guests: number;
     totalPrice: number;
+    locale?: string;
     t: TFunction;
 }
 
@@ -293,7 +294,6 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
                 item.kind === 'customer'
                     ? ReservationTemplate({
                           ...data,
-                          manageUrl: `${SITE_URL}/reservas/${data.reservationId}`,
                       })
                     : TourLeadNotification({
                           customerName: data.customerName,

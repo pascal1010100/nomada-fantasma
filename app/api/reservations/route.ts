@@ -325,6 +325,7 @@ export async function POST(request: Request) {
                 date: reservationDate,
                 guests: reservationGuests,
                 totalPrice: ('total_price' in reservation ? reservation.total_price : reservation.total_price) || 0,
+                locale,
                 t: t,
             });
             emailSent = emailResult.success;
