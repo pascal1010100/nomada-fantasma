@@ -126,24 +126,25 @@ export default function RouteCard({ route }: RouteCardProps) {
         </motion.div>
 
         {/* Top badges */}
+        {route.slug === 'lago-atitlan' && (
+          <motion.div
+            className="absolute top-1 left-1/2 -translate-x-1/2 z-20"
+            initial={{ y: -10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <span className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold shadow-lg shadow-amber-500/30 animate-pulse-glow">
+              🌟 {t('recommended')}
+            </span>
+          </motion.div>
+        )}
+
         <motion.div
-          className="absolute top-4 left-4 right-4 flex justify-between z-10"
+          className="absolute top-4 left-4 z-10 flex max-w-[calc(100%-5.5rem)] flex-col items-start gap-2"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.4 }}
         >
-          {route.slug === 'lago-atitlan' && (
-            <motion.div
-              className="absolute -top-3 left-1/2 -translate-x-1/2 z-20"
-              initial={{ y: -10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <span className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold shadow-lg shadow-amber-500/30 animate-pulse-glow">
-                🌟 {t('recommended')}
-              </span>
-            </motion.div>
-          )}
           <motion.div
             className="px-3 py-1 rounded-full bg-black/40 backdrop-blur-md text-white text-xs font-medium border border-white/10"
             whileHover={{ scale: 1.05 }}
@@ -155,9 +156,10 @@ export default function RouteCard({ route }: RouteCardProps) {
           {/* Conditional Badge */}
           {vibe ? (
             <motion.div
-              className="px-3 py-1 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-xs font-bold shadow-lg shadow-purple-500/20"
+              className="max-w-full truncate px-3 py-1 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-xs font-bold shadow-lg shadow-purple-500/20"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              title={vibe}
             >
               {vibe}
             </motion.div>
@@ -174,7 +176,7 @@ export default function RouteCard({ route }: RouteCardProps) {
         </motion.div>
 
         {/* Rating and Favorite */}
-        <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+        <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
           <motion.div
             className="flex items-center bg-black/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/10"
             whileHover={{ scale: 1.1 }}
