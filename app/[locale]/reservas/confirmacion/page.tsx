@@ -94,8 +94,15 @@ export default async function ConfirmationPage({
     month: 'long',
     day: 'numeric',
   });
+  const parseReservationDate = (value: string) => {
+    const trimmed = value.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return new Date(`${trimmed}T00:00:00`);
+    }
+    return new Date(trimmed);
+  };
   const formatDate = (dateString: string) => {
-    const parsedDate = new Date(dateString);
+    const parsedDate = parseReservationDate(dateString);
     if (Number.isNaN(parsedDate.getTime())) {
       return t('dateFallback');
     }
@@ -129,7 +136,7 @@ export default async function ConfirmationPage({
   const participantLabel = reservation.adults === 1 ? t('participantSingular') : t('participantPlural');
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cyan-50 to-white dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-cyan-50 to-white dark:from-gray-900 dark:to-gray-800 px-4 pb-12 pt-28 sm:px-6 sm:pt-32 lg:px-8">
       <div className="max-w-3xl mx-auto">
         {/* Encabezado */}
         <div className="text-center mb-12">
