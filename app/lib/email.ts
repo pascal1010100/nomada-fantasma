@@ -474,7 +474,6 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
                             passengers: data.passengers,
                             pickupLocation: data.pickupLocation,
                             type: data.type,
-                            price: data.price,
                             createdAt: data.createdAt,
                             operationsEmail: adminEmail,
                         });
