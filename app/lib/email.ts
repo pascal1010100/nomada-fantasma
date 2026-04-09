@@ -3,6 +3,7 @@ import ReservationTemplate from '../components/emails/ReservationTemplate';
 import ShuttleRequestTemplate from '../components/emails/ShuttleRequestTemplate';
 import ShuttleConfirmationEmail from '../components/emails/ShuttleConfirmationEmail';
 import ShuttleAdminNotification from '../components/emails/ShuttleAdminNotification';
+import ShuttleAgencyNotification from '../components/emails/ShuttleAgencyNotification';
 import TourLeadNotification from '../components/emails/TourLeadNotification';
 import logger from './logger';
 
@@ -200,8 +201,13 @@ interface SendShuttleConfirmationEmailsProps {
     pickupLocation: string;
     type: string;
     price?: number;
+    createdAt?: string;
     t: TFunction;
     locale?: string;
+}
+
+function buildShuttleOpsSubject(prefix: string, origin: string, destination: string, travelDate: string) {
+    return `${prefix}: ${origin} -> ${destination} • ${travelDate}`;
 }
 
 export async function sendTourConfirmationEmails(data: SendConfirmationEmailProps): Promise<MultiRecipientSendResult> {
@@ -367,14 +373,14 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
             {
                 label: 'shuttle_customer',
                 to: data.customerEmail,
-                subject: 'Confirmacion de Shuttle',
+                subject: data.t('subject', { origin: data.origin, destination: data.destination }),
                 success: true,
                 id: 'simulated_' + Date.now(),
             },
             {
                 label: 'shuttle_admin',
                 to: adminEmail,
-                subject: 'Nueva Solicitud de Shuttle',
+                subject: buildShuttleOpsSubject('Shuttle pendiente', data.origin, data.destination, data.travelDate),
                 success: true,
                 id: 'simulated_' + Date.now(),
             },
@@ -383,7 +389,7 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
             simulatedRecipients.push({
                 label: 'shuttle_agency',
                 to: agencyEmail,
-                subject: 'Nueva Solicitud de Shuttle Asignada',
+                subject: buildShuttleOpsSubject('Shuttle asignado', data.origin, data.destination, data.travelDate),
                 success: true,
                 id: 'simulated_' + Date.now(),
             });
@@ -407,7 +413,7 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
             {
                 label: 'shuttle_admin',
                 to: adminEmail,
-                subject: 'Nueva Solicitud de Shuttle',
+                subject: buildShuttleOpsSubject('Shuttle pendiente', data.origin, data.destination, data.travelDate),
                 kind: 'operations',
             },
         ];
@@ -416,7 +422,7 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
             queue.push({
                 label: 'shuttle_agency',
                 to: agencyEmail,
-                subject: 'Nueva Solicitud de Shuttle Asignada',
+                subject: buildShuttleOpsSubject('Shuttle asignado', data.origin, data.destination, data.travelDate),
                 kind: 'operations',
             });
         }
@@ -425,12 +431,6 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
 
         for (let i = 0; i < queue.length; i += 1) {
             const item = queue[i];
-            const roleLabel =
-                item.label === 'shuttle_admin'
-                    ? 'ADMIN'
-                    : item.label === 'shuttle_agency'
-                        ? 'AGENCIA'
-                        : undefined;
             const reactComponent =
                 item.kind === 'customer'
                     ? ShuttleConfirmationEmail({
@@ -447,22 +447,37 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
                           t: data.t,
                           locale: data.locale,
                       })
-                    : ShuttleAdminNotification({
-                          bookingId: data.bookingId,
-                          customerName: data.customerName,
-                          customerEmail: data.customerEmail,
-                          origin: data.origin,
-                          destination: data.destination,
-                          travelDate: data.travelDate,
-                          travelTime: data.travelTime,
-                          passengers: data.passengers,
-                          pickupLocation: data.pickupLocation,
-                          type: data.type,
-                          price: data.price,
-                          roleLabel,
-                          showAdminPanel: item.label === 'shuttle_admin',
-                          showAgencyInstructions: item.label === 'shuttle_agency',
-                      });
+                    : item.label === 'shuttle_admin'
+                      ? ShuttleAdminNotification({
+                            bookingId: data.bookingId,
+                            customerName: data.customerName,
+                            customerEmail: data.customerEmail,
+                            origin: data.origin,
+                            destination: data.destination,
+                            travelDate: data.travelDate,
+                            travelTime: data.travelTime,
+                            passengers: data.passengers,
+                            pickupLocation: data.pickupLocation,
+                            type: data.type,
+                            price: data.price,
+                            createdAt: data.createdAt,
+                            adminPanelUrl: `${SITE_URL}/es/internal/recepcion`,
+                        })
+                      : ShuttleAgencyNotification({
+                            bookingId: data.bookingId,
+                            customerName: data.customerName,
+                            customerEmail: data.customerEmail,
+                            origin: data.origin,
+                            destination: data.destination,
+                            travelDate: data.travelDate,
+                            travelTime: data.travelTime,
+                            passengers: data.passengers,
+                            pickupLocation: data.pickupLocation,
+                            type: data.type,
+                            price: data.price,
+                            createdAt: data.createdAt,
+                            operationsEmail: adminEmail,
+                        });
 
             const result = await sendEmailWithRetry(item.label, () =>
                 resend.emails.send({

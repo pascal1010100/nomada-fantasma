@@ -13,35 +13,41 @@ type ShuttleBookingRow = Database['public']['Tables']['shuttle_bookings']['Row']
 type ShuttleBookingUpdate = Database['public']['Tables']['shuttle_bookings']['Update'];
 const DEFAULT_AGENCY_EMAIL = process.env.DEFAULT_AGENCY_EMAIL?.trim() || null;
 
+type ShuttleRouteAssignment = {
+    agencyEmail: string | null;
+    price?: number;
+};
+
 function normalizeEmail(value: string | null | undefined): string | null {
     const candidate = value?.trim();
     if (!candidate) return null;
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate) ? candidate : null;
 }
 
-async function getShuttleAgencyEmail(
+async function getShuttleRouteAssignment(
     origin: string,
     destination: string,
     type: string
-): Promise<string | null> {
+): Promise<ShuttleRouteAssignment> {
     const fallbackAgencyEmail = normalizeEmail(DEFAULT_AGENCY_EMAIL);
     const routeResult = await supabaseAdmin
         .schema('public')
         .from('shuttle_routes')
-        .select('agency_id')
+        .select('agency_id, price')
         .eq('origin', origin)
         .eq('destination', destination)
         .eq('type', type)
         .limit(1)
-        .maybeSingle<{ agency_id: string | null }>();
+        .maybeSingle<{ agency_id: string | null; price: number | null }>();
 
     if (routeResult.error) {
         logger.warn('Unable to resolve shuttle route agency assignment:', routeResult.error);
-        return fallbackAgencyEmail;
+        return { agencyEmail: fallbackAgencyEmail };
     }
 
     const agencyId = routeResult.data?.agency_id;
-    if (!agencyId) return fallbackAgencyEmail;
+    const price = typeof routeResult.data?.price === 'number' ? routeResult.data.price : undefined;
+    if (!agencyId) return { agencyEmail: fallbackAgencyEmail, price };
 
     const agencyResult = await supabaseAdmin
         .schema('public')
@@ -52,11 +58,11 @@ async function getShuttleAgencyEmail(
 
     if (agencyResult.error) {
         logger.warn('Unable to resolve agency email for shuttle route:', agencyResult.error);
-        return fallbackAgencyEmail;
+        return { agencyEmail: fallbackAgencyEmail, price };
     }
 
-    if (!agencyResult.data?.is_active) return fallbackAgencyEmail;
-    return normalizeEmail(agencyResult.data.email) ?? fallbackAgencyEmail;
+    if (!agencyResult.data?.is_active) return { agencyEmail: fallbackAgencyEmail, price };
+    return { agencyEmail: normalizeEmail(agencyResult.data.email) ?? fallbackAgencyEmail, price };
 }
 
 export async function POST(request: Request) {
@@ -136,7 +142,7 @@ export async function POST(request: Request) {
         // 2. Send confirmation to customer and notification to admin
         let emailError: string | null = null;
         const bookingType = data.type || 'shared';
-        const agencyEmail = await getShuttleAgencyEmail(data.routeOrigin, data.routeDestination, bookingType);
+        const { agencyEmail, price } = await getShuttleRouteAssignment(data.routeOrigin, data.routeDestination, bookingType);
         const result = await sendShuttleConfirmationEmails({
             bookingId: booking?.id ?? undefined,
             customerName: data.customerName,
@@ -149,7 +155,8 @@ export async function POST(request: Request) {
             passengers: data.passengers,
             pickupLocation: data.pickupLocation,
             type: bookingType,
-            price: undefined,
+            price,
+            createdAt: booking?.created_at ?? undefined,
             t: tEmail,
             locale,
         });
