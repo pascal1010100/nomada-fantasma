@@ -60,6 +60,48 @@ export default function ShuttleAgencyNotification({
     ? `Disponibilidad shuttle ${bookingId} · ${routeLabel}`
     : `Disponibilidad shuttle · ${routeLabel}`;
   const operationsMailto = `mailto:${normalizedOperationsEmail}?subject=${encodeURIComponent(replySubject)}`;
+  const confirmSubject = bookingId
+    ? `Disponible shuttle ${bookingId} · ${routeLabel}`
+    : `Disponible shuttle · ${routeLabel}`;
+  const denySubject = bookingId
+    ? `No disponible shuttle ${bookingId} · ${routeLabel}`
+    : `No disponible shuttle · ${routeLabel}`;
+  const confirmBody = [
+    'Hola equipo de operaciones,',
+    '',
+    'Confirmamos disponibilidad para esta reserva de shuttle.',
+    '',
+    `Ruta: ${routeLabel}`,
+    `Fecha: ${formatDate(travelDate)}`,
+    travelTime ? `Hora: ${travelTime}` : null,
+    `Pasajeros: ${passengers}`,
+    `Pickup viable: ${pickupLocation}`,
+    '',
+    'Notas operativas:',
+    '- ',
+    '',
+    'Saludos,'
+  ].filter(Boolean).join('\n');
+  const denyBody = [
+    'Hola equipo de operaciones,',
+    '',
+    'No tenemos disponibilidad para esta reserva en la condición solicitada.',
+    '',
+    `Ruta: ${routeLabel}`,
+    `Fecha: ${formatDate(travelDate)}`,
+    travelTime ? `Hora: ${travelTime}` : null,
+    `Pasajeros: ${passengers}`,
+    '',
+    'Motivo:',
+    '- ',
+    '',
+    'Alternativa sugerida:',
+    '- ',
+    '',
+    'Saludos,'
+  ].filter(Boolean).join('\n');
+  const confirmMailto = `mailto:${normalizedOperationsEmail}?subject=${encodeURIComponent(confirmSubject)}&body=${encodeURIComponent(confirmBody)}`;
+  const denyMailto = `mailto:${normalizedOperationsEmail}?subject=${encodeURIComponent(denySubject)}&body=${encodeURIComponent(denyBody)}`;
 
   return (
     <Html>
@@ -94,6 +136,98 @@ export default function ShuttleAgencyNotification({
           </Section>
 
           <Section style={{ padding: '32px 36px 36px' }}>
+            <Section style={{ margin: '0 0 24px' }}>
+              <Text style={{ color: '#475569', fontSize: '13px', textAlign: 'center', margin: '0 0 14px' }}>
+                Responde en segundos con una de estas opciones y el sistema abrirá un correo ya preparado para operaciones.
+              </Text>
+              <table width="100%" cellPadding="0" cellSpacing="0" role="presentation">
+                <tbody>
+                  <tr>
+                    <td style={{ width: '50%', paddingRight: '8px', verticalAlign: 'top' }}>
+                      <Section style={{ background: 'linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%)', border: '1px solid #86efac', borderRadius: '18px', padding: '18px', minHeight: '172px', boxShadow: '0 10px 24px rgba(16, 185, 129, 0.10)' }}>
+                        <Text style={{ color: '#047857', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, margin: '0 0 8px' }}>
+                          Respuesta positiva
+                        </Text>
+                        <Heading style={{ color: '#065f46', fontSize: '20px', lineHeight: '1.2', fontWeight: 700, margin: '0 0 10px' }}>
+                          Sí, podemos operarlo
+                        </Heading>
+                        <Text style={{ color: '#065f46', fontSize: '14px', lineHeight: '1.65', margin: '0 0 16px' }}>
+                          Usa este botón si la ruta y la franja horaria están disponibles tal como se solicitaron.
+                        </Text>
+                        <Link
+                          href={confirmMailto}
+                            style={{ backgroundColor: '#047857', color: '#ffffff', padding: '12px 18px', borderRadius: '999px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', display: 'inline-block', boxShadow: '0 8px 18px rgba(4, 120, 87, 0.22)' }}
+                        >
+                          Confirmar disponibilidad
+                        </Link>
+                      </Section>
+                    </td>
+                    <td style={{ width: '50%', paddingLeft: '8px', verticalAlign: 'top' }}>
+                      <Section style={{ background: 'linear-gradient(180deg, #fff1f2 0%, #ffe4e6 100%)', border: '1px solid #fda4af', borderRadius: '18px', padding: '18px', minHeight: '172px', boxShadow: '0 10px 24px rgba(244, 63, 94, 0.10)' }}>
+                        <Text style={{ color: '#be123c', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, margin: '0 0 8px' }}>
+                          Respuesta negativa
+                        </Text>
+                        <Heading style={{ color: '#9f1239', fontSize: '20px', lineHeight: '1.2', fontWeight: 700, margin: '0 0 10px' }}>
+                          No está disponible
+                        </Heading>
+                        <Text style={{ color: '#9f1239', fontSize: '14px', lineHeight: '1.65', margin: '0 0 16px' }}>
+                          Usa este botón si no puedes operar esta reserva y quieres responder con motivo o alternativa.
+                        </Text>
+                        <Link
+                          href={denyMailto}
+                            style={{ backgroundColor: '#be123c', color: '#ffffff', padding: '12px 18px', borderRadius: '999px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', display: 'inline-block', boxShadow: '0 8px 18px rgba(190, 24, 93, 0.20)' }}
+                        >
+                          No disponible
+                        </Link>
+                      </Section>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </Section>
+
+            <Section style={{ backgroundColor: '#f8fafc', border: '1px solid #dbe7f0', borderRadius: '18px', padding: '18px 20px', margin: '0 0 24px' }}>
+              <Text style={{ color: '#475569', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, margin: '0 0 14px' }}>
+                Lectura rápida
+              </Text>
+              <table width="100%" cellPadding="0" cellSpacing="0" role="presentation">
+                <tbody>
+                  <tr>
+                    <td style={{ width: '33.33%', paddingRight: '8px', verticalAlign: 'top' }}>
+                      <Section style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '14px' }}>
+                        <Text style={{ color: '#94a3b8', fontSize: '11px', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em', margin: '0 0 6px' }}>
+                          Ruta
+                        </Text>
+                        <Text style={{ color: '#0f172a', fontSize: '14px', lineHeight: '1.5', fontWeight: 700, margin: 0 }}>
+                          {routeLabel}
+                        </Text>
+                      </Section>
+                    </td>
+                    <td style={{ width: '33.33%', paddingLeft: '4px', paddingRight: '4px', verticalAlign: 'top' }}>
+                      <Section style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '14px' }}>
+                        <Text style={{ color: '#94a3b8', fontSize: '11px', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em', margin: '0 0 6px' }}>
+                          Fecha
+                        </Text>
+                        <Text style={{ color: '#0f172a', fontSize: '14px', lineHeight: '1.5', fontWeight: 700, margin: 0 }}>
+                          {formatDate(travelDate)}
+                        </Text>
+                      </Section>
+                    </td>
+                    <td style={{ width: '33.33%', paddingLeft: '8px', verticalAlign: 'top' }}>
+                      <Section style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '14px' }}>
+                        <Text style={{ color: '#94a3b8', fontSize: '11px', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em', margin: '0 0 6px' }}>
+                          Grupo
+                        </Text>
+                        <Text style={{ color: '#0f172a', fontSize: '14px', lineHeight: '1.5', fontWeight: 700, margin: 0 }}>
+                          {passengers} {passengers === 1 ? 'persona' : 'personas'}
+                        </Text>
+                      </Section>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </Section>
+
             <Section style={{ backgroundColor: '#f8fbfd', border: '1px solid #e2edf5', borderRadius: '18px', padding: '22px', margin: '0 0 24px' }}>
               <Heading style={{ color: '#0f172a', fontSize: '18px', fontWeight: 700, margin: '0 0 16px' }}>
                 Detalles de la ruta
@@ -157,12 +291,12 @@ export default function ShuttleAgencyNotification({
               <Text style={{ color: '#713f12', fontSize: '14px', lineHeight: '1.75', margin: 0 }}>3. Responde a operaciones para que Nómada Fantasma cierre el siguiente paso con el viajero.</Text>
             </Section>
 
-            <Section style={{ textAlign: 'center', marginBottom: '24px' }}>
+            <Section style={{ textAlign: 'center', marginBottom: '16px' }}>
               <Link
                 href={operationsMailto}
                 style={{ backgroundColor: '#0f172a', color: '#ffffff', padding: '12px 24px', borderRadius: '999px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', display: 'inline-block', marginBottom: '10px' }}
               >
-                Responder a operaciones
+                Escribir manualmente a operaciones
               </Link>
             </Section>
 
