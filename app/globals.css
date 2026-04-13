@@ -42,6 +42,10 @@
   /* Mejora de tipografía */
   text-rendering: optimizeLegibility;
   font-synthesis: none;
+
+  /* Colores para el Chat Button (Más oscuros para contraste en modo claro) */
+  --chat-btn-top: 193 100% 32%;
+  --chat-btn-bot: 187 100% 28%;
 }
 
 /* DARK THEME */
@@ -64,6 +68,10 @@
     0 0 25px theme('colors.neonPink/30');
   --cyber-blue-glow: 0 0 12px theme('colors.electricBlue/60'),
     0 0 25px theme('colors.electricBlue/30');
+
+  /* Conservar brillo neón en Chat Button para modo oscuro */
+  --chat-btn-top: 199 89% 53%;
+  --chat-btn-bot: 187 92% 44%;
 }
 
 /* Estilos base */
@@ -364,6 +372,13 @@
     outline: none;
     box-shadow: 0 0 0 3px hsl(var(--primary) / 0.38);
     border-radius: 10px;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.35), 0 0 15px hsl(var(--primary) / 0.2);
+    transition: all 0.2s ease-in-out;
   }
 }
 

@@ -65,11 +65,11 @@ export default function ChatButton({
           aria-expanded={open}
           onClick={() => setOpen(true)}
           className="
-            fixed z-[70] h-14 w-14 md:h-16 md:w-16
+            fixed z-30 h-14 w-14 md:h-16 md:w-16
             rounded-full shadow-xl border-0 relative
             flex items-center justify-center
-            text-[hsl(var(--primary-foreground))]
-            bg-[linear-gradient(180deg,hsl(var(--primary)),hsl(187_92%_44%))]
+            text-white
+            bg-[linear-gradient(180deg,hsl(var(--chat-btn-top)),hsl(var(--chat-btn-bot)))]
             outline-none transition-transform hover:scale-[1.03] active:scale-[0.98]
             focus-visible:ring-4 focus-visible:ring-[hsl(var(--primary)/0.35)]
             glow-aqua
