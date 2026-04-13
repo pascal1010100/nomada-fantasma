@@ -4,7 +4,6 @@ import { motion, type MotionProps, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { Compass, Bus } from "lucide-react";
 import { useId, useMemo } from "react";
-import Tooltip from "./ui/Tooltip";
 import { useTranslations, useLocale } from "next-intl";
 
 export default function Hero() {

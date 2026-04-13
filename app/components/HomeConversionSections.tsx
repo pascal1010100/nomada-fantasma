@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Bus, Compass, Map, ArrowRight, Clock3, Route } from "lucide-react";
+import { Bus, Compass, Map, ArrowRight } from "lucide-react";
 
 export default function HomeConversionSections() {
   const t = useTranslations("HomeConversion");
