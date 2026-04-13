@@ -68,6 +68,33 @@ function getStatusBadgeClasses(status: RequestStatus): string {
     return 'bg-slate-500/15 text-slate-300 border-slate-400/30';
 }
 
+function getStatusLabel(status: RequestStatus): string {
+    if (status === 'pending') return 'Nueva solicitud';
+    if (status === 'processing') return 'En gestion';
+    if (status === 'confirmed') return 'Confirmada';
+    if (status === 'cancelled') return 'Cancelada';
+    return 'Completada';
+}
+
+function getKindLabel(kind: InternalRequestItem['kind']): string {
+    return kind === 'tour' ? 'Tour' : 'Shuttle';
+}
+
+function getEmailStatusLabel(status: string | null): string {
+    if (status === 'sent') return 'Enviado';
+    if (status === 'failed') return 'Fallido';
+    if (status === 'pending') return 'Pendiente';
+    if (status === 'not_requested') return 'No solicitado';
+    return 'Sin dato';
+}
+
+function getEmailStatusClasses(status: string | null): string {
+    if (status === 'sent') return 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300';
+    if (status === 'failed') return 'border-rose-400/30 bg-rose-500/10 text-rose-300';
+    if (status === 'pending') return 'border-amber-400/30 bg-amber-500/10 text-amber-300';
+    return 'border-white/10 bg-white/5 text-muted-foreground';
+}
+
 function getChecklist(status: RequestStatus): string {
     if (status === 'pending') return 'Validar datos e iniciar gestion con agencia.';
     if (status === 'processing') return 'Esperando respuesta de agencia y resolver confirmacion/cancelacion.';
@@ -170,12 +197,12 @@ function getNoteQuality(status: RequestStatus, note: string | null): NoteQuality
 function renderQualityBadge(status: RequestStatus, note: string | null) {
     const quality = getNoteQuality(status, note);
     if (quality === 'strong') {
-        return <span className="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-300">🟢 Confiable</span>;
+        return <span className="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-300">Confiable</span>;
     }
     if (quality === 'weak') {
-        return <span className="inline-flex items-center rounded-full border border-amber-400/30 bg-amber-500/15 px-2 py-0.5 text-xs text-amber-300">🟡 Débil</span>;
+        return <span className="inline-flex items-center rounded-full border border-amber-400/30 bg-amber-500/15 px-2 py-0.5 text-xs text-amber-300">Debil</span>;
     }
-    return <span className="inline-flex items-center rounded-full border border-rose-400/30 bg-rose-500/15 px-2 py-0.5 text-xs text-rose-300">🔴 Riesgo</span>;
+    return <span className="inline-flex items-center rounded-full border border-rose-400/30 bg-rose-500/15 px-2 py-0.5 text-xs text-rose-300">Riesgo</span>;
 }
 
 export default function RecepcionRequestsPage() {
@@ -258,6 +285,16 @@ export default function RecepcionRequestsPage() {
         }),
         [filteredItems]
     );
+
+    const queueSummary = useMemo(() => ({
+        pending: filteredItems.filter((item) => normalizeStatus(item.status) === 'pending').length,
+        processing: filteredItems.filter((item) => normalizeStatus(item.status) === 'processing').length,
+        confirmed: filteredItems.filter((item) => normalizeStatus(item.status) === 'confirmed').length,
+        closed: filteredItems.filter((item) => {
+            const status = normalizeStatus(item.status);
+            return status === 'completed' || status === 'cancelled';
+        }).length,
+    }), [filteredItems]);
 
     const operations = useMemo(() => {
         const now = new Date();
@@ -446,9 +483,9 @@ export default function RecepcionRequestsPage() {
                     </div>
                 ))}
             </div>
-            <h1 className="text-2xl font-bold mb-2">Panel Recepción San Pedro</h1>
+            <h1 className="text-2xl font-bold mb-2">Panel Operativo San Pedro</h1>
             <p className="text-sm text-muted-foreground mb-6">
-                Solicitudes recientes de tours y shuttles con estado de envío de email.
+                Vista interna para operar solicitudes de tours y shuttles sin salir del flujo.
             </p>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-200">
                 <span className="h-2 w-2 rounded-full bg-cyan-300 animate-pulse" />
@@ -584,170 +621,217 @@ export default function RecepcionRequestsPage() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                 <div className="rounded-lg border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:shadow-md hover:shadow-cyan-500/10">
-                    <p className="text-xs text-muted-foreground">Total operativas</p>
+                    <p className="text-xs text-muted-foreground">Solicitudes visibles</p>
                     <p className="text-xl font-semibold">{summary.total}</p>
                 </div>
                 <div className="rounded-lg border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:shadow-md hover:shadow-cyan-500/10">
-                    <p className="text-xs text-muted-foreground">Tours operativos</p>
+                    <p className="text-xs text-muted-foreground">Tours</p>
                     <p className="text-xl font-semibold">{summary.tours}</p>
                 </div>
                 <div className="rounded-lg border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:shadow-md hover:shadow-cyan-500/10">
-                    <p className="text-xs text-muted-foreground">Shuttles operativos</p>
+                    <p className="text-xs text-muted-foreground">Shuttles</p>
                     <p className="text-xl font-semibold">{summary.shuttles}</p>
                 </div>
                 <div className="rounded-lg border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:shadow-md hover:shadow-cyan-500/10">
-                    <p className="text-xs text-muted-foreground">Email fallido (operativo)</p>
+                    <p className="text-xs text-muted-foreground">Emails fallidos</p>
                     <p className="text-xl font-semibold">{summary.emailFailed}</p>
                 </div>
             </div>
 
             <p className="text-xs text-muted-foreground mb-6">
-                Estas métricas corresponden exactamente a la tabla visible (solicitudes operativas de San Pedro).
+                Estas métricas se calculan sobre la vista filtrada actual.
             </p>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div className="rounded-lg border p-3 bg-amber-500/5">
+                    <p className="text-xs text-muted-foreground">Nuevas</p>
+                    <p className="text-xl font-semibold">{queueSummary.pending}</p>
+                </div>
+                <div className="rounded-lg border p-3 bg-sky-500/5">
+                    <p className="text-xs text-muted-foreground">En gestion</p>
+                    <p className="text-xl font-semibold">{queueSummary.processing}</p>
+                </div>
+                <div className="rounded-lg border p-3 bg-emerald-500/5">
+                    <p className="text-xs text-muted-foreground">Confirmadas</p>
+                    <p className="text-xl font-semibold">{queueSummary.confirmed}</p>
+                </div>
+                <div className="rounded-lg border p-3 bg-slate-500/5">
+                    <p className="text-xs text-muted-foreground">Cerradas</p>
+                    <p className="text-xl font-semibold">{queueSummary.closed}</p>
+                </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
                 <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">Pending hoy</p>
+                    <p className="text-xs text-muted-foreground">Nuevas hoy</p>
                     <p className="text-xl font-semibold">{operations.pendingToday}</p>
                 </div>
                 <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">Processing &gt; {PROCESSING_STALE_HOURS}h</p>
+                    <p className="text-xs text-muted-foreground">En gestion &gt; {PROCESSING_STALE_HOURS}h</p>
                     <p className="text-xl font-semibold">{operations.processingStale}</p>
                 </div>
                 <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">Confirmed vencidas</p>
+                    <p className="text-xs text-muted-foreground">Confirmadas vencidas</p>
                     <p className="text-xl font-semibold">{operations.confirmedOverdue}</p>
                 </div>
             </div>
 
-            <div className="rounded-xl border overflow-x-auto">
-                <table className="w-full text-sm">
-                    <thead className="bg-muted/40">
-                        <tr>
-                            <th className="text-left px-3 py-2">Fecha</th>
-                            <th className="text-left px-3 py-2">Tipo</th>
-                            <th className="text-left px-3 py-2">Cliente</th>
-                            <th className="text-left px-3 py-2">Detalle</th>
-                            <th className="text-left px-3 py-2">Estado</th>
-                            <th className="text-left px-3 py-2">Checklist</th>
-                            <th className="text-left px-3 py-2">Calidad</th>
-                            <th className="text-left px-3 py-2">Email</th>
-                            <th className="text-left px-3 py-2">Intentos</th>
-                            <th className="text-left px-3 py-2">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredItems.map((item) => (
-                            <tr key={`${item.kind}-${item.id}`} className="border-t transition-colors hover:bg-white/5">
-                                <td className="px-3 py-2 whitespace-nowrap">
-                                    {new Date(item.createdAt).toLocaleString()}
-                                </td>
-                                <td className="px-3 py-2">{item.kind}</td>
-                                <td className="px-3 py-2">
-                                    <div>{item.customerName}</div>
-                                    <div className="text-xs text-muted-foreground">{item.customerEmail}</div>
-                                </td>
-                                <td className="px-3 py-2">{item.details}</td>
-                                <td className="px-3 py-2">
-                                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getStatusBadgeClasses(normalizeStatus(item.status))}`}>
-                                        {normalizeStatus(item.status)}
-                                    </span>
-                                    <div className="mt-1 text-xs text-muted-foreground space-y-1">
-                                        {normalizeStatus(item.status) === 'confirmed' ? (
-                                            <div>
-                                                Confirmado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : (
-                                                    <span className="text-amber-400">Pendiente de fecha</span>
-                                                )}
+            <div className="space-y-4">
+                {filteredItems.map((item) => {
+                    const normalizedStatus = normalizeStatus(item.status);
+                    const itemKey = `${item.kind}-${item.id}`;
+
+                    return (
+                        <article key={itemKey} className="rounded-2xl border bg-card/40 p-4 shadow-sm transition hover:border-cyan-400/30 hover:shadow-cyan-500/5">
+                            <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                                <div className="min-w-0 flex-1 space-y-4">
+                                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                                        <div className="min-w-0 space-y-3">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-muted-foreground">
+                                                    {getKindLabel(item.kind)}
+                                                </span>
+                                                <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${getStatusBadgeClasses(normalizedStatus)}`}>
+                                                    {getStatusLabel(normalizedStatus)}
+                                                </span>
+                                                <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-muted-foreground">
+                                                    {new Date(item.createdAt).toLocaleString()}
+                                                </span>
                                             </div>
+
+                                            <div>
+                                                <h2 className="text-lg font-semibold">{item.customerName}</h2>
+                                                <p className="text-sm text-muted-foreground break-all">{item.customerEmail}</p>
+                                            </div>
+                                        </div>
+
+                                        <aside className="w-full rounded-2xl border border-white/10 bg-background/50 p-4 lg:max-w-sm xl:w-72">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div>
+                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Acciones</p>
+                                                    <p className="mt-1 text-xs text-muted-foreground">Siguiente movimiento del caso</p>
+                                                </div>
+                                                <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${getEmailStatusClasses(item.emailStatus)}`}>
+                                                    {getEmailStatusLabel(item.emailStatus)}
+                                                </span>
+                                            </div>
+
+                                            <div className="mt-3 flex flex-wrap gap-2">
+                                                {getActions(normalizedStatus).map((action) => {
+                                                    const actionKey = `${item.kind}-${item.id}-${action.to}`;
+                                                    return (
+                                                        <button
+                                                            key={actionKey}
+                                                            type="button"
+                                                            onClick={() => updateStatus(item, action.to)}
+                                                            disabled={Boolean(actionLoadingId) || !token.trim()}
+                                                            className="rounded-lg border px-3 py-2 text-sm transition hover:border-cyan-400/40 hover:text-cyan-100 disabled:opacity-50"
+                                                        >
+                                                            {actionLoadingId === actionKey ? 'Procesando...' : action.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                                {getActions(normalizedStatus).length === 0 ? (
+                                                    <span className="text-sm text-muted-foreground">Sin acciones disponibles.</span>
+                                                ) : null}
+                                            </div>
+
+                                            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                                                    <p className="text-muted-foreground">Intentos email</p>
+                                                    <p className="mt-1 font-medium text-foreground">{item.emailAttempts}</p>
+                                                </div>
+                                                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                                                    <p className="text-muted-foreground">Tipo</p>
+                                                    <p className="mt-1 font-medium text-foreground">{getKindLabel(item.kind)}</p>
+                                                </div>
+                                            </div>
+
+                                            {item.emailLastError ? (
+                                                <p className="mt-3 text-xs text-rose-400">{item.emailLastError}</p>
+                                            ) : null}
+                                        </aside>
+                                    </div>
+
+                                    <div className="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(220px,0.7fr)]">
+                                        <div className="rounded-xl border border-white/10 bg-background/40 p-3">
+                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Solicitud</p>
+                                            <p className="mt-1 text-sm font-medium">{item.details}</p>
+                                        </div>
+                                        <div className="rounded-xl border border-white/10 bg-background/40 p-3">
+                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Fecha del servicio</p>
+                                            <p className="mt-1 text-sm font-medium">{item.date || 'Sin fecha'}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(220px,0.8fr)]">
+                                        <div className="rounded-xl border border-white/10 bg-background/40 p-3">
+                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Siguiente paso</p>
+                                            <p className="mt-1 text-sm text-muted-foreground">{getChecklist(normalizedStatus)}</p>
+                                        </div>
+                                        <div className="rounded-xl border border-white/10 bg-background/40 p-3">
+                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Registro operativo</p>
+                                            <div className="mt-2">{renderQualityBadge(normalizedStatus, item.adminNotes)}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                        {normalizedStatus === 'confirmed' ? (
+                                            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                Confirmado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Pendiente'}
+                                            </span>
                                         ) : null}
-                                        {normalizeStatus(item.status) === 'cancelled' ? (
-                                            <div>
-                                                Cancelado: {item.cancelledAt ? formatTimestamp(item.cancelledAt) : (
-                                                    <span className="text-amber-400">Pendiente de fecha</span>
-                                                )}
-                                            </div>
+                                        {normalizedStatus === 'cancelled' ? (
+                                            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                Cancelado: {item.cancelledAt ? formatTimestamp(item.cancelledAt) : 'Pendiente'}
+                                            </span>
                                         ) : null}
-                                        {normalizeStatus(item.status) === 'completed' ? (
-                                            <div>
-                                                Confirmado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : (
-                                                    <span className="text-amber-400">Sin fecha de confirmación</span>
-                                                )}
-                                            </div>
+                                        {normalizedStatus === 'completed' ? (
+                                            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                Servicio cerrado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Sin registro'}
+                                            </span>
                                         ) : null}
-                                        {(normalizeStatus(item.status) === 'confirmed' ||
-                                            normalizeStatus(item.status) === 'cancelled' ||
-                                            normalizeStatus(item.status) === 'completed') ? (
-                                            <div>
-                                                Nota:{' '}
-                                                {item.adminNotes ? (
-                                                    <>
-                                                        <span>
-                                                            {expandedNotes[`${item.kind}-${item.id}`]
-                                                                ? item.adminNotes
-                                                                : getNotePreview(item.adminNotes)}
-                                                        </span>{' '}
-                                                        {item.adminNotes.length > 110 ? (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => toggleNote(item)}
-                                                                className="underline text-cyan-300 hover:text-cyan-200"
-                                                            >
-                                                                {expandedNotes[`${item.kind}-${item.id}`] ? 'ver menos' : 'ver más'}
-                                                            </button>
-                                                        ) : null}
-                                                    </>
-                                                ) : (
-                                                    <span className="text-amber-400">Sin nota</span>
-                                                )}
-                                            </div>
+                                        {!['confirmed', 'cancelled', 'completed'].includes(normalizedStatus) ? (
+                                            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                Sin hitos finales registrados
+                                            </span>
                                         ) : null}
                                     </div>
-                                </td>
-                                <td className="px-3 py-2 text-xs text-muted-foreground">
-                                    {getChecklist(normalizeStatus(item.status))}
-                                </td>
-                                <td className="px-3 py-2">
-                                    {renderQualityBadge(normalizeStatus(item.status), item.adminNotes)}
-                                </td>
-                                <td className="px-3 py-2">
-                                    <div>{item.emailStatus ?? '-'}</div>
-                                    {item.emailLastError ? (
-                                        <div className="text-xs text-red-500">{item.emailLastError}</div>
+
+                                    {(normalizedStatus === 'confirmed' ||
+                                        normalizedStatus === 'cancelled' ||
+                                        normalizedStatus === 'completed') ? (
+                                        <div className="rounded-xl border border-white/10 bg-background/40 p-3">
+                                            <div className="flex items-center justify-between gap-3">
+                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Nota operativa</p>
+                                                {item.adminNotes && item.adminNotes.length > 110 ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => toggleNote(item)}
+                                                        className="text-xs text-cyan-300 transition hover:text-cyan-200"
+                                                    >
+                                                        {expandedNotes[itemKey] ? 'Ver menos' : 'Ver mas'}
+                                                    </button>
+                                                ) : null}
+                                            </div>
+                                            <p className="mt-2 text-sm text-muted-foreground">
+                                                {item.adminNotes
+                                                    ? (expandedNotes[itemKey] ? item.adminNotes : getNotePreview(item.adminNotes))
+                                                    : 'Sin nota operativa registrada.'}
+                                            </p>
+                                        </div>
                                     ) : null}
-                                </td>
-                                <td className="px-3 py-2">{item.emailAttempts}</td>
-                                <td className="px-3 py-2">
-                                    <div className="flex flex-wrap gap-2">
-                                        {getActions(normalizeStatus(item.status)).map((action) => {
-                                            const actionKey = `${item.kind}-${item.id}-${action.to}`;
-                                            return (
-                                                <button
-                                                    key={actionKey}
-                                                    type="button"
-                                                    onClick={() => updateStatus(item, action.to)}
-                                                    disabled={Boolean(actionLoadingId) || !token.trim()}
-                                                    className="rounded border px-2 py-1 text-xs disabled:opacity-50"
-                                                >
-                                                    {actionLoadingId === actionKey ? '...' : action.label}
-                                                </button>
-                                            );
-                                        })}
-                                        {getActions(normalizeStatus(item.status)).length === 0 ? (
-                                            <span className="text-xs text-muted-foreground">Sin acciones</span>
-                                        ) : null}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                        {!loading && filteredItems.length === 0 ? (
-                            <tr>
-                                <td className="px-3 py-6 text-center text-muted-foreground" colSpan={10}>
-                                    Sin solicitudes para mostrar.
-                                </td>
-                            </tr>
-                        ) : null}
-                    </tbody>
-                </table>
+                                </div>
+                            </div>
+                        </article>
+                    );
+                })}
+
+                {!loading && filteredItems.length === 0 ? (
+                    <div className="rounded-2xl border p-8 text-center text-muted-foreground">
+                        Sin solicitudes para mostrar.
+                    </div>
+                ) : null}
             </div>
         </div>
     );
