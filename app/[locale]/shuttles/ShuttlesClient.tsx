@@ -1,66 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ShuttleRoute } from '@/types/shuttle';
-import { supabase } from '@/app/lib/supabase/client';
 import ShuttleCard from './components/ShuttleCard';
 import ShuttleBookingModal from './components/ShuttleBookingModal';
-import { Search, Loader2 } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 
-export default function ShuttlesClient() {
+export default function ShuttlesClient({ initialShuttles }: { initialShuttles: ShuttleRoute[] }) {
     const t = useTranslations('Shuttles');
-    const [shuttleList, setShuttleList] = useState<ShuttleRoute[]>([]);
-    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedOrigin, setSelectedOrigin] = useState('');
     const [selectedDestination, setSelectedDestination] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedShuttle, setSelectedShuttle] = useState<ShuttleRoute | null>(null);
 
-    useEffect(() => {
-        async function fetchRoutes() {
-            try {
-                const { data, error } = await supabase
-                    .from('shuttle_routes')
-                    .select('*')
-                    .eq('origin', 'San Pedro La Laguna')
-                    .order('origin', { ascending: true });
-
-                if (error) {
-                    const message = (() => {
-                        if (typeof error === 'string') return error;
-                        if (error && typeof error === 'object' && 'message' in error) {
-                            const m = (error as { message?: unknown }).message;
-                            return typeof m === 'string' ? m : 'Supabase fetch error';
-                        }
-                        return 'Supabase fetch error';
-                    })();
-                    throw new Error(message);
-                }
-                if (!data || data.length === 0) throw new Error('No data found');
-                setShuttleList(data as ShuttleRoute[]);
-            } catch (error) {
-                const msg = error instanceof Error ? error.message : String(error);
-                if (process.env.NODE_ENV === 'development') {
-                    console.warn('Error fetching shuttles, using mocks:', msg);
-                }
-                // Fallback to mock data if DB is inaccessible
-                const { shuttles } = await import('./mocks/shuttles');
-                setShuttleList(shuttles.filter((shuttle) => shuttle.origin === 'San Pedro La Laguna'));
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchRoutes();
-    }, []);
-
     // Get unique origins and destinations for filters
-    const origins = Array.from(new Set(shuttleList.map(s => s.origin)));
-    const destinations = Array.from(new Set(shuttleList.map(s => s.destination)));
+    const origins = Array.from(new Set(initialShuttles.map(s => s.origin)));
+    const destinations = Array.from(new Set(initialShuttles.map(s => s.destination)));
 
-    const filteredShuttles = shuttleList.filter(shuttle => {
+    const filteredShuttles = initialShuttles.filter(shuttle => {
         const matchesSearch =
             shuttle.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
             shuttle.destination.toLowerCase().includes(searchTerm.toLowerCase());
@@ -188,12 +148,7 @@ export default function ShuttlesClient() {
                     </div>
                 </div>
 
-                {loading ? (
-                    <div className="flex flex-col items-center justify-center py-48 space-y-4">
-                        <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                        <p className="text-muted-foreground font-medium animate-pulse uppercase tracking-[0.3em] text-[10px]">Establishing Ghost Link...</p>
-                    </div>
-                ) : filteredShuttles.length > 0 ? (
+                {filteredShuttles.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                         {filteredShuttles.map((shuttle) => (
                             <ShuttleCard
