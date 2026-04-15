@@ -1,11 +1,14 @@
 import { Resend } from 'resend';
+import type { ReactElement } from 'react';
 import ReservationTemplate from '../components/emails/ReservationTemplate';
 import ShuttleRequestTemplate from '../components/emails/ShuttleRequestTemplate';
 import ShuttleConfirmationEmail from '../components/emails/ShuttleConfirmationEmail';
 import ShuttleAdminNotification from '../components/emails/ShuttleAdminNotification';
 import ShuttleAgencyNotification from '../components/emails/ShuttleAgencyNotification';
+import CustomerActionEmail from '../components/emails/CustomerActionEmail';
 import TourLeadNotification from '../components/emails/TourLeadNotification';
 import logger from './logger';
+import { CONTACT_INFO } from './constants';
 
 // Initialize Resend only if API key is present
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -89,6 +92,15 @@ type MultiRecipientSendResult = {
     success: boolean;
     recipients: RecipientDeliveryResult[];
     error?: unknown;
+};
+
+type ManualCustomerEmailTemplate = 'payment_instructions' | 'not_available' | 'booking_confirmed';
+
+type ManualCustomerEmailProps = {
+    to: string;
+    subject: string;
+    react: ReactElement;
+    label: string;
 };
 
 function sleep(ms: number): Promise<void> {
@@ -187,6 +199,233 @@ export async function sendConfirmationEmail(data: SendConfirmationEmailProps) {
         logger.error('Exception sending email:', error);
         return { success: false, error };
     }
+}
+
+export async function sendManualCustomerEmail(data: ManualCustomerEmailProps): Promise<SendEmailResult> {
+    if (!resend) {
+        logger.info('📧 [MANUAL CUSTOMER EMAIL SIMULATION] ------------------------------');
+        logger.info(`To: ${data.to}`);
+        logger.info(`Subject: ${data.subject}`);
+        logger.info(`Label: ${data.label}`);
+        logger.info('----------------------------------------------------------------');
+        return { success: true, id: 'simulated_' + Date.now() };
+    }
+
+    try {
+        return await sendEmailWithRetry(data.label, () =>
+            resend.emails.send({
+                from: RESEND_FROM,
+                to: [data.to],
+                subject: data.subject,
+                react: data.react,
+            })
+        );
+    } catch (error) {
+        logger.error(`Exception sending manual customer email (${data.label}):`, error);
+        return { success: false, error };
+    }
+}
+
+type CustomerActionEmailContent = {
+    subject: string;
+    react: ReactElement;
+};
+
+type PaymentOption = {
+    title: string;
+    details: string[];
+    ctaLabel?: string;
+    ctaHref?: string;
+    isPrimary?: boolean;
+};
+
+type BuildCustomerActionEmailInput = {
+    template: ManualCustomerEmailTemplate;
+    locale: string;
+    customerName: string;
+    kind: 'tour' | 'shuttle';
+    serviceName: string;
+    date: string;
+    travelers?: number;
+    price?: number;
+    requestId: string;
+    paymentOptions?: PaymentOption[];
+};
+
+function formatEmailDate(value: string, locale: string) {
+    const trimmed = value.trim();
+    const parsed = /^\d{4}-\d{2}-\d{2}$/.test(trimmed)
+        ? new Date(`${trimmed}T12:00:00`)
+        : new Date(trimmed);
+
+    if (Number.isNaN(parsed.getTime())) return value;
+
+    return parsed.toLocaleDateString(locale.startsWith('en') ? 'en-US' : 'es-GT', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+}
+
+export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): CustomerActionEmailContent {
+    const isEnglish = data.locale.startsWith('en');
+    const serviceKindLabel = isEnglish
+        ? data.kind === 'tour' ? 'Tour' : 'Shuttle'
+        : data.kind === 'tour' ? 'Tour' : 'Shuttle';
+    const formattedDate = formatEmailDate(data.date, data.locale);
+    const travelerValue =
+        typeof data.travelers === 'number'
+            ? isEnglish
+                ? `${data.travelers} ${data.travelers === 1 ? 'traveler' : 'travelers'}`
+                : `${data.travelers} ${data.travelers === 1 ? 'viajero' : 'viajeros'}`
+            : undefined;
+
+    const eyebrow = 'Nómada Fantasma';
+    const requestIdLabel = isEnglish ? 'Request ID' : 'ID de solicitud';
+    const summaryTitle = isEnglish ? 'Booking summary' : 'Resumen de tu reserva';
+    const serviceLabel = isEnglish ? serviceKindLabel : serviceKindLabel;
+    const dateLabel = isEnglish ? 'Date' : 'Fecha';
+    const travelersLabel = isEnglish ? 'Travelers' : 'Viajeros';
+    const priceLabel = isEnglish
+        ? data.kind === 'tour' ? 'Total' : 'Quoted price'
+        : data.kind === 'tour' ? 'Total' : 'Precio cotizado';
+    const priceValue = typeof data.price === 'number' ? `Q${data.price.toFixed(2)}` : undefined;
+    const contactTitle = isEnglish ? 'Need help?' : '¿Necesitas ayuda?';
+    const contactLine = isEnglish
+        ? 'If you have questions, reply to this email or contact our team directly.'
+        : 'Si tienes preguntas, responde a este correo o contacta directamente a nuestro equipo.';
+    const contactWhatsAppLabel = isEnglish ? 'Open WhatsApp' : 'Abrir WhatsApp';
+    const footerNote = isEnglish
+        ? 'This is an operational email from the Nómada Fantasma team.'
+        : 'Este es un correo operativo enviado por el equipo de Nómada Fantasma.';
+    const footerSignature = isEnglish
+        ? 'Nómada Fantasma - Epic Travels in Guatemala'
+        : 'Nómada Fantasma - Viajes Épicos en Guatemala';
+
+    if (data.template === 'payment_instructions') {
+        const subject = isEnglish
+            ? `Payment instructions: ${data.serviceName}`
+            : `Instrucciones de pago: ${data.serviceName}`;
+        
+        return {
+            subject,
+            react: CustomerActionEmail({
+                preview: subject,
+                eyebrow,
+                title: isEnglish ? 'Your spot is ready to be secured' : 'Tu espacio está listo para asegurarse',
+                subtitle: isEnglish
+                    ? 'Availability is confirmed. Complete the payment using one of the methods below to finish your booking.'
+                    : 'La disponibilidad ya está confirmada. Completa el pago con uno de los métodos indicados abajo para cerrar tu reserva.',
+                greeting: isEnglish ? `Hi ${data.customerName},` : `Hola ${data.customerName},`,
+                intro: isEnglish
+                    ? 'We have already validated your reservation with operations. To complete the booking, please send the payment and share the proof with our team.'
+                    : 'Ya validamos tu reserva con operaciones. Para completar la reserva, por favor realiza el pago y comparte el comprobante con nuestro equipo.',
+                summaryTitle,
+                serviceLabel,
+                serviceValue: data.serviceName,
+                dateLabel,
+                dateValue: formattedDate,
+                travelersLabel,
+                travelersValue: travelerValue,
+                priceLabel,
+                priceValue,
+                requestIdLabel,
+                requestId: data.requestId,
+                infoTitle: isEnglish ? 'Next step' : 'Siguiente paso',
+                infoBody: isEnglish
+                    ? 'Once the payment is confirmed, we will send your final booking confirmation with the operational details.'
+                    : 'Una vez confirmado el pago, te enviaremos la confirmación final de tu reserva con los detalles operativos.',
+                paymentTitle: isEnglish ? 'Available payment methods' : 'Métodos de pago disponibles',
+                paymentOptions: data.paymentOptions,
+                contactTitle,
+                contactLine,
+                contactWhatsAppLabel,
+                footerNote,
+                footerSignature,
+            }),
+        };
+    }
+
+    if (data.template === 'not_available') {
+        const subject = isEnglish
+            ? `Availability update: ${data.serviceName}`
+            : `Actualización de disponibilidad: ${data.serviceName}`;
+        return {
+            subject,
+            react: CustomerActionEmail({
+                preview: subject,
+                eyebrow,
+                title: isEnglish ? 'This booking is not available' : 'Esta reserva no está disponible',
+                subtitle: isEnglish
+                    ? 'We could not confirm the requested date or operational conditions for this booking.'
+                    : 'No pudimos confirmar la fecha o las condiciones operativas solicitadas para esta reserva.',
+                greeting: isEnglish ? `Hi ${data.customerName},` : `Hola ${data.customerName},`,
+                intro: isEnglish
+                    ? 'Our team reviewed the request with operations and we cannot confirm this booking exactly as requested.'
+                    : 'Nuestro equipo revisó la solicitud con operaciones y no podemos confirmar esta reserva exactamente como fue solicitada.',
+                summaryTitle,
+                serviceLabel,
+                serviceValue: data.serviceName,
+                dateLabel,
+                dateValue: formattedDate,
+                travelersLabel,
+                travelersValue: travelerValue,
+                priceLabel,
+                priceValue,
+                requestIdLabel,
+                requestId: data.requestId,
+                infoTitle: isEnglish ? 'What happens next' : 'Qué sigue ahora',
+                infoBody: isEnglish
+                    ? 'Reply to this email or contact us on WhatsApp and we will help you find an alternative date, route or experience.'
+                    : 'Responde a este correo o contáctanos por WhatsApp y con gusto te ayudaremos a encontrar una fecha, ruta o experiencia alternativa.',
+                contactTitle,
+                contactLine,
+                contactWhatsAppLabel,
+                footerNote,
+                footerSignature,
+            }),
+        };
+    }
+
+    const subject = isEnglish
+        ? `Booking confirmed: ${data.serviceName}`
+        : `Reserva confirmada: ${data.serviceName}`;
+    return {
+        subject,
+        react: CustomerActionEmail({
+            preview: subject,
+            eyebrow,
+            title: isEnglish ? 'Your booking is confirmed' : 'Tu reserva está confirmada',
+            subtitle: isEnglish
+                ? 'Your payment has been received and the reservation is now confirmed.'
+                : 'Ya recibimos tu pago y la reserva quedó confirmada.',
+            greeting: isEnglish ? `Hi ${data.customerName},` : `Hola ${data.customerName},`,
+            intro: isEnglish
+                ? 'Thank you for completing the process. Your booking is now confirmed and our team will support you with any final operational details if needed.'
+                : 'Gracias por completar el proceso. Tu reserva ya está confirmada y nuestro equipo te apoyará con cualquier detalle operativo final si hace falta.',
+            summaryTitle,
+            serviceLabel,
+            serviceValue: data.serviceName,
+            dateLabel,
+            dateValue: formattedDate,
+            travelersLabel,
+            travelersValue: travelerValue,
+            priceLabel,
+            priceValue,
+            requestIdLabel,
+            requestId: data.requestId,
+            infoTitle: isEnglish ? 'Important' : 'Importante',
+            infoBody: isEnglish
+                ? 'Please keep this email as your confirmation reference. If there are any final adjustments, our team will contact you directly.'
+                : 'Guarda este correo como referencia de confirmación. Si existe algún ajuste final, nuestro equipo te contactará directamente.',
+            contactTitle,
+            contactLine,
+            contactWhatsAppLabel,
+            footerNote,
+            footerSignature,
+        }),
+    };
 }
 
 interface SendShuttleConfirmationEmailsProps {

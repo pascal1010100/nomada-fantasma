@@ -1,4 +1,6 @@
 import * as React from 'react';
+import logger from './logger';
+import { CONTACT_INFO } from '../../lib/constants';
 import {
     Body,
     Button,
@@ -335,10 +337,10 @@ export const ReservationTemplate = ({
                         <Section style={styles.contactRow}>
                             <Heading style={styles.cardTitle}>{t('contactTitle')}</Heading>
                             <Text style={styles.text}>{t('contactLine')}</Text>
-                            <Button href="mailto:hola@nomadafantasma.com" style={styles.primaryButton}>
-                                hola@nomadafantasma.com
+                            <Button href={`mailto:${CONTACT_INFO.email}`} style={styles.primaryButton}>
+                                {CONTACT_INFO.email}
                             </Button>
-                            <Button href="https://wa.me/50242900009" style={styles.secondaryButton}>
+                            <Button href={CONTACT_INFO.whatsappLink} style={styles.secondaryButton}>
                                 {t('contactWhatsApp')}
                             </Button>
                         </Section>

@@ -6,6 +6,7 @@ import { sendTourConfirmationEmails } from '@/app/lib/email';
 import { checkRateLimit, getClientIP } from '@/app/lib/rate-limit';
 import { getLocaleFromRequest } from '@/app/lib/locale';
 import logger from '@/app/lib/logger';
+import { buildRequestMetadataNote } from '@/app/lib/request-metadata';
 import { isAdminRequestAuthorized } from '@/app/lib/admin-auth';
 import {
     CreateReservationSchema,
@@ -180,6 +181,11 @@ export async function POST(request: Request) {
             );
         }
 
+        const metadataNote = buildRequestMetadataNote({
+            locale,
+            price: sanitizedData.total_price ?? undefined,
+        });
+
         // Explicitly create an object with only the fields for insertion
         const dataToInsert: ReservationInsert = {
             full_name: sanitizedData.full_name,
@@ -195,15 +201,42 @@ export async function POST(request: Request) {
             total_price: sanitizedData.total_price,
             notes: sanitizedData.notes,
             status: 'pending',
+            admin_notes: metadataNote,
+            customer_locale: locale,
         };
 
         // Insert into Supabase
-        const insertResult = await supabaseAdmin
+        let insertResult = await supabaseAdmin
             .schema('public')
             .from('reservations')
             .insert([dataToInsert])
             .select()
             .single<ReservationRow>();
+
+        if (insertResult.error && typeof insertResult.error.message === 'string' && insertResult.error.message.includes('customer_locale')) {
+            const fallbackInsertData: ReservationInsert = {
+                full_name: sanitizedData.full_name,
+                email: sanitizedData.email,
+                whatsapp: sanitizedData.whatsapp,
+                date: sanitizedData.date,
+                number_of_people: sanitizedData.number_of_people,
+                reservation_type: sanitizedData.reservation_type,
+                tour_id: sanitizedData.tour_id,
+                accommodation_id: sanitizedData.accommodation_id,
+                guide_id: sanitizedData.guide_id,
+                tour_name: sanitizedData.tour_name,
+                total_price: sanitizedData.total_price,
+                notes: sanitizedData.notes,
+                status: 'pending',
+                admin_notes: metadataNote,
+            };
+            insertResult = await supabaseAdmin
+                .schema('public')
+                .from('reservations')
+                .insert([fallbackInsertData])
+                .select()
+                .single<ReservationRow>();
+        }
         let newReservation: ReservationRecord | null = insertResult.data;
         let dbError = insertResult.error;
 

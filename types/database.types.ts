@@ -207,6 +207,7 @@ export type Database = {
           cancelled_at: string | null
           confirmed_at: string | null
           created_at: string | null
+          customer_locale: string | null
           date: string
           email: string
           email_attempts: number | null
@@ -232,6 +233,7 @@ export type Database = {
           cancelled_at?: string | null
           confirmed_at?: string | null
           created_at?: string | null
+          customer_locale?: string | null
           date: string
           email: string
           email_attempts?: number | null
@@ -257,6 +259,7 @@ export type Database = {
           cancelled_at?: string | null
           confirmed_at?: string | null
           created_at?: string | null
+          customer_locale?: string | null
           date?: string
           email?: string
           email_attempts?: number | null
@@ -285,6 +288,7 @@ export type Database = {
           confirmed_at: string | null
           created_at: string | null
           customer_email: string
+          customer_locale: string | null
           customer_name: string
           email_attempts: number | null
           email_delivery_status: string | null
@@ -306,6 +310,7 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string | null
           customer_email: string
+          customer_locale?: string | null
           customer_name: string
           email_attempts?: number | null
           email_delivery_status?: string | null
@@ -327,6 +332,7 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string | null
           customer_email?: string
+          customer_locale?: string | null
           customer_name?: string
           email_attempts?: number | null
           email_delivery_status?: string | null

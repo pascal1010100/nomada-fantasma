@@ -1,4 +1,6 @@
 import { Html, Head, Body, Container, Section, Text, Heading, Button, Font, Preview } from '@react-email/components';
+import { CONTACT_INFO } from '../../lib/constants';
+
 
 interface ShuttleConfirmationEmailProps {
   bookingId?: string;
@@ -197,7 +199,7 @@ export default function ShuttleConfirmationEmail({
                 {t('contactLine')}
               </Text>
               <Button
-                href="mailto:hola@nomadafantasma.com"
+                href={`mailto:${CONTACT_INFO.email}`}
                 style={{
                   backgroundColor: '#0f172a',
                   color: '#ffffff',
@@ -211,10 +213,10 @@ export default function ShuttleConfirmationEmail({
                   marginBottom: '12px'
                 }}
               >
-                hola@nomadafantasma.com
+                {CONTACT_INFO.email}
               </Button>
               <Button
-                href="https://wa.me/50242900009"
+                href={CONTACT_INFO.whatsappLink}
                 style={{
                   backgroundColor: '#ecfeff',
                   color: '#155e75',

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
+import { stripRequestMetadata } from '@/app/lib/request-metadata';
 
 type InternalRequestItem = {
     id: string;
@@ -33,6 +34,7 @@ type InternalResponse = {
 };
 type NoteQuality = 'strong' | 'weak' | 'risk';
 type ToastKind = 'success' | 'error' | 'info';
+type ManualEmailTemplate = 'payment_instructions' | 'not_available' | 'booking_confirmed';
 type ToastMessage = {
     id: number;
     kind: ToastKind;
@@ -111,8 +113,9 @@ function formatTimestamp(value: string | null): string {
 }
 
 function getNotePreview(note: string, limit = 110): string {
-    if (note.length <= limit) return note;
-    return `${note.slice(0, limit)}...`;
+    const cleanNote = stripRequestMetadata(note);
+    if (cleanNote.length <= limit) return cleanNote;
+    return `${cleanNote.slice(0, limit)}...`;
 }
 
 function noteHasAgencyEvidence(note: string): boolean {
@@ -171,10 +174,11 @@ function validateTransitionNoteClient(fromStatus: RequestStatus, toStatus: Reque
 }
 
 function getNoteQuality(status: RequestStatus, note: string | null): NoteQuality {
+    const cleanNote = stripRequestMetadata(note);
     if (!(status === 'confirmed' || status === 'cancelled' || status === 'completed')) return 'strong';
-    if (!note || note.trim().length < 18) return 'risk';
+    if (!cleanNote || cleanNote.trim().length < 18) return 'risk';
 
-    const normalized = note.trim();
+    const normalized = cleanNote.trim();
     const hasTime = noteHasTemporalEvidence(normalized);
     if (status === 'confirmed') {
         if (noteHasAgencyEvidence(normalized) && noteHasConfirmationEvidence(normalized) && hasTime) return 'strong';
@@ -212,6 +216,7 @@ export default function RecepcionRequestsPage() {
     const [actor, setActor] = useState('recepcion');
     const [loading, setLoading] = useState(false);
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+    const [emailActionLoadingId, setEmailActionLoadingId] = useState<string | null>(null);
     const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
     const [error, setError] = useState('');
     const [data, setData] = useState<InternalResponse | null>(null);
@@ -390,6 +395,19 @@ export default function RecepcionRequestsPage() {
         return [];
     };
 
+    const getEmailActions = (status: RequestStatus): Array<{ label: string; template: ManualEmailTemplate }> => {
+        if (status === 'processing') {
+            return [
+                { label: 'Enviar métodos de pago', template: 'payment_instructions' },
+                { label: 'Enviar no disponibilidad', template: 'not_available' },
+            ];
+        }
+        if (status === 'confirmed') {
+            return [{ label: 'Enviar confirmación final', template: 'booking_confirmed' }];
+        }
+        return [];
+    };
+
     const toggleNote = (item: InternalRequestItem) => {
         const key = `${item.kind}-${item.id}`;
         setExpandedNotes((prev) => ({
@@ -461,6 +479,54 @@ export default function RecepcionRequestsPage() {
             pushToast('error', 'Error de red', message);
         } finally {
             setActionLoadingId(null);
+        }
+    };
+
+    const sendCustomerEmail = async (item: InternalRequestItem, template: ManualEmailTemplate) => {
+        if (!token.trim()) return;
+
+        const loadingKey = `${item.kind}-${item.id}-${template}`;
+        setEmailActionLoadingId(loadingKey);
+        setError('');
+
+        try {
+            const response = await fetch('/api/internal/requests/send-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-admin-token': token.trim(),
+                    'x-admin-actor': actor.trim() || 'recepcion',
+                },
+                body: JSON.stringify({
+                    kind: item.kind,
+                    id: item.id,
+                    template,
+                }),
+            });
+
+            const payload = await response.json();
+            if (!response.ok) {
+                const message = payload?.error || 'No se pudo enviar el correo.';
+                setError(message);
+                pushToast('error', 'No se pudo enviar el correo', message);
+                return;
+            }
+
+            const successTitle =
+                template === 'payment_instructions'
+                    ? 'Correo de pago enviado'
+                    : template === 'not_available'
+                      ? 'Correo de no disponibilidad enviado'
+                      : 'Correo de confirmación enviado';
+
+            pushToast('success', successTitle, item.customerEmail);
+            await fetchRequests();
+        } catch (requestError) {
+            const message = requestError instanceof Error ? requestError.message : 'Error de red';
+            setError(message);
+            pushToast('error', 'Error de red', message);
+        } finally {
+            setEmailActionLoadingId(null);
         }
     };
 
@@ -736,6 +802,29 @@ export default function RecepcionRequestsPage() {
                                                 ) : null}
                                             </div>
 
+                                            <div className="mt-3">
+                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Correos al usuario</p>
+                                                <div className="mt-2 flex flex-wrap gap-2">
+                                                    {getEmailActions(normalizedStatus).map((action) => {
+                                                        const emailKey = `${item.kind}-${item.id}-${action.template}`;
+                                                        return (
+                                                            <button
+                                                                key={emailKey}
+                                                                type="button"
+                                                                onClick={() => sendCustomerEmail(item, action.template)}
+                                                                disabled={Boolean(emailActionLoadingId) || !token.trim()}
+                                                                className="rounded-lg border border-emerald-400/20 bg-emerald-500/5 px-3 py-2 text-sm transition hover:border-emerald-400/40 hover:text-emerald-100 disabled:opacity-50"
+                                                            >
+                                                                {emailActionLoadingId === emailKey ? 'Enviando...' : action.label}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                    {getEmailActions(normalizedStatus).length === 0 ? (
+                                                        <span className="text-sm text-muted-foreground">Sin correos manuales para este estado.</span>
+                                                    ) : null}
+                                                </div>
+                                            </div>
+
                                             <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                                                 <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
                                                     <p className="text-muted-foreground">Intentos email</p>
@@ -816,7 +905,7 @@ export default function RecepcionRequestsPage() {
                                             </div>
                                             <p className="mt-2 text-sm text-muted-foreground">
                                                 {item.adminNotes
-                                                    ? (expandedNotes[itemKey] ? item.adminNotes : getNotePreview(item.adminNotes))
+                                                    ? (expandedNotes[itemKey] ? stripRequestMetadata(item.adminNotes) || 'Sin nota operativa registrada.' : getNotePreview(item.adminNotes))
                                                     : 'Sin nota operativa registrada.'}
                                             </p>
                                         </div>

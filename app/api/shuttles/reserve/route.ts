@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/app/lib/supabase/server';
 import { checkRateLimit, getClientIP } from '@/app/lib/rate-limit';
 import { getLocaleFromRequest } from '@/app/lib/locale';
 import logger from '@/app/lib/logger';
+import { buildRequestMetadataNote } from '@/app/lib/request-metadata';
 import { ShuttleRequestSchema, mapZodErrorToTranslationKey } from '@/app/lib/validations';
 import type { Database } from '@/types/database.types';
 
@@ -110,6 +111,9 @@ export async function POST(request: Request) {
 
         const data = validation.data;
         const tEmail = await getTranslations({ locale, namespace: 'ShuttleEmail' });
+        const bookingType = data.type || 'shared';
+        const { agencyEmail, price } = await getShuttleRouteAssignment(data.routeOrigin, data.routeDestination, bookingType);
+        const metadataNote = buildRequestMetadataNote({ locale, price });
 
         // 1. Persist to Supabase
         const payload: ShuttleBookingInsert = {
@@ -121,15 +125,46 @@ export async function POST(request: Request) {
             travel_time: data.time,
             passengers: data.passengers,
             pickup_location: data.pickupLocation,
-            type: data.type || 'shared',
+            type: bookingType,
             status: 'pending',
+            customer_locale: locale,
+            admin_notes: metadataNote,
         };
 
-        const { data: booking, error: dbError } = await supabaseAdmin
+        let booking: ShuttleBookingRow | null = null;
+        let dbError: { message?: string } | null = null;
+
+        const insertWithLocale = await supabaseAdmin
             .from('shuttle_bookings')
             .insert(payload)
             .select()
             .single<ShuttleBookingRow>();
+
+        booking = insertWithLocale.data;
+        dbError = insertWithLocale.error;
+
+        if (dbError && typeof dbError.message === 'string' && dbError.message.includes('customer_locale')) {
+            const fallbackPayload: ShuttleBookingInsert = {
+                customer_name: data.customerName,
+                customer_email: data.customerEmail,
+                route_origin: data.routeOrigin,
+                route_destination: data.routeDestination,
+                travel_date: data.date,
+                travel_time: data.time,
+                passengers: data.passengers,
+                pickup_location: data.pickupLocation,
+                type: bookingType,
+                status: 'pending',
+                admin_notes: metadataNote,
+            };
+            const fallbackInsert = await supabaseAdmin
+                .from('shuttle_bookings')
+                .insert(fallbackPayload)
+                .select()
+                .single<ShuttleBookingRow>();
+            booking = fallbackInsert.data;
+            dbError = fallbackInsert.error;
+        }
 
         if (dbError) {
             console.error('Error saving to Supabase:', dbError);
@@ -141,8 +176,6 @@ export async function POST(request: Request) {
 
         // 2. Send confirmation to customer and notification to admin
         let emailError: string | null = null;
-        const bookingType = data.type || 'shared';
-        const { agencyEmail, price } = await getShuttleRouteAssignment(data.routeOrigin, data.routeDestination, bookingType);
         const result = await sendShuttleConfirmationEmails({
             bookingId: booking?.id ?? undefined,
             customerName: data.customerName,

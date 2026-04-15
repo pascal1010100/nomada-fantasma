@@ -1343,7 +1343,7 @@
         "totalLabel": "Total",
         "taxesIncluded": "Taxes included",
         "paymentMethodTitle": "Payment method",
-        "paymentMethodDesc": "We’ll email you the available payment options to confirm your spot.",
+        "paymentMethodDesc": "We’ll email you the payment options. Note: Card payments include a 10% administrative fee.",
         "tipsTitle": "Tips for your adventure",
         "tipArriveTitle": "Arrive early",
         "tipArriveDesc": "We recommend arriving 15 minutes before the scheduled time for check-in.",

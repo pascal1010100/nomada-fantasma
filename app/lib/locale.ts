@@ -11,9 +11,9 @@ export const DEFAULT_LOCALE: SupportedLocale = 'es';
 
 /**
  * Detects locale from a Request object using multiple strategies:
- * 1. x-locale header (highest priority)
- * 2. Accept-Language header
- * 3. URL pathname (first segment after /)
+ * 1. x-locale header (explicit override, highest priority)
+ * 2. URL pathname (first segment after /) — most reliable signal in a Next.js i18n app
+ * 3. Accept-Language header (browser preference, fallback only)
  * 4. Default to 'es'
  * 
  * @param request - The incoming Request object
@@ -25,8 +25,8 @@ export function getLocaleFromRequest(request: Request): SupportedLocale {
     const headerLocale = request.headers.get('x-locale');
     const acceptLanguage = request.headers.get('accept-language');
     
-    // Priority: header > accept-language > url > default
-    const candidateLocale = headerLocale || acceptLanguage?.split(',')[0] || urlLocale || DEFAULT_LOCALE;
+    // Priority: x-locale header > URL path > Accept-Language > default
+    const candidateLocale = headerLocale || urlLocale || acceptLanguage?.split(',')[0] || DEFAULT_LOCALE;
     const localeToken = candidateLocale.split('-')[0].toLowerCase();
     
     // Validate against supported locales

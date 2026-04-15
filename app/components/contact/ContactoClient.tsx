@@ -19,8 +19,10 @@ import {
 } from 'lucide-react';
 import { RippleButton, FloatingInput } from '@/app/components/ui';
 import { useTranslations } from 'next-intl';
+import { CONTACT_INFO } from '@/app/lib/constants';
 
 const ContactoClient = () => {
+
   const t = useTranslations('Contact');
   const [formData, setFormData] = useState({
     name: '',
@@ -52,7 +54,7 @@ const ContactoClient = () => {
       description: t('cardChat.desc'),
       action: t('cardChat.action'),
       color: "bg-blue-500",
-      href: "https://wa.me/50242900009",
+      href: CONTACT_INFO.whatsappLink,
       isExternal: true
     },
     {
@@ -61,7 +63,7 @@ const ContactoClient = () => {
       description: t('cardMail.desc'),
       action: t('cardMail.action'),
       color: "bg-purple-500",
-      href: "mailto:hola@nomadafantasma.com",
+      href: `mailto:${CONTACT_INFO.email}`,
       isExternal: false
     },
     {
@@ -263,7 +265,7 @@ const ContactoClient = () => {
                 </div>
                 <div>
                   <h4 className="font-bold">WhatsApp Directo</h4>
-                  <a href="https://wa.me/50242900009" target="_blank" rel="noopener noreferrer" className="text-muted-foreground text-sm hover:text-primary transition-colors">+502 4290 0009</a>
+                  <a href={CONTACT_INFO.whatsappLink} target="_blank" rel="noopener noreferrer" className="text-muted-foreground text-sm hover:text-primary transition-colors">+{CONTACT_INFO.whatsapp}</a>
                 </div>
               </div>
 
@@ -273,7 +275,7 @@ const ContactoClient = () => {
                 </div>
                 <div>
                   <h4 className="font-bold">{t('infoEmail')}</h4>
-                  <a href="mailto:hola@nomadafantasma.com" className="text-muted-foreground text-sm hover:text-primary transition-colors">hola@nomadafantasma.com</a>
+                  <a href={`mailto:${CONTACT_INFO.email}`} className="text-muted-foreground text-sm hover:text-primary transition-colors">{CONTACT_INFO.email}</a>
                 </div>
               </div>
 
