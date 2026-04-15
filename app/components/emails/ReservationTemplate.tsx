@@ -1,5 +1,5 @@
 import * as React from 'react';
-import logger from './logger';
+import logger from '@/app/lib/logger';
 import { CONTACT_INFO } from '../../lib/constants';
 import {
     Body,
