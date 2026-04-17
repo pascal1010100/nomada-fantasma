@@ -141,7 +141,7 @@ export default function CustomerActionEmail({
                       <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingBottom: '12px' }}>
                         {priceLabel}
                       </td>
-                      <td style={{ color: '#0f172a', fontSize: '16px', fontWeight: 800, textAlign: 'right', paddingBottom: '12px', color: '#0891b2' }}>
+                      <td style={{ fontSize: '16px', fontWeight: 800, textAlign: 'right', paddingBottom: '12px', color: '#0891b2' }}>
                         {priceValue}
                       </td>
                     </tr>
