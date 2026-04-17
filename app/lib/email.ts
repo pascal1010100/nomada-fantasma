@@ -567,8 +567,10 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
                           customerWhatsapp: data.customerPhone || '',
                           tourName: data.tourName,
                           tourDate: data.date,
+                          guests: data.guests,
                           notes: data.customerNotes || undefined,
                           reservationId: data.reservationId,
+                          operationsEmail: adminEmail,
                           adminPanelUrl: item.label === 'tour_admin'
                               ? `${SITE_URL}/es/internal/recepcion`
                               : undefined,
