@@ -1,7 +1,7 @@
 'use client';
 
 import { normalizeId, normalizeSlug, Tour } from '@/app/lib/types';
-import { Clock, MapPin, CheckCircle } from 'lucide-react';
+import { Clock, MapPin, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -98,7 +98,7 @@ export default function TourCard({ tour, puebloSlug, className = '' }: TourCardP
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="flex w-full">
                 <motion.div
                   whileHover={buttonHover}
                   whileTap={buttonTap}
@@ -106,25 +106,11 @@ export default function TourCard({ tour, puebloSlug, className = '' }: TourCardP
                 >
                   <Link
                     href={`/${locale}/rutas-magicas/lago-atitlan/${puebloSlug}/tours/${tourSlug}`}
-                    className="w-full flex items-center justify-center px-3 py-2.5 text-sm font-medium text-cyan-700 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg border border-cyan-200 dark:border-cyan-800 transition-colors"
+                    className="w-full flex items-center justify-center px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
                     aria-label={t('detailsAria', { title: name })}
                   >
                     {t('viewDetails')}
-                  </Link>
-                </motion.div>
-
-                <motion.div
-                  whileHover={buttonHover}
-                  whileTap={buttonTap}
-                  className="w-full"
-                >
-                  <Link
-                    href={`/${locale}/reservar/${tourId ?? tourSlug}`}
-                    className="w-full flex items-center justify-center px-3 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 rounded-lg shadow-sm transition-all"
-                    aria-label={t('reservationAria', { title: name })}
-                  >
-                    <CheckCircle className="w-4 h-4 mr-1.5" />
-                    {t('book')}
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </motion.div>
               </div>

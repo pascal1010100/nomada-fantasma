@@ -83,14 +83,14 @@ export default function CustomerActionEmail({
       <Preview>{preview}</Preview>
       <Body style={{ backgroundColor: '#f3f7fb', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: '24px 0' }}>
         <Container style={{ maxWidth: '600px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '24px', overflow: 'hidden', border: '1px solid #dbe7f0', boxShadow: '0 18px 50px rgba(15, 23, 42, 0.08)' }}>
-          <Section style={{ background: 'linear-gradient(135deg, #0f172a 0%, #164e63 55%, #0f766e 100%)', padding: '36px 36px 30px' }}>
-            <Text style={{ color: '#a5f3fc', fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: '700', margin: '0 0 14px' }}>
+          <Section style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)', padding: '40px 36px 36px' }}>
+            <Text style={{ color: '#38bdf8', fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: '800', margin: '0 0 16px' }}>
               {eyebrow}
             </Text>
-            <Heading style={{ color: '#ffffff', fontSize: '31px', lineHeight: '1.15', fontWeight: 700, margin: 0 }}>
+            <Heading style={{ color: '#ffffff', fontSize: '32px', lineHeight: '1.2', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
               {title}
             </Heading>
-            <Text style={{ color: '#cffafe', fontSize: '15px', lineHeight: '1.7', margin: '14px 0 0' }}>
+            <Text style={{ color: '#94a3b8', fontSize: '16px', lineHeight: '1.6', margin: '16px 0 0' }}>
               {subtitle}
             </Text>
           </Section>
@@ -104,53 +104,53 @@ export default function CustomerActionEmail({
               {intro}
             </Text>
 
-            <Section style={{ backgroundColor: '#f8fbfd', border: '1px solid #e2edf5', borderRadius: '18px', padding: '22px', margin: '24px 0' }}>
+            <Section style={{ backgroundColor: '#fcfdfe', border: '1px solid #e5eaf0', borderRadius: '24px', padding: '24px', margin: '24px 0' }}>
               <Heading style={{ color: '#0f172a', fontSize: '18px', fontWeight: 700, margin: '0 0 16px' }}>
                 {summaryTitle}
               </Heading>
               <table width="100%" cellPadding="0" cellSpacing="0" role="presentation">
                 <tbody>
                   <tr>
-                    <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>
+                    <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingBottom: '12px' }}>
                       {serviceLabel}
                     </td>
-                    <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>
+                    <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 700, textAlign: 'right', paddingBottom: '12px' }}>
                       {serviceValue}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>
+                    <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingBottom: '12px' }}>
                       {dateLabel}
                     </td>
-                    <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>
+                    <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 700, textAlign: 'right', paddingBottom: '12px' }}>
                       {dateValue}
                     </td>
                   </tr>
                   {travelersValue ? (
                     <tr>
-                      <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>
+                      <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingBottom: '12px' }}>
                         {travelersLabel}
                       </td>
-                      <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>
+                      <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 700, textAlign: 'right', paddingBottom: '12px' }}>
                         {travelersValue}
                       </td>
                     </tr>
                   ) : null}
                   {priceLabel && priceValue ? (
                     <tr>
-                      <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>
+                      <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingBottom: '12px' }}>
                         {priceLabel}
                       </td>
-                      <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>
+                      <td style={{ color: '#0f172a', fontSize: '16px', fontWeight: 800, textAlign: 'right', paddingBottom: '12px', color: '#0891b2' }}>
                         {priceValue}
                       </td>
                     </tr>
                   ) : null}
                   <tr>
-                    <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingTop: '12px', borderTop: '1px solid #dbe7f0' }}>
+                    <td style={{ color: '#94a3b8', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
                       {requestIdLabel}
                     </td>
-                    <td style={{ color: '#0f172a', fontSize: '14px', fontWeight: 700, fontFamily: 'Menlo, Monaco, Consolas, monospace', textAlign: 'right', paddingTop: '12px', borderTop: '1px solid #dbe7f0' }}>
+                    <td style={{ color: '#64748b', fontSize: '13px', fontWeight: 700, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', textAlign: 'right', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
                       {requestId}
                     </td>
                   </tr>
@@ -158,17 +158,17 @@ export default function CustomerActionEmail({
               </table>
             </Section>
 
-            <Section style={{ backgroundColor: '#fefce8', border: '1px solid #fde68a', borderRadius: '18px', padding: '22px', margin: '24px 0' }}>
-              <Heading style={{ color: '#854d0e', fontSize: '17px', fontWeight: 700, margin: '0 0 10px' }}>
+            <Section style={{ backgroundColor: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '20px', padding: '24px', margin: '24px 0' }}>
+              <Heading style={{ color: '#92400e', fontSize: '16px', fontWeight: 800, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {infoTitle}
               </Heading>
-              <Text style={{ color: '#713f12', fontSize: '14px', lineHeight: '1.75', margin: 0 }}>
+              <Text style={{ color: '#b45309', fontSize: '15px', lineHeight: '1.7', margin: 0 }}>
                 {infoBody}
               </Text>
             </Section>
 
             {paymentTitle && (
-              <Heading style={{ color: '#0f172a', fontSize: '20px', fontWeight: 700, margin: '32px 0 16px' }}>
+              <Heading style={{ color: '#0f172a', fontSize: '20px', fontWeight: 800, margin: '40px 0 20px', letterSpacing: '-0.01em' }}>
                 {paymentTitle}
               </Heading>
             )}
@@ -179,18 +179,19 @@ export default function CustomerActionEmail({
                   <Section 
                     key={idx} 
                     style={{ 
-                      backgroundColor: option.isPrimary ? '#ecfeff' : '#f8fafc', 
-                      border: `1px solid ${option.isPrimary ? '#a5f3fc' : '#e2e8f0'}`, 
-                      borderRadius: '18px', 
-                      padding: '20px', 
-                      marginBottom: '16px' 
+                      backgroundColor: option.isPrimary ? '#f0f9ff' : '#ffffff', 
+                      border: `1px solid ${option.isPrimary ? '#bae6fd' : '#e2e8f0'}`, 
+                      borderRadius: '24px', 
+                      padding: '24px', 
+                      marginBottom: '20px',
+                      boxShadow: option.isPrimary ? '0 4px 12px rgba(14, 165, 233, 0.08)' : 'none'
                     }}
                   >
-                    <Heading style={{ color: option.isPrimary ? '#155e75' : '#0f172a', fontSize: '16px', fontWeight: 700, margin: '0 0 10px' }}>
+                    <Heading style={{ color: option.isPrimary ? '#0369a1' : '#1e293b', fontSize: '17px', fontWeight: 800, margin: '0 0 12px' }}>
                       {option.title}
                     </Heading>
                     {option.details.map((detail, dIdx) => (
-                      <Text key={dIdx} style={{ color: option.isPrimary ? '#0f766e' : '#475569', fontSize: '14px', lineHeight: '1.6', margin: '0 0 4px' }}>
+                      <Text key={dIdx} style={{ color: option.isPrimary ? '#0284c7' : '#64748b', fontSize: '14px', lineHeight: '1.6', margin: '0 0 6px' }}>
                         {detail}
                       </Text>
                     ))}
@@ -200,13 +201,13 @@ export default function CustomerActionEmail({
                         style={{ 
                           backgroundColor: option.isPrimary ? '#0f172a' : '#ffffff', 
                           color: option.isPrimary ? '#ffffff' : '#0f172a', 
-                          border: `1px solid ${option.isPrimary ? '#0f172a' : '#0f172a'}`,
-                          borderRadius: '999px', 
+                          border: `1px solid #0f172a`,
+                          borderRadius: '12px', 
                           textDecoration: 'none', 
-                          fontSize: '13px', 
+                          fontSize: '14px', 
                           fontWeight: 700, 
-                          padding: '10px 18px', 
-                          marginTop: '12px',
+                          padding: '12px 24px', 
+                          marginTop: '16px',
                           display: 'inline-block' 
                         }}
                       >
