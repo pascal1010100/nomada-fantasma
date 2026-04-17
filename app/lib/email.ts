@@ -250,6 +250,10 @@ type BuildCustomerActionEmailInput = {
     price?: number;
     requestId: string;
     paymentOptions?: PaymentOption[];
+    pickupTime?: string;
+    pickupLocation?: string;
+    meetingPoint?: string;
+    travelTime?: string;
 };
 
 function formatEmailDate(value: string, locale: string) {
@@ -391,6 +395,25 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
     const subject = isEnglish
         ? `Booking confirmed: ${data.serviceName}`
         : `Reserva confirmada: ${data.serviceName}`;
+
+    const infoBody = isEnglish
+        ? 'Please keep this email as your confirmation reference. If there are any final adjustments, our team will contact you directly.'
+        : 'Guarda este correo como referencia de confirmación. Si existe algún ajuste final, nuestro equipo te contactará directamente.';
+
+    // Elite logistics for voucher
+    const infoTitle = isEnglish ? 'Travel Logistics' : 'Logística de viaje';
+    let eliteInfoBody = infoBody;
+    
+    if (data.kind === 'shuttle' && (data.travelTime || data.pickupLocation)) {
+        const timeLabel = isEnglish ? 'Time' : 'Hora';
+        const locLabel = isEnglish ? 'Pickup' : 'Recogida';
+        eliteInfoBody = `${infoBody}\n\n• ${timeLabel}: ${data.travelTime || '-'}\n• ${locLabel}: ${data.pickupLocation || '-'}`;
+    } else if (data.kind === 'tour' && (data.pickupTime || data.meetingPoint)) {
+        const timeLabel = isEnglish ? 'Pickup Time' : 'Hora de recogida';
+        const meetLabel = isEnglish ? 'Meeting Point' : 'Punto de encuentro';
+        eliteInfoBody = `${infoBody}\n\n• ${timeLabel}: ${data.pickupTime || '-'}\n• ${meetLabel}: ${data.meetingPoint || '-'}`;
+    }
+
     return {
         subject,
         react: CustomerActionEmail({
@@ -415,10 +438,8 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
             priceValue,
             requestIdLabel,
             requestId: data.requestId,
-            infoTitle: isEnglish ? 'Important' : 'Importante',
-            infoBody: isEnglish
-                ? 'Please keep this email as your confirmation reference. If there are any final adjustments, our team will contact you directly.'
-                : 'Guarda este correo como referencia de confirmación. Si existe algún ajuste final, nuestro equipo te contactará directamente.',
+            infoTitle: infoTitle,
+            infoBody: eliteInfoBody,
             contactTitle,
             contactLine,
             contactWhatsAppLabel,

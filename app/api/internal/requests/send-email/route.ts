@@ -39,7 +39,7 @@ type PaymentOption = {
 function getPaymentOptions(locale: string, requestId: string, serviceName: string): PaymentOption[] {
   const isEnglish = locale.startsWith('en');
   const bankName = process.env.BANK_BANK_NAME || 'Banrural';
-  const bankAccountName = process.env.BANK_ACCOUNT_NAME || 'Hostal Mandalas';
+  const bankAccountName = process.env.BANK_ACCOUNT_NAME || 'José Manuel Aguilar Cruz';
   const bankAccountNumber = process.env.BANK_ACCOUNT_NUMBER || '4093219169';
   const bankCurrency = process.env.BANK_CURRENCY || 'GTQ';
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '50242900009';
@@ -169,6 +169,22 @@ export async function POST(request: Request) {
       const fallbackService = reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma tour' : 'Tour Nómada Fantasma');
       const tourKey = reservation.tour_name?.toLowerCase().replace(/\s+/g, '-') || '';
       const serviceName = tourKey && tTours.has(`${tourKey}.title`) ? tTours(`${tourKey}.title`) : fallbackService;
+      // Optimized for elite voucher: fetch tour specifics
+      let pickupTime: string | undefined;
+      let meetingPoint: string | undefined;
+
+      if (reservation.tour_id) {
+          const { data: tourData } = await supabaseAdmin
+              .from('tours')
+              .select('pickup_time, meeting_point')
+              .eq('id', reservation.tour_id)
+              .maybeSingle();
+          if (tourData) {
+              pickupTime = tourData.pickup_time ? tourData.pickup_time.toString().slice(0, 5) : undefined;
+              meetingPoint = tourData.meeting_point || undefined;
+          }
+      }
+
       const { subject, react } = buildCustomerActionEmail({
         template,
         locale,
@@ -180,6 +196,8 @@ export async function POST(request: Request) {
         price: typeof reservation.total_price === 'number' ? reservation.total_price : metadata.price,
         requestId: reservation.id,
         paymentOptions: getPaymentOptions(locale, reservation.id, serviceName),
+        pickupTime,
+        meetingPoint,
       });
 
       const emailResult = await sendManualCustomerEmail({
@@ -198,6 +216,7 @@ export async function POST(request: Request) {
         .from('reservations')
         .update({
           admin_notes: appendAuditNote(reservation.admin_notes, actor, template),
+          email_delivery_status: 'sent',
         } as Database['public']['Tables']['reservations']['Update'])
         .eq('id', reservation.id);
 
@@ -232,6 +251,8 @@ export async function POST(request: Request) {
       price,
       requestId: shuttle.id,
       paymentOptions: getPaymentOptions(locale, shuttle.id, serviceName),
+      travelTime: shuttle.travel_time,
+      pickupLocation: shuttle.pickup_location,
     });
 
     const emailResult = await sendManualCustomerEmail({
@@ -250,6 +271,7 @@ export async function POST(request: Request) {
       .from('shuttle_bookings')
       .update({
         admin_notes: appendAuditNote(shuttle.admin_notes, actor, template),
+        email_delivery_status: 'sent',
       } as Database['public']['Tables']['shuttle_bookings']['Update'])
       .eq('id', shuttle.id);
 

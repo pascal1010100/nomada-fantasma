@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { stripRequestMetadata } from '@/app/lib/request-metadata';
+import TransitionModal, { ModalStatus } from './components/TransitionModal';
 
 type InternalRequestItem = {
     id: string;
@@ -42,7 +43,19 @@ type ToastMessage = {
     message?: string;
 };
 
-const STORAGE_KEY = 'nomada_admin_token';
+interface ModalState {
+    isOpen: boolean;
+    item: InternalRequestItem | null;
+    nextStatus: RequestStatus | null;
+    title: string;
+    description: string;
+    confirmLabel: string;
+    modalStatus: ModalStatus;
+    showNoteInput: boolean;
+    initialNote: string;
+}
+
+const STORAGE_KEY = 'nomada_admin_token_permanent';
 const PROCESSING_STALE_HOURS = 8;
 
 function toStartOfDay(date: Date) {
@@ -155,21 +168,10 @@ function getTransitionHelper(fromStatus: RequestStatus, toStatus: RequestStatus)
 }
 
 function validateTransitionNoteClient(fromStatus: RequestStatus, toStatus: RequestStatus, note: string): string | null {
-    if (note.length < 18) {
-        return 'La nota debe tener al menos 18 caracteres.';
+    if (toStatus === 'cancelled' && note.length < 5) {
+        return 'Por favor incluye un motivo breve para la cancelación (mín. 5 caracteres).';
     }
-    if (fromStatus === 'processing' && toStatus === 'confirmed') {
-        if (!noteHasAgencyEvidence(note)) return 'Incluye la agencia en la nota.';
-        if (!noteHasConfirmationEvidence(note)) return 'Incluye evidencia de confirmación en la nota.';
-        if (!noteHasTemporalEvidence(note)) return 'Incluye fecha u hora de confirmación en la nota.';
-    }
-    if (toStatus === 'cancelled' && !noteHasReasonEvidence(note)) {
-        return 'Incluye motivo o contexto claro de cancelación en la nota.';
-    }
-    if (fromStatus === 'confirmed' && toStatus === 'completed') {
-        if (!noteHasServiceExecutionEvidence(note)) return 'Incluye evidencia de ejecución del servicio en la nota.';
-        if (!noteHasTemporalEvidence(note)) return 'Incluye fecha u hora de ejecución en la nota.';
-    }
+    // Strict evidence requirements removed for a more fluid admin experience.
     return null;
 }
 
@@ -217,6 +219,19 @@ export default function RecepcionRequestsPage() {
     const [loading, setLoading] = useState(false);
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
     const [emailActionLoadingId, setEmailActionLoadingId] = useState<string | null>(null);
+
+    // Modern Modal State
+    const [modal, setModal] = useState<ModalState>({
+        isOpen: false,
+        item: null,
+        nextStatus: null,
+        title: '',
+        description: '',
+        confirmLabel: '',
+        modalStatus: 'processing',
+        showNoteInput: true,
+        initialNote: ''
+    });
     const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
     const [error, setError] = useState('');
     const [data, setData] = useState<InternalResponse | null>(null);
@@ -241,7 +256,7 @@ export default function RecepcionRequestsPage() {
     };
 
     useEffect(() => {
-        const stored = sessionStorage.getItem(STORAGE_KEY);
+        const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             setToken(stored);
             setTempToken(stored);
@@ -373,7 +388,7 @@ export default function RecepcionRequestsPage() {
     const saveToken = () => {
         const normalized = tempToken.trim();
         setToken(normalized);
-        sessionStorage.setItem(STORAGE_KEY, normalized);
+        localStorage.setItem(STORAGE_KEY, normalized);
         setData(null);
         setError('');
         pushToast('success', 'Token guardado', 'Ya puedes actualizar solicitudes.');
@@ -384,7 +399,7 @@ export default function RecepcionRequestsPage() {
         setTempToken('');
         setData(null);
         setError('');
-        sessionStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(STORAGE_KEY);
         pushToast('info', 'Token limpiado', 'La sesión operativa fue cerrada.');
     };
 
@@ -421,22 +436,64 @@ export default function RecepcionRequestsPage() {
         const currentStatus = normalizeStatus(item.status);
         if (currentStatus === nextStatus) return;
 
-        const requiresNote = nextStatus === 'confirmed' || nextStatus === 'cancelled' || nextStatus === 'completed';
-        let note = '';
-            if (requiresNote) {
+        // NEW: Open modern modal instead of using browser native methods
+        if (nextStatus === 'confirmed') {
+            setModal({
+                isOpen: true,
+                item,
+                nextStatus,
+                title: 'Confirmar Pago',
+                description: `Estás a punto de confirmar el pago de ${item.customerName}. Esto enviará automáticamente el Voucher de reserva a su correo.`,
+                confirmLabel: 'Finalizar y Notificar',
+                modalStatus: 'confirmed',
+                showNoteInput: true,
+                initialNote: 'Pago confirmado (Voucher enviado automáticamente)'
+            });
+            return;
+        }
+
+        if (nextStatus === 'completed') {
+            setModal({
+                isOpen: true,
+                item,
+                nextStatus,
+                title: 'Servicio Completado',
+                description: 'Confirma que el servicio se realizó con éxito para cerrar este caso operativamente.',
+                confirmLabel: 'Cerrar Caso',
+                modalStatus: 'completed',
+                showNoteInput: true,
+                initialNote: 'Servicio ejecutado y finalizado correctamente'
+            });
+            return;
+        }
+
+        if (nextStatus === 'cancelled') {
             const helper = getTransitionHelper(currentStatus, nextStatus);
-            const prompted = window.prompt(`Nota obligatoria para cambiar a ${nextStatus}:\n${helper}`, '');
-            if (prompted === null) return;
-            note = prompted.trim();
-            if (!note) {
-                setError(`Debes agregar una nota para cambiar a ${nextStatus}.`);
-                return;
-            }
-            const noteValidationError = validateTransitionNoteClient(currentStatus, nextStatus, note);
-            if (noteValidationError) {
-                setError(noteValidationError);
-                return;
-            }
+            setModal({
+                isOpen: true,
+                item,
+                nextStatus,
+                title: 'Cancelar Solicitud',
+                description: helper,
+                confirmLabel: 'Confirmar Cancelación',
+                modalStatus: 'cancelled',
+                showNoteInput: true,
+                initialNote: ''
+            });
+            return;
+        }
+
+        // For other transitions (e.g. processing)
+        executeStatusUpdate(item, nextStatus, '');
+    };
+
+    const executeStatusUpdate = async (item: InternalRequestItem, nextStatus: RequestStatus, note: string) => {
+        const currentStatus = normalizeStatus(item.status);
+        
+        // Final client-side validation for cancellations
+        if (nextStatus === 'cancelled' && note.trim().length < 5) {
+            pushToast('error', 'Nota requerida', 'Por favor escribe el motivo de la cancelación.');
+            return;
         }
 
         setActionLoadingId(`${item.kind}-${item.id}-${nextStatus}`);
@@ -472,7 +529,20 @@ export default function RecepcionRequestsPage() {
             }
 
             pushToast('success', `Estado actualizado a ${nextStatus}`, 'Cambio guardado correctamente.');
+            
+            // Elite Automation: Send voucher if confirmed
+            if (nextStatus === 'confirmed') {
+                try {
+                    pushToast('info', 'Generando Voucher...', 'Enviando confirmación al cliente.');
+                    await sendCustomerEmail(item, 'booking_confirmed');
+                } catch (emailErr) {
+                    console.error('Failed to auto-send voucher:', emailErr);
+                    pushToast('error', 'Error enviando Voucher', 'El estado se cambió pero el correo falló.');
+                }
+            }
+
             await fetchRequests();
+            setModal(prev => ({ ...prev, isOpen: false }));
         } catch (requestError) {
             const message = requestError instanceof Error ? requestError.message : 'Error de red';
             setError(message);
@@ -922,6 +992,23 @@ export default function RecepcionRequestsPage() {
                     </div>
                 ) : null}
             </div>
+
+            <TransitionModal
+                isOpen={modal.isOpen}
+                onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={(note) => {
+                    if (modal.item && modal.nextStatus) {
+                        executeStatusUpdate(modal.item, modal.nextStatus, note);
+                    }
+                }}
+                title={modal.title}
+                description={modal.description}
+                confirmLabel={modal.confirmLabel}
+                status={modal.modalStatus}
+                showNoteInput={modal.showNoteInput}
+                initialNote={modal.initialNote}
+                isLoading={!!actionLoadingId}
+            />
         </div>
     );
 }

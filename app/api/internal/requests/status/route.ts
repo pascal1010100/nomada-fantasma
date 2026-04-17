@@ -20,8 +20,8 @@ const TRANSITION_MATRIX: Record<RequestStatus, RequestStatus[]> = {
     completed: [],
 };
 
-const NOTE_REQUIRED_STATUSES = new Set<RequestStatus>(['confirmed', 'cancelled', 'completed']);
-const MIN_NOTE_LENGTH = 18;
+const NOTE_REQUIRED_STATUSES = new Set<RequestStatus>(['cancelled']);
+const MIN_NOTE_LENGTH = 3;
 
 function isValidStatus(status: string): status is RequestStatus {
     return ['pending', 'processing', 'confirmed', 'cancelled', 'completed'].includes(status);
@@ -84,30 +84,8 @@ function validateTransitionNote(fromStatus: RequestStatus, toStatus: RequestStat
         return `La nota para ${toStatus} debe tener al menos ${MIN_NOTE_LENGTH} caracteres.`;
     }
 
-    if (fromStatus === 'processing' && toStatus === 'confirmed') {
-        if (!noteHasAgencyEvidence(note)) {
-            return 'Para confirmar debes incluir la agencia en la nota.';
-        }
-        if (!noteHasConfirmationEvidence(note)) {
-            return 'Para confirmar debes incluir evidencia de confirmación en la nota.';
-        }
-        if (!noteHasTemporalEvidence(note)) {
-            return 'Para confirmar debes incluir fecha u hora de la confirmación en la nota.';
-        }
-    }
-
-    if (toStatus === 'cancelled' && !noteHasReasonEvidence(note)) {
-        return 'Para cancelar debes incluir motivo o contexto claro en la nota.';
-    }
-
-    if (fromStatus === 'confirmed' && toStatus === 'completed') {
-        if (!noteHasServiceExecutionEvidence(note)) {
-            return 'Para completar debes registrar evidencia de ejecución del servicio en la nota.';
-        }
-        if (!noteHasTemporalEvidence(note)) {
-            return 'Para completar debes incluir fecha u hora de ejecución en la nota.';
-        }
-    }
+    // Strict evidence requirements removed for a more fluid admin experience.
+    // The previous evidence checks (agency, confirmation, etc.) are no longer enforced.
 
     return null;
 }
