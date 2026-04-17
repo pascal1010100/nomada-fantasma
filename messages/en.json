@@ -395,7 +395,16 @@
         "highlightsTitle": "Highlights",
         "helpCardTitle": "Need help?",
         "helpCardText": "Our team is available 24/7 to answer your questions.",
-        "supportLink": "Contact support"
+        "supportLink": "Contact support",
+        "badge": "MAGICAL ROUTE",
+        "durationDescription": "{days, plural, one {# day} other {# days}}",
+        "groupDescription": "Group of {min}-{max} people",
+        "reviews": "({count} reviews)",
+        "perPerson": "per person",
+        "viewDetails": "View details",
+        "durationLabel": "Duration",
+        "groupSizeLabel": "Group size",
+        "othersTitle": "Other routes you might like"
     },
     "ReservationPage": {
         "backToRoutes": "Back to routes",

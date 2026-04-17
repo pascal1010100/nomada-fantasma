@@ -396,8 +396,15 @@
         "helpCardTitle": "¿Necesitas ayuda?",
         "helpCardText": "Nuestro equipo está disponible 24/7 para responder tus preguntas.",
         "supportLink": "Contactar con soporte",
+        "badge": "RUTA MÁGICA",
         "durationDescription": "{days, plural, one {# día} other {# días}}",
-        "groupDescription": "Grupo de {min}-{max} personas"
+        "groupDescription": "Grupo de {min}-{max} personas",
+        "reviews": "({count} reseñas)",
+        "perPerson": "por persona",
+        "viewDetails": "Ver detalles",
+        "durationLabel": "Duración",
+        "groupSizeLabel": "Tamaño del grupo",
+        "othersTitle": "Otras rutas que te pueden interesar"
     },
     "ReservationPage": {
         "backToRoutes": "Volver a rutas",

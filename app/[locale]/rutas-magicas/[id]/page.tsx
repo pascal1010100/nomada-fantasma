@@ -16,6 +16,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const tData = useTranslations('Data.routes');
   const tRoute = useTranslations('RouteDetail');
+  const tRoutes = useTranslations('Routes');
   const tLake = useTranslations('LakeInfo');
   const locale = useLocale();
 
@@ -88,7 +89,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
         ))}
         {!small && (
           <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
-            {rating.toFixed(1)} ({reviewCount} reseñas)
+            {rating.toFixed(1)} {tRoute('reviews', { count: reviewCount })}
           </span>
         )}
       </div>
@@ -132,7 +133,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75"></span>
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400"></span>
               </span>
-              <span className="tracking-wider">RUTA MÁGICA</span>
+              <span className="tracking-wider">{tRoute('badge')}</span>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -146,15 +147,15 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
             <div className="flex flex-wrap items-center gap-4 text-white/90 mb-6">
               <div className="flex items-center bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
                 <MapPin className="w-4 h-4 mr-1.5 text-cyan-400" />
-                <span className="text-sm">{route.region.charAt(0).toUpperCase() + route.region.slice(1)}</span>
+                <span className="text-sm">{tRoutes(`regions.${route.region}`)}</span>
               </div>
               <div className="flex items-center bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
                 <Calendar className="w-4 h-4 mr-1.5 text-purple-400" />
-                <span className="text-sm">{route.durationDays} {route.durationDays === 1 ? 'día' : 'días'}</span>
+                <span className="text-sm">{tRoute('durationDescription', { days: route.durationDays })}</span>
               </div>
               <div className="flex items-center bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
                 <Users className="w-4 h-4 mr-1.5 text-cyan-400" />
-                <span className="text-sm">Grupo de {route.groupSize.min}-{route.groupSize.max} personas</span>
+                <span className="text-sm">{tRoute('groupDescription', { min: route.groupSize.min, max: route.groupSize.max })}</span>
               </div>
               <div className="flex items-center bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full">
                 <Wifi className="w-4 h-4 mr-1.5 text-purple-400" />
@@ -319,18 +320,18 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
                   <>
                     <div className="flex items-baseline mb-4">
                       <span className="text-3xl font-bold text-gray-900 dark:text-white">Q{route.price.toLocaleString()}</span>
-                      <span className="ml-2 text-gray-500 dark:text-gray-400">por persona</span>
+                      <span className="ml-2 text-gray-500 dark:text-gray-400">{tRoute('perPerson')}</span>
                     </div>
 
                     <div className="space-y-4">
                       <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                         <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                        <span>Duración: {route.durationDays} {route.durationDays === 1 ? 'día' : 'días'}</span>
+                        <span>{tRoute('durationLabel')}: {tRoute('durationDescription', { days: route.durationDays })}</span>
                       </div>
 
                       <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                         <Users className="w-4 h-4 mr-2 text-gray-400" />
-                        <span>Tamaño del grupo: {route.groupSize.min}-{route.groupSize.max} personas</span>
+                        <span>{tRoute('groupSizeLabel')}: {tRoute('groupDescription', { min: route.groupSize.min, max: route.groupSize.max })}</span>
                       </div>
 
                       <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
@@ -387,7 +388,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
       {/* Sección de recomendaciones */}
       <div className="bg-gray-50 dark:bg-gray-900/50 py-16">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Otras rutas que te pueden interesar</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">{tRoute('othersTitle')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {mockRoutes
               .filter(r => r.id !== route.id)
@@ -420,7 +421,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
                         href={`/${locale}/rutas-magicas/${relatedRoute.id}`}
                         className="text-sm font-medium text-electricBlue hover:text-cyberPurple dark:text-cyberPurple dark:hover:text-electricBlue transition-colors flex items-center"
                       >
-                        Ver detalles
+                        {tRoute('viewDetails')}
                         <ArrowRight className="w-4 h-4 ml-1" />
                       </Link>
                     </div>
