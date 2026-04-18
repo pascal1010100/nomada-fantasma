@@ -1,7 +1,6 @@
 import { CheckCircle2, ArrowLeft, Calendar, Users, MapPin, Clock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getTourById } from '@/app/[locale]/rutas-magicas/mocks/tours';
 import { getTourBySlugFromDB } from '@/app/lib/supabase/tours';
 import type { Database } from '@/types/database.types';
 import { getTranslations } from 'next-intl/server';
@@ -30,10 +29,9 @@ export default async function ConfirmationPage({
   const t = await getTranslations({ locale, namespace: 'ReservationConfirmation' });
   const tTours = await getTranslations({ locale, namespace: 'Data.tours' });
 
-  const tour = getTourById(tourId);
-  const supabaseTour = tour ? null : await getTourBySlugFromDB(tourId);
+  const supabaseTour = await getTourBySlugFromDB(tourId);
 
-  if (!tour && !supabaseTour) {
+  if (!supabaseTour) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
         <div className="text-center">
@@ -51,36 +49,20 @@ export default async function ConfirmationPage({
     );
   }
 
-  const displayTour = tour
-    ? {
-      title: tour.title,
-      images: tour.images,
-      difficulty: tour.difficulty,
-      duration: tour.duration,
-      meetingPoint: tour.meetingPoint,
-      adultPrice: tour.price.adult,
-    }
-    : (() => {
-      const fallbackTour = supabaseTour as Database['public']['Tables']['tours']['Row'];
-      const coverImage = fallbackTour.cover_image;
-      const images = (fallbackTour.images?.length ? fallbackTour.images : (coverImage ? [coverImage] : []));
-      const duration = fallbackTour.duration_hours
-        ? `${fallbackTour.duration_hours} ${t('hoursLabel')}`
-        : t('durationFallback');
-      const difficulty = fallbackTour.difficulty ?? t('difficultyFallback');
-      const meetingPoint = (fallbackTour as { meeting_point?: string | null }).meeting_point ?? '';
-      const adultPrice = fallbackTour.price_min ?? fallbackTour.price_max ?? 0;
-
-      return {
-        title: fallbackTour.title,
-        images,
-        difficulty,
-        duration,
-        meetingPoint,
-        adultPrice,
-      };
-    })();
-  const tourKeyRaw = (tour?.slug ?? (supabaseTour as { slug?: string | null })?.slug ?? tourId) || '';
+  const typedTour = supabaseTour as Database['public']['Tables']['tours']['Row'];
+  const coverImage = typedTour.cover_image;
+  const images = typedTour.images?.length ? typedTour.images : (coverImage ? [coverImage] : []);
+  const displayTour = {
+    title: locale === 'en' ? (typedTour.title_en ?? typedTour.title) : typedTour.title,
+    images,
+    difficulty: typedTour.difficulty ?? t('difficultyFallback'),
+    duration: typedTour.duration_hours
+      ? `${typedTour.duration_hours} ${t('hoursLabel')}`
+      : t('durationFallback'),
+    meetingPoint: typedTour.meeting_point ?? '',
+    adultPrice: typedTour.price_min ?? typedTour.price_max ?? 0,
+  };
+  const tourKeyRaw = typedTour.slug ?? tourId;
   const tourKey = tourKeyRaw.toLowerCase();
   const localizedTour = {
     ...displayTour,

@@ -1,6 +1,6 @@
 import { getToursByPuebloFromDB } from '@/app/lib/supabase/tours';
 import { notFound } from 'next/navigation';
-import { pueblosAtitlan as atitlanTowns } from '../../mocks/atitlanData';
+import { getNearbyTownsFromDB, getTownBySlugFromDB } from '@/app/lib/supabase/towns';
 import { ArrowLeft, MapPin, Wifi, Star } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -15,17 +15,18 @@ import { buildLocalizedTownPageViewModel } from '../../lib/townPageViewModel';
 
 export default async function TownPage({ params }: { params: Promise<{ pueblo: string; locale: string }> }) {
   const { pueblo: slug, locale } = await params;
-  const town = atitlanTowns.find(t => t.slug === slug);
+  const town = await getTownBySlugFromDB(slug);
 
   if (!town) {
     notFound();
   }
 
   const tours = await getToursByPuebloFromDB(slug);
+  const nearbyTowns = await getNearbyTownsFromDB(slug);
 
   const tRoutes = await getTranslations({ locale, namespace: 'Data.routes' });
   const tTown = await getTranslations({ locale, namespace: 'Town' });
-  const viewModel = buildLocalizedTownPageViewModel(town, tRoutes);
+  const viewModel = buildLocalizedTownPageViewModel(town, nearbyTowns, tRoutes);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 pb-20">
@@ -33,7 +34,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
       <div className="relative h-[500px] overflow-hidden group">
         <div className="absolute inset-0 transition-transform duration-[3000ms] ease-in-out group-hover:scale-105">
           <Image
-            src={town.coverImage}
+            src={town.cover_image}
             alt={viewModel.localizedTitle}
             fill
             className="object-cover object-center"
@@ -95,7 +96,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
               </div>
               <div className="flex items-center bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 hover:bg-black/30 transition-colors shadow-lg">
                 <Wifi className="w-4 h-4 mr-1.5 text-cyan-400" />
-                <span className="text-sm font-medium text-white">{'⭐'.repeat(town.wifiRating)} WiFi</span>
+                <span className="text-sm font-medium text-white">{'⭐'.repeat(town.wifi_rating)} WiFi</span>
               </div>
             </div>
           </div>

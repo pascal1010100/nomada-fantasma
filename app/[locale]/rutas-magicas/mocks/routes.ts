@@ -4,6 +4,7 @@ export const mockRoutes: Route[] = [
   {
     id: '1',
     slug: 'lago-atitlan',
+    entityType: 'editorial_route',
     title: 'Lago de Atitlán',
     summary: 'Un paraíso rodeado de volcanes en Guatemala',
     coverImage: '/images/rutas/atitlan.jpg',
@@ -25,6 +26,7 @@ export const mockRoutes: Route[] = [
   {
     id: '2',
     slug: 'coban',
+    entityType: 'editorial_route',
     title: 'Cobán',
     summary: 'Naturaleza exuberante y cultura viva en Alta Verapaz',
     coverImage: '/images/rutas/coban.jpg',
@@ -47,6 +49,7 @@ export const mockRoutes: Route[] = [
   {
     id: '3',
     slug: 'antigua-guatemala',
+    entityType: 'editorial_route',
     title: 'Antigua Guatemala',
     summary: 'Historia colonial y volcanes majestuosos',
     coverImage: '/images/rutas/antigua.jpg',
@@ -69,6 +72,7 @@ export const mockRoutes: Route[] = [
   {
     id: '4',
     slug: 'san-marcos',
+    entityType: 'editorial_route',
     title: 'San Marcos La Laguna',
     summary: 'Yoga, meditación y misticismo maya',
     coverImage: '/images/rutas/san-marcos.jpg',
@@ -87,6 +91,7 @@ export const mockRoutes: Route[] = [
   {
     id: '5',
     slug: 'san-pedro',
+    entityType: 'editorial_route',
     title: 'San Pedro La Laguna',
     summary: 'Fiesta y aventura',
     coverImage: '/images/rutas/san-pedro.jpg',
@@ -105,6 +110,7 @@ export const mockRoutes: Route[] = [
   {
     id: '6',
     slug: 'san-juan',
+    entityType: 'editorial_route',
     title: 'San Juan La Laguna',
     summary: 'Arte y cultura auténtica',
     coverImage: '/images/rutas/san-juan.jpg',
@@ -123,6 +129,7 @@ export const mockRoutes: Route[] = [
   {
     id: '7',
     slug: 'santiago',
+    entityType: 'editorial_route',
     title: 'Santiago Atitlán',
     summary: 'Tradición y Maximón',
     coverImage: '/images/rutas/santiago.jpg',

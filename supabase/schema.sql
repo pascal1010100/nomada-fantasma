@@ -136,6 +136,32 @@ COMMENT ON TABLE "public"."internal_request_notifications" IS 'Operational deliv
 COMMENT ON COLUMN "public"."internal_request_notifications"."template" IS 'Business template or event identifier used to trigger the notification.';
 
 
+CREATE TABLE IF NOT EXISTS "public"."towns" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "slug" "text" NOT NULL,
+    "title" "text" NOT NULL,
+    "summary" "text" NOT NULL,
+    "full_description" "text",
+    "cover_image" "text" NOT NULL,
+    "wifi_rating" integer DEFAULT 0 NOT NULL,
+    "rating" numeric(3,2) DEFAULT 0 NOT NULL,
+    "vibe" "text",
+    "highlights" "jsonb" DEFAULT '[]'::"jsonb" NOT NULL,
+    "weather" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
+    "activities" "jsonb" DEFAULT '[]'::"jsonb" NOT NULL,
+    "transport_schedule" "jsonb" DEFAULT '[]'::"jsonb" NOT NULL,
+    "services" "jsonb" DEFAULT '{"atms":[],"essentials":[]}'::"jsonb" NOT NULL,
+    "guides" "jsonb" DEFAULT '[]'::"jsonb" NOT NULL,
+    "sort_order" integer DEFAULT 0 NOT NULL,
+    "is_active" boolean DEFAULT true NOT NULL
+);
+
+
+ALTER TABLE "public"."towns" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."places" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"(),
@@ -346,6 +372,16 @@ ALTER TABLE ONLY "public"."internal_request_notifications"
 
 
 
+ALTER TABLE ONLY "public"."towns"
+    ADD CONSTRAINT "towns_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."towns"
+    ADD CONSTRAINT "towns_slug_key" UNIQUE ("slug");
+
+
+
 ALTER TABLE ONLY "public"."places"
     ADD CONSTRAINT "places_pkey" PRIMARY KEY ("id");
 
@@ -394,6 +430,14 @@ CREATE INDEX "idx_internal_request_notifications_recipient" ON "public"."interna
 
 
 CREATE INDEX "idx_internal_request_notifications_request" ON "public"."internal_request_notifications" USING "btree" ("request_kind", "request_id", "created_at" DESC);
+
+
+
+CREATE INDEX "idx_towns_is_active" ON "public"."towns" USING "btree" ("is_active") WHERE ("is_active" = true);
+
+
+
+CREATE INDEX "idx_towns_slug" ON "public"."towns" USING "btree" ("slug");
 
 
 
@@ -483,6 +527,14 @@ CREATE POLICY "Service role can manage internal request notifications" ON "publi
 
 
 
+CREATE POLICY "Public can view active towns" ON "public"."towns" FOR SELECT USING (("is_active" = true));
+
+
+
+CREATE POLICY "Service role can manage towns" ON "public"."towns" USING (("auth"."role"() = 'service_role'::"text")) WITH CHECK (("auth"."role"() = 'service_role'::"text"));
+
+
+
 ALTER TABLE "public"."accommodations" ENABLE ROW LEVEL SECURITY;
 
 
@@ -493,6 +545,9 @@ ALTER TABLE "public"."internal_admin_users" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."internal_request_notifications" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."towns" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."places" ENABLE ROW LEVEL SECURITY;
@@ -547,6 +602,12 @@ GRANT ALL ON TABLE "public"."internal_admin_users" TO "service_role";
 REVOKE ALL ON TABLE "public"."internal_request_notifications" FROM "anon";
 REVOKE ALL ON TABLE "public"."internal_request_notifications" FROM "authenticated";
 GRANT ALL ON TABLE "public"."internal_request_notifications" TO "service_role";
+
+
+
+GRANT SELECT ON TABLE "public"."towns" TO "anon";
+GRANT SELECT ON TABLE "public"."towns" TO "authenticated";
+GRANT ALL ON TABLE "public"."towns" TO "service_role";
 
 
 

@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Region } from '../lib/types';
+import { Region, Route } from '../lib/types';
 
 import { useTranslations } from 'next-intl';
 
@@ -26,10 +26,11 @@ const FilteredRoutes = dynamic(
 );
 
 interface FilteredRoutesWrapperProps {
+  routes: Route[];
   region?: Region;
   searchQuery?: string;
 }
 
-export default function FilteredRoutesWrapper({ region, searchQuery = '' }: FilteredRoutesWrapperProps) {
-  return <FilteredRoutes region={region} searchQuery={searchQuery} />;
+export default function FilteredRoutesWrapper({ routes, region, searchQuery = '' }: FilteredRoutesWrapperProps) {
+  return <FilteredRoutes routes={routes} region={region} searchQuery={searchQuery} />;
 }

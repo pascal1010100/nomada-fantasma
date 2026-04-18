@@ -5,7 +5,7 @@ import { useDebounce } from '@/app/_hooks/useDebounce';
 import { useState, useCallback, useEffect } from 'react';
 import HeroSection from './components/HeroSection';
 import FilteredRoutesWrapper from './components/FilteredRoutesWrapper';
-import { Region } from './lib/types';
+import { Region, Route } from './lib/types';
 import dynamic from 'next/dynamic';
 
 const ParticlesBackground = dynamic(
@@ -13,7 +13,11 @@ const ParticlesBackground = dynamic(
   { ssr: false }
 );
 
-export default function RutasMagicasClient() {
+interface RutasMagicasClientProps {
+  routes: Route[];
+}
+
+export default function RutasMagicasClient({ routes }: RutasMagicasClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -67,6 +71,7 @@ export default function RutasMagicasClient() {
         <main className="relative z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
             <FilteredRoutesWrapper
+              routes={routes}
               region={region || undefined}
               searchQuery={searchQuery}
             />

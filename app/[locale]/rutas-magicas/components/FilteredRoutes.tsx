@@ -2,7 +2,6 @@
 
 import { motion, Variants } from "framer-motion"
 import RouteCard from "./RouteCard"
-import { mockRoutes } from "../mocks/routes"
 import { Region, Route } from "../lib/types"
 import { Compass, ArrowRight } from "lucide-react"
 import { useState, useEffect } from "react"
@@ -20,10 +19,11 @@ const itemVariants: Variants = {
   },
 }
 interface FilteredRoutesProps {
+  routes: Route[]
   region?: Region
   searchQuery?: string
 }
-export default function FilteredRoutes({ region, searchQuery = "" }: FilteredRoutesProps) {
+export default function FilteredRoutes({ routes, region, searchQuery = "" }: FilteredRoutesProps) {
   const t = useTranslations("Routes")
   const td = useTranslations('Data.routes');
   const [isMounted, setIsMounted] = useState(false)
@@ -36,13 +36,13 @@ export default function FilteredRoutes({ region, searchQuery = "" }: FilteredRou
     return null
   }
 
-  const filteredRoutes = mockRoutes.filter((route: Route) => {
+  const filteredRoutes = routes.filter((route: Route) => {
     const matchesRegion = !region || route.region === region
     const isMainRoute = !route.isSubRoute
 
     // Get localized content for search
-    const localizedTitle = td(`${route.slug}.title`).toLowerCase();
-    const localizedSummary = td(`${route.slug}.summary`).toLowerCase();
+    const localizedTitle = (td.has(`${route.slug}.title`) ? td(`${route.slug}.title`) : route.title).toLowerCase();
+    const localizedSummary = (td.has(`${route.slug}.summary`) ? td(`${route.slug}.summary`) : route.summary).toLowerCase();
     const query = searchQuery.toLowerCase();
 
     const matchesSearch =

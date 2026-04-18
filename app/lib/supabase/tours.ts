@@ -2,7 +2,7 @@ import { supabaseAdmin } from '@/app/lib/supabase/server';
 import type { Database } from '@/types/database.types';
 import { normalizeId, normalizeSlug, type Tour } from '@/app/lib/types';
 
-type SupabaseTour = Database['public']['Tables']['tours']['Row'];
+export type SupabaseTour = Database['public']['Tables']['tours']['Row'];
 
 const mapSupabaseTourToUi = (tour: SupabaseTour): Tour => {
   const meetingPoint = (tour as { meeting_point?: string | null }).meeting_point ?? '';
@@ -79,4 +79,44 @@ export async function getToursByPuebloFromDB(puebloSlug: string) {
   return tours
     .map((tour) => mapSupabaseTourToUi(tour))
     .filter((tour) => Boolean(normalizeSlug(tour.slug) ?? normalizeId(tour.id)));
+}
+
+export async function getRecommendedToursFromDB(excludeSlug?: string, limit = 3): Promise<SupabaseTour[]> {
+  const normalizedExcludeSlug = normalizeSlug(excludeSlug);
+  let query = supabaseAdmin
+    .from('tours')
+    .select('*')
+    .eq('is_active', true)
+    .order('is_featured', { ascending: false })
+    .order('rating', { ascending: false })
+    .limit(limit);
+
+  if (normalizedExcludeSlug) {
+    query = query.neq('slug', normalizedExcludeSlug);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error(`Error fetching recommended tours excluding '${excludeSlug ?? ''}':`, error);
+    return [];
+  }
+
+  return data ?? [];
+}
+
+export async function getActiveToursFromDB(): Promise<SupabaseTour[]> {
+  const { data, error } = await supabaseAdmin
+    .from('tours')
+    .select('*')
+    .eq('is_active', true)
+    .order('is_featured', { ascending: false })
+    .order('rating', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching active tours:', error);
+    return [];
+  }
+
+  return data ?? [];
 }

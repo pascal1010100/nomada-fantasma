@@ -53,21 +53,23 @@ export default function RouteCard({ route }: RouteCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
 
-  const title = td('title');
-  const summary = td('summary');
-  const vibe = route.vibe ? td('vibe') : undefined;
+  const title = td.has('title') ? td('title') : route.title;
+  const summary = td.has('summary') ? td('summary') : route.summary;
+  const vibe = route.vibe ? (td.has('vibe') ? td('vibe') : route.vibe) : undefined;
 
   // We need to handle highlights carefully as it's an array
   // next-intl supports getting arrays if configured, but let's assume we can map keys
-  const highlights = route.highlights ? (td.raw('highlights') as string[]) : [];
+  const highlights = td.has('highlights')
+    ? ((() => {
+        const localizedHighlights = td.raw('highlights');
+        return Array.isArray(localizedHighlights) ? (localizedHighlights as string[]) : route.highlights;
+      })())
+    : route.highlights;
 
   const handleClick = (e: MouseEvent) => {
     e.preventDefault();
     if (route.isComingSoon) return;
-    const isAtitlanTown = route.region === 'america' &&
-      (route.slug.includes('san-') || route.slug === 'santiago' || route.slug === 'panajachel' || route.slug === 'santa-cruz');
-
-    const path = isAtitlanTown
+    const path = route.entityType === 'town'
       ? `/${locale}/rutas-magicas/lago-atitlan/${route.slug}`
       : `/${locale}/rutas-magicas/${route.slug}`;
 
@@ -78,10 +80,7 @@ export default function RouteCard({ route }: RouteCardProps) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       if (route.isComingSoon) return;
-      const isAtitlanTown = route.region === 'america' &&
-        (route.slug.includes('san-') || route.slug === 'santiago' || route.slug === 'panajachel' || route.slug === 'santa-cruz');
-
-      const path = isAtitlanTown
+      const path = route.entityType === 'town'
         ? `/${locale}/rutas-magicas/lago-atitlan/${route.slug}`
         : `/${locale}/rutas-magicas/${route.slug}`;
 

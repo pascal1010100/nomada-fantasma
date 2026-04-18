@@ -1,60 +1,9 @@
 import { notFound } from 'next/navigation';
-import { mockRoutes } from '../../rutas-magicas/mocks/routes';
-import { pueblosAtitlan } from '../../rutas-magicas/mocks/atitlanData';
 import ReservationForm from '../../rutas-magicas/components/ReservationForm';
 import { ArrowLeft, Star, ShieldCheck, Zap } from 'lucide-react';
 import Link from 'next/link';
-import { getTourById, getPuebloSlugByTourId } from '../../rutas-magicas/mocks/tours';
 import { getTourBySlugFromDB } from '@/app/lib/supabase/tours';
 import { getTranslations } from 'next-intl/server';
-
-// Helper to find a tour by ID across all data sources
-const findTourById = (id: string) => {
-    // Check main routes
-    const route = mockRoutes.find(r => r.id === id);
-    if (route) return { data: route, type: 'route' as const };
-
-    // Check pueblos
-    const pueblo = pueblosAtitlan.find(p => p.id === id);
-    if (pueblo) return { data: pueblo, type: 'pueblo' as const };
-
-    // Check specific tours inside pueblos
-    const specificTour = getTourById(id);
-    if (specificTour) return { data: specificTour, type: 'tour' as const };
-
-    return null;
-};
-
-const findSupabaseTour = async (idOrSlug: string, locale: string) => {
-    const supabaseTour = await getTourBySlugFromDB(idOrSlug);
-    if (!supabaseTour) {
-        return null;
-    }
-    const isEnglish = locale === 'en';
-    const localizedTitle = isEnglish
-        ? (supabaseTour.title_en ?? supabaseTour.title)
-        : supabaseTour.title;
-    const localizedSummary = isEnglish
-        ? (supabaseTour.description_en ?? supabaseTour.description ?? '')
-        : (supabaseTour.description ?? '');
-    const images = supabaseTour.images ?? (supabaseTour.cover_image ? [supabaseTour.cover_image] : []);
-    return {
-        data: {
-            id: supabaseTour.id,
-            title: localizedTitle,
-            slug: supabaseTour.slug,
-            images,
-            price: supabaseTour.price_min ?? 0,
-            capacity: {
-                max: supabaseTour.max_guests ?? 10,
-            },
-            summary: localizedSummary,
-            rating: 5,
-        },
-        type: 'tour' as const,
-        puebloSlug: supabaseTour.pueblo_slug,
-    };
-};
 
 export default async function TourReservationPage({
     params,
@@ -63,39 +12,21 @@ export default async function TourReservationPage({
 }) {
     const { id, locale } = await params;
     const t = await getTranslations({ locale, namespace: 'ReservationPage' });
-    const localResult = findTourById(id);
-    const result = localResult ?? await findSupabaseTour(id, locale);
+    const supabaseTour = await getTourBySlugFromDB(id);
 
-    if (!result) {
+    if (!supabaseTour) {
         notFound();
     }
 
-    const { data: tour, type } = result;
-
-    // Normalize data for rendering
-    const title = tour.title;
-    const coverImage = 'coverImage' in tour ? tour.coverImage : (tour.images?.[0] || '/images/placeholder.svg');
-    const price = typeof tour.price === 'number' ? tour.price : tour.price.adult;
-    const maxCapacity = 'groupSize' in tour ? tour.groupSize.max : (tour.capacity?.max || 10);
-    const summary = 'summary' in tour ? tour.summary : '';
-
-    // Determine back link
-    let backLink = '/rutas-magicas';
-    let backLabel = t('backToRoutes');
-
-    if (type === 'route') {
-        backLink = `/rutas-magicas/${tour.slug}`;
-        backLabel = t('backToDetails');
-    } else if (type === 'pueblo') {
-        backLink = `/rutas-magicas/lago-atitlan/${tour.slug}`; // Assuming it's always Atitlan for now
-        backLabel = t('backToTown', { town: tour.title });
-    } else if (type === 'tour') {
-        const puebloSlug = ('puebloSlug' in result ? result.puebloSlug : undefined) ?? getPuebloSlugByTourId(tour.id);
-        if (puebloSlug) {
-            backLink = `/rutas-magicas/lago-atitlan/${puebloSlug}/tours/${tour.slug}`;
-            backLabel = t('backToTour');
-        }
-    }
+    const title = locale === 'en' ? (supabaseTour.title_en ?? supabaseTour.title) : supabaseTour.title;
+    const summary = locale === 'en'
+        ? (supabaseTour.description_en ?? supabaseTour.description ?? '')
+        : (supabaseTour.description ?? '');
+    const coverImage = supabaseTour.cover_image ?? supabaseTour.images?.[0] ?? '/images/placeholder.svg';
+    const price = supabaseTour.price_min ?? supabaseTour.price_max ?? 0;
+    const maxCapacity = supabaseTour.max_guests ?? 10;
+    const backLink = `/rutas-magicas/lago-atitlan/${supabaseTour.pueblo_slug}/tours/${supabaseTour.slug}`;
+    const backLabel = t('backToTour');
     const localizedBackLink = `/${locale}${backLink}`;
 
     return (
@@ -138,12 +69,10 @@ export default async function TourReservationPage({
                                         <span className="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold uppercase tracking-wider border border-cyan-500/30 backdrop-blur-md">
                                             {t('premiumBadge')}
                                         </span>
-                                        {'rating' in tour && (
-                                            <span className="flex items-center text-yellow-400 text-sm font-bold">
-                                                <Star className="w-4 h-4 fill-current mr-1" />
-                                                {tour.rating}
-                                            </span>
-                                        )}
+                                        <span className="flex items-center text-yellow-400 text-sm font-bold">
+                                            <Star className="w-4 h-4 fill-current mr-1" />
+                                            {supabaseTour.rating ?? 5}
+                                        </span>
                                     </div>
                                     <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 leading-tight">{title}</h1>
                                     <p className="text-gray-200 text-sm md:text-base line-clamp-3">{summary}</p>
@@ -186,10 +115,10 @@ export default async function TourReservationPage({
                                 </div>
 
                                 <ReservationForm
-                                    tourId={tour.id}
+                                    tourId={supabaseTour.id}
                                     price={price}
                                     maxCapacity={maxCapacity}
-                                    availableDays={['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']}
+                                    availableDays={supabaseTour.available_days ?? ['Todos los días']}
                                 />
                             </div>
                         </div>

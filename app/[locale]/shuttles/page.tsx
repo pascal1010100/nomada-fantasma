@@ -10,26 +10,44 @@ export const metadata = {
 export default async function ShuttlesPage() {
     const supabase = await createClient();
     let initialShuttles: ShuttleRoute[] = [];
+    let dataSource: 'live' | 'mock' | 'empty' = 'live';
+    let fetchWarning: string | null = null;
 
     try {
         const { data, error } = await supabase
             .from('shuttle_routes')
             .select('*')
-            .eq('origin', 'San Pedro La Laguna')
-            .order('origin', { ascending: true });
+            .order('origin', { ascending: true })
+            .order('destination', { ascending: true });
 
-        if (!error && data) {
+        if (error) {
+            throw error;
+        }
+
+        if (data) {
             initialShuttles = data as ShuttleRoute[];
         }
     } catch (e) {
         console.error("Error SSR fetching shuttles:", e);
-    }
-    
-    // Fallback to mocks if DB is empty or fails
-    if (initialShuttles.length === 0) {
-        const { shuttles } = await import('./mocks/shuttles');
-        initialShuttles = shuttles.filter((shuttle) => shuttle.origin === 'San Pedro La Laguna');
+        fetchWarning = 'db_error';
     }
 
-    return <ShuttlesClient initialShuttles={initialShuttles} />;
+    // Keep mocks only as an explicit development safety net.
+    if (initialShuttles.length === 0) {
+        if (process.env.NODE_ENV !== 'production') {
+            const { shuttles } = await import('./mocks/shuttles');
+            initialShuttles = shuttles;
+            dataSource = 'mock';
+        } else {
+            dataSource = 'empty';
+        }
+    }
+
+    return (
+        <ShuttlesClient
+            initialShuttles={initialShuttles}
+            dataSource={dataSource}
+            fetchWarning={fetchWarning}
+        />
+    );
 }

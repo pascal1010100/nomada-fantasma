@@ -4,17 +4,40 @@ import { useState } from 'react';
 import { ShuttleRoute } from '@/types/shuttle';
 import ShuttleCard from './components/ShuttleCard';
 import ShuttleBookingModal from './components/ShuttleBookingModal';
-import { Search } from 'lucide-react';
+import { AlertTriangle, DatabaseZap, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
-export default function ShuttlesClient({ initialShuttles }: { initialShuttles: ShuttleRoute[] }) {
+type ShuttlesClientProps = {
+    initialShuttles: ShuttleRoute[];
+    dataSource?: 'live' | 'mock' | 'empty';
+    fetchWarning?: string | null;
+};
+
+export default function ShuttlesClient({
+    initialShuttles,
+    dataSource = 'live',
+    fetchWarning = null,
+}: ShuttlesClientProps) {
     const t = useTranslations('Shuttles');
+    const locale = useLocale();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedOrigin, setSelectedOrigin] = useState('');
     const [selectedDestination, setSelectedDestination] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedShuttle, setSelectedShuttle] = useState<ShuttleRoute | null>(null);
+
+    const isEnglish = locale.startsWith('en');
+    const operationalMessage =
+        dataSource === 'mock'
+            ? isEnglish
+                ? 'Showing development fallback routes because the live shuttle catalog is unavailable.'
+                : 'Mostrando rutas temporales de desarrollo porque el catalogo real de shuttles no esta disponible.'
+            : dataSource === 'empty'
+                ? isEnglish
+                    ? 'No live shuttle routes are published yet. Add records in Supabase to populate this page.'
+                    : 'Aun no hay rutas de shuttle publicadas en la base real. Agrega registros en Supabase para poblar esta pagina.'
+                : null;
 
     // Get unique origins and destinations for filters
     const origins = Array.from(new Set(initialShuttles.map(s => s.origin)));
@@ -100,6 +123,33 @@ export default function ShuttlesClient({ initialShuttles }: { initialShuttles: S
 
             {/* Search Bar */}
             <div className="max-w-6xl mx-auto px-4 mt-12 relative z-30">
+                {(operationalMessage || fetchWarning) && (
+                    <div className={`mb-6 rounded-2xl border px-5 py-4 ${dataSource === 'mock'
+                            ? 'border-amber-500/30 bg-amber-500/10'
+                            : 'border-cyan-500/30 bg-cyan-500/10'
+                        }`}>
+                        <div className="flex items-start gap-3">
+                            {dataSource === 'mock' ? (
+                                <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-300" />
+                            ) : (
+                                <DatabaseZap className="mt-0.5 h-5 w-5 text-cyan-300" />
+                            )}
+                            <div className="space-y-1">
+                                <p className="text-sm font-semibold text-white">
+                                    {operationalMessage}
+                                </p>
+                                {fetchWarning === 'db_error' && (
+                                    <p className="text-xs text-white/70">
+                                        {isEnglish
+                                            ? 'The server could not read shuttle_routes from Supabase during SSR.'
+                                            : 'El servidor no pudo leer shuttle_routes desde Supabase durante el SSR.'}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="bg-card border border-white/10 p-3 rounded-2xl shadow-3xl shadow-black/20">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                         <select

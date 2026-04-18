@@ -1,7 +1,9 @@
 export type Region = 'europe' | 'asia' | 'america';
+export type RouteEntityType = 'editorial_route' | 'town' | 'tour';
 
 export interface Route {
   id: string;
+  entityType: RouteEntityType;
   slug: string;
   title: string;
   summary: string;

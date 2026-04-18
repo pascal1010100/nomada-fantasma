@@ -18,20 +18,8 @@ export default function NearbyTownCard({ town, locale }: NearbyTownCardProps) {
   const t = useTranslations('Data.routes');
   const tTown = useTranslations('Town');
 
-  let title = town.title;
-  let summary = town.summary;
-
-  try {
-    title = t(`${town.slug}.title`);
-  } catch {
-    title = town.title;
-  }
-
-  try {
-    summary = t(`${town.slug}.summary`);
-  } catch {
-    summary = town.summary;
-  }
+  const title = t.has(`${town.slug}.title`) ? t(`${town.slug}.title`) : town.title;
+  const summary = t.has(`${town.slug}.summary`) ? t(`${town.slug}.summary`) : town.summary;
 
   return (
     <Link

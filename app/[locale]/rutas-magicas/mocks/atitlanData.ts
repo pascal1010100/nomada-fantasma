@@ -3,6 +3,7 @@ import { Route } from '../lib/types';
 export const atitlanInfo = {
   id: '1',
   slug: 'lago-atitlan',
+  entityType: 'town',
   title: 'atitlan.title',
   summary: 'atitlan.summary',
   coverImage: '/images/rutas/atitlan.jpg',
@@ -92,6 +93,7 @@ export const pueblosAtitlan: (Route & {
     {
       id: 'p0',
       slug: 'panajachel',
+      entityType: 'town',
       title: 'panajachel.title',
       summary: 'panajachel.summary',
       coverImage: '/images/rutas/panajachel.jpg',
@@ -204,6 +206,7 @@ export const pueblosAtitlan: (Route & {
     {
       id: 'p1',
       slug: 'san-pedro',
+      entityType: 'town',
       title: 'san-pedro.title',
       summary: 'san-pedro.summary',
       coverImage: '/images/tours/san-pedro/volcan-san-pedro-1.jpg',
@@ -355,6 +358,7 @@ export const pueblosAtitlan: (Route & {
     {
       id: 'p2',
       slug: 'san-marcos',
+      entityType: 'town',
       title: 'san-marcos.title',
       summary: 'san-marcos.summary',
       coverImage: '/images/rutas/san-marcos.jpg',
@@ -463,6 +467,7 @@ export const pueblosAtitlan: (Route & {
     {
       id: 'p3',
       slug: 'santiago',
+      entityType: 'town',
       title: 'santiago.title',
       summary: 'santiago.summary',
       coverImage: '/images/rutas/santiago.jpg',
@@ -571,6 +576,7 @@ export const pueblosAtitlan: (Route & {
     {
       id: 'p4',
       slug: 'san-juan',
+      entityType: 'town',
       title: 'San Juan La Laguna',
       summary: 'Arte, textiles y café orgánico',
       coverImage: '/images/rutas/san-juan.jpg',
@@ -679,6 +685,7 @@ export const pueblosAtitlan: (Route & {
     {
       id: 'p5',
       slug: 'santa-cruz',
+      entityType: 'town',
       title: 'Santa Cruz La Laguna',
       summary: 'Pueblo tranquilo con las mejores vistas y buceo de altura',
       coverImage: '/images/rutas/santa-cruz-authentic.jpg',
