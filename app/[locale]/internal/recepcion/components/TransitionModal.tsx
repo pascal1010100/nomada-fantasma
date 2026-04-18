@@ -17,6 +17,9 @@ interface TransitionModalProps {
     showNoteInput?: boolean;
     initialNote?: string;
     isLoading?: boolean;
+    noteRequired?: boolean;
+    noteMinLength?: number;
+    noteHelper?: string;
 }
 
 export default function TransitionModal({
@@ -29,14 +32,19 @@ export default function TransitionModal({
     status,
     showNoteInput = true,
     initialNote = '',
-    isLoading = false
+    isLoading = false,
+    noteRequired = false,
+    noteMinLength = 0,
+    noteHelper
 }: TransitionModalProps) {
     const [note, setNote] = React.useState(initialNote);
+    const [validationError, setValidationError] = React.useState('');
 
     // Reset note when modal opens/changes
     React.useEffect(() => {
         if (isOpen) {
             setNote(initialNote);
+            setValidationError('');
         }
     }, [isOpen, initialNote]);
 
@@ -81,6 +89,14 @@ export default function TransitionModal({
 
     const handleConfirm = (e: React.FormEvent) => {
         e.preventDefault();
+        const trimmedNote = note.trim();
+
+        if (showNoteInput && noteRequired && trimmedNote.length < noteMinLength) {
+            setValidationError(`La nota debe tener al menos ${noteMinLength} caracteres.`);
+            return;
+        }
+
+        setValidationError('');
         onConfirm(note);
     };
 
@@ -126,12 +142,22 @@ export default function TransitionModal({
                                         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">
                                             Bitácora Operativa
                                         </label>
-                                        <span className="text-[10px] text-gray-600 font-medium">Opcional</span>
+                                        <span className="text-[10px] text-gray-600 font-medium">
+                                            {noteRequired ? 'Obligatoria' : 'Opcional'}
+                                        </span>
                                     </div>
+                                    {noteHelper ? (
+                                        <p className="px-1 text-xs text-gray-500">{noteHelper}</p>
+                                    ) : null}
                                     <div className="group relative">
                                         <textarea
                                             value={note}
-                                            onChange={(e) => setNote(e.target.value)}
+                                            onChange={(e) => {
+                                                setNote(e.target.value);
+                                                if (validationError) {
+                                                    setValidationError('');
+                                                }
+                                            }}
                                             disabled={isLoading}
                                             rows={4}
                                             className="w-full bg-black/40 border border-white/5 group-hover:border-white/10 focus:border-cyan-500/40 rounded-2xl px-5 py-4 text-sm text-gray-200 transition-all outline-none resize-none placeholder:text-gray-700 shadow-inner"
@@ -139,6 +165,9 @@ export default function TransitionModal({
                                         />
                                         <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-transparent via-cyan-500/20 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity rounded-full" />
                                     </div>
+                                    {validationError ? (
+                                        <p className="px-1 text-xs text-rose-300">{validationError}</p>
+                                    ) : null}
                                 </div>
                             )}
 

@@ -5,8 +5,10 @@ import ShuttleRequestTemplate from '../components/emails/ShuttleRequestTemplate'
 import ShuttleConfirmationEmail from '../components/emails/ShuttleConfirmationEmail';
 import ShuttleAdminNotification from '../components/emails/ShuttleAdminNotification';
 import ShuttleAgencyNotification from '../components/emails/ShuttleAgencyNotification';
+import ShuttleCancellationNotice from '../components/emails/ShuttleCancellationNotice';
 import CustomerActionEmail from '../components/emails/CustomerActionEmail';
 import TourLeadNotification from '../components/emails/TourLeadNotification';
+import TourCancellationNotice from '../components/emails/TourCancellationNotice';
 import logger from './logger';
 import { CONTACT_INFO } from './constants';
 
@@ -94,7 +96,7 @@ type MultiRecipientSendResult = {
     error?: unknown;
 };
 
-type ManualCustomerEmailTemplate = 'payment_instructions' | 'not_available' | 'booking_confirmed';
+type ManualCustomerEmailTemplate = 'payment_instructions' | 'not_available' | 'booking_confirmed' | 'booking_cancelled';
 
 type ManualCustomerEmailProps = {
     to: string;
@@ -254,6 +256,7 @@ type BuildCustomerActionEmailInput = {
     pickupLocation?: string;
     meetingPoint?: string;
     travelTime?: string;
+    cancellationReason?: string;
 };
 
 function formatEmailDate(value: string, locale: string) {
@@ -311,7 +314,7 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
         const subject = isEnglish
             ? `Payment instructions: ${data.serviceName}`
             : `Instrucciones de pago: ${data.serviceName}`;
-        
+
         return {
             subject,
             react: CustomerActionEmail({
@@ -392,6 +395,51 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
         };
     }
 
+    if (data.template === 'booking_cancelled') {
+        const subject = isEnglish
+            ? `Booking cancelled: ${data.serviceName}`
+            : `Reserva cancelada: ${data.serviceName}`;
+        return {
+            subject,
+            react: CustomerActionEmail({
+                preview: subject,
+                eyebrow,
+                title: isEnglish ? 'Your booking has been cancelled' : 'Tu reserva ha sido cancelada',
+                subtitle: isEnglish
+                    ? 'We are sorry, but this booking can no longer move forward under the requested conditions.'
+                    : 'Lo sentimos, pero esta reserva ya no puede continuar bajo las condiciones solicitadas.',
+                greeting: isEnglish ? `Hi ${data.customerName},` : `Hola ${data.customerName},`,
+                intro: isEnglish
+                    ? 'Our operations team has closed this booking and the reservation is now cancelled.'
+                    : 'Nuestro equipo de operaciones cerró esta gestión y la reserva quedó cancelada.',
+                summaryTitle,
+                serviceLabel,
+                serviceValue: data.serviceName,
+                dateLabel,
+                dateValue: formattedDate,
+                travelersLabel,
+                travelersValue: travelerValue,
+                priceLabel,
+                priceValue,
+                requestIdLabel,
+                requestId: data.requestId,
+                infoTitle: isEnglish ? 'Cancellation details' : 'Detalle de la cancelación',
+                infoBody: data.cancellationReason
+                    ? isEnglish
+                        ? `Reason shared by operations: ${data.cancellationReason}\n\nIf you would like us to help you find an alternative, reply to this email or contact us on WhatsApp.`
+                        : `Motivo registrado por operaciones: ${data.cancellationReason}\n\nSi quieres que te ayudemos a encontrar una alternativa, responde a este correo o escríbenos por WhatsApp.`
+                    : isEnglish
+                        ? 'If you would like us to help you find an alternative, reply to this email or contact us on WhatsApp.'
+                        : 'Si quieres que te ayudemos a encontrar una alternativa, responde a este correo o escríbenos por WhatsApp.',
+                contactTitle,
+                contactLine,
+                contactWhatsAppLabel,
+                footerNote,
+                footerSignature,
+            }),
+        };
+    }
+
     const subject = isEnglish
         ? `Booking confirmed: ${data.serviceName}`
         : `Reserva confirmada: ${data.serviceName}`;
@@ -403,7 +451,7 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
     // Elite logistics for voucher
     const infoTitle = isEnglish ? 'Travel Logistics' : 'Logística de viaje';
     let eliteInfoBody = infoBody;
-    
+
     if (data.kind === 'shuttle' && (data.travelTime || data.pickupLocation)) {
         const timeLabel = isEnglish ? 'Time' : 'Hora';
         const locLabel = isEnglish ? 'Pickup' : 'Recogida';
@@ -447,6 +495,80 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
             footerSignature,
         }),
     };
+}
+
+type TourCancellationAgencyEmailProps = {
+    to: string;
+    reservationId: string;
+    tourName: string;
+    tourDate: string;
+    customerName: string;
+    customerEmail: string;
+    customerWhatsapp?: string | null;
+    guests?: number;
+    cancellationReason: string;
+};
+
+type ShuttleCancellationAgencyEmailProps = {
+    to: string;
+    bookingId: string;
+    origin: string;
+    destination: string;
+    travelDate: string;
+    travelTime?: string | null;
+    passengers: number;
+    pickupLocation: string;
+    customerName: string;
+    customerEmail: string;
+    cancellationReason: string;
+};
+
+export async function sendTourCancellationAgencyEmail(data: TourCancellationAgencyEmailProps): Promise<SendEmailResult> {
+    if (!resend) {
+        logger.info('📧 [TOUR CANCELLATION AGENCY EMAIL SIMULATION] --------------------');
+        logger.info(`To: ${data.to}`);
+        logger.info(`Subject: Tour cancelado: ${data.tourName}`);
+        logger.info('----------------------------------------------------------------');
+        return { success: true, id: 'simulated_' + Date.now() };
+    }
+
+    try {
+        return await sendEmailWithRetry('tour_agency_cancellation', () =>
+            resend.emails.send({
+                from: RESEND_FROM,
+                to: [data.to],
+                subject: `Tour cancelado: ${data.tourName}`,
+                react: TourCancellationNotice(data),
+            })
+        );
+    } catch (error) {
+        logger.error('Error sending tour cancellation agency email:', error);
+        return { success: false, error };
+    }
+}
+
+export async function sendShuttleCancellationAgencyEmail(data: ShuttleCancellationAgencyEmailProps): Promise<SendEmailResult> {
+    if (!resend) {
+        logger.info('📧 [SHUTTLE CANCELLATION AGENCY EMAIL SIMULATION] -----------------');
+        logger.info(`To: ${data.to}`);
+        logger.info(`Subject: Shuttle cancelado: ${data.origin} -> ${data.destination}`);
+        logger.info('----------------------------------------------------------------');
+        return { success: true, id: 'simulated_' + Date.now() };
+    }
+
+    try {
+        return await sendEmailWithRetry('shuttle_agency_cancellation', () =>
+            resend.emails.send({
+                from: RESEND_FROM,
+                to: [data.to],
+                subject: `Shuttle cancelado: ${data.origin} -> ${data.destination}`,
+                react: ShuttleCancellationNotice(data),
+            })
+        );
+    } catch (error) {
+        logger.error('Error sending shuttle cancellation agency email:', error);
+        return { success: false, error };
+    }
 }
 
 interface SendShuttleConfirmationEmailsProps {
@@ -523,19 +645,19 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
             subject: string;
             kind: 'customer' | 'operations';
         }> = [
-            {
-                label: 'tour_customer',
-                to: data.to,
-                subject: data.t('preview', { tourName: data.tourName }),
-                kind: 'customer',
-            },
-            {
-                label: 'tour_admin',
-                to: adminEmail,
-                subject: `Nueva solicitud de tour: ${data.tourName}`,
-                kind: 'operations',
-            },
-        ];
+                {
+                    label: 'tour_customer',
+                    to: data.to,
+                    subject: data.t('preview', { tourName: data.tourName }),
+                    kind: 'customer',
+                },
+                {
+                    label: 'tour_admin',
+                    to: adminEmail,
+                    subject: `Nueva solicitud de tour: ${data.tourName}`,
+                    kind: 'operations',
+                },
+            ];
 
         if (agencyEmail) {
             queue.push({
@@ -559,25 +681,25 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
             const reactComponent =
                 item.kind === 'customer'
                     ? ReservationTemplate({
-                          ...data,
-                      })
+                        ...data,
+                    })
                     : TourLeadNotification({
-                          customerName: data.customerName,
-                          customerEmail: data.to,
-                          customerWhatsapp: data.customerPhone || '',
-                          tourName: data.tourName,
-                          tourDate: data.date,
-                          guests: data.guests,
-                          notes: data.customerNotes || undefined,
-                          reservationId: data.reservationId,
-                          operationsEmail: adminEmail,
-                          adminPanelUrl: item.label === 'tour_admin'
-                              ? `${SITE_URL}/es/internal/recepcion`
-                              : undefined,
-                          roleLabel,
-                          showAdminPanel: item.label === 'tour_admin',
-                          showAgencyInstructions: item.label === 'tour_agency',
-                      });
+                        customerName: data.customerName,
+                        customerEmail: data.to,
+                        customerWhatsapp: data.customerPhone || '',
+                        tourName: data.tourName,
+                        tourDate: data.date,
+                        guests: data.guests,
+                        notes: data.customerNotes || undefined,
+                        reservationId: data.reservationId,
+                        operationsEmail: adminEmail,
+                        adminPanelUrl: item.label === 'tour_admin'
+                            ? `${SITE_URL}/es/internal/recepcion`
+                            : undefined,
+                        roleLabel,
+                        showAdminPanel: item.label === 'tour_admin',
+                        showAgencyInstructions: item.label === 'tour_agency',
+                    });
 
             const result = await sendEmailWithRetry(item.label, () =>
                 resend.emails.send({
@@ -666,19 +788,19 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
             subject: string;
             kind: 'customer' | 'operations';
         }> = [
-            {
-                label: 'shuttle_customer',
-                to: data.customerEmail,
-                subject: data.t('subject', { origin: data.origin, destination: data.destination }),
-                kind: 'customer',
-            },
-            {
-                label: 'shuttle_admin',
-                to: adminEmail,
-                subject: buildShuttleOpsSubject('Shuttle pendiente', data.origin, data.destination, data.travelDate),
-                kind: 'operations',
-            },
-        ];
+                {
+                    label: 'shuttle_customer',
+                    to: data.customerEmail,
+                    subject: data.t('subject', { origin: data.origin, destination: data.destination }),
+                    kind: 'customer',
+                },
+                {
+                    label: 'shuttle_admin',
+                    to: adminEmail,
+                    subject: buildShuttleOpsSubject('Shuttle pendiente', data.origin, data.destination, data.travelDate),
+                    kind: 'operations',
+                },
+            ];
 
         if (agencyEmail) {
             queue.push({
@@ -696,21 +818,21 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
             const reactComponent =
                 item.kind === 'customer'
                     ? ShuttleConfirmationEmail({
-                          bookingId: data.bookingId,
-                          customerName: data.customerName,
-                          origin: data.origin,
-                          destination: data.destination,
-                          travelDate: data.travelDate,
-                          travelTime: data.travelTime,
-                          passengers: data.passengers,
-                          pickupLocation: data.pickupLocation,
-                          type: data.type,
-                          price: data.price,
-                          t: data.t,
-                          locale: data.locale,
-                      })
+                        bookingId: data.bookingId,
+                        customerName: data.customerName,
+                        origin: data.origin,
+                        destination: data.destination,
+                        travelDate: data.travelDate,
+                        travelTime: data.travelTime,
+                        passengers: data.passengers,
+                        pickupLocation: data.pickupLocation,
+                        type: data.type,
+                        price: data.price,
+                        t: data.t,
+                        locale: data.locale,
+                    })
                     : item.label === 'shuttle_admin'
-                      ? ShuttleAdminNotification({
+                        ? ShuttleAdminNotification({
                             bookingId: data.bookingId,
                             customerName: data.customerName,
                             customerEmail: data.customerEmail,
@@ -725,7 +847,7 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
                             createdAt: data.createdAt,
                             adminPanelUrl: `${SITE_URL}/es/internal/recepcion`,
                         })
-                      : ShuttleAgencyNotification({
+                        : ShuttleAgencyNotification({
                             bookingId: data.bookingId,
                             customerName: data.customerName,
                             customerEmail: data.customerEmail,

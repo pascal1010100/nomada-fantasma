@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { stripRequestMetadata } from '@/app/lib/request-metadata';
+import { supabase } from '@/app/lib/supabase/client';
 import TransitionModal, { ModalStatus } from './components/TransitionModal';
 
 type InternalRequestItem = {
@@ -20,6 +22,21 @@ type InternalRequestItem = {
     adminNotes: string | null;
     confirmedAt: string | null;
     cancelledAt: string | null;
+    notifications: Array<{
+        id: string;
+        created_at: string;
+        request_kind: 'tour' | 'shuttle';
+        request_id: string;
+        recipient_type: 'customer' | 'agency' | 'admin';
+        recipient_email: string;
+        channel: 'email';
+        template: string;
+        delivery_status: 'sent' | 'failed';
+        subject: string | null;
+        provider_message_id: string | null;
+        error_message: string | null;
+        triggered_by: string | null;
+    }>;
 };
 type RequestStatus = 'pending' | 'processing' | 'confirmed' | 'cancelled' | 'completed';
 
@@ -43,6 +60,17 @@ type ToastMessage = {
     message?: string;
 };
 
+type InternalSessionResponse = {
+    success: boolean;
+    user: {
+        email: string;
+        displayName: string;
+        actor: string;
+        role: 'admin' | 'ops';
+        source: 'directory' | 'env_fallback';
+    };
+};
+
 interface ModalState {
     isOpen: boolean;
     item: InternalRequestItem | null;
@@ -53,9 +81,11 @@ interface ModalState {
     modalStatus: ModalStatus;
     showNoteInput: boolean;
     initialNote: string;
+    noteRequired: boolean;
+    noteMinLength: number;
+    noteHelper?: string;
 }
 
-const STORAGE_KEY = 'nomada_admin_token_permanent';
 const PROCESSING_STALE_HOURS = 8;
 
 function toStartOfDay(date: Date) {
@@ -108,6 +138,26 @@ function getEmailStatusClasses(status: string | null): string {
     if (status === 'failed') return 'border-rose-400/30 bg-rose-500/10 text-rose-300';
     if (status === 'pending') return 'border-amber-400/30 bg-amber-500/10 text-amber-300';
     return 'border-white/10 bg-white/5 text-muted-foreground';
+}
+
+function getNotificationRecipientLabel(type: InternalRequestItem['notifications'][number]['recipient_type']): string {
+    if (type === 'customer') return 'Cliente';
+    if (type === 'agency') return 'Agencia';
+    return 'Admin';
+}
+
+function getNotificationTemplateLabel(template: string): string {
+    if (template === 'payment_instructions') return 'Pago';
+    if (template === 'booking_confirmed') return 'Confirmación';
+    if (template === 'booking_cancelled') return 'Cancelación';
+    if (template === 'not_available') return 'No disponible';
+    return template;
+}
+
+function getNotificationStatusClasses(status: 'sent' | 'failed'): string {
+    return status === 'sent'
+        ? 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200'
+        : 'border-rose-400/20 bg-rose-500/10 text-rose-200';
 }
 
 function getChecklist(status: RequestStatus): string {
@@ -205,9 +255,13 @@ function renderQualityBadge(status: RequestStatus, note: string | null) {
 
 export default function RecepcionRequestsPage() {
     const locale = useLocale();
-    const [token, setToken] = useState('');
-    const [tempToken, setTempToken] = useState('');
+    const router = useRouter();
     const [actor, setActor] = useState('recepcion');
+    const [operatorEmail, setOperatorEmail] = useState('');
+    const [operatorName, setOperatorName] = useState('');
+    const [operatorRole, setOperatorRole] = useState<'admin' | 'ops' | null>(null);
+    const [accessSource, setAccessSource] = useState<'directory' | 'env_fallback' | null>(null);
+    const [authLoading, setAuthLoading] = useState(true);
     const [loading, setLoading] = useState(false);
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
     const [emailActionLoadingId, setEmailActionLoadingId] = useState<string | null>(null);
@@ -222,7 +276,9 @@ export default function RecepcionRequestsPage() {
         confirmLabel: '',
         modalStatus: 'processing',
         showNoteInput: true,
-        initialNote: ''
+        initialNote: '',
+        noteRequired: false,
+        noteMinLength: 0,
     });
     const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
     const [error, setError] = useState('');
@@ -248,14 +304,59 @@ export default function RecepcionRequestsPage() {
     };
 
     useEffect(() => {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            setToken(stored);
-            setTempToken(stored);
-        }
-    }, []);
+        let active = true;
 
-    const canFetch = token.trim().length > 0;
+        const loadUser = async () => {
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
+
+            if (!active) return;
+
+            if (!user?.email) {
+                router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}`);
+                return;
+            }
+
+            try {
+                const sessionResponse = await fetch('/api/internal/session');
+                const payload = (await sessionResponse.json()) as InternalSessionResponse | { error?: string };
+
+                if (!active) return;
+
+                if (!sessionResponse.ok || !('success' in payload)) {
+                    await supabase.auth.signOut();
+                    const errorCode = sessionResponse.status === 403 ? 'not-allowed' : 'auth-required';
+                    router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}&error=${errorCode}`);
+                    return;
+                }
+
+                setOperatorEmail(payload.user.email);
+                setOperatorName(payload.user.displayName);
+                setOperatorRole(payload.user.role);
+                setAccessSource(payload.user.source);
+                setActor(payload.user.actor);
+                setAuthLoading(false);
+            } catch {
+                if (!active) return;
+                router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}&error=auth-required`);
+            }
+        };
+
+        void loadUser();
+
+        return () => {
+            active = false;
+        };
+    }, [locale, router]);
+
+    useEffect(() => {
+        if (!authLoading) {
+            void fetchRequests();
+        }
+    }, [authLoading]);
+
+    const canFetch = !authLoading;
 
     const normalizeStatus = (status: string | null): RequestStatus => {
         if (status === 'processing' || status === 'confirmed' || status === 'cancelled' || status === 'completed') {
@@ -351,12 +452,16 @@ export default function RecepcionRequestsPage() {
         try {
             const response = await fetch('/api/internal/requests?limit=100', {
                 headers: {
-                    'x-admin-token': token.trim(),
                 },
             });
 
             const payload = (await response.json()) as InternalResponse | { error?: string };
             if (!response.ok) {
+                if (response.status === 401) {
+                    await supabase.auth.signOut();
+                    router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}&error=auth-required`);
+                    return;
+                }
                 setData(null);
                 const message = payload && typeof payload === 'object' && 'error' in payload ? payload.error || 'Error' : 'Error';
                 setError(message);
@@ -377,22 +482,12 @@ export default function RecepcionRequestsPage() {
         }
     };
 
-    const saveToken = () => {
-        const normalized = tempToken.trim();
-        setToken(normalized);
-        localStorage.setItem(STORAGE_KEY, normalized);
+    const signOutOperator = async () => {
+        await supabase.auth.signOut();
         setData(null);
         setError('');
-        pushToast('success', 'Token guardado', 'Ya puedes actualizar solicitudes.');
-    };
-
-    const clearToken = () => {
-        setToken('');
-        setTempToken('');
-        setData(null);
-        setError('');
-        localStorage.removeItem(STORAGE_KEY);
-        pushToast('info', 'Token limpiado', 'La sesión operativa fue cerrada.');
+        pushToast('info', 'Sesión cerrada', 'La sesión operativa fue cerrada.');
+        router.replace(`/${locale}/internal/login`);
     };
 
     const getActions = (status: RequestStatus): Array<{ label: string; to: RequestStatus }> => {
@@ -424,7 +519,6 @@ export default function RecepcionRequestsPage() {
     };
 
     const updateStatus = async (item: InternalRequestItem, nextStatus: RequestStatus) => {
-        if (!token.trim()) return;
         const currentStatus = normalizeStatus(item.status);
         if (currentStatus === nextStatus) return;
 
@@ -439,7 +533,9 @@ export default function RecepcionRequestsPage() {
                 confirmLabel: 'Finalizar y Notificar',
                 modalStatus: 'confirmed',
                 showNoteInput: true,
-                initialNote: 'Pago confirmado (Voucher enviado automáticamente)'
+                initialNote: 'Pago confirmado (Voucher enviado automáticamente)',
+                noteRequired: false,
+                noteMinLength: 0,
             });
             return;
         }
@@ -454,7 +550,9 @@ export default function RecepcionRequestsPage() {
                 confirmLabel: 'Cerrar Caso',
                 modalStatus: 'completed',
                 showNoteInput: true,
-                initialNote: 'Servicio ejecutado y finalizado correctamente'
+                initialNote: 'Servicio ejecutado y finalizado correctamente',
+                noteRequired: false,
+                noteMinLength: 0,
             });
             return;
         }
@@ -470,7 +568,10 @@ export default function RecepcionRequestsPage() {
                 confirmLabel: 'Confirmar Cancelación',
                 modalStatus: 'cancelled',
                 showNoteInput: true,
-                initialNote: ''
+                initialNote: '',
+                noteRequired: true,
+                noteMinLength: 5,
+                noteHelper: 'Explica el motivo de la cancelación para dejar rastro operativo claro.',
             });
             return;
         }
@@ -495,7 +596,6 @@ export default function RecepcionRequestsPage() {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-admin-token': token.trim(),
                     'x-admin-actor': actor.trim() || 'recepcion',
                 },
                 body: JSON.stringify({
@@ -509,6 +609,11 @@ export default function RecepcionRequestsPage() {
 
             const payload = await response.json();
             if (!response.ok) {
+                if (response.status === 401) {
+                    await supabase.auth.signOut();
+                    router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}&error=auth-required`);
+                    return;
+                }
                 if (response.status === 409) {
                     setError('Este caso fue actualizado por otro operador. Actualiza solicitudes.');
                     pushToast('error', 'Conflicto de actualización', 'Otro operador ya cambió este caso.');
@@ -521,6 +626,9 @@ export default function RecepcionRequestsPage() {
             }
 
             pushToast('success', `Estado actualizado a ${nextStatus}`, 'Cambio guardado correctamente.');
+            if (typeof payload?.warning === 'string' && payload.warning.trim()) {
+                pushToast('info', 'Notificación pendiente de revisión', payload.warning);
+            }
             
             // Elite Automation: Send voucher if confirmed
             if (nextStatus === 'confirmed') {
@@ -545,8 +653,6 @@ export default function RecepcionRequestsPage() {
     };
 
     const sendCustomerEmail = async (item: InternalRequestItem, template: ManualEmailTemplate) => {
-        if (!token.trim()) return;
-
         const loadingKey = `${item.kind}-${item.id}-${template}`;
         setEmailActionLoadingId(loadingKey);
         setError('');
@@ -556,7 +662,6 @@ export default function RecepcionRequestsPage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-admin-token': token.trim(),
                     'x-admin-actor': actor.trim() || 'recepcion',
                 },
                 body: JSON.stringify({
@@ -568,6 +673,11 @@ export default function RecepcionRequestsPage() {
 
             const payload = await response.json();
             if (!response.ok) {
+                if (response.status === 401) {
+                    await supabase.auth.signOut();
+                    router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}&error=auth-required`);
+                    return;
+                }
                 const message = payload?.error || 'No se pudo enviar el correo.';
                 setError(message);
                 pushToast('error', 'No se pudo enviar el correo', message);
@@ -623,33 +733,38 @@ export default function RecepcionRequestsPage() {
             </div>
 
             <div className="rounded-xl border p-4 mb-6 bg-card/50">
-                <label htmlFor="admin-token" className="text-sm font-medium block mb-2">
-                    Token de Admin
-                </label>
-                <div className="flex flex-col sm:flex-row gap-2">
-                    <input
-                        id="admin-token"
-                        type="password"
-                        value={tempToken}
-                        onChange={(event) => setTempToken(event.target.value)}
-                        placeholder="Pega ADMIN_API_TOKEN"
-                        className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
-                    />
-                    <button
-                        type="button"
-                        onClick={saveToken}
-                        className="rounded-md bg-primary px-4 py-2 text-primary-foreground text-sm"
-                    >
-                        Guardar token
-                    </button>
-                    <button
-                        type="button"
-                        onClick={clearToken}
-                        className="rounded-md border px-4 py-2 text-sm"
-                    >
-                        Limpiar
-                    </button>
+                <p className="text-sm font-medium mb-2">Sesión operativa</p>
+                <div className="rounded-lg border border-cyan-400/20 bg-cyan-500/5 px-3 py-2 text-sm text-cyan-100">
+                    {authLoading ? 'Validando sesión...' : `Conectado como ${operatorName || operatorEmail}`}
                 </div>
+                {!authLoading ? (
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-foreground/90">
+                            {operatorEmail}
+                        </span>
+                        {operatorRole ? (
+                            <span className="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-cyan-100">
+                                Rol: {operatorRole === 'admin' ? 'Admin' : 'Ops'}
+                            </span>
+                        ) : null}
+                        {accessSource ? (
+                            <span
+                                className={`rounded-full px-2.5 py-1 ${
+                                    accessSource === 'directory'
+                                        ? 'border border-emerald-400/20 bg-emerald-500/10 text-emerald-100'
+                                        : 'border border-amber-400/20 bg-amber-500/10 text-amber-100'
+                                }`}
+                            >
+                                {accessSource === 'directory' ? 'Acceso desde directorio interno' : 'Acceso temporal por allowlist'}
+                            </span>
+                        ) : null}
+                    </div>
+                ) : null}
+                {accessSource === 'env_fallback' ? (
+                    <p className="mt-3 text-xs text-amber-200">
+                        Este operador todavía depende del fallback por email. Conviene darlo de alta en `internal_admin_users` para cerrar la transición.
+                    </p>
+                ) : null}
                 <div className="mt-3">
                     <label htmlFor="admin-actor" className="text-sm font-medium block mb-2">
                         Operador
@@ -671,6 +786,13 @@ export default function RecepcionRequestsPage() {
                         className="rounded-md border px-4 py-2 text-sm transition hover:border-cyan-400/40 hover:text-cyan-100 disabled:opacity-50"
                     >
                         {loading ? 'Cargando...' : 'Actualizar solicitudes'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={signOutOperator}
+                        className="rounded-md border px-4 py-2 text-sm"
+                    >
+                        Cerrar sesión
                     </button>
                     <a
                         href={`/${locale}`}
@@ -808,6 +930,7 @@ export default function RecepcionRequestsPage() {
                 {filteredItems.map((item) => {
                     const normalizedStatus = normalizeStatus(item.status);
                     const itemKey = `${item.kind}-${item.id}`;
+                    const notifications = item.notifications ?? [];
 
                     return (
                         <article key={itemKey} className="rounded-2xl border bg-card/40 p-4 shadow-sm transition hover:border-cyan-400/30 hover:shadow-cyan-500/5">
@@ -852,7 +975,7 @@ export default function RecepcionRequestsPage() {
                                                             key={actionKey}
                                                             type="button"
                                                             onClick={() => updateStatus(item, action.to)}
-                                                            disabled={Boolean(actionLoadingId) || !token.trim()}
+                                                            disabled={Boolean(actionLoadingId) || authLoading}
                                                             className="rounded-lg border px-3 py-2 text-sm transition hover:border-cyan-400/40 hover:text-cyan-100 disabled:opacity-50"
                                                         >
                                                             {actionLoadingId === actionKey ? 'Procesando...' : action.label}
@@ -874,7 +997,7 @@ export default function RecepcionRequestsPage() {
                                                                 key={emailKey}
                                                                 type="button"
                                                                 onClick={() => sendCustomerEmail(item, action.template)}
-                                                                disabled={Boolean(emailActionLoadingId) || !token.trim()}
+                                                                disabled={Boolean(emailActionLoadingId) || authLoading}
                                                                 className="rounded-lg border border-emerald-400/20 bg-emerald-500/5 px-3 py-2 text-sm transition hover:border-emerald-400/40 hover:text-emerald-100 disabled:opacity-50"
                                                             >
                                                                 {emailActionLoadingId === emailKey ? 'Enviando...' : action.label}
@@ -884,6 +1007,42 @@ export default function RecepcionRequestsPage() {
                                                     {getEmailActions(normalizedStatus).length === 0 ? (
                                                         <span className="text-sm text-muted-foreground">Sin correos manuales para este estado.</span>
                                                     ) : null}
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-3">
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Trazabilidad de notificaciones</p>
+                                                    <span className="text-[11px] text-muted-foreground">
+                                                        {notifications.length} registro{notifications.length === 1 ? '' : 's'}
+                                                    </span>
+                                                </div>
+                                                <div className="mt-2 space-y-2">
+                                                    {notifications.length > 0 ? notifications.map((notification) => (
+                                                        <div
+                                                            key={notification.id}
+                                                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs"
+                                                        >
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <span className={`rounded-full border px-2 py-0.5 ${getNotificationStatusClasses(notification.delivery_status)}`}>
+                                                                    {notification.delivery_status === 'sent' ? 'Enviado' : 'Falló'}
+                                                                </span>
+                                                                <span className="rounded-full border border-white/10 bg-black/10 px-2 py-0.5 text-muted-foreground">
+                                                                    {getNotificationRecipientLabel(notification.recipient_type)}
+                                                                </span>
+                                                                <span className="text-foreground/90">{getNotificationTemplateLabel(notification.template)}</span>
+                                                            </div>
+                                                            <p className="mt-1 break-all text-muted-foreground">{notification.recipient_email}</p>
+                                                            <p className="mt-1 text-[11px] text-muted-foreground">
+                                                                {formatTimestamp(notification.created_at)}
+                                                            </p>
+                                                            {notification.error_message ? (
+                                                                <p className="mt-1 text-[11px] text-rose-300">{notification.error_message}</p>
+                                                            ) : null}
+                                                        </div>
+                                                    )) : (
+                                                        <span className="text-sm text-muted-foreground">Aún no hay trazabilidad registrada.</span>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -1000,6 +1159,9 @@ export default function RecepcionRequestsPage() {
                 showNoteInput={modal.showNoteInput}
                 initialNote={modal.initialNote}
                 isLoading={!!actionLoadingId}
+                noteRequired={modal.noteRequired}
+                noteMinLength={modal.noteMinLength}
+                noteHelper={modal.noteHelper}
             />
         </div>
     );

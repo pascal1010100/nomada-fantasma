@@ -7,7 +7,7 @@ import { checkRateLimit, getClientIP } from '@/app/lib/rate-limit';
 import { getLocaleFromRequest } from '@/app/lib/locale';
 import logger from '@/app/lib/logger';
 import { buildRequestMetadataNote } from '@/app/lib/request-metadata';
-import { isAdminRequestAuthorized } from '@/app/lib/admin-auth';
+import { getAuthorizedAdminContext } from '@/app/lib/admin-auth';
 import {
     CreateReservationSchema,
     sanitizeReservationInput,
@@ -442,7 +442,8 @@ export async function POST(request: Request) {
 // GET: Retrieve all reservations (admin only - requires authentication in future)
 export async function GET(request: Request) {
     try {
-        if (!isAdminRequestAuthorized(request)) {
+        const adminContext = await getAuthorizedAdminContext(request);
+        if (!adminContext) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -508,7 +509,8 @@ export async function GET(request: Request) {
 // to enforce operational rules, audit trail, and conflict handling.
 export async function PATCH(request: Request) {
     try {
-        if (!isAdminRequestAuthorized(request)) {
+        const adminContext = await getAuthorizedAdminContext(request);
+        if (!adminContext) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 

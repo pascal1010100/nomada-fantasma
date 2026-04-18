@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/app/lib/supabase/server';
-import { isAdminRequestAuthorized } from '@/app/lib/admin-auth';
+import { getAuthorizedAdminContext } from '@/app/lib/admin-auth';
+import { listInternalNotificationsForRequests, type InternalNotificationRecord } from '@/app/lib/internal-notifications';
 import logger from '@/app/lib/logger';
 import type { Database } from '@/types/database.types';
 
@@ -39,6 +40,7 @@ type InternalRequestItem = {
     adminNotes: string | null;
     confirmedAt: string | null;
     cancelledAt: string | null;
+    notifications: InternalNotificationRecord[];
 };
 
 function normalizeLimit(rawValue: string | null): number {
@@ -66,6 +68,7 @@ function mapReservation(row: ReservationRow | LegacyReservationRow): InternalReq
         adminNotes: row.admin_notes ?? null,
         confirmedAt: row.confirmed_at ?? null,
         cancelledAt: row.cancelled_at ?? null,
+        notifications: [],
     };
 }
 
@@ -86,12 +89,14 @@ function mapShuttle(row: ShuttleBookingRow): InternalRequestItem {
         adminNotes: row.admin_notes,
         confirmedAt: row.confirmed_at,
         cancelledAt: row.cancelled_at,
+        notifications: [],
     };
 }
 
 export async function GET(request: Request) {
     try {
-        if (!isAdminRequestAuthorized(request)) {
+        const adminContext = await getAuthorizedAdminContext(request);
+        if (!adminContext) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -170,16 +175,23 @@ export async function GET(request: Request) {
         const items = [...reservationItems, ...shuttleItems].sort((a, b) =>
             b.createdAt.localeCompare(a.createdAt)
         );
+        const notificationsByRequest = await listInternalNotificationsForRequests(
+            items.map((item) => ({ kind: item.kind, id: item.id }))
+        );
+        const enrichedItems = items.map((item) => ({
+            ...item,
+            notifications: notificationsByRequest[`${item.kind}:${item.id}`] ?? [],
+        }));
 
         return NextResponse.json({
             success: true,
             summary: {
-                total: items.length,
+                total: enrichedItems.length,
                 tours: reservationItems.length,
                 shuttles: shuttleItems.length,
-                emailFailed: items.filter((item) => item.emailStatus === 'failed').length,
+                emailFailed: enrichedItems.filter((item) => item.emailStatus === 'failed').length,
             },
-            items,
+            items: enrichedItems,
         });
     } catch (error) {
         logger.error('Unexpected error in internal requests API:', error);

@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/app/lib/supabase/server';
-import { isAdminRequestAuthorized } from '@/app/lib/admin-auth';
+import { getAuthorizedAdminContext } from '@/app/lib/admin-auth';
 import logger from '@/app/lib/logger';
 import { buildCustomerActionEmail, sendManualCustomerEmail } from '@/app/lib/email';
+import { recordInternalNotification } from '@/app/lib/internal-notifications';
 import { normalizeLocale } from '@/app/lib/locale';
 import { parseRequestMetadata } from '@/app/lib/request-metadata';
 import type { Database } from '@/types/database.types';
@@ -131,7 +132,8 @@ function normalizeTemplate(value: unknown): ManualTemplate | null {
 
 export async function POST(request: Request) {
   try {
-    if (!isAdminRequestAuthorized(request)) {
+    const adminContext = await getAuthorizedAdminContext(request);
+    if (!adminContext) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -139,7 +141,7 @@ export async function POST(request: Request) {
     const kind = body?.kind as RequestKind | undefined;
     const id = typeof body?.id === 'string' ? body.id.trim() : '';
     const template = normalizeTemplate(body?.template);
-    const actor = normalizeActor(request.headers.get('x-admin-actor'));
+    const actor = normalizeActor(adminContext.actor);
 
     if (!kind || !['tour', 'shuttle'].includes(kind)) {
       return NextResponse.json({ error: 'kind es requerido (tour o shuttle).' }, { status: 400 });
@@ -209,8 +211,32 @@ export async function POST(request: Request) {
 
       if (!emailResult.success) {
         const errorMessage = emailResult.error instanceof Error ? emailResult.error.message : 'No se pudo enviar el correo manual.';
+        await recordInternalNotification({
+          requestKind: 'tour',
+          requestId: reservation.id,
+          recipientType: 'customer',
+          recipientEmail: reservation.email,
+          template,
+          deliveryStatus: 'failed',
+          subject,
+          providerMessageId: emailResult.id,
+          errorMessage,
+          triggeredBy: actor,
+        });
         return NextResponse.json({ error: errorMessage }, { status: 502 });
       }
+
+      await recordInternalNotification({
+        requestKind: 'tour',
+        requestId: reservation.id,
+        recipientType: 'customer',
+        recipientEmail: reservation.email,
+        template,
+        deliveryStatus: 'sent',
+        subject,
+        providerMessageId: emailResult.id,
+        triggeredBy: actor,
+      });
 
       await supabaseAdmin
         .from('reservations')
@@ -264,8 +290,32 @@ export async function POST(request: Request) {
 
     if (!emailResult.success) {
       const errorMessage = emailResult.error instanceof Error ? emailResult.error.message : 'No se pudo enviar el correo manual.';
+      await recordInternalNotification({
+        requestKind: 'shuttle',
+        requestId: shuttle.id,
+        recipientType: 'customer',
+        recipientEmail: shuttle.customer_email,
+        template,
+        deliveryStatus: 'failed',
+        subject,
+        providerMessageId: emailResult.id,
+        errorMessage,
+        triggeredBy: actor,
+      });
       return NextResponse.json({ error: errorMessage }, { status: 502 });
     }
+
+    await recordInternalNotification({
+      requestKind: 'shuttle',
+      requestId: shuttle.id,
+      recipientType: 'customer',
+      recipientEmail: shuttle.customer_email,
+      template,
+      deliveryStatus: 'sent',
+      subject,
+      providerMessageId: emailResult.id,
+      triggeredBy: actor,
+    });
 
     await supabaseAdmin
       .from('shuttle_bookings')

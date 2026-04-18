@@ -84,6 +84,58 @@ CREATE TABLE IF NOT EXISTS "public"."internal_request_transitions" (
 ALTER TABLE "public"."internal_request_transitions" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."internal_admin_users" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "email" "text" NOT NULL,
+    "display_name" "text",
+    "role" "text" DEFAULT 'ops'::"text" NOT NULL,
+    "is_active" boolean DEFAULT true NOT NULL,
+    "notes" "text",
+    CONSTRAINT "internal_admin_users_role_check" CHECK (("role" = ANY (ARRAY['admin'::"text", 'ops'::"text"])))
+);
+
+
+ALTER TABLE "public"."internal_admin_users" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."internal_admin_users" IS 'Authorized internal operators for the backoffice panel.';
+
+
+COMMENT ON COLUMN "public"."internal_admin_users"."role" IS 'Internal access level: admin can manage everything, ops can operate requests.';
+
+
+CREATE TABLE IF NOT EXISTS "public"."internal_request_notifications" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "request_kind" "text" NOT NULL,
+    "request_id" "uuid" NOT NULL,
+    "recipient_type" "text" NOT NULL,
+    "recipient_email" "text" NOT NULL,
+    "channel" "text" DEFAULT 'email'::"text" NOT NULL,
+    "template" "text" NOT NULL,
+    "delivery_status" "text" NOT NULL,
+    "subject" "text",
+    "provider_message_id" "text",
+    "error_message" "text",
+    "triggered_by" "text",
+    CONSTRAINT "internal_request_notifications_channel_check" CHECK (("channel" = 'email'::"text")),
+    CONSTRAINT "internal_request_notifications_delivery_status_check" CHECK (("delivery_status" = ANY (ARRAY['sent'::"text", 'failed'::"text"]))),
+    CONSTRAINT "internal_request_notifications_recipient_type_check" CHECK (("recipient_type" = ANY (ARRAY['customer'::"text", 'agency'::"text", 'admin'::"text"]))),
+    CONSTRAINT "internal_request_notifications_request_kind_check" CHECK (("request_kind" = ANY (ARRAY['tour'::"text", 'shuttle'::"text'])))
+);
+
+
+ALTER TABLE "public"."internal_request_notifications" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."internal_request_notifications" IS 'Operational delivery log for customer and agency notifications.';
+
+
+COMMENT ON COLUMN "public"."internal_request_notifications"."template" IS 'Business template or event identifier used to trigger the notification.';
+
+
 CREATE TABLE IF NOT EXISTS "public"."places" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"(),
@@ -279,6 +331,21 @@ ALTER TABLE ONLY "public"."internal_request_transitions"
 
 
 
+ALTER TABLE ONLY "public"."internal_admin_users"
+    ADD CONSTRAINT "internal_admin_users_email_key" UNIQUE ("email");
+
+
+
+ALTER TABLE ONLY "public"."internal_admin_users"
+    ADD CONSTRAINT "internal_admin_users_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."internal_request_notifications"
+    ADD CONSTRAINT "internal_request_notifications_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."places"
     ADD CONSTRAINT "places_pkey" PRIMARY KEY ("id");
 
@@ -315,6 +382,18 @@ ALTER TABLE ONLY "public"."tours"
 
 
 CREATE INDEX "idx_internal_request_transitions_request" ON "public"."internal_request_transitions" USING "btree" ("request_kind", "request_id", "created_at" DESC);
+
+
+
+CREATE INDEX "idx_internal_admin_users_email" ON "public"."internal_admin_users" USING "btree" ("email");
+
+
+
+CREATE INDEX "idx_internal_request_notifications_recipient" ON "public"."internal_request_notifications" USING "btree" ("recipient_email", "created_at" DESC);
+
+
+
+CREATE INDEX "idx_internal_request_notifications_request" ON "public"."internal_request_notifications" USING "btree" ("request_kind", "request_id", "created_at" DESC);
 
 
 
@@ -396,10 +475,24 @@ CREATE POLICY "Service role can manage internal request transitions" ON "public"
 
 
 
+CREATE POLICY "Service role can manage internal admin users" ON "public"."internal_admin_users" USING (("auth"."role"() = 'service_role'::"text")) WITH CHECK (("auth"."role"() = 'service_role'::"text"));
+
+
+
+CREATE POLICY "Service role can manage internal request notifications" ON "public"."internal_request_notifications" USING (("auth"."role"() = 'service_role'::"text")) WITH CHECK (("auth"."role"() = 'service_role'::"text"));
+
+
+
 ALTER TABLE "public"."accommodations" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."agencies" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."internal_admin_users" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."internal_request_notifications" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."places" ENABLE ROW LEVEL SECURITY;
@@ -442,6 +535,18 @@ GRANT ALL ON TABLE "public"."agencies" TO "service_role";
 REVOKE ALL ON TABLE "public"."internal_request_transitions" FROM "anon";
 REVOKE ALL ON TABLE "public"."internal_request_transitions" FROM "authenticated";
 GRANT ALL ON TABLE "public"."internal_request_transitions" TO "service_role";
+
+
+
+REVOKE ALL ON TABLE "public"."internal_admin_users" FROM "anon";
+REVOKE ALL ON TABLE "public"."internal_admin_users" FROM "authenticated";
+GRANT ALL ON TABLE "public"."internal_admin_users" TO "service_role";
+
+
+
+REVOKE ALL ON TABLE "public"."internal_request_notifications" FROM "anon";
+REVOKE ALL ON TABLE "public"."internal_request_notifications" FROM "authenticated";
+GRANT ALL ON TABLE "public"."internal_request_notifications" TO "service_role";
 
 
 
@@ -499,7 +604,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
 
 
 

@@ -1,7 +1,7 @@
 // Supabase client for client-side usage (browser)
 // Use this in Client Components and browser-side code
 
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 import type { Database } from '@/types/database.types';
 import logger from '../logger';
 
@@ -20,8 +20,9 @@ if (!supabaseAnonKey) {
     supabaseAnonKey = 'placeholder-key';
 }
 
-// Create a single supabase client for interacting with your database
-export const supabase = createClient<Database, 'public'>(supabaseUrl, supabaseAnonKey, {
+// Create a single Supabase browser client that keeps the auth session in sync
+// with cookies so Server Components can verify the operator session.
+export const supabase = createBrowserClient<Database, 'public'>(supabaseUrl, supabaseAnonKey, {
     db: {
         schema: 'public',
     },
