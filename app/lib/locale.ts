@@ -9,6 +9,12 @@ export type SupportedLocale = 'es' | 'en';
 export const SUPPORTED_LOCALES: readonly SupportedLocale[] = ['es', 'en'] as const;
 export const DEFAULT_LOCALE: SupportedLocale = 'es';
 
+function extractSupportedLocale(value: string | null | undefined): SupportedLocale | null {
+    if (!value) return null;
+    const normalized = value.split('-')[0].toLowerCase();
+    return isValidLocale(normalized) ? normalized : null;
+}
+
 /**
  * Detects locale from a Request object using multiple strategies:
  * 1. x-locale header (explicit override, highest priority)
@@ -21,19 +27,15 @@ export const DEFAULT_LOCALE: SupportedLocale = 'es';
  */
 export function getLocaleFromRequest(request: Request): SupportedLocale {
     const url = new URL(request.url);
-    const urlLocale = url.pathname.split('/')[1];
-    const headerLocale = request.headers.get('x-locale');
-    const acceptLanguage = request.headers.get('accept-language');
-    
-    // Priority: x-locale header > URL path > Accept-Language > default
-    const candidateLocale = headerLocale || urlLocale || acceptLanguage?.split(',')[0] || DEFAULT_LOCALE;
-    const localeToken = candidateLocale.split('-')[0].toLowerCase();
-    
-    // Validate against supported locales
-    if (SUPPORTED_LOCALES.includes(localeToken as SupportedLocale)) {
-        return localeToken as SupportedLocale;
-    }
-    
+    const headerLocale = extractSupportedLocale(request.headers.get('x-locale'));
+    if (headerLocale) return headerLocale;
+
+    const urlLocale = extractSupportedLocale(url.pathname.split('/')[1]);
+    if (urlLocale) return urlLocale;
+
+    const acceptLanguage = extractSupportedLocale(request.headers.get('accept-language')?.split(',')[0]);
+    if (acceptLanguage) return acceptLanguage;
+
     return DEFAULT_LOCALE;
 }
 

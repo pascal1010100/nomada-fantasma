@@ -167,14 +167,6 @@ function getTransitionHelper(fromStatus: RequestStatus, toStatus: RequestStatus)
     return `Debes documentar el cambio a ${toStatus} con contexto claro.`;
 }
 
-function validateTransitionNoteClient(fromStatus: RequestStatus, toStatus: RequestStatus, note: string): string | null {
-    if (toStatus === 'cancelled' && note.length < 5) {
-        return 'Por favor incluye un motivo breve para la cancelación (mín. 5 caracteres).';
-    }
-    // Strict evidence requirements removed for a more fluid admin experience.
-    return null;
-}
-
 function getNoteQuality(status: RequestStatus, note: string | null): NoteQuality {
     const cleanNote = stripRequestMetadata(note);
     if (!(status === 'confirmed' || status === 'cancelled' || status === 'completed')) return 'strong';

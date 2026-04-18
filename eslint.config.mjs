@@ -8,11 +8,18 @@ export default [
   js.configs.recommended,
   nextPlugin.configs["core-web-vitals"],
   {
-    files: ["scripts/**/*.{js,mjs}", "*.mjs"],
+    files: ["scripts/**/*.{js,mjs}", "scratch/**/*.{js,mjs}", "*.mjs"],
     languageOptions: {
       globals: {
         ...globals.node,
       },
+    },
+  },
+  {
+    files: ["scripts/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "off",
     },
   },
   {

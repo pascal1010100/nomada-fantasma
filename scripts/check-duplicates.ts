@@ -1,15 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '../types/database.types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 
-interface DuplicateResult {
-  field: string;
-  count: number;
-  duplicates: any[];
-}
+type TourRow = Pick<Database['public']['Tables']['tours']['Row'], 'id' | 'slug' | 'title'>;
+type ReservationRow = Pick<Database['public']['Tables']['reservations']['Row'], 'id' | 'email' | 'date' | 'tour_id'>;
+type ShuttleRow = Pick<
+  Database['public']['Tables']['shuttle_bookings']['Row'],
+  'id' | 'customer_email' | 'travel_date' | 'route_origin' | 'route_destination'
+>;
+type AccommodationRow = Pick<
+  Database['public']['Tables']['accommodations']['Row'],
+  'id' | 'slug' | 'pueblo_slug' | 'name'
+>;
 
 async function checkDuplicates() {
   console.log('🔍 Iniciando verificación de duplicados...\n');
@@ -17,46 +23,39 @@ async function checkDuplicates() {
   try {
     // 1. Tours duplicados por slug
     console.log('📍 Verificando tours duplicados (por slug)...');
-    const { data: tourDups, error: tourError } = await supabase.rpc(
-      'get_duplicate_tours'
-    );
+    const { data: tours } = await supabase
+      .from('tours')
+      .select('id, slug, title');
 
-    if (tourError) {
-      // Fallback a query manual
-      const { data: tours } = await supabase
-        .from('tours')
-        .select('id, slug, name_es');
-
-      if (tours) {
-        const slugGroups: { [key: string]: any[] } = {};
-        tours.forEach((tour) => {
-          if (!slugGroups[tour.slug]) {
-            slugGroups[tour.slug] = [];
-          }
-          slugGroups[tour.slug].push(tour);
-        });
-
-        const tourDuplicates = Object.entries(slugGroups)
-          .filter(([, group]) => group.length > 1)
-          .map(([slug, group]) => ({
-            slug,
-            count: group.length,
-            ids: group.map((t) => t.id),
-          }));
-
-        if (tourDuplicates.length > 0) {
-          console.log(`❌ ${tourDuplicates.length} grupos de tours duplicados encontrados:`);
-          tourDuplicates.forEach((dup) => {
-            console.log(
-              `   - Slug: "${dup.slug}" (${dup.count} tours) - IDs: ${dup.ids.join(', ')}`
-            );
-          });
-        } else {
-          console.log('✅ Sin duplicados en tours\n');
+    if (tours) {
+      const slugGroups: Record<string, TourRow[]> = {};
+      tours.forEach((tour) => {
+        if (!slugGroups[tour.slug]) {
+          slugGroups[tour.slug] = [];
         }
+        slugGroups[tour.slug].push(tour);
+      });
+
+      const tourDuplicates = Object.entries(slugGroups)
+        .filter(([, group]) => group.length > 1)
+        .map(([slug, group]) => ({
+          slug,
+          count: group.length,
+          ids: group.map((t) => t.id),
+        }));
+
+      if (tourDuplicates.length > 0) {
+        console.log(`❌ ${tourDuplicates.length} grupos de tours duplicados encontrados:`);
+        tourDuplicates.forEach((dup) => {
+          console.log(
+            `   - Slug: "${dup.slug}" (${dup.count} tours) - IDs: ${dup.ids.join(', ')}`
+          );
+        });
+      } else {
+        console.log('✅ Sin duplicados en tours\n');
       }
     } else {
-      console.log('✅ Sin duplicados en tours\n');
+      console.log('⚠️ No se pudieron cargar tours para revisar duplicados\n');
     }
 
     // 2. Reservaciones duplicadas (mismo email + fecha + tour)
@@ -67,7 +66,7 @@ async function checkDuplicates() {
       .not('tour_id', 'is', null);
 
     if (reservations && reservations.length > 0) {
-      const resGroups: { [key: string]: any[] } = {};
+      const resGroups: Record<string, ReservationRow[]> = {};
       reservations.forEach((res) => {
         const key = `${res.email}-${res.date}-${res.tour_id}`;
         if (!resGroups[key]) {
@@ -103,7 +102,7 @@ async function checkDuplicates() {
       .select('id, customer_email, travel_date, route_origin, route_destination');
 
     if (shuttles && shuttles.length > 0) {
-      const shuttleGroups: { [key: string]: any[] } = {};
+      const shuttleGroups: Record<string, ShuttleRow[]> = {};
       shuttles.forEach((shuttle) => {
         const key = `${shuttle.customer_email}-${shuttle.travel_date}-${shuttle.route_origin}-${shuttle.route_destination}`;
         if (!shuttleGroups[key]) {
@@ -141,7 +140,7 @@ async function checkDuplicates() {
       .select('id, slug, pueblo_slug, name');
 
     if (accommodations && accommodations.length > 0) {
-      const accGroups: { [key: string]: any[] } = {};
+      const accGroups: Record<string, AccommodationRow[]> = {};
       accommodations.forEach((acc) => {
         const key = `${acc.slug}-${acc.pueblo_slug}`;
         if (!accGroups[key]) {

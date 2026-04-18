@@ -372,7 +372,7 @@ CREATE POLICY "Anyone can create leads" ON "public"."reservations" FOR INSERT WI
 
 
 
-CREATE POLICY "Only service role can view leads" ON "public"."reservations" FOR SELECT USING (true);
+CREATE POLICY "Only service role can view leads" ON "public"."reservations" FOR SELECT USING (("auth"."role"() = 'service_role'::"text"));
 
 
 
@@ -392,6 +392,10 @@ CREATE POLICY "Service role can manage places" ON "public"."places" USING (("aut
 
 
 
+CREATE POLICY "Service role can manage internal request transitions" ON "public"."internal_request_transitions" USING (("auth"."role"() = 'service_role'::"text")) WITH CHECK (("auth"."role"() = 'service_role'::"text"));
+
+
+
 ALTER TABLE "public"."accommodations" ENABLE ROW LEVEL SECURITY;
 
 
@@ -402,6 +406,9 @@ ALTER TABLE "public"."places" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."reservations" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."internal_request_transitions" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."shuttle_bookings" ENABLE ROW LEVEL SECURITY;
@@ -420,50 +427,50 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."accommodations" TO "anon";
-GRANT ALL ON TABLE "public"."accommodations" TO "authenticated";
+GRANT SELECT ON TABLE "public"."accommodations" TO "anon";
+GRANT SELECT ON TABLE "public"."accommodations" TO "authenticated";
 GRANT ALL ON TABLE "public"."accommodations" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."agencies" TO "anon";
-GRANT ALL ON TABLE "public"."agencies" TO "authenticated";
+REVOKE ALL ON TABLE "public"."agencies" FROM "anon";
+REVOKE ALL ON TABLE "public"."agencies" FROM "authenticated";
 GRANT ALL ON TABLE "public"."agencies" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."internal_request_transitions" TO "anon";
-GRANT ALL ON TABLE "public"."internal_request_transitions" TO "authenticated";
+REVOKE ALL ON TABLE "public"."internal_request_transitions" FROM "anon";
+REVOKE ALL ON TABLE "public"."internal_request_transitions" FROM "authenticated";
 GRANT ALL ON TABLE "public"."internal_request_transitions" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."places" TO "anon";
-GRANT ALL ON TABLE "public"."places" TO "authenticated";
+GRANT SELECT ON TABLE "public"."places" TO "anon";
+GRANT SELECT ON TABLE "public"."places" TO "authenticated";
 GRANT ALL ON TABLE "public"."places" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."reservations" TO "anon";
-GRANT ALL ON TABLE "public"."reservations" TO "authenticated";
+REVOKE ALL ON TABLE "public"."reservations" FROM "anon";
+REVOKE ALL ON TABLE "public"."reservations" FROM "authenticated";
 GRANT ALL ON TABLE "public"."reservations" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."shuttle_bookings" TO "anon";
-GRANT ALL ON TABLE "public"."shuttle_bookings" TO "authenticated";
+GRANT INSERT ON TABLE "public"."shuttle_bookings" TO "anon";
+GRANT INSERT ON TABLE "public"."shuttle_bookings" TO "authenticated";
 GRANT ALL ON TABLE "public"."shuttle_bookings" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."shuttle_routes" TO "anon";
-GRANT ALL ON TABLE "public"."shuttle_routes" TO "authenticated";
+GRANT SELECT ON TABLE "public"."shuttle_routes" TO "anon";
+GRANT SELECT ON TABLE "public"."shuttle_routes" TO "authenticated";
 GRANT ALL ON TABLE "public"."shuttle_routes" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."tours" TO "anon";
-GRANT ALL ON TABLE "public"."tours" TO "authenticated";
+GRANT SELECT ON TABLE "public"."tours" TO "anon";
+GRANT SELECT ON TABLE "public"."tours" TO "authenticated";
 GRANT ALL ON TABLE "public"."tours" TO "service_role";
 
 
@@ -492,8 +499,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
-
 
 
 

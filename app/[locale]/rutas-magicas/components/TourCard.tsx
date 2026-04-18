@@ -25,7 +25,6 @@ const buttonTap = {
 export default function TourCard({ tour, puebloSlug, className = '' }: TourCardProps) {
   const t = useTranslations('Tours');
   const tourSlug = (normalizeSlug(tour.slug) ?? normalizeId(tour.id))?.toLowerCase();
-  const tourId = normalizeId(tour.id);
   if (!tourSlug) {
     return null;
   }

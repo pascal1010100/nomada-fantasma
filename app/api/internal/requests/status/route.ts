@@ -54,26 +54,6 @@ function assertTransitionAllowed(fromStatus: RequestStatus, toStatus: RequestSta
     return null;
 }
 
-function noteHasAgencyEvidence(note: string): boolean {
-    return /\bagencia\b/i.test(note);
-}
-
-function noteHasConfirmationEvidence(note: string): boolean {
-    return /\bconfirm\w*\b/i.test(note);
-}
-
-function noteHasServiceExecutionEvidence(note: string): boolean {
-    return /\b(servicio|tour|shuttle|traslado|realiz\w*|ejecut\w*|complet\w*)\b/i.test(note);
-}
-
-function noteHasReasonEvidence(note: string): boolean {
-    return /\b(motivo|raz[oó]n|cancel\w*|cliente|agencia|no\s+disponible)\b/i.test(note);
-}
-
-function noteHasTemporalEvidence(note: string): boolean {
-    return /\b(fecha|hora|hoy|ayer)\b/i.test(note) || /\b\d{1,2}:\d{2}\b/.test(note) || /\b\d{4}-\d{2}-\d{2}\b/.test(note);
-}
-
 function validateTransitionNote(fromStatus: RequestStatus, toStatus: RequestStatus, note: string | null): string | null {
     if (NOTE_REQUIRED_STATUSES.has(toStatus) && !note) {
         return `Nota requerida para mover a ${toStatus}.`;
