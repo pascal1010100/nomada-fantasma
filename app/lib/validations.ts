@@ -128,6 +128,7 @@ export type GuideFilters = z.infer<typeof GuideFilterSchema>;
 export const ShuttleRequestSchema = z.object({
     customerName: z.string().min(2), // Mapped to 'nameTooShort'
     customerEmail: z.string().email(), // Mapped to 'invalidEmail'
+    customerWhatsapp: z.string().min(7), // Mapped to 'whatsappRequired'
     routeOrigin: z.string().min(1), // Mapped to 'originRequired'
     routeDestination: z.string().min(1), // Mapped to 'destinationRequired'
     date: z.string().min(1), // Mapped to 'dateRequired'
@@ -160,6 +161,7 @@ export function mapZodErrorToTranslationKey(issue: z.ZodIssue): string {
         'name': 'name',
         'customerEmail': 'email',
         'email': 'email',
+        'customerWhatsapp': 'whatsapp',
         'routeOrigin': 'origin',
         'routeDestination': 'destination',
         'date': 'date',
@@ -176,6 +178,7 @@ export function mapZodErrorToTranslationKey(issue: z.ZodIssue): string {
             if (mappedField === 'name') return 'nameTooShort';
             if (mappedField === 'passengers') return 'minPassengers';
             if (mappedField === 'pickupLocation') return 'pickupLocationRequired';
+            if (mappedField === 'whatsapp') return 'whatsappRequired';
             return 'nameTooShort'; // fallback
 
         case z.ZodIssueCode.invalid_type:
@@ -202,6 +205,7 @@ export function mapZodErrorToTranslationKey(issue: z.ZodIssue): string {
             if (message.includes('hora')) return 'timeRequired';
             if (message.includes('nombre')) return 'nameRequired';
             if (message.includes('email')) return 'invalidEmail';
+            if (message.includes('whatsapp')) return 'whatsappRequired';
             return 'nameRequired'; // fallback
         }
 
@@ -213,6 +217,7 @@ export function mapZodErrorToTranslationKey(issue: z.ZodIssue): string {
             if (mappedField === 'time') return 'timeRequired';
             if (mappedField === 'name') return 'nameRequired';
             if (mappedField === 'email') return 'invalidEmail';
+            if (mappedField === 'whatsapp') return 'whatsappRequired';
             return 'nameRequired'; // fallback
     }
 }

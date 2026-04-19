@@ -91,17 +91,6 @@ export const shuttles: ShuttleRoute[] = [
         description: 'Tu conexión más fácil con el aeropuerto desde San Pedro. Servicio puerta a puerta en vehículos de modelo reciente.'
     },
     {
-        id: 'san-marcos-antigua',
-        origin: 'San Marcos La Laguna',
-        destination: 'Antigua Guatemala',
-        price: 175,
-        schedule: ['08:00', '13:00'],
-        duration: '4 horas',
-        image: getDestinationImage('Antigua Guatemala'),
-        type: 'shared',
-        description: 'Transporte directo desde San Marcos hacia Antigua. Cómodo, seguro y con conductores profesionales con experiencia en rutas de montaña.'
-    },
-    {
         id: 'san-pedro-paredon',
         origin: 'San Pedro La Laguna',
         destination: 'El Paredón (Playa)',

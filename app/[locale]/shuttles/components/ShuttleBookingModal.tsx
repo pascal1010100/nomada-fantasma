@@ -18,6 +18,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
     const locale = useLocale();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [whatsapp, setWhatsapp] = useState('');
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
     const [passengers, setPassengers] = useState(1);
@@ -50,13 +51,13 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
     }, [isOpen]);
 
     useEffect(() => {
-        if (shuttle && (name || email || date || time || pickup)) {
+            if (shuttle && (name || email || whatsapp || date || time || pickup)) {
             trackEvent('start_general_booking_form', {
                 route: `${shuttle.origin} -> ${shuttle.destination}`,
                 type: shuttle.type
             });
         }
-    }, [name, email, date, time, pickup, shuttle]);
+    }, [name, email, whatsapp, date, time, pickup, shuttle]);
 
     const isCustom = shuttle?.id === 'custom-private';
     const hasScale = (shuttle?.description || '').toLowerCase().includes('escala');
@@ -110,6 +111,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
     const validateForm = (): string | null => {
         if (!name.trim() || name.trim().length < 2) return t('validationErrors.nameRequired');
         if (!email || !validateEmail(email)) return t('validationErrors.emailInvalid');
+        if (!whatsapp.trim() || whatsapp.trim().length < 7) return t('validationErrors.whatsappRequired');
         if (!date) return t('validationErrors.dateRequired');
         const selected = new Date(date);
         const boundary = new Date(minDate);
@@ -159,6 +161,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                 body: JSON.stringify({
                     customerName: name,
                     customerEmail: email,
+                    customerWhatsapp: whatsapp,
                     routeOrigin: isCustom ? customOrigin : shuttle.origin,
                     routeDestination: isCustom ? customDestination : shuttle.destination,
                     date,
@@ -208,6 +211,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
         setIsSuccess(false);
         setName('');
         setEmail('');
+        setWhatsapp('');
         setDate('');
         setTime('');
         setPickup('');
@@ -322,6 +326,19 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                                 className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none transition-all placeholder:text-muted-foreground/20 font-bold text-sm"
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-2 md:col-span-2">
+                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 pl-1">
+                                                {t('whatsappLabel')}
+                                            </label>
+                                            <input
+                                                required
+                                                type="tel"
+                                                placeholder={t('whatsappPlaceholder')}
+                                                className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none transition-all placeholder:text-muted-foreground/20 font-bold text-sm"
+                                                value={whatsapp}
+                                                onChange={(e) => setWhatsapp(e.target.value)}
                                             />
                                         </div>
                                     </div>

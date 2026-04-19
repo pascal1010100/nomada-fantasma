@@ -119,6 +119,7 @@ export async function POST(request: Request) {
         const payload: ShuttleBookingInsert = {
             customer_name: data.customerName,
             customer_email: data.customerEmail,
+            customer_whatsapp: data.customerWhatsapp,
             route_origin: data.routeOrigin,
             route_destination: data.routeDestination,
             travel_date: data.date,
@@ -143,7 +144,11 @@ export async function POST(request: Request) {
         booking = insertWithLocale.data;
         dbError = insertWithLocale.error;
 
-        if (dbError && typeof dbError.message === 'string' && dbError.message.includes('customer_locale')) {
+        if (
+            dbError &&
+            typeof dbError.message === 'string' &&
+            (dbError.message.includes('customer_locale') || dbError.message.includes('customer_whatsapp'))
+        ) {
             const fallbackPayload: ShuttleBookingInsert = {
                 customer_name: data.customerName,
                 customer_email: data.customerEmail,
@@ -157,6 +162,9 @@ export async function POST(request: Request) {
                 status: 'pending',
                 admin_notes: metadataNote,
             };
+            if ('customer_whatsapp' in fallbackPayload) {
+                delete fallbackPayload.customer_whatsapp;
+            }
             const fallbackInsert = await supabaseAdmin
                 .from('shuttle_bookings')
                 .insert(fallbackPayload)
@@ -180,6 +188,7 @@ export async function POST(request: Request) {
             bookingId: booking?.id ?? undefined,
             customerName: data.customerName,
             customerEmail: data.customerEmail,
+            customerWhatsapp: data.customerWhatsapp,
             agencyEmail,
             origin: data.routeOrigin,
             destination: data.routeDestination,

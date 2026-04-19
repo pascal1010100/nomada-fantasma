@@ -31,6 +31,7 @@ type InternalRequestItem = {
     createdAt: string;
     customerName: string;
     customerEmail: string;
+    customerWhatsapp: string | null;
     date: string;
     details: string;
     status: string | null;
@@ -59,6 +60,7 @@ function mapReservation(row: ReservationRow | LegacyReservationRow): InternalReq
         createdAt,
         customerName: isModern ? row.full_name : (row.customer_name ?? 'Sin nombre'),
         customerEmail: isModern ? row.email : (row.customer_email ?? ''),
+        customerWhatsapp: isModern ? row.whatsapp : null,
         date: isModern ? (row.date ?? fallbackDate) : (row.reservation_date ?? fallbackDate),
         details: isModern ? (row.tour_name || row.notes || 'Reserva de tour') : (row.tour_name || row.customer_notes || 'Reserva de tour'),
         status: row.status ?? null,
@@ -80,6 +82,7 @@ function mapShuttle(row: ShuttleBookingRow): InternalRequestItem {
         createdAt,
         customerName: row.customer_name ?? 'Sin nombre',
         customerEmail: row.customer_email ?? '',
+        customerWhatsapp: row.customer_whatsapp ?? null,
         date: row.travel_date ?? '',
         details: `${row.route_origin ?? ''} -> ${row.route_destination ?? ''} (${row.passengers ?? 0})`,
         status: row.status,

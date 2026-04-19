@@ -4,6 +4,7 @@ interface ShuttleAdminNotificationProps {
   bookingId?: string;
   customerName: string;
   customerEmail: string;
+  customerWhatsapp?: string | null;
   origin: string;
   destination: string;
   travelDate: string;
@@ -45,6 +46,7 @@ export default function ShuttleAdminNotification({
   bookingId,
   customerName,
   customerEmail,
+  customerWhatsapp,
   origin,
   destination,
   travelDate,
@@ -168,6 +170,11 @@ export default function ShuttleAdminNotification({
               <Text style={{ color: '#7f1d1d', fontSize: '14px', lineHeight: '1.7', margin: 0 }}>
                 <strong>Email:</strong> {customerEmail}
               </Text>
+              {customerWhatsapp ? (
+                <Text style={{ color: '#7f1d1d', fontSize: '14px', lineHeight: '1.7', margin: '8px 0 0' }}>
+                  <strong>WhatsApp:</strong> {customerWhatsapp}
+                </Text>
+              ) : null}
             </Section>
 
             <Section style={{ backgroundColor: '#fefce8', border: '1px solid #fde68a', borderRadius: '18px', padding: '22px', margin: '0 0 24px' }}>

@@ -300,6 +300,7 @@ async function notifyShuttleCancellation(
             pickupLocation: shuttle.pickup_location,
             customerName: shuttle.customer_name,
             customerEmail: shuttle.customer_email,
+            customerWhatsapp: shuttle.customer_whatsapp,
             cancellationReason: note,
         });
         await recordInternalNotification({

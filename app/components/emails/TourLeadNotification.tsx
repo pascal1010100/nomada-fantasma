@@ -33,7 +33,7 @@ function formatDate(dateString: string) {
     const date = parts.length === 3
         ? new Date(parts[0], parts[1] - 1, parts[2], 12)
         : new Date(dateString);
-    
+
     if (Number.isNaN(date.getTime())) return dateString;
 
     return date.toLocaleDateString('es-ES', {
@@ -61,7 +61,7 @@ export const TourLeadNotification = ({
 }: TourLeadNotificationProps) => {
     const normalizedOperationsEmail = (operationsEmail || 'hola@nomadafantasma.com').trim();
     const normalizedWhatsapp = customerWhatsapp?.replace(/[^0-9]/g, '') || '';
-    
+
     const replySubject = `Disponibilidad tour ${reservationId} · ${tourName}`;
     const confirmSubject = `Disponible tour ${reservationId} · ${tourName}`;
     const denySubject = `No disponible tour ${reservationId} · ${tourName}`;
@@ -119,7 +119,7 @@ export const TourLeadNotification = ({
             <Preview>Nuevo Lead: {customerName} - {tourName}</Preview>
             <Body style={{ backgroundColor: '#f3f7fb', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: '24px 0' }}>
                 <Container style={{ maxWidth: '620px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '24px', overflow: 'hidden', border: '1px solid #dbe7f0', boxShadow: '0 18px 50px rgba(15, 23, 42, 0.08)' }}>
-                    
+
                     {/* Header Operativo (Elite Red Style) */}
                     <Section style={{ background: 'linear-gradient(135deg, #7f1d1d 0%, #b91c1c 55%, #dc2626 100%)', padding: '34px 36px 30px' }}>
                         <Text style={{ color: '#fecaca', fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: '700', margin: '0 0 14px' }}>
@@ -137,7 +137,7 @@ export const TourLeadNotification = ({
                     </Section>
 
                     <Section style={{ padding: '32px 36px 36px' }}>
-                        
+
                         {/* Quick Response section for Agencies */}
                         {showAgencyInstructions && (
                             <Section style={{ margin: '0 0 24px' }}>
@@ -255,7 +255,7 @@ export const TourLeadNotification = ({
 
                         {showAgencyInstructions && (
                             <Text style={{ color: '#0f766e', fontSize: '13px', textAlign: 'center', margin: '0 0 24px' }}>
-                                Si los botones no abren tu correo, responde manualmente a <strong style={{color: '#0d9488'}}>{normalizedOperationsEmail}</strong>.
+                                Si los botones no abren tu correo, responde manualmente a <strong style={{ color: '#0d9488' }}>{normalizedOperationsEmail}</strong>.
                             </Text>
                         )}
 

@@ -107,6 +107,9 @@
         "privateTransferDesc": "If you are traveling in a large group or have special requirements, we can organize exclusive transportation for you.",
         "privateTransferBtn": "Request Private Quote",
         "conciergeService": "Concierge Service",
+        "privateTransferChip1": "Tailored route",
+        "privateTransferChip2": "Group or special luggage",
+        "privateTransferChip3": "Direct coordination",
         "card": {
             "eliteService": "Elite Service",
             "sharedType": "Shared Shuttle",
@@ -134,6 +137,8 @@
             "destinationLabel": "Destination",
             "nameLabel": "Full Name",
             "emailLabel": "Contact Email",
+            "whatsappLabel": "WhatsApp",
+            "whatsappPlaceholder": "502 0000 0000",
             "dateLabel": "Travel Date",
             "timeLabel": "Time",
             "timePlaceholder": "Time",
@@ -149,6 +154,7 @@
             "validationErrors": {
                 "nameRequired": "Please enter your name",
                 "emailInvalid": "Enter a valid email",
+                "whatsappRequired": "Enter a WhatsApp number so we can contact you",
                 "dateRequired": "Select a date",
                 "dateFuture": "Select a date starting from tomorrow",
                 "timeRequired": "Select a time",

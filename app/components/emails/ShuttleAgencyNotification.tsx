@@ -11,6 +11,7 @@ interface ShuttleAgencyNotificationProps {
   type: string;
   customerName: string;
   customerEmail: string;
+  customerWhatsapp?: string | null;
   createdAt?: string;
   operationsEmail: string;
 }
@@ -51,6 +52,7 @@ export default function ShuttleAgencyNotification({
   type,
   customerName,
   customerEmail,
+  customerWhatsapp,
   createdAt,
   operationsEmail
 }: ShuttleAgencyNotificationProps) {
@@ -156,7 +158,7 @@ export default function ShuttleAgencyNotification({
                         </Text>
                         <Link
                           href={confirmMailto}
-                            style={{ backgroundColor: '#047857', color: '#ffffff', padding: '12px 18px', borderRadius: '999px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', display: 'inline-block', boxShadow: '0 8px 18px rgba(4, 120, 87, 0.22)' }}
+                          style={{ backgroundColor: '#047857', color: '#ffffff', padding: '12px 18px', borderRadius: '999px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', display: 'inline-block', boxShadow: '0 8px 18px rgba(4, 120, 87, 0.22)' }}
                         >
                           Confirmar disponibilidad
                         </Link>
@@ -175,7 +177,7 @@ export default function ShuttleAgencyNotification({
                         </Text>
                         <Link
                           href={denyMailto}
-                            style={{ backgroundColor: '#be123c', color: '#ffffff', padding: '12px 18px', borderRadius: '999px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', display: 'inline-block', boxShadow: '0 8px 18px rgba(190, 24, 93, 0.20)' }}
+                          style={{ backgroundColor: '#be123c', color: '#ffffff', padding: '12px 18px', borderRadius: '999px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', display: 'inline-block', boxShadow: '0 8px 18px rgba(190, 24, 93, 0.20)' }}
                         >
                           No disponible
                         </Link>
@@ -280,6 +282,11 @@ export default function ShuttleAgencyNotification({
               <Text style={{ color: '#0f766e', fontSize: '14px', lineHeight: '1.7', margin: 0 }}>
                 <strong>Email:</strong> {customerEmail}
               </Text>
+              {customerWhatsapp ? (
+                <Text style={{ color: '#0f766e', fontSize: '14px', lineHeight: '1.7', margin: '8px 0 0' }}>
+                  <strong>WhatsApp:</strong> {customerWhatsapp}
+                </Text>
+              ) : null}
             </Section>
 
             <Section style={{ backgroundColor: '#fefce8', border: '1px solid #fde68a', borderRadius: '18px', padding: '22px', margin: '0 0 24px' }}>

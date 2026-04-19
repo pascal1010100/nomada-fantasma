@@ -229,6 +229,7 @@ CREATE TABLE IF NOT EXISTS "public"."shuttle_bookings" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "customer_name" "text" NOT NULL,
     "customer_email" "text" NOT NULL,
+    "customer_whatsapp" "text",
     "route_origin" "text" NOT NULL,
     "route_destination" "text" NOT NULL,
     "travel_date" "date" NOT NULL,
@@ -665,7 +666,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
 
 
 

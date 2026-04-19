@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ShuttleRoute } from '@/types/shuttle';
 import ShuttleCard from './components/ShuttleCard';
 import ShuttleBookingModal from './components/ShuttleBookingModal';
-import { AlertTriangle, Bus, DatabaseZap, Search, ShieldCheck, Sparkles } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Bus, DatabaseZap, Search, ShieldCheck, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLocale, useTranslations } from 'next-intl';
 
@@ -242,21 +242,40 @@ export default function ShuttlesClient({
                 )}
             </div>
 
-            {/* Private Section (Concierge Style) */}
+            {/* Private Section */}
             <div className="max-w-6xl mx-auto px-4 mt-32 md:mt-48 mb-32">
-                <div className="bg-card border border-white/5 rounded-[3rem] p-12 md:p-24 text-center space-y-10 relative group hover:border-primary/20 transition-all duration-700 shadow-3xl shadow-black/40">
-                    <div className="relative z-10 space-y-6">
-                        <div className="flex flex-col items-center space-y-4 mb-4">
-                            <span className="text-[10px] font-black uppercase tracking-[0.6em] text-primary/60 border-b border-primary/20 pb-2">
-                                {t('conciergeService') || 'Concierge Service'}
-                            </span>
+                <div className="relative overflow-hidden rounded-[3rem] border border-white/8 bg-card/90 px-8 py-12 shadow-3xl shadow-black/40 transition-all duration-700 hover:border-primary/20 md:px-16 md:py-16">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,232,255,0.12),transparent_28%),radial-gradient(circle_at_85%_15%,rgba(182,102,255,0.12),transparent_24%)]" />
+                    <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 42px), repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 42px)' }} />
+
+                    <div className="relative z-10 text-center">
+                        <div className="mb-6 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.38em] text-primary">
+                            {t('conciergeService') || 'Concierge Service'}
                         </div>
-                        <h3 className="text-4xl md:text-6xl font-black tracking-tight max-w-4xl mx-auto leading-[1.1] text-white">
+
+                        <h3 className="mx-auto max-w-4xl text-4xl font-black leading-[1.06] tracking-tight text-white md:text-6xl">
                             {t('privateTransferTitle')}
                         </h3>
-                        <p className="text-lg text-muted-foreground/50 max-w-2xl mx-auto font-medium leading-relaxed pt-2">
+
+                        <p className="mx-auto max-w-2xl pt-4 text-lg font-medium leading-relaxed text-white/65">
                             {t('privateTransferDesc')}
                         </p>
+
+                        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
+                                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                                {t('privateTransferChip1')}
+                            </span>
+                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
+                                <Bus className="h-3.5 w-3.5 text-primary" />
+                                {t('privateTransferChip2')}
+                            </span>
+                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
+                                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                                {t('privateTransferChip3')}
+                            </span>
+                        </div>
+
                         <div className="pt-10">
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
@@ -272,9 +291,10 @@ export default function ShuttlesClient({
                                     type: 'private',
                                     description: 'Solicitud de traslado privado personalizado.'
                                 })}
-                                className="px-12 py-5.5 rounded-2xl bg-white text-black font-black uppercase tracking-[0.4em] text-[10px] hover:bg-primary hover:text-white transition-all duration-500 shadow-2xl shadow-black/50"
+                                className="btn-cta shimmer group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full px-10 py-4 text-[11px] font-black uppercase tracking-[0.3em] transition-all duration-500 hover:scale-105 hover:shadow-xl hover:shadow-primary/30"
                             >
                                 {t('privateTransferBtn')}
+                                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                             </motion.button>
                         </div>
                     </div>

@@ -13,6 +13,7 @@ type InternalRequestItem = {
     createdAt: string;
     customerName: string;
     customerEmail: string;
+    customerWhatsapp: string | null;
     date: string;
     details: string;
     status: string | null;
@@ -953,6 +954,9 @@ export default function RecepcionRequestsPage() {
                                             <div>
                                                 <h2 className="text-lg font-semibold">{item.customerName}</h2>
                                                 <p className="text-sm text-muted-foreground break-all">{item.customerEmail}</p>
+                                                {item.customerWhatsapp ? (
+                                                    <p className="text-sm text-primary/80 break-all">{item.customerWhatsapp}</p>
+                                                ) : null}
                                             </div>
                                         </div>
 

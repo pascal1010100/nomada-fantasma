@@ -520,6 +520,7 @@ type ShuttleCancellationAgencyEmailProps = {
     pickupLocation: string;
     customerName: string;
     customerEmail: string;
+    customerWhatsapp?: string | null;
     cancellationReason: string;
 };
 
@@ -574,6 +575,7 @@ export async function sendShuttleCancellationAgencyEmail(data: ShuttleCancellati
 interface SendShuttleConfirmationEmailsProps {
     customerName: string;
     customerEmail: string;
+    customerWhatsapp?: string | null;
     agencyEmail?: string | null;
     origin: string;
     destination: string;
@@ -836,6 +838,7 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
                             bookingId: data.bookingId,
                             customerName: data.customerName,
                             customerEmail: data.customerEmail,
+                            customerWhatsapp: data.customerWhatsapp,
                             origin: data.origin,
                             destination: data.destination,
                             travelDate: data.travelDate,
@@ -851,6 +854,7 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
                             bookingId: data.bookingId,
                             customerName: data.customerName,
                             customerEmail: data.customerEmail,
+                            customerWhatsapp: data.customerWhatsapp,
                             origin: data.origin,
                             destination: data.destination,
                             travelDate: data.travelDate,

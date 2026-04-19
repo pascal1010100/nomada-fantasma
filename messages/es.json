@@ -107,6 +107,9 @@
         "privateTransferDesc": "Si viajas en un grupo grande o tienes requerimientos especiales, podemos organizar un transporte exclusivo para ti.",
         "privateTransferBtn": "Solicitar Cotización Privada",
         "conciergeService": "Servicio de Concierge",
+        "privateTransferChip1": "Ruta a tu medida",
+        "privateTransferChip2": "Grupo o equipaje especial",
+        "privateTransferChip3": "Coordinación directa",
         "card": {
             "eliteService": "Servicio Elite",
             "sharedType": "Shuttle Compartido",
@@ -134,6 +137,8 @@
             "destinationLabel": "Destino",
             "nameLabel": "Nombre Completo",
             "emailLabel": "Email de Contacto",
+            "whatsappLabel": "WhatsApp",
+            "whatsappPlaceholder": "502 0000 0000",
             "dateLabel": "Fecha del Viaje",
             "timeLabel": "Hora",
             "timePlaceholder": "Hora",
@@ -149,6 +154,7 @@
             "validationErrors": {
                 "nameRequired": "Por favor ingresa tu nombre",
                 "emailInvalid": "Ingresa un correo válido",
+                "whatsappRequired": "Ingresa un WhatsApp para poder contactarte",
                 "dateRequired": "Selecciona una fecha",
                 "dateFuture": "Selecciona una fecha a partir de mañana",
                 "timeRequired": "Selecciona una hora",
