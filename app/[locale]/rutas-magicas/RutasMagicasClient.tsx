@@ -7,6 +7,7 @@ import HeroSection from './components/HeroSection';
 import FilteredRoutesWrapper from './components/FilteredRoutesWrapper';
 import { Region, Route } from './lib/types';
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 
 const ParticlesBackground = dynamic(
   () => import('../mapa/components/ParticlesBackground'),
@@ -18,6 +19,7 @@ interface RutasMagicasClientProps {
 }
 
 export default function RutasMagicasClient({ routes }: RutasMagicasClientProps) {
+  const t = useTranslations('Routes');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -54,7 +56,7 @@ export default function RutasMagicasClient({ routes }: RutasMagicasClientProps) 
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-x-hidden">
       {/* Background Effects */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 nf-grid opacity-20" />
@@ -69,7 +71,18 @@ export default function RutasMagicasClient({ routes }: RutasMagicasClientProps) 
         <HeroSection onSearch={handleSearch} defaultQuery={searchQuery} />
 
         <main className="relative z-10">
-          <div id="destinos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20 scroll-mt-28">
+          <div id="destinos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 md:pt-20 md:pb-16 lg:pt-24 lg:pb-20 scroll-mt-28">
+            <div className="mx-auto mb-10 max-w-3xl text-center md:mb-14">
+              <div className="mb-4 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+                {t('sectionEyebrow')}
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                {t('sectionTitle')}
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                {t('sectionDescription')}
+              </p>
+            </div>
             <FilteredRoutesWrapper
               routes={routes}
               region={region || undefined}

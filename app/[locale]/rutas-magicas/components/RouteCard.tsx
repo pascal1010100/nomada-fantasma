@@ -4,7 +4,7 @@ import { useRef, type MouseEvent, type KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Route } from '../lib/types';
 import { motion, useInView } from 'framer-motion';
-import { Star, MapPin, Calendar, ArrowRight, Zap, Heart } from 'lucide-react';
+import { Star, MapPin, Calendar, ArrowRight, Zap } from 'lucide-react';
 import { cn } from '@/app/lib/utils';
 import { RippleButton } from '@/app/components/ui';
 import { useLocale } from 'next-intl';
@@ -151,31 +151,10 @@ export default function RouteCard({ route }: RouteCardProps) {
           >
             {getRegionFlag(route.region)} {t(`regions.${route.region}`)}
           </motion.div>
-
-          {/* Conditional Badge */}
-          {vibe ? (
-            <motion.div
-              className="max-w-full truncate px-3 py-1 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-xs font-bold shadow-lg shadow-purple-500/20"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              title={vibe}
-            >
-              {vibe}
-            </motion.div>
-          ) : (
-            <motion.div
-              className="px-3 py-1 rounded-full bg-gradient-to-r from-primary to-accent text-white text-xs font-bold shadow-lg shadow-primary/20"
-              whileHover={{ scale: 1.05, rotate: [0, -2, 2, -2, 0] }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 300 }}
-            >
-              Q{route.price.toLocaleString()}
-            </motion.div>
-          )}
         </motion.div>
 
-        {/* Rating and Favorite */}
-        <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
+        {/* Rating */}
+        <div className="absolute top-4 right-4 z-10">
           <motion.div
             className="flex items-center bg-black/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/10"
             whileHover={{ scale: 1.1 }}
@@ -186,14 +165,6 @@ export default function RouteCard({ route }: RouteCardProps) {
               {route.rating.toFixed(1)}
             </span>
           </motion.div>
-          <motion.button
-            className="p-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-white/20 transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            aria-label={t('addToFavorites')}
-          >
-            <Heart className="h-4 w-4 text-white hover:text-pink-500 hover:fill-pink-500 transition-colors" />
-          </motion.button>
         </div>
       </div>
 
@@ -212,7 +183,7 @@ export default function RouteCard({ route }: RouteCardProps) {
           {/* Highlights */}
           {highlights && highlights.length > 0 && (
             <div className="mt-3 space-y-1">
-              {highlights.slice(0, 3).map((highlight, i) => (
+              {highlights.slice(0, 2).map((highlight, i) => (
                 <div key={i} className="flex items-start">
                   <Zap className="h-3.5 w-3.5 text-primary mt-0.5 mr-2 flex-shrink-0" />
                   <span className="text-xs text-muted-foreground">{highlight}</span>
@@ -301,7 +272,7 @@ export default function RouteCard({ route }: RouteCardProps) {
                 variant="primary"
                 className={cn("!py-2 !px-4 !text-sm !rounded-lg", route.isComingSoon && "cursor-not-allowed opacity-60 bg-transparent border border-white/20 shadow-none")}
               >
-                {route.isComingSoon ? t('comingSoon') : vibe ? t('discover') : t('explore')}
+                {route.isComingSoon ? t('comingSoon') : t('viewDestination')}
                 {!route.isComingSoon && <ArrowRight className="w-4 h-4 ml-1" />}
               </RippleButton>
             </div>

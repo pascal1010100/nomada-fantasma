@@ -50,7 +50,7 @@ export default function HeroSection({
           </motion.div>
 
           <motion.h1
-            className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl pb-2"
+            className="text-4xl font-bold tracking-tight leading-[1.12] sm:text-5xl md:text-6xl lg:text-7xl pb-3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
