@@ -1,29 +1,9 @@
 import { notFound } from 'next/navigation';
-import { atitlanInfo } from '../mocks/atitlanData';
 import type { Route } from '../lib/types';
 import RouteDetailPageClient from './RouteDetailPageClient';
 import { getRecommendedToursFromDB, getTourBySlugFromDB, type SupabaseTour } from '@/app/lib/supabase/tours';
 import { getActiveTownsFromDB, getTownBySlugFromDB, type TownContentRecord } from '@/app/lib/supabase/towns';
 import { getEditorialRouteBySlug } from '../lib/editorialRoutes';
-
-const ATITLAN_ROUTE: Route = {
-  id: '1',
-  entityType: 'editorial_route',
-  slug: 'lago-atitlan',
-  title: 'Lago de Atitlan',
-  summary: 'Un paraiso rodeado de volcanes en Guatemala',
-  coverImage: atitlanInfo.coverImage,
-  region: 'america',
-  durationDays: 3,
-  groupSize: { min: 1, max: 12 },
-  wifiRating: 4,
-  priceTier: 'standard',
-  highlights: [],
-  fullDescription: '',
-  price: 0,
-  vibe: 'Paraiso Volcanico',
-  rating: 4.9,
-};
 
 function toDurationDays(durationHours: number | null): number {
   if (!durationHours || durationHours <= 0) {
@@ -111,6 +91,11 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
   const isAtitlanPage = id === 'lago-atitlan' || id === '1';
 
   if (isAtitlanPage) {
+    const atitlanRoute = getEditorialRouteBySlug('lago-atitlan');
+    if (!atitlanRoute) {
+      notFound();
+    }
+
     const [towns, relatedRoutes] = await Promise.all([
       getActiveTownsFromDB(),
       buildRelatedRoutes(''),
@@ -118,7 +103,7 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
 
     return (
       <RouteDetailPageClient
-        route={ATITLAN_ROUTE}
+        route={atitlanRoute}
         isAtitlanPage={true}
         pueblos={towns.map(mapTownToRoute)}
         relatedRoutes={relatedRoutes}
