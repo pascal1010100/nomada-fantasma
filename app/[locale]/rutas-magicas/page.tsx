@@ -1,5 +1,8 @@
-// Este archivo ha sido reemplazado por una implementación más limpia
-// que separa la lógica del cliente y del servidor.
-// Ver: RutasMagicasClient.tsx y RutasMagicasPage.tsx
+import RutasMagicasClient from './RutasMagicasClient';
+import { getCatalogRoutes } from './lib/catalogRoutes';
 
-export { default } from './RutasMagicasPage';
+export default async function RutasMagicasPage() {
+  const routes = await getCatalogRoutes();
+
+  return <RutasMagicasClient routes={routes} />;
+}
