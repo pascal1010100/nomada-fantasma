@@ -2,10 +2,10 @@
 
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
-import { ArrowRight, Sparkles } from "lucide-react"
+import { ArrowRight, Compass, Sparkles } from "lucide-react"
 import Link from "next/link"
 import SearchBar from "./SearchBar"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 
 export default function HeroSection({
   onSearch,
@@ -15,6 +15,7 @@ export default function HeroSection({
   defaultQuery?: string
 }) {
   const t = useTranslations("Routes")
+  const locale = useLocale()
   const ref = useRef<HTMLDivElement>(null)
 
   const handleSearch = (query: string) => {
@@ -90,40 +91,26 @@ export default function HeroSection({
             transition={{ delay: 0.5, duration: 0.6 }}
           >
             <Link
-              href="/rutas-magicas"
-              className="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-medium text-white bg-gradient-to-r from-primary to-accent rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
+              href="#destinos"
+              className="btn-cta shimmer group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-full px-8 py-4 text-sm font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/40 sm:w-auto"
             >
               <span className="relative z-10 flex items-center gap-2">
+                <Compass className="h-5 w-5 transition-transform group-hover:rotate-12" />
                 {t("btnExplore")}
                 <Sparkles className="w-4 h-4" />
               </span>
+              <span className="absolute right-4 transition-transform duration-300 group-hover:translate-x-1">→</span>
             </Link>
             <Link
-              href="/sobre-nosotros"
-              className="inline-flex items-center justify-center px-8 py-3.5 text-base font-medium text-foreground bg-card/50 hover:bg-card/80 border border-border/50 rounded-xl backdrop-blur-sm transition-all duration-300 hover:scale-105"
+              href={`/${locale}/shuttles`}
+              className="btn-ghost group inline-flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-sm font-medium transition-all duration-300 hover:scale-105 hover:border-primary/50 sm:w-auto"
             >
               <span>{t("btnHow")}</span>
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </motion.div>
         </div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-      >
-        <div className="w-5 h-8 border-2 border-muted-foreground/30 rounded-full flex justify-center p-1">
-          <motion.div
-            className="w-1 h-2 bg-primary rounded-full"
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </div>
-      </motion.div>
 
       {/* Gradient animation CSS */}
       <style jsx>{`
