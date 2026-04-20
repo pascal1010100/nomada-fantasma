@@ -23,6 +23,7 @@ const ReservationForm = dynamic(
 
 interface ReservationFormWrapperProps {
   tourId: string;
+  tourName?: string;
   price: number;
   maxCapacity: number;
   minCapacity?: number;
@@ -33,6 +34,7 @@ interface ReservationFormWrapperProps {
 
 export default function ReservationFormWrapper({
   tourId,
+  tourName,
   price,
   maxCapacity,
   minCapacity = 1,
@@ -57,6 +59,7 @@ export default function ReservationFormWrapper({
 
       <ReservationForm
         tourId={tourId}
+        tourName={tourName}
         price={price}
         minCapacity={minCapacity}
         maxCapacity={maxCapacity || 10}

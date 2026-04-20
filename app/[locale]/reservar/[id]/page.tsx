@@ -117,6 +117,7 @@ export default async function TourReservationPage({
 
                                 <ReservationForm
                                     tourId={supabaseTour.id}
+                                    tourName={title}
                                     price={price}
                                     minCapacity={minCapacity}
                                     maxCapacity={maxCapacity}

@@ -194,6 +194,7 @@ export default async function TourDetailPage({
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 sticky top-6">
               <ReservationFormWrapper
                 tourId={tour.id}
+                tourName={localizedTitle}
                 price={tour.price_min ?? 0}
                 minCapacity={minGuests}
                 maxCapacity={maxGuests ?? 10}

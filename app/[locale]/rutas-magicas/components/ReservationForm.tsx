@@ -10,6 +10,7 @@ import { formatTourTimeDisplay } from '@/app/lib/tours';
 
 type ReservationFormProps = {
   tourId: string;
+  tourName?: string;
   price: number;
   childPrice?: number;
   minCapacity?: number;
@@ -158,6 +159,7 @@ const buildAvailableDates = (availableDays: string[]) => {
 
 export default function ReservationForm({
   tourId,
+  tourName,
   price,
   minCapacity = 1,
   maxCapacity,
@@ -375,6 +377,7 @@ export default function ReservationForm({
         },
         body: JSON.stringify({
           tourId,
+          tourName,
           date,
           time: (normalizedPickupTime || selectedTime) || undefined,
           guests,

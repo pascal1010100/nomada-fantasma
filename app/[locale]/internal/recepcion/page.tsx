@@ -15,6 +15,12 @@ type InternalRequestItem = {
     customerEmail: string;
     customerWhatsapp: string | null;
     date: string;
+    serviceName: string;
+    serviceSlug: string | null;
+    requestedTime: string | null;
+    partySize: number | null;
+    locationLabel: string | null;
+    totalPrice: number | null;
     details: string;
     status: string | null;
     emailStatus: string | null;
@@ -176,10 +182,122 @@ function formatTimestamp(value: string | null): string {
     return parsed.toLocaleString();
 }
 
+function formatServiceDate(value: string): string {
+    if (!value) return 'Sin fecha';
+    const parsed = /^\d{4}-\d{2}-\d{2}$/.test(value)
+        ? new Date(`${value}T12:00:00`)
+        : new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleDateString('es-GT', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    });
+}
+
+function formatMoney(value: number | null): string | null {
+    if (typeof value !== 'number' || Number.isNaN(value) || value <= 0) return null;
+    return `Q${value.toFixed(2)}`;
+}
+
+function getPartySizeLabel(kind: InternalRequestItem['kind'], value: number | null): string {
+    if (!value || value < 1) return kind === 'tour' ? 'Sin viajeros' : 'Sin pasajeros';
+    const label = kind === 'tour' ? (value === 1 ? 'viajero' : 'viajeros') : (value === 1 ? 'pasajero' : 'pasajeros');
+    return `${value} ${label}`;
+}
+
+function getTimingLabel(item: InternalRequestItem): string {
+    if (!item.requestedTime) return item.kind === 'tour' ? 'Por confirmar' : 'Sin hora';
+    return item.requestedTime;
+}
+
+function shouldShowTiming(item: InternalRequestItem): boolean {
+    return item.kind === 'shuttle' && Boolean(item.requestedTime);
+}
+
+function getServiceWindowBadge(item: InternalRequestItem, status: RequestStatus) {
+    const requestDate = parseRequestDate(item);
+    if (!requestDate || status === 'cancelled' || status === 'completed') return null;
+
+    const today = toStartOfDay(new Date());
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (requestDate < today && status === 'confirmed') {
+        return {
+            label: 'Vencida',
+            className: 'border-rose-400/30 bg-rose-500/15 text-rose-300',
+        };
+    }
+
+    if (requestDate.getTime() === today.getTime()) {
+        return {
+            label: 'Hoy',
+            className: 'border-amber-400/30 bg-amber-500/15 text-amber-300',
+        };
+    }
+
+    if (requestDate.getTime() === tomorrow.getTime()) {
+        return {
+            label: 'Mañana',
+            className: 'border-sky-400/30 bg-sky-500/15 text-sky-300',
+        };
+    }
+
+    return null;
+}
+
 function getNotePreview(note: string, limit = 110): string {
-    const cleanNote = stripRequestMetadata(note);
+    const cleanNote = getReadableAdminNote(note);
     if (cleanNote.length <= limit) return cleanNote;
     return `${cleanNote.slice(0, limit)}...`;
+}
+
+function getReadableAdminNote(note: string | null | undefined): string {
+    const cleanNote = stripRequestMetadata(note);
+    if (!cleanNote) return '';
+
+    const normalizedLines = cleanNote
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) =>
+            line
+                .replace(/^\[[^\]]+\]\s*/, '')
+                .replace(/^\([^)]+\)\s*/, '')
+                .replace(/^(pending|processing|confirmed|cancelled|completed):\s*/i, '')
+                .replace(/^email:booking_confirmed\s*$/i, 'Se envio la confirmacion final al cliente')
+                .replace(/^email:payment_instructions\s*$/i, 'Se enviaron instrucciones de pago al cliente')
+                .replace(/^email:not_available\s*$/i, 'Se notifico no disponibilidad al cliente')
+                .replace(/^email:auto_booking_cancelled_customer:sent\s*$/i, 'Se notifico la cancelacion al cliente')
+                .replace(/^email:auto_booking_cancelled_agency:sent\s*$/i, 'Se notifico la cancelacion a la agencia')
+                .replace(/^email:auto_booking_cancelled_customer:failed\s*$/i, 'Fallo la notificacion de cancelacion al cliente')
+                .replace(/^email:auto_booking_cancelled_agency:failed\s*$/i, 'Fallo la notificacion de cancelacion a la agencia')
+                .replace(/^email:[^:]+:\w+\s*/i, '')
+                .trim()
+        )
+        .filter(Boolean);
+
+    if (normalizedLines.length === 0) return '';
+    return normalizedLines[normalizedLines.length - 1];
+}
+
+function summarizeLocationLabel(value: string | null, kind: InternalRequestItem['kind']): string | null {
+    if (!value) return null;
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    if (kind === 'tour') {
+        if (/por confirmar|to be confirmed/i.test(trimmed)) {
+            return 'Meetup por confirmar';
+        }
+        if (trimmed.length > 72) {
+            return `${trimmed.slice(0, 72)}...`;
+        }
+    }
+
+    return trimmed;
 }
 
 function noteHasAgencyEvidence(note: string): boolean {
@@ -932,164 +1050,104 @@ export default function RecepcionRequestsPage() {
                     const normalizedStatus = normalizeStatus(item.status);
                     const itemKey = `${item.kind}-${item.id}`;
                     const notifications = item.notifications ?? [];
+                    const serviceWindowBadge = getServiceWindowBadge(item, normalizedStatus);
+                    const priceLabel = formatMoney(item.totalPrice);
+                    const timingLabel = getTimingLabel(item);
+                    const showTiming = shouldShowTiming(item);
+                    const locationSummary = summarizeLocationLabel(item.locationLabel, item.kind);
 
                     return (
-                        <article key={itemKey} className="rounded-2xl border bg-card/40 p-4 shadow-sm transition hover:border-cyan-400/30 hover:shadow-cyan-500/5">
-                            <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                                <div className="min-w-0 flex-1 space-y-4">
-                                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                                        <div className="min-w-0 space-y-3">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-muted-foreground">
-                                                    {getKindLabel(item.kind)}
+                        <article key={itemKey} className="rounded-2xl border bg-card/35 p-4 shadow-sm transition hover:border-cyan-400/30 hover:shadow-cyan-500/5">
+                            <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
+                                <div className="min-w-0 space-y-4">
+                                    <div className="space-y-3">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-[11px] font-medium text-cyan-100">
+                                                {getKindLabel(item.kind)}
+                                            </span>
+                                            <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${getStatusBadgeClasses(normalizedStatus)}`}>
+                                                {getStatusLabel(normalizedStatus)}
+                                            </span>
+                                            {serviceWindowBadge ? (
+                                                <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${serviceWindowBadge.className}`}>
+                                                    {serviceWindowBadge.label}
                                                 </span>
-                                                <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${getStatusBadgeClasses(normalizedStatus)}`}>
-                                                    {getStatusLabel(normalizedStatus)}
-                                                </span>
-                                                <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-muted-foreground">
-                                                    {new Date(item.createdAt).toLocaleString()}
-                                                </span>
-                                            </div>
-
-                                            <div>
-                                                <h2 className="text-lg font-semibold">{item.customerName}</h2>
-                                                <p className="text-sm text-muted-foreground break-all">{item.customerEmail}</p>
-                                                {item.customerWhatsapp ? (
-                                                    <p className="text-sm text-primary/80 break-all">{item.customerWhatsapp}</p>
-                                                ) : null}
-                                            </div>
+                                            ) : null}
                                         </div>
 
-                                        <aside className="w-full rounded-2xl border border-white/10 bg-background/50 p-4 lg:max-w-sm xl:w-72">
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div>
-                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Acciones</p>
-                                                    <p className="mt-1 text-xs text-muted-foreground">Siguiente movimiento del caso</p>
+                                        <div className="grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)] lg:items-start">
+                                            <div className="min-w-0">
+                                                <h2 className="text-xl font-semibold leading-tight text-foreground">
+                                                    {item.serviceName}
+                                                </h2>
+                                                <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                                                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">
+                                                        ID #{item.id.slice(0, 8)}
+                                                    </span>
+                                                    {item.kind === 'tour' ? (
+                                                        <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">
+                                                            Tour
+                                                        </span>
+                                                    ) : null}
                                                 </div>
-                                                <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${getEmailStatusClasses(item.emailStatus)}`}>
-                                                    {getEmailStatusLabel(item.emailStatus)}
-                                                </span>
-                                            </div>
-
-                                            <div className="mt-3 flex flex-wrap gap-2">
-                                                {getActions(normalizedStatus).map((action) => {
-                                                    const actionKey = `${item.kind}-${item.id}-${action.to}`;
-                                                    return (
-                                                        <button
-                                                            key={actionKey}
-                                                            type="button"
-                                                            onClick={() => updateStatus(item, action.to)}
-                                                            disabled={Boolean(actionLoadingId) || authLoading}
-                                                            className="rounded-lg border px-3 py-2 text-sm transition hover:border-cyan-400/40 hover:text-cyan-100 disabled:opacity-50"
-                                                        >
-                                                            {actionLoadingId === actionKey ? 'Procesando...' : action.label}
-                                                        </button>
-                                                    );
-                                                })}
-                                                {getActions(normalizedStatus).length === 0 ? (
-                                                    <span className="text-sm text-muted-foreground">Sin acciones disponibles.</span>
-                                                ) : null}
-                                            </div>
-
-                                            <div className="mt-3">
-                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Correos al usuario</p>
-                                                <div className="mt-2 flex flex-wrap gap-2">
-                                                    {getEmailActions(normalizedStatus).map((action) => {
-                                                        const emailKey = `${item.kind}-${item.id}-${action.template}`;
-                                                        return (
-                                                            <button
-                                                                key={emailKey}
-                                                                type="button"
-                                                                onClick={() => sendCustomerEmail(item, action.template)}
-                                                                disabled={Boolean(emailActionLoadingId) || authLoading}
-                                                                className="rounded-lg border border-emerald-400/20 bg-emerald-500/5 px-3 py-2 text-sm transition hover:border-emerald-400/40 hover:text-emerald-100 disabled:opacity-50"
-                                                            >
-                                                                {emailActionLoadingId === emailKey ? 'Enviando...' : action.label}
-                                                            </button>
-                                                        );
-                                                    })}
-                                                    {getEmailActions(normalizedStatus).length === 0 ? (
-                                                        <span className="text-sm text-muted-foreground">Sin correos manuales para este estado.</span>
+                                                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                                                        {formatServiceDate(item.date)}
+                                                    </span>
+                                                    {item.partySize ? (
+                                                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                                                            {getPartySizeLabel(item.kind, item.partySize)}
+                                                        </span>
+                                                    ) : null}
+                                                    {showTiming ? (
+                                                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                                                            {timingLabel}
+                                                        </span>
+                                                    ) : null}
+                                                    {priceLabel ? (
+                                                        <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-emerald-200">
+                                                            {priceLabel}
+                                                        </span>
                                                     ) : null}
                                                 </div>
                                             </div>
 
-                                            <div className="mt-3">
-                                                <div className="flex items-center justify-between gap-3">
-                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Trazabilidad de notificaciones</p>
-                                                    <span className="text-[11px] text-muted-foreground">
-                                                        {notifications.length} registro{notifications.length === 1 ? '' : 's'}
-                                                    </span>
+                                            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+                                                <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
+                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Cliente</p>
+                                                    <p className="mt-1 text-sm font-medium">{item.customerName}</p>
+                                                    <p className="mt-0.5 break-all text-xs text-muted-foreground">{item.customerEmail}</p>
+                                                    {item.customerWhatsapp ? (
+                                                        <p className="mt-0.5 break-all text-xs text-cyan-200">{item.customerWhatsapp}</p>
+                                                    ) : null}
                                                 </div>
-                                                <div className="mt-2 space-y-2">
-                                                    {notifications.length > 0 ? notifications.map((notification) => (
-                                                        <div
-                                                            key={notification.id}
-                                                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs"
-                                                        >
-                                                            <div className="flex flex-wrap items-center gap-2">
-                                                                <span className={`rounded-full border px-2 py-0.5 ${getNotificationStatusClasses(notification.delivery_status)}`}>
-                                                                    {notification.delivery_status === 'sent' ? 'Enviado' : 'Falló'}
-                                                                </span>
-                                                                <span className="rounded-full border border-white/10 bg-black/10 px-2 py-0.5 text-muted-foreground">
-                                                                    {getNotificationRecipientLabel(notification.recipient_type)}
-                                                                </span>
-                                                                <span className="text-foreground/90">{getNotificationTemplateLabel(notification.template)}</span>
-                                                            </div>
-                                                            <p className="mt-1 break-all text-muted-foreground">{notification.recipient_email}</p>
-                                                            <p className="mt-1 text-[11px] text-muted-foreground">
-                                                                {formatTimestamp(notification.created_at)}
-                                                            </p>
-                                                            {notification.error_message ? (
-                                                                <p className="mt-1 text-[11px] text-rose-300">{notification.error_message}</p>
-                                                            ) : null}
-                                                        </div>
-                                                    )) : (
-                                                        <span className="text-sm text-muted-foreground">Aún no hay trazabilidad registrada.</span>
-                                                    )}
-                                                </div>
+                                                {locationSummary ? (
+                                                    <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
+                                                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                                                            {item.kind === 'tour' ? 'Encuentro' : 'Recogida'}
+                                                        </p>
+                                                        <p className="mt-1 text-sm text-foreground/90">{locationSummary}</p>
+                                                    </div>
+                                                ) : null}
                                             </div>
-
-                                            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                                                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-                                                    <p className="text-muted-foreground">Intentos email</p>
-                                                    <p className="mt-1 font-medium text-foreground">{item.emailAttempts}</p>
-                                                </div>
-                                                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-                                                    <p className="text-muted-foreground">Tipo</p>
-                                                    <p className="mt-1 font-medium text-foreground">{getKindLabel(item.kind)}</p>
-                                                </div>
-                                            </div>
-
-                                            {item.emailLastError ? (
-                                                <p className="mt-3 text-xs text-rose-400">{item.emailLastError}</p>
-                                            ) : null}
-                                        </aside>
-                                    </div>
-
-                                    <div className="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(220px,0.7fr)]">
-                                        <div className="rounded-xl border border-white/10 bg-background/40 p-3">
-                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Solicitud</p>
-                                            <p className="mt-1 text-sm font-medium">{item.details}</p>
-                                        </div>
-                                        <div className="rounded-xl border border-white/10 bg-background/40 p-3">
-                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Fecha del servicio</p>
-                                            <p className="mt-1 text-sm font-medium">{item.date || 'Sin fecha'}</p>
                                         </div>
                                     </div>
 
-                                    <div className="grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(220px,0.8fr)]">
-                                        <div className="rounded-xl border border-white/10 bg-background/40 p-3">
+                                    <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
+                                        <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
                                             <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Siguiente paso</p>
                                             <p className="mt-1 text-sm text-muted-foreground">{getChecklist(normalizedStatus)}</p>
                                         </div>
-                                        <div className="rounded-xl border border-white/10 bg-background/40 p-3">
+                                        <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
                                             <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Registro operativo</p>
                                             <div className="mt-2">{renderQualityBadge(normalizedStatus, item.adminNotes)}</div>
                                         </div>
                                     </div>
 
                                     <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                        <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                            Creada: {formatTimestamp(item.createdAt)}
+                                        </span>
                                         {normalizedStatus === 'confirmed' ? (
                                             <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
                                                 Confirmado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Pendiente'}
@@ -1103,11 +1161,6 @@ export default function RecepcionRequestsPage() {
                                         {normalizedStatus === 'completed' ? (
                                             <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
                                                 Servicio cerrado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Sin registro'}
-                                            </span>
-                                        ) : null}
-                                        {!['confirmed', 'cancelled', 'completed'].includes(normalizedStatus) ? (
-                                            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                                                Sin hitos finales registrados
                                             </span>
                                         ) : null}
                                     </div>
@@ -1130,12 +1183,112 @@ export default function RecepcionRequestsPage() {
                                             </div>
                                             <p className="mt-2 text-sm text-muted-foreground">
                                                 {item.adminNotes
-                                                    ? (expandedNotes[itemKey] ? stripRequestMetadata(item.adminNotes) || 'Sin nota operativa registrada.' : getNotePreview(item.adminNotes))
+                                                    ? (expandedNotes[itemKey] ? getReadableAdminNote(item.adminNotes) || 'Sin nota operativa registrada.' : getNotePreview(item.adminNotes))
                                                     : 'Sin nota operativa registrada.'}
                                             </p>
                                         </div>
                                     ) : null}
                                 </div>
+
+                                <aside className="w-full rounded-2xl border border-white/10 bg-background/40 p-3.5">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Acciones</p>
+                                            <p className="mt-1 text-xs text-muted-foreground">Movimiento del caso y notificaciones</p>
+                                        </div>
+                                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${getEmailStatusClasses(item.emailStatus)}`}>
+                                            {getEmailStatusLabel(item.emailStatus)}
+                                        </span>
+                                    </div>
+
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        {getActions(normalizedStatus).map((action) => {
+                                            const actionKey = `${item.kind}-${item.id}-${action.to}`;
+                                            return (
+                                                <button
+                                                    key={actionKey}
+                                                    type="button"
+                                                    onClick={() => updateStatus(item, action.to)}
+                                                    disabled={Boolean(actionLoadingId) || authLoading}
+                                                    className="rounded-lg border px-3 py-1.5 text-sm transition hover:border-cyan-400/40 hover:text-cyan-100 disabled:opacity-50"
+                                                >
+                                                    {actionLoadingId === actionKey ? 'Procesando...' : action.label}
+                                                </button>
+                                            );
+                                        })}
+                                        {getActions(normalizedStatus).length === 0 ? (
+                                            <span className="text-sm text-muted-foreground">Sin acciones disponibles.</span>
+                                        ) : null}
+                                    </div>
+
+                                    <div className="mt-3">
+                                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Correos al usuario</p>
+                                        <div className="mt-2 flex flex-wrap gap-2">
+                                            {getEmailActions(normalizedStatus).map((action) => {
+                                                const emailKey = `${item.kind}-${item.id}-${action.template}`;
+                                                return (
+                                                    <button
+                                                        key={emailKey}
+                                                        type="button"
+                                                        onClick={() => sendCustomerEmail(item, action.template)}
+                                                        disabled={Boolean(emailActionLoadingId) || authLoading}
+                                                        className="rounded-lg border border-emerald-400/20 bg-emerald-500/5 px-3 py-1.5 text-sm transition hover:border-emerald-400/40 hover:text-emerald-100 disabled:opacity-50"
+                                                    >
+                                                        {emailActionLoadingId === emailKey ? 'Enviando...' : action.label}
+                                                    </button>
+                                                );
+                                            })}
+                                            {getEmailActions(normalizedStatus).length === 0 ? (
+                                                <span className="text-sm text-muted-foreground">Sin correos manuales para este estado.</span>
+                                            ) : null}
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                        <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                                            <p className="text-muted-foreground">Intentos email</p>
+                                            <p className="mt-1 font-medium text-foreground">{item.emailAttempts}</p>
+                                        </div>
+                                        <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                                            <p className="text-muted-foreground">Tipo</p>
+                                            <p className="mt-1 font-medium text-foreground">{getKindLabel(item.kind)}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-3">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Notificaciones</p>
+                                            <span className="text-[11px] text-muted-foreground">
+                                                {notifications.length} registro{notifications.length === 1 ? '' : 's'}
+                                            </span>
+                                        </div>
+                                        <div className="mt-2 space-y-2">
+                                            {notifications.length > 0 ? notifications.slice(0, 3).map((notification) => (
+                                                <div
+                                                    key={notification.id}
+                                                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs"
+                                                >
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <span className={`rounded-full border px-2 py-0.5 ${getNotificationStatusClasses(notification.delivery_status)}`}>
+                                                            {notification.delivery_status === 'sent' ? 'Enviado' : 'Falló'}
+                                                        </span>
+                                                        <span className="rounded-full border border-white/10 bg-black/10 px-2 py-0.5 text-muted-foreground">
+                                                            {getNotificationRecipientLabel(notification.recipient_type)}
+                                                        </span>
+                                                        <span className="text-foreground/90">{getNotificationTemplateLabel(notification.template)}</span>
+                                                    </div>
+                                                    <p className="mt-1 break-all text-muted-foreground">{notification.recipient_email}</p>
+                                                </div>
+                                            )) : (
+                                                <span className="text-sm text-muted-foreground">Aún no hay trazabilidad registrada.</span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {item.emailLastError ? (
+                                        <p className="mt-3 text-xs text-rose-400">{item.emailLastError}</p>
+                                    ) : null}
+                                </aside>
                             </div>
                         </article>
                     );

@@ -33,6 +33,12 @@ type InternalRequestItem = {
     customerEmail: string;
     customerWhatsapp: string | null;
     date: string;
+    serviceName: string;
+    serviceSlug: string | null;
+    requestedTime: string | null;
+    partySize: number | null;
+    locationLabel: string | null;
+    totalPrice: number | null;
     details: string;
     status: string | null;
     emailStatus: string | null;
@@ -50,10 +56,19 @@ function normalizeLimit(rawValue: string | null): number {
     return Math.min(Math.max(parsed, 1), 200);
 }
 
-function mapReservation(row: ReservationRow | LegacyReservationRow): InternalRequestItem {
+function mapReservation(
+    row: ReservationRow | LegacyReservationRow,
+    relatedTour?: Pick<TourRow, 'id' | 'title' | 'slug' | 'meeting_point' | 'pickup_time'> | null
+): InternalRequestItem {
     const isModern = 'full_name' in row;
     const createdAt = row.created_at ?? '';
     const fallbackDate = createdAt ? createdAt.slice(0, 10) : '';
+    const serviceName = isModern
+        ? relatedTour?.title || row.tour_name || 'Tour sin nombre'
+        : row.tour_name || relatedTour?.title || 'Tour sin nombre';
+    const details = isModern
+        ? row.notes || serviceName
+        : row.customer_notes || serviceName;
     return {
         id: row.id,
         kind: 'tour',
@@ -62,7 +77,13 @@ function mapReservation(row: ReservationRow | LegacyReservationRow): InternalReq
         customerEmail: isModern ? row.email : (row.customer_email ?? ''),
         customerWhatsapp: isModern ? row.whatsapp : null,
         date: isModern ? (row.date ?? fallbackDate) : (row.reservation_date ?? fallbackDate),
-        details: isModern ? (row.tour_name || row.notes || 'Reserva de tour') : (row.tour_name || row.customer_notes || 'Reserva de tour'),
+        serviceName,
+        serviceSlug: relatedTour?.slug ?? null,
+        requestedTime: isModern ? (row.requested_time ?? relatedTour?.pickup_time ?? null) : null,
+        partySize: isModern ? (row.number_of_people ?? null) : null,
+        locationLabel: relatedTour?.meeting_point ?? null,
+        totalPrice: isModern ? (row.total_price ?? null) : null,
+        details,
         status: row.status ?? null,
         emailStatus: row.email_delivery_status ?? null,
         emailAttempts: row.email_attempts ?? 0,
@@ -76,6 +97,8 @@ function mapReservation(row: ReservationRow | LegacyReservationRow): InternalReq
 
 function mapShuttle(row: ShuttleBookingRow): InternalRequestItem {
     const createdAt = row.created_at ?? '';
+    const serviceName = `${row.route_origin ?? ''} → ${row.route_destination ?? ''}`;
+    const shuttleType = row.type === 'private' ? 'Privado' : row.type === 'shared' ? 'Compartido' : 'Shuttle';
     return {
         id: row.id,
         kind: 'shuttle',
@@ -84,7 +107,13 @@ function mapShuttle(row: ShuttleBookingRow): InternalRequestItem {
         customerEmail: row.customer_email ?? '',
         customerWhatsapp: row.customer_whatsapp ?? null,
         date: row.travel_date ?? '',
-        details: `${row.route_origin ?? ''} -> ${row.route_destination ?? ''} (${row.passengers ?? 0})`,
+        serviceName,
+        serviceSlug: null,
+        requestedTime: row.travel_time ?? null,
+        partySize: row.passengers ?? null,
+        locationLabel: row.pickup_location ?? null,
+        totalPrice: null,
+        details: `${shuttleType} · ${row.route_origin ?? ''} -> ${row.route_destination ?? ''}`,
         status: row.status,
         emailStatus: row.email_delivery_status,
         emailAttempts: row.email_attempts ?? 0,
@@ -120,7 +149,7 @@ export async function GET(request: Request) {
 
         const sanPedroToursResult = await supabaseAdmin
             .from('tours')
-            .select('id')
+            .select('id, title, slug, meeting_point, pickup_time')
             .eq('pueblo_slug', 'san-pedro');
 
         if (sanPedroToursResult.error) {
@@ -128,9 +157,11 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Error fetching tours' }, { status: 500 });
         }
 
-        const sanPedroTourIds = new Set(
-            (sanPedroToursResult.data ?? []).map((tour) => (tour as Pick<TourRow, 'id'>).id)
-        );
+        const sanPedroTours = (sanPedroToursResult.data ?? []) as Array<
+            Pick<TourRow, 'id' | 'title' | 'slug' | 'meeting_point' | 'pickup_time'>
+        >;
+        const sanPedroTourIds = new Set(sanPedroTours.map((tour) => tour.id));
+        const toursById = new Map(sanPedroTours.map((tour) => [tour.id, tour]));
 
         const reservationsResult = await supabaseAdmin
             .from('reservations')
@@ -169,9 +200,11 @@ export async function GET(request: Request) {
                 })
                 .slice(0, limit);
 
-            reservationItems = scopedReservations.map((row) =>
-                mapReservation(row as ReservationRow)
-            );
+            reservationItems = scopedReservations.map((row) => {
+                const typedRow = row as ReservationRow;
+                const relatedTour = typedRow.tour_id ? toursById.get(typedRow.tour_id) ?? null : null;
+                return mapReservation(typedRow, relatedTour);
+            });
         }
 
         const shuttleItems = (shuttleResult.data ?? []).map(mapShuttle);
