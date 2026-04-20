@@ -400,6 +400,7 @@ export default function RecepcionRequestsPage() {
         noteMinLength: 0,
     });
     const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
+    const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
     const [error, setError] = useState('');
     const [data, setData] = useState<InternalResponse | null>(null);
     const [statusFilter, setStatusFilter] = useState<'all' | RequestStatus>('all');
@@ -637,6 +638,14 @@ export default function RecepcionRequestsPage() {
         }));
     };
 
+    const toggleCard = (item: InternalRequestItem) => {
+        const key = `${item.kind}-${item.id}`;
+        setExpandedCards((prev) => ({
+            ...prev,
+            [key]: !prev[key],
+        }));
+    };
+
     const updateStatus = async (item: InternalRequestItem, nextStatus: RequestStatus) => {
         const currentStatus = normalizeStatus(item.status);
         if (currentStatus === nextStatus) return;
@@ -844,223 +853,218 @@ export default function RecepcionRequestsPage() {
             <p className="text-sm text-muted-foreground mb-6">
                 Vista interna para operar solicitudes de tours y shuttles sin salir del flujo.
             </p>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-200">
-                <span className="h-2 w-2 rounded-full bg-cyan-300 animate-pulse" />
-                <span>
-                    {lastSyncAt ? `Última actualización: ${lastSyncAt}` : 'Sincronización pendiente'}
-                </span>
-            </div>
+            <section className="mb-6 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-slate-900/88 via-slate-900/72 to-cyan-950/30 shadow-[0_16px_50px_rgba(8,15,30,0.28)]">
+                <div className="flex flex-col gap-4 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-200">
+                                <span className="h-2 w-2 rounded-full bg-cyan-300 animate-pulse" />
+                                <span>{lastSyncAt ? `Actualizado ${lastSyncAt}` : 'Sincronización pendiente'}</span>
+                            </span>
+                            {!authLoading ? (
+                                <>
+                                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                                        Opera: {operatorName || operatorEmail}
+                                    </span>
+                                    {operatorRole ? (
+                                        <span className="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-100">
+                                            {operatorRole === 'admin' ? 'Admin' : 'Ops'}
+                                        </span>
+                                    ) : null}
+                                    {accessSource ? (
+                                        <span
+                                            className={`rounded-full px-3 py-1 text-xs ${
+                                                accessSource === 'directory'
+                                                    ? 'border border-emerald-400/20 bg-emerald-500/10 text-emerald-100'
+                                                    : 'border border-amber-400/20 bg-amber-500/10 text-amber-100'
+                                            }`}
+                                        >
+                                            {accessSource === 'directory' ? 'Directorio interno' : 'Allowlist temporal'}
+                                        </span>
+                                    ) : null}
+                                </>
+                            ) : null}
+                        </div>
 
-            <div className="rounded-xl border p-4 mb-6 bg-card/50">
-                <p className="text-sm font-medium mb-2">Sesión operativa</p>
-                <div className="rounded-lg border border-cyan-400/20 bg-cyan-500/5 px-3 py-2 text-sm text-cyan-100">
-                    {authLoading ? 'Validando sesión...' : `Conectado como ${operatorName || operatorEmail}`}
-                </div>
-                {!authLoading ? (
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-foreground/90">
-                            {operatorEmail}
-                        </span>
-                        {operatorRole ? (
-                            <span className="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-cyan-100">
-                                Rol: {operatorRole === 'admin' ? 'Admin' : 'Ops'}
-                            </span>
+                        <div className="mt-3 flex flex-col gap-3 xl:flex-row xl:items-center">
+                            <label htmlFor="admin-actor" className="flex items-center gap-2 text-sm text-slate-300">
+                                <span className="text-xs uppercase tracking-wide text-slate-400">Operador visible</span>
+                                <input
+                                    id="admin-actor"
+                                    type="text"
+                                    value={actor}
+                                    onChange={(event) => setActor(event.target.value)}
+                                    placeholder="Nombre de quien opera"
+                                    className="w-full min-w-0 rounded-xl border border-white/10 bg-slate-950/35 px-3 py-2 text-sm text-white shadow-inner sm:w-72"
+                                />
+                            </label>
+                            {!authLoading ? (
+                                <span className="truncate text-xs text-slate-400">{operatorEmail}</span>
+                            ) : null}
+                        </div>
+
+                        {accessSource === 'env_fallback' ? (
+                            <p className="mt-3 text-xs text-amber-200">
+                                Este operador todavía depende del fallback por email. Conviene darlo de alta en `internal_admin_users`.
+                            </p>
                         ) : null}
-                        {accessSource ? (
-                            <span
-                                className={`rounded-full px-2.5 py-1 ${
-                                    accessSource === 'directory'
-                                        ? 'border border-emerald-400/20 bg-emerald-500/10 text-emerald-100'
-                                        : 'border border-amber-400/20 bg-amber-500/10 text-amber-100'
-                                }`}
-                            >
-                                {accessSource === 'directory' ? 'Acceso desde directorio interno' : 'Acceso temporal por allowlist'}
-                            </span>
-                        ) : null}
+                        {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
                     </div>
-                ) : null}
-                {accessSource === 'env_fallback' ? (
-                    <p className="mt-3 text-xs text-amber-200">
-                        Este operador todavía depende del fallback por email. Conviene darlo de alta en `internal_admin_users` para cerrar la transición.
-                    </p>
-                ) : null}
-                <div className="mt-3">
-                    <label htmlFor="admin-actor" className="text-sm font-medium block mb-2">
-                        Operador
-                    </label>
-                    <input
-                        id="admin-actor"
-                        type="text"
-                        value={actor}
-                        onChange={(event) => setActor(event.target.value)}
-                        placeholder="Nombre de quien opera"
-                        className="w-full sm:max-w-xs rounded-md border bg-background px-3 py-2 text-sm"
-                    />
-                </div>
-                <div className="mt-3 flex gap-2">
-                    <button
-                        type="button"
-                        onClick={fetchRequests}
-                        disabled={!canFetch || loading}
-                        className="rounded-md border px-4 py-2 text-sm transition hover:border-cyan-400/40 hover:text-cyan-100 disabled:opacity-50"
-                    >
-                        {loading ? 'Cargando...' : 'Actualizar solicitudes'}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={signOutOperator}
-                        className="rounded-md border px-4 py-2 text-sm"
-                    >
-                        Cerrar sesión
-                    </button>
-                    <a
-                        href={`/${locale}`}
-                        className="rounded-md border px-4 py-2 text-sm"
-                    >
-                        Volver
-                    </a>
-                </div>
-                {error ? <p className="mt-3 text-sm text-red-500">{error}</p> : null}
-            </div>
 
-            <div className="rounded-xl border p-4 mb-6 bg-card/50">
-                <p className="text-sm font-medium mb-3">Filtros operativos</p>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <label className="text-sm">
-                        <span className="block text-xs text-muted-foreground mb-1">Estado</span>
-                        <select
-                            value={statusFilter}
-                            onChange={(event) => setStatusFilter(event.target.value as 'all' | RequestStatus)}
-                            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                    <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                        <button
+                            type="button"
+                            onClick={fetchRequests}
+                            disabled={!canFetch || loading}
+                            className="rounded-xl border border-cyan-400/30 bg-cyan-500/15 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:border-cyan-300/50 hover:bg-cyan-500/20 disabled:opacity-50"
                         >
-                            <option value="all">Todos</option>
-                            <option value="pending">pending</option>
-                            <option value="processing">processing</option>
-                            <option value="confirmed">confirmed</option>
-                            <option value="completed">completed</option>
-                            <option value="cancelled">cancelled</option>
-                        </select>
-                    </label>
-                    <label className="text-sm">
-                        <span className="block text-xs text-muted-foreground mb-1">Tipo</span>
-                        <select
-                            value={kindFilter}
-                            onChange={(event) => setKindFilter(event.target.value as 'all' | InternalRequestItem['kind'])}
-                            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                            {loading ? 'Cargando...' : 'Actualizar solicitudes'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={signOutOperator}
+                            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-white/20 hover:text-white"
                         >
-                            <option value="all">Todos</option>
-                            <option value="tour">Tours</option>
-                            <option value="shuttle">Shuttles</option>
-                        </select>
-                    </label>
-                    <label className="text-sm">
-                        <span className="block text-xs text-muted-foreground mb-1">Desde</span>
-                        <input
-                            type="date"
-                            value={dateFrom}
-                            onChange={(event) => setDateFrom(event.target.value)}
-                            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                        />
-                    </label>
-                    <label className="text-sm">
-                        <span className="block text-xs text-muted-foreground mb-1">Hasta</span>
-                        <input
-                            type="date"
-                            value={dateTo}
-                            onChange={(event) => setDateTo(event.target.value)}
-                            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                        />
-                    </label>
+                            Cerrar sesión
+                        </button>
+                        <a
+                            href={`/${locale}`}
+                            className="rounded-xl border border-white/10 bg-transparent px-4 py-2 text-sm text-slate-400 transition hover:border-white/20 hover:text-slate-200"
+                        >
+                            Volver
+                        </a>
+                    </div>
                 </div>
-                <div className="mt-3">
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setStatusFilter('all');
-                            setKindFilter('all');
-                            setDateFrom('');
-                            setDateTo('');
-                        }}
-                        className="rounded-md border px-3 py-1.5 text-xs"
-                    >
-                        Limpiar filtros
-                    </button>
-                </div>
-            </div>
+            </section>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                <div className="rounded-lg border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:shadow-md hover:shadow-cyan-500/10">
-                    <p className="text-xs text-muted-foreground">Solicitudes visibles</p>
-                    <p className="text-xl font-semibold">{summary.total}</p>
+            <section className="mb-6 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/90 via-slate-900/75 to-cyan-950/40 shadow-[0_20px_60px_rgba(8,15,30,0.35)]">
+                <div className="border-b border-white/10 px-4 py-4 sm:px-5">
+                    <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                        <div>
+                            <p className="text-xs uppercase tracking-[0.18em] text-cyan-200/80">Pulso operativo</p>
+                            <h2 className="mt-1 text-lg font-semibold text-white">Filtro y prioridad del día</h2>
+                        </div>
+                        <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-4 xl:max-w-4xl">
+                            <label className="text-sm">
+                                <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Estado</span>
+                                <select
+                                    value={statusFilter}
+                                    onChange={(event) => setStatusFilter(event.target.value as 'all' | RequestStatus)}
+                                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2.5 text-sm text-white shadow-inner"
+                                >
+                                    <option value="all">Todos</option>
+                                    <option value="pending">Nuevas</option>
+                                    <option value="processing">En gestión</option>
+                                    <option value="confirmed">Confirmadas</option>
+                                    <option value="completed">Completadas</option>
+                                    <option value="cancelled">Canceladas</option>
+                                </select>
+                            </label>
+                            <label className="text-sm">
+                                <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Tipo</span>
+                                <select
+                                    value={kindFilter}
+                                    onChange={(event) => setKindFilter(event.target.value as 'all' | InternalRequestItem['kind'])}
+                                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2.5 text-sm text-white shadow-inner"
+                                >
+                                    <option value="all">Todos</option>
+                                    <option value="tour">Tours</option>
+                                    <option value="shuttle">Shuttles</option>
+                                </select>
+                            </label>
+                            <label className="text-sm">
+                                <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Desde</span>
+                                <input
+                                    type="date"
+                                    value={dateFrom}
+                                    onChange={(event) => setDateFrom(event.target.value)}
+                                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2.5 text-sm text-white shadow-inner"
+                                />
+                            </label>
+                            <label className="text-sm">
+                                <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Hasta</span>
+                                <input
+                                    type="date"
+                                    value={dateTo}
+                                    onChange={(event) => setDateTo(event.target.value)}
+                                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2.5 text-sm text-white shadow-inner"
+                                />
+                            </label>
+                        </div>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setStatusFilter('all');
+                                setKindFilter('all');
+                                setDateFrom('');
+                                setDateTo('');
+                            }}
+                            className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:border-cyan-400/30 hover:text-cyan-100"
+                        >
+                            Limpiar filtros
+                        </button>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
+                            Total visible: {summary.total}
+                        </span>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
+                            Tours: {summary.tours}
+                        </span>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
+                            Shuttles: {summary.shuttles}
+                        </span>
+                    </div>
                 </div>
-                <div className="rounded-lg border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:shadow-md hover:shadow-cyan-500/10">
-                    <p className="text-xs text-muted-foreground">Tours</p>
-                    <p className="text-xl font-semibold">{summary.tours}</p>
-                </div>
-                <div className="rounded-lg border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:shadow-md hover:shadow-cyan-500/10">
-                    <p className="text-xs text-muted-foreground">Shuttles</p>
-                    <p className="text-xl font-semibold">{summary.shuttles}</p>
-                </div>
-                <div className="rounded-lg border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:shadow-md hover:shadow-cyan-500/10">
-                    <p className="text-xs text-muted-foreground">Emails fallidos</p>
-                    <p className="text-xl font-semibold">{summary.emailFailed}</p>
-                </div>
-            </div>
 
-            <p className="text-xs text-muted-foreground mb-6">
-                Estas métricas se calculan sobre la vista filtrada actual.
-            </p>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                <div className="rounded-lg border p-3 bg-amber-500/5">
-                    <p className="text-xs text-muted-foreground">Nuevas</p>
-                    <p className="text-xl font-semibold">{queueSummary.pending}</p>
+                <div className="grid gap-3 px-4 py-4 sm:px-5 md:grid-cols-2 xl:grid-cols-5">
+                    <div className="rounded-2xl border border-amber-400/20 bg-gradient-to-br from-amber-500/16 to-amber-500/4 p-4 shadow-[0_10px_30px_rgba(245,158,11,0.12)]">
+                        <p className="text-[11px] uppercase tracking-wide text-amber-200/80">Nuevas</p>
+                        <p className="mt-2 text-3xl font-semibold text-white">{queueSummary.pending}</p>
+                        <p className="mt-2 text-xs text-amber-100/75">Pendientes por iniciar hoy</p>
+                    </div>
+                    <div className="rounded-2xl border border-sky-400/20 bg-gradient-to-br from-sky-500/16 to-sky-500/4 p-4 shadow-[0_10px_30px_rgba(14,165,233,0.12)]">
+                        <p className="text-[11px] uppercase tracking-wide text-sky-200/80">En gestión</p>
+                        <p className="mt-2 text-3xl font-semibold text-white">{queueSummary.processing}</p>
+                        <p className="mt-2 text-xs text-sky-100/75">{operations.processingStale} llevan más de {PROCESSING_STALE_HOURS}h</p>
+                    </div>
+                    <div className="rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-emerald-500/16 to-emerald-500/4 p-4 shadow-[0_10px_30px_rgba(16,185,129,0.12)]">
+                        <p className="text-[11px] uppercase tracking-wide text-emerald-200/80">Confirmadas</p>
+                        <p className="mt-2 text-3xl font-semibold text-white">{queueSummary.confirmed}</p>
+                        <p className="mt-2 text-xs text-emerald-100/75">{operations.pendingToday} nuevas entraron hoy</p>
+                    </div>
+                    <div className="rounded-2xl border border-rose-400/20 bg-gradient-to-br from-rose-500/18 to-rose-500/4 p-4 shadow-[0_10px_30px_rgba(244,63,94,0.14)]">
+                        <p className="text-[11px] uppercase tracking-wide text-rose-200/85">Urgentes</p>
+                        <p className="mt-2 text-3xl font-semibold text-white">{operations.confirmedOverdue}</p>
+                        <p className="mt-2 text-xs text-rose-100/75">Confirmadas con fecha ya vencida</p>
+                    </div>
+                    <div className="rounded-2xl border border-fuchsia-400/20 bg-gradient-to-br from-fuchsia-500/16 to-fuchsia-500/4 p-4 shadow-[0_10px_30px_rgba(217,70,239,0.12)]">
+                        <p className="text-[11px] uppercase tracking-wide text-fuchsia-200/85">Emails fallidos</p>
+                        <p className="mt-2 text-3xl font-semibold text-white">{summary.emailFailed}</p>
+                        <p className="mt-2 text-xs text-fuchsia-100/75">Requieren revisión manual</p>
+                    </div>
                 </div>
-                <div className="rounded-lg border p-3 bg-sky-500/5">
-                    <p className="text-xs text-muted-foreground">En gestion</p>
-                    <p className="text-xl font-semibold">{queueSummary.processing}</p>
-                </div>
-                <div className="rounded-lg border p-3 bg-emerald-500/5">
-                    <p className="text-xs text-muted-foreground">Confirmadas</p>
-                    <p className="text-xl font-semibold">{queueSummary.confirmed}</p>
-                </div>
-                <div className="rounded-lg border p-3 bg-slate-500/5">
-                    <p className="text-xs text-muted-foreground">Cerradas</p>
-                    <p className="text-xl font-semibold">{queueSummary.closed}</p>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-                <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">Nuevas hoy</p>
-                    <p className="text-xl font-semibold">{operations.pendingToday}</p>
-                </div>
-                <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">En gestion &gt; {PROCESSING_STALE_HOURS}h</p>
-                    <p className="text-xl font-semibold">{operations.processingStale}</p>
-                </div>
-                <div className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">Confirmadas vencidas</p>
-                    <p className="text-xl font-semibold">{operations.confirmedOverdue}</p>
-                </div>
-            </div>
+            </section>
 
             <div className="space-y-4">
                 {filteredItems.map((item) => {
                     const normalizedStatus = normalizeStatus(item.status);
                     const itemKey = `${item.kind}-${item.id}`;
+                    const isExpanded = Boolean(expandedCards[itemKey]);
                     const notifications = item.notifications ?? [];
                     const serviceWindowBadge = getServiceWindowBadge(item, normalizedStatus);
                     const priceLabel = formatMoney(item.totalPrice);
                     const timingLabel = getTimingLabel(item);
                     const showTiming = shouldShowTiming(item);
                     const locationSummary = summarizeLocationLabel(item.locationLabel, item.kind);
+                    const primaryActions = getActions(normalizedStatus);
+                    const manualEmailActions = getEmailActions(normalizedStatus);
 
                     return (
                         <article key={itemKey} className="rounded-2xl border bg-card/35 p-4 shadow-sm transition hover:border-cyan-400/30 hover:shadow-cyan-500/5">
-                            <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
-                                <div className="min-w-0 space-y-4">
-                                    <div className="space-y-3">
+                            <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                                    <div className="min-w-0 flex-1">
                                         <div className="flex flex-wrap items-center gap-2">
                                             <span className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-[11px] font-medium text-cyan-100">
                                                 {getKindLabel(item.kind)}
@@ -1073,222 +1077,221 @@ export default function RecepcionRequestsPage() {
                                                     {serviceWindowBadge.label}
                                                 </span>
                                             ) : null}
+                                            <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${getEmailStatusClasses(item.emailStatus)}`}>
+                                                {getEmailStatusLabel(item.emailStatus)}
+                                            </span>
                                         </div>
 
-                                        <div className="grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)] lg:items-start">
-                                            <div className="min-w-0">
-                                                <h2 className="text-xl font-semibold leading-tight text-foreground">
-                                                    {item.serviceName}
-                                                </h2>
-                                                <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                                                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">
-                                                        ID #{item.id.slice(0, 8)}
-                                                    </span>
-                                                    {item.kind === 'tour' ? (
-                                                        <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">
-                                                            Tour
-                                                        </span>
-                                                    ) : null}
-                                                </div>
-                                                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                        <div className="mt-3">
+                                            <h2 className="text-xl font-semibold leading-tight text-foreground">
+                                                {item.serviceName}
+                                            </h2>
+                                            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                                                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">
+                                                    ID #{item.id.slice(0, 8)}
+                                                </span>
+                                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                                                    {formatServiceDate(item.date)}
+                                                </span>
+                                                {item.partySize ? (
                                                     <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
-                                                        {formatServiceDate(item.date)}
+                                                        {getPartySizeLabel(item.kind, item.partySize)}
                                                     </span>
-                                                    {item.partySize ? (
-                                                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
-                                                            {getPartySizeLabel(item.kind, item.partySize)}
-                                                        </span>
-                                                    ) : null}
-                                                    {showTiming ? (
-                                                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
-                                                            {timingLabel}
-                                                        </span>
-                                                    ) : null}
-                                                    {priceLabel ? (
-                                                        <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-emerald-200">
-                                                            {priceLabel}
-                                                        </span>
-                                                    ) : null}
-                                                </div>
-                                            </div>
-
-                                            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-                                                <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
-                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Cliente</p>
-                                                    <p className="mt-1 text-sm font-medium">{item.customerName}</p>
-                                                    <p className="mt-0.5 break-all text-xs text-muted-foreground">{item.customerEmail}</p>
-                                                    {item.customerWhatsapp ? (
-                                                        <p className="mt-0.5 break-all text-xs text-cyan-200">{item.customerWhatsapp}</p>
-                                                    ) : null}
-                                                </div>
-                                                {locationSummary ? (
-                                                    <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
-                                                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                                                            {item.kind === 'tour' ? 'Encuentro' : 'Recogida'}
-                                                        </p>
-                                                        <p className="mt-1 text-sm text-foreground/90">{locationSummary}</p>
-                                                    </div>
+                                                ) : null}
+                                                {showTiming ? (
+                                                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                                                        {timingLabel}
+                                                    </span>
+                                                ) : null}
+                                                {priceLabel ? (
+                                                    <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-emerald-200">
+                                                        {priceLabel}
+                                                    </span>
                                                 ) : null}
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
-                                        <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
-                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Siguiente paso</p>
-                                            <p className="mt-1 text-sm text-muted-foreground">{getChecklist(normalizedStatus)}</p>
-                                        </div>
-                                        <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
-                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Registro operativo</p>
-                                            <div className="mt-2">{renderQualityBadge(normalizedStatus, item.adminNotes)}</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                                        <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                                            Creada: {formatTimestamp(item.createdAt)}
-                                        </span>
-                                        {normalizedStatus === 'confirmed' ? (
-                                            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                                                Confirmado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Pendiente'}
-                                            </span>
-                                        ) : null}
-                                        {normalizedStatus === 'cancelled' ? (
-                                            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                                                Cancelado: {item.cancelledAt ? formatTimestamp(item.cancelledAt) : 'Pendiente'}
-                                            </span>
-                                        ) : null}
-                                        {normalizedStatus === 'completed' ? (
-                                            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                                                Servicio cerrado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Sin registro'}
-                                            </span>
-                                        ) : null}
-                                    </div>
-
-                                    {(normalizedStatus === 'confirmed' ||
-                                        normalizedStatus === 'cancelled' ||
-                                        normalizedStatus === 'completed') ? (
-                                        <div className="rounded-xl border border-white/10 bg-background/40 p-3">
-                                            <div className="flex items-center justify-between gap-3">
-                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Nota operativa</p>
-                                                {item.adminNotes && item.adminNotes.length > 110 ? (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => toggleNote(item)}
-                                                        className="text-xs text-cyan-300 transition hover:text-cyan-200"
-                                                    >
-                                                        {expandedNotes[itemKey] ? 'Ver menos' : 'Ver mas'}
-                                                    </button>
+                                        <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                                            <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
+                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Cliente</p>
+                                                <p className="mt-1 text-sm font-medium">{item.customerName}</p>
+                                            </div>
+                                            <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
+                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Contacto</p>
+                                                <p className="mt-1 truncate text-sm text-muted-foreground">{item.customerEmail}</p>
+                                                {item.customerWhatsapp ? (
+                                                    <p className="mt-0.5 text-xs text-cyan-200">{item.customerWhatsapp}</p>
                                                 ) : null}
                                             </div>
-                                            <p className="mt-2 text-sm text-muted-foreground">
-                                                {item.adminNotes
-                                                    ? (expandedNotes[itemKey] ? getReadableAdminNote(item.adminNotes) || 'Sin nota operativa registrada.' : getNotePreview(item.adminNotes))
-                                                    : 'Sin nota operativa registrada.'}
-                                            </p>
-                                        </div>
-                                    ) : null}
-                                </div>
-
-                                <aside className="w-full rounded-2xl border border-white/10 bg-background/40 p-3.5">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div>
-                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Acciones</p>
-                                            <p className="mt-1 text-xs text-muted-foreground">Movimiento del caso y notificaciones</p>
-                                        </div>
-                                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${getEmailStatusClasses(item.emailStatus)}`}>
-                                            {getEmailStatusLabel(item.emailStatus)}
-                                        </span>
-                                    </div>
-
-                                    <div className="mt-3 flex flex-wrap gap-2">
-                                        {getActions(normalizedStatus).map((action) => {
-                                            const actionKey = `${item.kind}-${item.id}-${action.to}`;
-                                            return (
-                                                <button
-                                                    key={actionKey}
-                                                    type="button"
-                                                    onClick={() => updateStatus(item, action.to)}
-                                                    disabled={Boolean(actionLoadingId) || authLoading}
-                                                    className="rounded-lg border px-3 py-1.5 text-sm transition hover:border-cyan-400/40 hover:text-cyan-100 disabled:opacity-50"
-                                                >
-                                                    {actionLoadingId === actionKey ? 'Procesando...' : action.label}
-                                                </button>
-                                            );
-                                        })}
-                                        {getActions(normalizedStatus).length === 0 ? (
-                                            <span className="text-sm text-muted-foreground">Sin acciones disponibles.</span>
-                                        ) : null}
-                                    </div>
-
-                                    <div className="mt-3">
-                                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Correos al usuario</p>
-                                        <div className="mt-2 flex flex-wrap gap-2">
-                                            {getEmailActions(normalizedStatus).map((action) => {
-                                                const emailKey = `${item.kind}-${item.id}-${action.template}`;
-                                                return (
-                                                    <button
-                                                        key={emailKey}
-                                                        type="button"
-                                                        onClick={() => sendCustomerEmail(item, action.template)}
-                                                        disabled={Boolean(emailActionLoadingId) || authLoading}
-                                                        className="rounded-lg border border-emerald-400/20 bg-emerald-500/5 px-3 py-1.5 text-sm transition hover:border-emerald-400/40 hover:text-emerald-100 disabled:opacity-50"
-                                                    >
-                                                        {emailActionLoadingId === emailKey ? 'Enviando...' : action.label}
-                                                    </button>
-                                                );
-                                            })}
-                                            {getEmailActions(normalizedStatus).length === 0 ? (
-                                                <span className="text-sm text-muted-foreground">Sin correos manuales para este estado.</span>
+                                            {locationSummary ? (
+                                                <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5 sm:col-span-2">
+                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                                                        {item.kind === 'tour' ? 'Encuentro' : 'Recogida'}
+                                                    </p>
+                                                    <p className="mt-1 text-sm text-foreground/90">{locationSummary}</p>
+                                                </div>
                                             ) : null}
                                         </div>
                                     </div>
 
-                                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                                        <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-                                            <p className="text-muted-foreground">Intentos email</p>
-                                            <p className="mt-1 font-medium text-foreground">{item.emailAttempts}</p>
+                                    <div className="flex w-full flex-col gap-2 xl:w-72 xl:flex-shrink-0">
+                                        <div className="flex flex-wrap gap-2">
+                                            {primaryActions.map((action) => {
+                                                const actionKey = `${item.kind}-${item.id}-${action.to}`;
+                                                return (
+                                                    <button
+                                                        key={actionKey}
+                                                        type="button"
+                                                        onClick={() => updateStatus(item, action.to)}
+                                                        disabled={Boolean(actionLoadingId) || authLoading}
+                                                        className="rounded-lg border px-3 py-1.5 text-sm transition hover:border-cyan-400/40 hover:text-cyan-100 disabled:opacity-50"
+                                                    >
+                                                        {actionLoadingId === actionKey ? 'Procesando...' : action.label}
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
-                                        <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-                                            <p className="text-muted-foreground">Tipo</p>
-                                            <p className="mt-1 font-medium text-foreground">{getKindLabel(item.kind)}</p>
-                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => toggleCard(item)}
+                                            className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-left text-muted-foreground transition hover:border-cyan-400/30 hover:text-cyan-100"
+                                        >
+                                            {isExpanded ? 'Ocultar detalle' : 'Ver detalle'}
+                                        </button>
                                     </div>
+                                </div>
 
-                                    <div className="mt-3">
-                                        <div className="flex items-center justify-between gap-3">
-                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Notificaciones</p>
-                                            <span className="text-[11px] text-muted-foreground">
-                                                {notifications.length} registro{notifications.length === 1 ? '' : 's'}
-                                            </span>
-                                        </div>
-                                        <div className="mt-2 space-y-2">
-                                            {notifications.length > 0 ? notifications.slice(0, 3).map((notification) => (
-                                                <div
-                                                    key={notification.id}
-                                                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs"
-                                                >
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        <span className={`rounded-full border px-2 py-0.5 ${getNotificationStatusClasses(notification.delivery_status)}`}>
-                                                            {notification.delivery_status === 'sent' ? 'Enviado' : 'Falló'}
-                                                        </span>
-                                                        <span className="rounded-full border border-white/10 bg-black/10 px-2 py-0.5 text-muted-foreground">
-                                                            {getNotificationRecipientLabel(notification.recipient_type)}
-                                                        </span>
-                                                        <span className="text-foreground/90">{getNotificationTemplateLabel(notification.template)}</span>
-                                                    </div>
-                                                    <p className="mt-1 break-all text-muted-foreground">{notification.recipient_email}</p>
+                                {isExpanded ? (
+                                    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
+                                        <div className="min-w-0 space-y-4">
+                                            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
+                                                <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
+                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Siguiente paso</p>
+                                                    <p className="mt-1 text-sm text-muted-foreground">{getChecklist(normalizedStatus)}</p>
                                                 </div>
-                                            )) : (
-                                                <span className="text-sm text-muted-foreground">Aún no hay trazabilidad registrada.</span>
-                                            )}
-                                        </div>
-                                    </div>
+                                                <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
+                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Registro operativo</p>
+                                                    <div className="mt-2">{renderQualityBadge(normalizedStatus, item.adminNotes)}</div>
+                                                </div>
+                                            </div>
 
-                                    {item.emailLastError ? (
-                                        <p className="mt-3 text-xs text-rose-400">{item.emailLastError}</p>
-                                    ) : null}
-                                </aside>
+                                            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                                <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                    Creada: {formatTimestamp(item.createdAt)}
+                                                </span>
+                                                {normalizedStatus === 'confirmed' ? (
+                                                    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                        Confirmado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Pendiente'}
+                                                    </span>
+                                                ) : null}
+                                                {normalizedStatus === 'cancelled' ? (
+                                                    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                        Cancelado: {item.cancelledAt ? formatTimestamp(item.cancelledAt) : 'Pendiente'}
+                                                    </span>
+                                                ) : null}
+                                                {normalizedStatus === 'completed' ? (
+                                                    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                        Servicio cerrado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Sin registro'}
+                                                    </span>
+                                                ) : null}
+                                            </div>
+
+                                            {(normalizedStatus === 'confirmed' ||
+                                                normalizedStatus === 'cancelled' ||
+                                                normalizedStatus === 'completed') ? (
+                                                <div className="rounded-xl border border-white/10 bg-background/40 p-3">
+                                                    <div className="flex items-center justify-between gap-3">
+                                                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Nota operativa</p>
+                                                        {item.adminNotes && item.adminNotes.length > 110 ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => toggleNote(item)}
+                                                                className="text-xs text-cyan-300 transition hover:text-cyan-200"
+                                                            >
+                                                                {expandedNotes[itemKey] ? 'Ver menos' : 'Ver mas'}
+                                                            </button>
+                                                        ) : null}
+                                                    </div>
+                                                    <p className="mt-2 text-sm text-muted-foreground">
+                                                        {item.adminNotes
+                                                            ? (expandedNotes[itemKey] ? getReadableAdminNote(item.adminNotes) || 'Sin nota operativa registrada.' : getNotePreview(item.adminNotes))
+                                                            : 'Sin nota operativa relevante.'}
+                                                    </p>
+                                                </div>
+                                            ) : null}
+                                        </div>
+
+                                        <aside className="w-full rounded-2xl border border-white/10 bg-background/40 p-3.5">
+                                            <div>
+                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Correos al usuario</p>
+                                                <div className="mt-2 flex flex-wrap gap-2">
+                                                    {manualEmailActions.map((action) => {
+                                                        const emailKey = `${item.kind}-${item.id}-${action.template}`;
+                                                        return (
+                                                            <button
+                                                                key={emailKey}
+                                                                type="button"
+                                                                onClick={() => sendCustomerEmail(item, action.template)}
+                                                                disabled={Boolean(emailActionLoadingId) || authLoading}
+                                                                className="rounded-lg border border-emerald-400/20 bg-emerald-500/5 px-3 py-1.5 text-sm transition hover:border-emerald-400/40 hover:text-emerald-100 disabled:opacity-50"
+                                                            >
+                                                                {emailActionLoadingId === emailKey ? 'Enviando...' : action.label}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                    {manualEmailActions.length === 0 ? (
+                                                        <span className="text-sm text-muted-foreground">Sin correos manuales para este estado.</span>
+                                                    ) : null}
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                                                    <p className="text-muted-foreground">Intentos email</p>
+                                                    <p className="mt-1 font-medium text-foreground">{item.emailAttempts}</p>
+                                                </div>
+                                                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                                                    <p className="text-muted-foreground">Tipo</p>
+                                                    <p className="mt-1 font-medium text-foreground">{getKindLabel(item.kind)}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-3">
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Notificaciones</p>
+                                                    <span className="text-[11px] text-muted-foreground">
+                                                        {notifications.length} registro{notifications.length === 1 ? '' : 's'}
+                                                    </span>
+                                                </div>
+                                                <div className="mt-2 space-y-2">
+                                                    {notifications.length > 0 ? notifications.slice(0, 3).map((notification) => (
+                                                        <div
+                                                            key={notification.id}
+                                                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs"
+                                                        >
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <span className={`rounded-full border px-2 py-0.5 ${getNotificationStatusClasses(notification.delivery_status)}`}>
+                                                                    {notification.delivery_status === 'sent' ? 'Enviado' : 'Falló'}
+                                                                </span>
+                                                                <span className="rounded-full border border-white/10 bg-black/10 px-2 py-0.5 text-muted-foreground">
+                                                                    {getNotificationRecipientLabel(notification.recipient_type)}
+                                                                </span>
+                                                                <span className="text-foreground/90">{getNotificationTemplateLabel(notification.template)}</span>
+                                                            </div>
+                                                            <p className="mt-1 break-all text-muted-foreground">{notification.recipient_email}</p>
+                                                        </div>
+                                                    )) : (
+                                                        <span className="text-sm text-muted-foreground">Aún no hay trazabilidad registrada.</span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {item.emailLastError ? (
+                                                <p className="mt-3 text-xs text-rose-400">{item.emailLastError}</p>
+                                            ) : null}
+                                        </aside>
+                                    </div>
+                                ) : null}
                             </div>
                         </article>
                     );
