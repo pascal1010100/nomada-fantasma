@@ -5,6 +5,7 @@ import { getTourBySlugFromDB } from '@/app/lib/supabase/tours';
 import type { Database } from '@/types/database.types';
 import { getTranslations } from 'next-intl/server';
 import { CONTACT_INFO } from '@/app/lib/constants';
+import { formatTourTimeDisplay } from '@/app/lib/tours';
 
 
 // Tipos para los parámetros de búsqueda
@@ -60,6 +61,7 @@ export default async function ConfirmationPage({
       ? `${typedTour.duration_hours} ${t('hoursLabel')}`
       : t('durationFallback'),
     meetingPoint: typedTour.meeting_point ?? '',
+    pickupTime: typedTour.pickup_time ?? '',
     adultPrice: typedTour.price_min ?? typedTour.price_max ?? 0,
   };
   const tourKeyRaw = typedTour.slug ?? tourId;
@@ -96,7 +98,7 @@ export default async function ConfirmationPage({
   const reservationAdults = Number.isNaN(parsedAdults) ? 1 : parsedAdults;
   const reservation = {
     date: date ? formatDate(date) : t('dateFallback'),
-    time: time || t('timeFallback'),
+    time: time || (displayTour.pickupTime ? t('pickupWindowValue', { time: formatTourTimeDisplay(displayTour.pickupTime) }) : t('timeFallback')),
     adults: reservationAdults,
     total: total ? parseFloat(total) : 0,
   };

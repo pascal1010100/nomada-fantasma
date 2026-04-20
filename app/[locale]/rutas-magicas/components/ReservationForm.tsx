@@ -6,6 +6,7 @@ import { Calendar, Loader2, CheckCircle2, AlertCircle, ChevronDown, Info, User, 
 import { motion } from 'framer-motion';
 import { trackEvent } from '../../../lib/analytics';
 import { useTranslations, useLocale } from 'next-intl';
+import { formatTourTimeDisplay } from '@/app/lib/tours';
 
 type ReservationFormProps = {
   tourId: string;
@@ -15,6 +16,7 @@ type ReservationFormProps = {
   maxCapacity: number;
   availableDays: string[];
   startTimes?: string[];
+  pickupTime?: string;
 };
 
 const normalizeDayName = (value: string) =>
@@ -161,6 +163,7 @@ export default function ReservationForm({
   maxCapacity,
   availableDays,
   startTimes = [],
+  pickupTime,
 }: ReservationFormProps) {
   const router = useRouter();
   const t = useTranslations('Reservation');
@@ -178,11 +181,14 @@ export default function ReservationForm({
     () => startTimes.map((value) => value.trim()).filter(Boolean),
     [startTimes]
   );
+  const normalizedPickupTime = pickupTime?.trim() ?? '';
+  const pickupTimeLabel = formatTourTimeDisplay(normalizedPickupTime);
   const normalizedStartTimesKey = useMemo(
     () => normalizedStartTimes.join('|'),
     [normalizedStartTimes]
   );
   const hasStartTimes = normalizedStartTimes.length > 0;
+  const hasPickupWindow = Boolean(normalizedPickupTime);
   const minGuests = Math.max(1, minCapacity);
   const guestOptions = useMemo(() => {
     const maxGuests = Math.max(minGuests, maxCapacity);
@@ -191,7 +197,7 @@ export default function ReservationForm({
 
   // Estados del formulario
   const [date, setDate] = useState(normalizedAvailableDays[0] || '');
-  const [selectedTime, setSelectedTime] = useState(normalizedStartTimes[0] || '');
+  const [selectedTime, setSelectedTime] = useState(normalizedPickupTime || normalizedStartTimes[0] || '');
   const [guests, setGuests] = useState(minGuests);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -217,7 +223,7 @@ export default function ReservationForm({
     if (nextDate !== date) {
       setDate(nextDate);
     }
-    const nextTime = normalizedStartTimes[0] || '';
+    const nextTime = normalizedPickupTime || normalizedStartTimes[0] || '';
     if (nextTime !== selectedTime) {
       setSelectedTime(nextTime);
     }
@@ -244,7 +250,7 @@ export default function ReservationForm({
       tour_id: tourId,
       price: price
     });
-  }, [tourId, normalizedAvailableDaysKey, normalizedStartTimesKey, price, minGuests, maxCapacity]);
+  }, [tourId, normalizedAvailableDaysKey, normalizedStartTimesKey, normalizedPickupTime, price, minGuests, maxCapacity]);
 
   // Track when user starts filling the form
   useEffect(() => {
@@ -280,7 +286,7 @@ export default function ReservationForm({
     } else if (!validatePhone(formData.phone)) {
       errors.push(t('errors.invalidPhone'));
     }
-    if (hasStartTimes && !selectedTime) {
+    if (hasStartTimes && !hasPickupWindow && !selectedTime) {
       errors.push(t('errors.requiredTime'));
     }
     if (maxCapacity < 1) {
@@ -370,7 +376,7 @@ export default function ReservationForm({
         body: JSON.stringify({
           tourId,
           date,
-          time: selectedTime || undefined,
+          time: (normalizedPickupTime || selectedTime) || undefined,
           guests,
           type: 'tour',
           totalPrice: calculateTotal(),
@@ -408,7 +414,7 @@ export default function ReservationForm({
       const searchParams = new URLSearchParams({
         tourId,
         date,
-        ...(selectedTime ? { time: selectedTime } : {}),
+        ...((normalizedPickupTime || selectedTime) ? { time: (normalizedPickupTime || selectedTime) } : {}),
         adults: guests.toString(),
         total: calculateTotal().toString(),
         emailSent: emailStatus,
@@ -546,7 +552,11 @@ export default function ReservationForm({
             {t('timeLabel')}
           </label>
           <div className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm">
-            {hasStartTimes ? (
+            {hasPickupWindow ? (
+              <div className="w-full bg-transparent text-sm">
+                {t('pickupWindowValue', { time: pickupTimeLabel })}
+              </div>
+            ) : hasStartTimes ? (
               <select
                 value={selectedTime}
                 onChange={(e) => setSelectedTime(e.target.value)}
@@ -564,7 +574,7 @@ export default function ReservationForm({
             )}
           </div>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {hasStartTimes ? t('timeHelp') : t('timeToConfirm')}
+            {hasPickupWindow ? t('pickupWindowHelp') : hasStartTimes ? t('timeHelp') : t('timeToConfirm')}
           </p>
         </div>
       </div>
@@ -755,7 +765,7 @@ export default function ReservationForm({
           !validateEmail(formData.email) ||
           !formData.phone ||
           !validatePhone(formData.phone) ||
-          (hasStartTimes && !selectedTime) ||
+          (hasStartTimes && !hasPickupWindow && !selectedTime) ||
           guests < minGuests ||
           maxCapacity < 1
         }

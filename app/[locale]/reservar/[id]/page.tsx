@@ -122,6 +122,7 @@ export default async function TourReservationPage({
                                     maxCapacity={maxCapacity}
                                     availableDays={supabaseTour.available_days ?? ['Todos los días']}
                                     startTimes={supabaseTour.start_times ?? []}
+                                    pickupTime={supabaseTour.pickup_time ?? undefined}
                                 />
                             </div>
                         </div>

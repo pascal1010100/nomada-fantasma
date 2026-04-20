@@ -12,6 +12,7 @@ export interface Tour {
   duration_hours: number;
   is_active: boolean;
   meeting_point: string;
+  pickup_time?: string | null;
   slug: string;
 }
 

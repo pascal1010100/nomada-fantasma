@@ -37,6 +37,7 @@ export default async function TourDetailPage({
   const minGuests = tour.min_guests ?? 1;
   const maxGuests = tour.max_guests ?? minGuests;
   const meetingPoint = (tour as { meeting_point?: string | null }).meeting_point ?? '';
+  const pickupTime = (tour as { pickup_time?: string | null }).pickup_time ?? '';
   const included = (tour.included ?? []) as string[];
   const notIncluded = (tour.not_included ?? []) as string[];
   const itinerary = ((tour as { itinerary?: ItineraryItem[] | null }).itinerary ?? []) as ItineraryItem[];
@@ -198,6 +199,7 @@ export default async function TourDetailPage({
                 maxCapacity={maxGuests ?? 10}
                 availableDays={safeAvailableDays}
                 startTimes={safeStartTimes}
+                pickupTime={pickupTime}
               />
             </div>
 

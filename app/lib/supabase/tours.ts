@@ -7,6 +7,7 @@ export type SupabaseTour = Database['public']['Tables']['tours']['Row'];
 
 const mapSupabaseTourToUi = (tour: SupabaseTour): Tour => {
   const meetingPoint = (tour as { meeting_point?: string | null }).meeting_point ?? '';
+  const pickupTime = (tour as { pickup_time?: string | null }).pickup_time ?? null;
   const imageUrl = getTourCoverImage(tour);
   const slug = normalizeSlug(tour.slug) ?? normalizeId(tour.id) ?? '';
 
@@ -24,6 +25,7 @@ const mapSupabaseTourToUi = (tour: SupabaseTour): Tour => {
     duration_hours: tour.duration_hours ?? 0,
     is_active: tour.is_active,
     meeting_point: meetingPoint,
+    pickup_time: pickupTime,
     slug,
   };
 };

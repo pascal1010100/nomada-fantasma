@@ -1,6 +1,7 @@
 'use client';
 
 import { normalizeId, normalizeSlug, Tour } from '@/app/lib/types';
+import { formatTourTimeDisplay } from '@/app/lib/tours';
 import { Clock, MapPin, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -35,7 +36,12 @@ export default function TourCard({ tour, puebloSlug, className = '' }: TourCardP
   const name = td.has('name') ? td('name') : (tour.name ?? tour.title ?? 'Tour');
   const description = td.has('description') ? td('description') : tour.description;
   const meeting_point = td.has('meeting_point') ? td('meeting_point') : tour.meeting_point;
+  const pickupTime = tour.pickup_time?.trim() || '';
+  const pickupTimeLabel = formatTourTimeDisplay(pickupTime);
   const durationLabel = `${tour.duration_hours} ${t('hours', { count: tour.duration_hours })}`;
+  const timeLabel = pickupTime
+    ? (locale === 'es' ? `Recogidas desde ${pickupTimeLabel}` : `Pickups start around ${pickupTimeLabel}`)
+    : durationLabel;
   const priceValue = (tour.price ?? tour.price_min ?? 0);
 
   return (
@@ -76,7 +82,7 @@ export default function TourCard({ tour, puebloSlug, className = '' }: TourCardP
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="flex items-center text-gray-600 dark:text-gray-300">
               <Clock className="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0" />
-              <span className="truncate" title={durationLabel}>{durationLabel}</span>
+              <span className="truncate" title={timeLabel}>{timeLabel}</span>
             </div>
 
             <div className="flex items-center text-gray-600 dark:text-gray-300">

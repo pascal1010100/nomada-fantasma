@@ -28,6 +28,7 @@ interface ReservationFormWrapperProps {
   minCapacity?: number;
   availableDays: string[];
   startTimes?: string[];
+  pickupTime?: string;
 }
 
 export default function ReservationFormWrapper({
@@ -37,6 +38,7 @@ export default function ReservationFormWrapper({
   minCapacity = 1,
   availableDays,
   startTimes = [],
+  pickupTime,
 }: ReservationFormWrapperProps) {
   const t = useTranslations('Reservation');
   // Asegurarse de que availableDays y startTimes sean arrays
@@ -60,6 +62,7 @@ export default function ReservationFormWrapper({
         maxCapacity={maxCapacity || 10}
         availableDays={defaultAvailableDays}
         startTimes={safeStartTimes}
+        pickupTime={pickupTime}
       />
     </div>
   );
