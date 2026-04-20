@@ -192,6 +192,7 @@ export async function POST(request: Request) {
             email: sanitizedData.email,
             whatsapp: sanitizedData.whatsapp,
             date: sanitizedData.date,
+            requested_time: sanitizedData.requested_time,
             number_of_people: sanitizedData.number_of_people,
             reservation_type: sanitizedData.reservation_type,
             tour_id: sanitizedData.tour_id,
@@ -219,6 +220,7 @@ export async function POST(request: Request) {
                 email: sanitizedData.email,
                 whatsapp: sanitizedData.whatsapp,
                 date: sanitizedData.date,
+                requested_time: sanitizedData.requested_time,
                 number_of_people: sanitizedData.number_of_people,
                 reservation_type: sanitizedData.reservation_type,
                 tour_id: sanitizedData.tour_id,
@@ -307,6 +309,10 @@ export async function POST(request: Request) {
             ('date' in reservation ? reservation.date : reservation.reservation_date) || '';
         const reservationGuests =
             ('number_of_people' in reservation ? reservation.number_of_people : reservation.guests) || 1;
+        const reservationRequestedTime =
+            'requested_time' in reservation && typeof reservation.requested_time === 'string'
+                ? reservation.requested_time
+                : null;
         const reservationPhone =
             ('whatsapp' in reservation ? reservation.whatsapp : reservation.customer_phone) || '';
         const reservationNotes =
@@ -356,6 +362,7 @@ export async function POST(request: Request) {
                 customerNotes: reservationNotes,
                 tourName: resolvedTourName,
                 date: reservationDate,
+                requestedTime: reservationRequestedTime,
                 guests: reservationGuests,
                 totalPrice: ('total_price' in reservation ? reservation.total_price : reservation.total_price) || 0,
                 locale,

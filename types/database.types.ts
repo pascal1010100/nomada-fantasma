@@ -219,6 +219,7 @@ export type Database = {
           id: string
           notes: string | null
           number_of_people: number
+          requested_time: string | null
           reservation_type: string | null
           status: string | null
           total_price: number | null
@@ -245,6 +246,7 @@ export type Database = {
           id?: string
           notes?: string | null
           number_of_people: number
+          requested_time?: string | null
           reservation_type?: string | null
           status?: string | null
           total_price?: number | null
@@ -271,6 +273,7 @@ export type Database = {
           id?: string
           notes?: string | null
           number_of_people?: number
+          requested_time?: string | null
           reservation_type?: string | null
           status?: string | null
           total_price?: number | null

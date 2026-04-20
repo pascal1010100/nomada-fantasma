@@ -6,6 +6,7 @@ import {
     sendManualCustomerEmail,
     sendShuttleCancellationAgencyEmail,
     sendTourCancellationAgencyEmail,
+    sendTourProviderConfirmationEmail,
 } from '@/app/lib/email';
 import { recordInternalNotification } from '@/app/lib/internal-notifications';
 import { normalizeLocale } from '@/app/lib/locale';
@@ -230,6 +231,81 @@ async function notifyTourCancellation(
         emailAttemptsDelta: 1,
         emailLastAttemptAt,
         emailLastError: customerResult.success ? null : getErrorMessage(customerResult.error, 'No se pudo notificar la cancelación al cliente.'),
+        warnings,
+    };
+}
+
+async function notifyTourConfirmed(
+    reservation: ReservationStatusRow,
+    actor: string,
+    adminNotes: string | null
+): Promise<CancellationNotificationResult> {
+    let nextNotes = adminNotes;
+    const warnings: string[] = [];
+    const agencyEmail = await getTourAgencyEmail(reservation.tour_id);
+
+    if (!agencyEmail) {
+        return {
+            auditNotes: nextNotes,
+            emailAttemptsDelta: 0,
+            warnings: [],
+        };
+    }
+
+    let meetingPoint: string | null = null;
+    if (reservation.tour_id) {
+        const tourResult = await supabaseAdmin
+            .from('tours')
+            .select('meeting_point')
+            .eq('id', reservation.tour_id)
+            .maybeSingle<{ meeting_point: string | null }>();
+
+        if (tourResult.error) {
+            logger.warn('Unable to resolve meeting point for provider confirmation:', tourResult.error);
+        } else {
+            meetingPoint = tourResult.data?.meeting_point ?? null;
+        }
+    }
+
+    const serviceName = reservation.tour_name || 'Tour Nómada Fantasma';
+    const agencyResult = await sendTourProviderConfirmationEmail({
+        to: agencyEmail,
+        reservationId: reservation.id,
+        tourName: serviceName,
+        tourDate: reservation.date,
+        requestedTime: reservation.requested_time,
+        meetingPoint,
+        customerName: reservation.full_name,
+        customerEmail: reservation.email,
+        customerWhatsapp: reservation.whatsapp,
+        customerNotes: reservation.notes,
+        guests: reservation.number_of_people,
+    });
+
+    await recordInternalNotification({
+        requestKind: 'tour',
+        requestId: reservation.id,
+        recipientType: 'agency',
+        recipientEmail: agencyEmail,
+        template: 'booking_confirmed_provider',
+        deliveryStatus: agencyResult.success ? 'sent' : 'failed',
+        subject: `Tour confirmado para operar: ${serviceName}`,
+        providerMessageId: agencyResult.id,
+        errorMessage: agencyResult.success ? null : getErrorMessage(agencyResult.error, 'No se pudo enviar la confirmación final al proveedor.'),
+        triggeredBy: actor,
+    });
+
+    if (agencyResult.success) {
+        nextNotes = appendAdminLine(nextNotes, `[${new Date().toISOString()}] (${actor}) email:auto_booking_confirmed_agency:sent`);
+    } else {
+        const errorMessage = getErrorMessage(agencyResult.error, 'No se pudo enviar la confirmación final al proveedor.');
+        warnings.push(errorMessage);
+        nextNotes = appendAdminLine(nextNotes, `[${new Date().toISOString()}] (${actor}) email:auto_booking_confirmed_agency:failed ${errorMessage}`);
+    }
+
+    return {
+        auditNotes: nextNotes,
+        emailAttemptsDelta: 0,
         warnings,
     };
 }
@@ -502,6 +578,29 @@ export async function PATCH(request: Request) {
             }
 
             let warning: string | undefined;
+
+            if (nextStatusRaw === 'confirmed') {
+                const confirmationNotification = await notifyTourConfirmed(
+                    reservationResult.data as ReservationStatusRow,
+                    actor,
+                    updatePayload.admin_notes ?? reservationResult.data.admin_notes
+                );
+
+                const confirmationPersist = await supabaseAdmin
+                    .from('reservations')
+                    .update({
+                        admin_notes: confirmationNotification.auditNotes,
+                    } as ReservationUpdate)
+                    .eq('id', id);
+
+                if (confirmationPersist.error) {
+                    logger.error('Error persisting reservation provider confirmation metadata:', confirmationPersist.error);
+                }
+
+                if (confirmationNotification.warnings.length > 0) {
+                    warning = confirmationNotification.warnings.join(' ');
+                }
+            }
 
             if (nextStatusRaw === 'cancelled' && note) {
                 const notificationResult = await notifyTourCancellation(

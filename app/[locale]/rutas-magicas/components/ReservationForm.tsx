@@ -11,6 +11,7 @@ type ReservationFormProps = {
   tourId: string;
   price: number;
   childPrice?: number;
+  minCapacity?: number;
   maxCapacity: number;
   availableDays: string[];
   startTimes?: string[];
@@ -156,14 +157,15 @@ const buildAvailableDates = (availableDays: string[]) => {
 export default function ReservationForm({
   tourId,
   price,
+  minCapacity = 1,
   maxCapacity,
-  availableDays
+  availableDays,
+  startTimes = [],
 }: ReservationFormProps) {
   const router = useRouter();
   const t = useTranslations('Reservation');
   const locale = useLocale();
   const dateLocale = locale === 'es' ? 'es-GT' : 'en-US';
-  const fixedStartTime = '03:40 am';
   const normalizedAvailableDays = useMemo(
     () => buildAvailableDates(availableDays),
     [availableDays]
@@ -172,9 +174,25 @@ export default function ReservationForm({
     () => normalizedAvailableDays.join('|'),
     [normalizedAvailableDays]
   );
+  const normalizedStartTimes = useMemo(
+    () => startTimes.map((value) => value.trim()).filter(Boolean),
+    [startTimes]
+  );
+  const normalizedStartTimesKey = useMemo(
+    () => normalizedStartTimes.join('|'),
+    [normalizedStartTimes]
+  );
+  const hasStartTimes = normalizedStartTimes.length > 0;
+  const minGuests = Math.max(1, minCapacity);
+  const guestOptions = useMemo(() => {
+    const maxGuests = Math.max(minGuests, maxCapacity);
+    return Array.from({ length: maxGuests - minGuests + 1 }, (_, index) => minGuests + index);
+  }, [maxCapacity, minGuests]);
 
   // Estados del formulario
   const [date, setDate] = useState(normalizedAvailableDays[0] || '');
+  const [selectedTime, setSelectedTime] = useState(normalizedStartTimes[0] || '');
+  const [guests, setGuests] = useState(minGuests);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -199,6 +217,15 @@ export default function ReservationForm({
     if (nextDate !== date) {
       setDate(nextDate);
     }
+    const nextTime = normalizedStartTimes[0] || '';
+    if (nextTime !== selectedTime) {
+      setSelectedTime(nextTime);
+    }
+    setGuests((currentGuests) => {
+      if (currentGuests < minGuests) return minGuests;
+      if (currentGuests > maxCapacity) return Math.max(minGuests, maxCapacity);
+      return currentGuests;
+    });
     setError('');
     setFormData({
       name: '',
@@ -217,7 +244,7 @@ export default function ReservationForm({
       tour_id: tourId,
       price: price
     });
-  }, [tourId, normalizedAvailableDaysKey, price]);
+  }, [tourId, normalizedAvailableDaysKey, normalizedStartTimesKey, price, minGuests, maxCapacity]);
 
   // Track when user starts filling the form
   useEffect(() => {
@@ -253,7 +280,16 @@ export default function ReservationForm({
     } else if (!validatePhone(formData.phone)) {
       errors.push(t('errors.invalidPhone'));
     }
+    if (hasStartTimes && !selectedTime) {
+      errors.push(t('errors.requiredTime'));
+    }
     if (maxCapacity < 1) {
+      errors.push(t('errors.maxCapacity', { max: maxCapacity }));
+    }
+    if (guests < minGuests) {
+      errors.push(t('errors.minCapacity', { min: minGuests }));
+    }
+    if (guests > maxCapacity) {
       errors.push(t('errors.maxCapacity', { max: maxCapacity }));
     }
 
@@ -285,7 +321,7 @@ export default function ReservationForm({
 
   // Calcular el total
   const calculateTotal = () => {
-    return price;
+    return price * guests;
   };
 
   // Manejar el envío del formulario
@@ -334,7 +370,8 @@ export default function ReservationForm({
         body: JSON.stringify({
           tourId,
           date,
-          guests: 1,
+          time: selectedTime || undefined,
+          guests,
           type: 'tour',
           totalPrice: calculateTotal(),
           name: formData.name,
@@ -371,8 +408,8 @@ export default function ReservationForm({
       const searchParams = new URLSearchParams({
         tourId,
         date,
-        time: fixedStartTime,
-        adults: '1',
+        ...(selectedTime ? { time: selectedTime } : {}),
+        adults: guests.toString(),
         total: calculateTotal().toString(),
         emailSent: emailStatus,
         name: encodeURIComponent(formData.name)
@@ -509,10 +546,25 @@ export default function ReservationForm({
             {t('timeLabel')}
           </label>
           <div className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm">
-            {fixedStartTime}
+            {hasStartTimes ? (
+              <select
+                value={selectedTime}
+                onChange={(e) => setSelectedTime(e.target.value)}
+                className="w-full bg-transparent text-sm focus:outline-none"
+                disabled={isLoading}
+              >
+                {normalizedStartTimes.map((timeOption) => (
+                  <option key={timeOption} value={timeOption}>
+                    {timeOption}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              t('timeToConfirm')
+            )}
           </div>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {t('timeHelp')}
+            {hasStartTimes ? t('timeHelp') : t('timeToConfirm')}
           </p>
         </div>
       </div>
@@ -524,9 +576,21 @@ export default function ReservationForm({
             <User className="w-4 h-4 mr-2 text-cyan-600" />
             {t('adultsLabel')}
           </label>
-          <div className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm">
-            1 {t('adultsSingular')}
-          </div>
+          <select
+            value={guests}
+            onChange={(e) => setGuests(Number(e.target.value))}
+            className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+            disabled={isLoading}
+          >
+            {guestOptions.map((guestCount) => (
+              <option key={guestCount} value={guestCount}>
+                {guestCount} {guestCount === 1 ? t('adultsSingular') : t('adultsPlural')}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {t('guestRangeHelp', { min: minGuests, max: maxCapacity })}
+          </p>
         </div>
       </div>
 
@@ -652,9 +716,9 @@ export default function ReservationForm({
       <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
         <div className="flex justify-between mb-2">
           <span className="text-gray-600 dark:text-gray-300">
-            1 {t('adultsSingular')}
+            {guests} {guests === 1 ? t('adultsSingular') : t('adultsPlural')}
           </span>
-          <span className="font-medium">Q{price.toLocaleString()}</span>
+          <span className="font-medium">Q{calculateTotal().toLocaleString()}</span>
         </div>
 
         <div className="border-t border-gray-200 dark:border-gray-700 mt-3 pt-3">
@@ -663,11 +727,11 @@ export default function ReservationForm({
             <span>Q{calculateTotal().toLocaleString()}</span>
           </div>
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            {t('capacityRemaining', { rem: Math.max(0, maxCapacity - 1) })}
+            {t('capacityRemaining', { rem: Math.max(0, maxCapacity - guests) })}
           </p>
-          {maxCapacity - 1 > 0 && maxCapacity - 1 <= 3 && (
+          {maxCapacity - guests > 0 && maxCapacity - guests <= 3 && (
             <p className="mt-1 text-xs text-amber-600 dark:text-amber-300">
-              {t('lowCapacityWarning', { rem: Math.max(0, maxCapacity - 1) })}
+              {t('lowCapacityWarning', { rem: Math.max(0, maxCapacity - guests) })}
             </p>
           )}
         </div>
@@ -691,6 +755,8 @@ export default function ReservationForm({
           !validateEmail(formData.email) ||
           !formData.phone ||
           !validatePhone(formData.phone) ||
+          (hasStartTimes && !selectedTime) ||
+          guests < minGuests ||
           maxCapacity < 1
         }
         className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"

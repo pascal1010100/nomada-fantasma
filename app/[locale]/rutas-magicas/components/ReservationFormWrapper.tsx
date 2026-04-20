@@ -25,18 +25,23 @@ interface ReservationFormWrapperProps {
   tourId: string;
   price: number;
   maxCapacity: number;
+  minCapacity?: number;
   availableDays: string[];
+  startTimes?: string[];
 }
 
 export default function ReservationFormWrapper({
   tourId,
   price,
   maxCapacity,
-  availableDays
+  minCapacity = 1,
+  availableDays,
+  startTimes = [],
 }: ReservationFormWrapperProps) {
   const t = useTranslations('Reservation');
   // Asegurarse de que availableDays y startTimes sean arrays
   const safeAvailableDays = Array.isArray(availableDays) ? availableDays : [];
+  const safeStartTimes = Array.isArray(startTimes) ? startTimes : [];
 
   const defaultAvailableDays = safeAvailableDays.length > 0
     ? safeAvailableDays
@@ -51,8 +56,10 @@ export default function ReservationFormWrapper({
       <ReservationForm
         tourId={tourId}
         price={price}
+        minCapacity={minCapacity}
         maxCapacity={maxCapacity || 10}
         availableDays={defaultAvailableDays}
+        startTimes={safeStartTimes}
       />
     </div>
   );

@@ -9,6 +9,7 @@ import ShuttleCancellationNotice from '../components/emails/ShuttleCancellationN
 import CustomerActionEmail from '../components/emails/CustomerActionEmail';
 import TourLeadNotification from '../components/emails/TourLeadNotification';
 import TourCancellationNotice from '../components/emails/TourCancellationNotice';
+import TourProviderConfirmationEmail from '../components/emails/TourProviderConfirmationEmail';
 import logger from './logger';
 import { CONTACT_INFO } from './constants';
 
@@ -57,6 +58,7 @@ interface SendConfirmationEmailProps {
     customerNotes?: string | null;
     tourName: string;
     date: string;
+    requestedTime?: string | null;
     guests: number;
     totalPrice: number;
     locale?: string;
@@ -524,6 +526,20 @@ type ShuttleCancellationAgencyEmailProps = {
     cancellationReason: string;
 };
 
+type TourProviderConfirmationEmailProps = {
+    to: string;
+    reservationId: string;
+    tourName: string;
+    tourDate: string;
+    requestedTime?: string | null;
+    meetingPoint?: string | null;
+    customerName: string;
+    customerEmail: string;
+    customerWhatsapp?: string | null;
+    customerNotes?: string | null;
+    guests?: number;
+};
+
 export async function sendTourCancellationAgencyEmail(data: TourCancellationAgencyEmailProps): Promise<SendEmailResult> {
     if (!resend) {
         logger.info('📧 [TOUR CANCELLATION AGENCY EMAIL SIMULATION] --------------------');
@@ -544,6 +560,31 @@ export async function sendTourCancellationAgencyEmail(data: TourCancellationAgen
         );
     } catch (error) {
         logger.error('Error sending tour cancellation agency email:', error);
+        return { success: false, error };
+    }
+}
+
+export async function sendTourProviderConfirmationEmail(data: TourProviderConfirmationEmailProps): Promise<SendEmailResult> {
+    if (!resend) {
+        logger.info('📧 [TOUR PROVIDER CONFIRMATION SIMULATION] ---------------------------');
+        logger.info(`To Agency: ${data.to}`);
+        logger.info(`Subject: Tour confirmado para operar: ${data.tourName}`);
+        logger.info('Agency Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        logger.info('-------------------------------------------------------------------');
+        return { success: true, id: 'simulated_' + Date.now() };
+    }
+
+    try {
+        return await sendEmailWithRetry('tour_agency_booking_confirmed', () =>
+            resend.emails.send({
+                from: RESEND_FROM,
+                to: [data.to],
+                subject: `Tour confirmado para operar: ${data.tourName}`,
+                react: TourProviderConfirmationEmail(data),
+            })
+        );
+    } catch (error) {
+        logger.error('Error sending tour provider confirmation email:', error);
         return { success: false, error };
     }
 }
@@ -691,6 +732,7 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
                         customerWhatsapp: data.customerPhone || '',
                         tourName: data.tourName,
                         tourDate: data.date,
+                        requestedTime: data.requestedTime,
                         guests: data.guests,
                         notes: data.customerNotes || undefined,
                         reservationId: data.reservationId,

@@ -27,6 +27,7 @@ export const CreateReservationSchema = z.object({
         today.setHours(0, 0, 0, 0);
         return parsed.getTime() > today.getTime();
     }, 'Date must be in the future'),
+    time: z.string().trim().max(50).optional(),
 
     guests: z.number().int().positive('Number of guests must be positive').max(50, 'Too many guests'),
 
@@ -80,6 +81,7 @@ export function sanitizeReservationInput(input: CreateReservationInput) {
         email: input.email.toLowerCase().trim(),
         whatsapp: input.phone?.trim() || null,
         date: input.date,
+        requested_time: input.time?.trim() || null,
         number_of_people: input.guests,
         reservation_type: input.type,
         tour_id: input.tourId || null,

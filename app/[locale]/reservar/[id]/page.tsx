@@ -24,6 +24,7 @@ export default async function TourReservationPage({
         : (supabaseTour.description ?? '');
     const coverImage = supabaseTour.cover_image ?? supabaseTour.images?.[0] ?? '/images/placeholder.svg';
     const price = supabaseTour.price_min ?? supabaseTour.price_max ?? 0;
+    const minCapacity = supabaseTour.min_guests ?? 1;
     const maxCapacity = supabaseTour.max_guests ?? 10;
     const backLink = `/rutas-magicas/lago-atitlan/${supabaseTour.pueblo_slug}/tours/${supabaseTour.slug}`;
     const backLabel = t('backToTour');
@@ -117,8 +118,10 @@ export default async function TourReservationPage({
                                 <ReservationForm
                                     tourId={supabaseTour.id}
                                     price={price}
+                                    minCapacity={minCapacity}
                                     maxCapacity={maxCapacity}
                                     availableDays={supabaseTour.available_days ?? ['Todos los días']}
+                                    startTimes={supabaseTour.start_times ?? []}
                                 />
                             </div>
                         </div>

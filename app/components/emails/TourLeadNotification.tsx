@@ -18,6 +18,7 @@ interface TourLeadNotificationProps {
     customerWhatsapp?: string | null;
     tourName: string;
     tourDate: string;
+    requestedTime?: string | null;
     guests?: number;
     notes?: string;
     reservationId: string;
@@ -50,6 +51,7 @@ export const TourLeadNotification = ({
     customerWhatsapp,
     tourName,
     tourDate,
+    requestedTime,
     guests,
     notes,
     reservationId,
@@ -73,6 +75,7 @@ export const TourLeadNotification = ({
         '',
         `Tour: ${tourName}`,
         `Fecha: ${formatDate(tourDate)}`,
+        requestedTime ? `Hora: ${requestedTime}` : null,
         guests ? `Viajeros: ${guests}` : null,
         '',
         'Notas operativas:',
@@ -88,6 +91,7 @@ export const TourLeadNotification = ({
         '',
         `Tour: ${tourName}`,
         `Fecha: ${formatDate(tourDate)}`,
+        requestedTime ? `Hora: ${requestedTime}` : null,
         '',
         'Motivo:',
         '- ',
@@ -191,6 +195,12 @@ export const TourLeadNotification = ({
                                         <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>FECHA</td>
                                         <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>{formatDate(tourDate)}</td>
                                     </tr>
+                                    {requestedTime ? (
+                                        <tr>
+                                            <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>HORA</td>
+                                            <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>{requestedTime}</td>
+                                        </tr>
+                                    ) : null}
                                     {guests ? (
                                         <tr>
                                             <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>VIAJEROS</td>

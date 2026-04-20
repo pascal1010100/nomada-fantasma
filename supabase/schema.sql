@@ -200,6 +200,7 @@ CREATE TABLE IF NOT EXISTS "public"."reservations" (
     "email" "text" NOT NULL,
     "whatsapp" "text",
     "date" "date" NOT NULL,
+    "requested_time" "text",
     "number_of_people" integer NOT NULL,
     "tour_id" "uuid",
     "notes" "text",
@@ -666,6 +667,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
 
 

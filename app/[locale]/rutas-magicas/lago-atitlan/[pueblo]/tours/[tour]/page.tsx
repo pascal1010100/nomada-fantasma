@@ -6,6 +6,7 @@ import Link from 'next/link';
 import ReservationFormWrapper from '@/app/[locale]/rutas-magicas/components/ReservationFormWrapper';
 import type { Database } from '@/types/database.types';
 import { getTranslations } from 'next-intl/server';
+import { getTourCoverImage } from '@/app/lib/tours';
 
 type Tour = Database['public']['Tables']['tours']['Row'];
 type ItineraryItem = { time: string; title: string; description: string };
@@ -23,13 +24,13 @@ export default async function TourDetailPage({
     notFound();
   }
 
-  const tour = (await getTourBySlugFromDB(tourSlug)) as Tour | null;
+  const tour = (await getTourBySlugFromDB(tourSlug, pueblo)) as Tour | null;
 
   if (!tour) {
     notFound();
   }
 
-  const coverImage = tour.cover_image || tour.images?.[0] || '/images/tours/default-tour.svg';
+  const coverImage = getTourCoverImage(tour);
   const description = tour.description ?? '';
   const fullDescription = tour.full_description ?? tour.description ?? '';
   const durationHours = tour.duration_hours ?? 0;
@@ -41,8 +42,10 @@ export default async function TourDetailPage({
   const itinerary = ((tour as { itinerary?: ItineraryItem[] | null }).itinerary ?? []) as ItineraryItem[];
   const faqs = ((tour as { faqs?: FaqItem[] | null }).faqs ?? []) as FaqItem[];
   const whatToBring = ((tour as { what_to_bring?: string[] | null }).what_to_bring ?? []) as string[];
-  const availableDays = (tour as { available_days?: number[] | null }).available_days ?? undefined;
+  const availableDays = (tour as { available_days?: string[] | null }).available_days ?? undefined;
+  const startTimes = (tour as { start_times?: string[] | null }).start_times ?? undefined;
   const safeAvailableDays = (availableDays ?? []).map(String);
+  const safeStartTimes = (startTimes ?? []).map(String);
   const townName = pueblo.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   const tourKeyRaw = tour.slug ?? tourSlug;
   const tourKey = tourKeyRaw.toLowerCase();
@@ -191,8 +194,10 @@ export default async function TourDetailPage({
               <ReservationFormWrapper
                 tourId={tour.id}
                 price={tour.price_min ?? 0}
+                minCapacity={minGuests}
                 maxCapacity={maxGuests ?? 10}
                 availableDays={safeAvailableDays}
+                startTimes={safeStartTimes}
               />
             </div>
 

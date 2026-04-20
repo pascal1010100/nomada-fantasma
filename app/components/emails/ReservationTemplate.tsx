@@ -21,6 +21,7 @@ interface ReservationTemplateProps {
     customerPhone?: string | null;
     tourName: string;
     date: string;
+    requestedTime?: string | null;
     guests: number;
     totalPrice: number;
     locale?: string;
@@ -243,6 +244,7 @@ export const ReservationTemplate = ({
     customerPhone,
     tourName,
     date,
+    requestedTime,
     guests,
     totalPrice,
     locale,
@@ -292,6 +294,12 @@ export const ReservationTemplate = ({
                                         <td style={styles.tableLabel}>{t('summaryDate')}</td>
                                         <td style={styles.tableValue}>{formattedDate}</td>
                                     </tr>
+                                    {requestedTime ? (
+                                        <tr>
+                                            <td style={styles.tableLabel}>{t('summaryTime')}</td>
+                                            <td style={styles.tableValue}>{requestedTime}</td>
+                                        </tr>
+                                    ) : null}
                                     <tr>
                                         <td style={styles.tableLabel}>{t('summaryTravelers')}</td>
                                         <td style={styles.tableValue}>

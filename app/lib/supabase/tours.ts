@@ -1,12 +1,13 @@
 import { supabaseAdmin } from '@/app/lib/supabase/server';
 import type { Database } from '@/types/database.types';
 import { normalizeId, normalizeSlug, type Tour } from '@/app/lib/types';
+import { getTourCoverImage } from '@/app/lib/tours';
 
 export type SupabaseTour = Database['public']['Tables']['tours']['Row'];
 
 const mapSupabaseTourToUi = (tour: SupabaseTour): Tour => {
   const meetingPoint = (tour as { meeting_point?: string | null }).meeting_point ?? '';
-  const imageUrl = tour.cover_image ?? tour.images?.[0] ?? '';
+  const imageUrl = getTourCoverImage(tour);
   const slug = normalizeSlug(tour.slug) ?? normalizeId(tour.id) ?? '';
 
   return {
@@ -27,17 +28,22 @@ const mapSupabaseTourToUi = (tour: SupabaseTour): Tour => {
   };
 };
 
-export async function getTourBySlugFromDB(slug?: string) {
+export async function getTourBySlugFromDB(slug?: string, puebloSlug?: string) {
   const normalizedSlug = normalizeSlug(slug);
   if (!normalizedSlug) {
     return null;
   }
 
-  const { data, error } = await supabaseAdmin
+  let slugQuery = supabaseAdmin
     .from('tours')
     .select('*')
-    .eq('slug', normalizedSlug)
-    .single();
+    .eq('slug', normalizedSlug);
+
+  if (puebloSlug) {
+    slugQuery = slugQuery.eq('pueblo_slug', puebloSlug);
+  }
+
+  const { data, error } = await slugQuery.single();
 
   if (data) {
     return data;
@@ -47,11 +53,16 @@ export async function getTourBySlugFromDB(slug?: string) {
     console.error(`Error fetching tour by slug '${slug}':`, error);
   }
 
-  const { data: byId, error: byIdError } = await supabaseAdmin
+  let idQuery = supabaseAdmin
     .from('tours')
     .select('*')
-    .eq('id', normalizedSlug)
-    .single();
+    .eq('id', normalizedSlug);
+
+  if (puebloSlug) {
+    idQuery = idQuery.eq('pueblo_slug', puebloSlug);
+  }
+
+  const { data: byId, error: byIdError } = await idQuery.single();
 
   if (byId) {
     return byId;
