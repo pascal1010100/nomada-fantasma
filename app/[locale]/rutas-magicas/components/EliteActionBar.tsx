@@ -31,17 +31,17 @@ export default function EliteActionBar({ title, slug }: EliteActionBarProps) {
             <div className="flex flex-wrap gap-3 relative z-10 w-full sm:w-auto">
                 <Link
                     href={`/${locale}/mapa?town=${slug}`}
-                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-cyan-500 dark:hover:border-cyan-400 text-gray-700 dark:text-gray-200 font-semibold transition-all duration-300 hover:bg-cyan-50 dark:hover:bg-cyan-900/20"
+                    className="btn-ghost btn-ghost-map group flex-1 sm:flex-none justify-center rounded-full px-6 py-3 text-sm font-semibold"
                 >
-                    <Map className="w-5 h-5 text-cyan-500" />
+                    <Map className="w-5 h-5 text-cyan-400 transition-transform duration-300 group-hover:scale-110" />
                     <span>{t('actionMap')}</span>
                 </Link>
                 <button
                     onClick={scrollToExperiences}
-                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-bold px-8 py-3 rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:-translate-y-0.5 transition-all duration-300"
+                    className="btn-cta shimmer group flex-1 sm:flex-none rounded-full px-8 py-3 text-sm font-semibold transition-all duration-300 hover:scale-[1.02]"
                 >
                     <span>{t('actionExperiences')}</span>
-                    <Sparkles className="w-5 h-5" />
+                    <Sparkles className="w-5 h-5 transition-transform duration-300 group-hover:rotate-12" />
                 </button>
             </div>
         </div>

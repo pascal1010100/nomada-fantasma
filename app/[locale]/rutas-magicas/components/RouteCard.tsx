@@ -6,7 +6,6 @@ import { Route } from '../lib/types';
 import { motion, useInView } from 'framer-motion';
 import { Star, MapPin, Calendar, ArrowRight, Zap } from 'lucide-react';
 import { cn } from '@/app/lib/utils';
-import { RippleButton } from '@/app/components/ui';
 import { useLocale } from 'next-intl';
 
 interface RouteCardProps {
@@ -268,13 +267,16 @@ export default function RouteCard({ route }: RouteCardProps) {
               e.stopPropagation();
               handleClick(e);
             }}>
-              <RippleButton
-                variant="primary"
-                className={cn("!py-2 !px-4 !text-sm !rounded-lg", route.isComingSoon && "cursor-not-allowed opacity-60 bg-transparent border border-white/20 shadow-none")}
+              <button
+                type="button"
+                className={cn(
+                  "btn-cta group whitespace-nowrap rounded-2xl px-4 py-2 text-xs font-semibold tracking-[0.01em] shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02]",
+                  route.isComingSoon && "cursor-not-allowed border border-white/20 bg-transparent text-muted-foreground shadow-none opacity-60"
+                )}
               >
                 {route.isComingSoon ? t('comingSoon') : t('viewDestination')}
-                {!route.isComingSoon && <ArrowRight className="w-4 h-4 ml-1" />}
-              </RippleButton>
+                {!route.isComingSoon && <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-0.5" />}
+              </button>
             </div>
           </div>
         </motion.div>
