@@ -73,7 +73,7 @@ export default async function TourDetailPage({
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header con imagen */}
-      <div className="relative h-64 md:h-96 bg-gray-800">
+      <div className="relative min-h-[340px] bg-gray-800 md:min-h-[420px]">
         <Image
           src={coverImage}
           alt={localizedTitle}
@@ -83,37 +83,52 @@ export default async function TourDetailPage({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/30 to-transparent" />
 
-        <div className="container mx-auto px-4 h-full flex flex-col justify-end pb-8 relative z-10">
+        <div className="container mx-auto flex h-full flex-col justify-end px-4 pb-6 pt-24 relative z-10 sm:pb-8 sm:pt-28">
           <Link
             href={`/${locale}/rutas-magicas/lago-atitlan/${pueblo}`}
-            className="inline-flex items-center text-white hover:text-cyan-300 mb-4 transition-colors"
+            className="mb-4 inline-flex items-center text-sm text-white hover:text-cyan-300 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 mr-1" />
             {t('backToTown', { town: townName })}
           </Link>
 
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">{localizedTitle}</h1>
-          <p className="text-lg text-gray-200 max-w-3xl">{localizedSummary}</p>
-
-          <div className="flex flex-wrap gap-4 mt-4">
-            <div className="flex items-center text-white">
-              <Clock className="w-5 h-5 mr-1 text-cyan-300" />
-              <span>{t('durationHours', { hours: durationHours })}</span>
-            </div>
-            <div className="flex items-center text-white">
-              <Users className="w-5 h-5 mr-1 text-cyan-300" />
-              <span>{t('groupRange', { min: minGuests, max: maxGuests })}</span>
-            </div>
-            <div className="flex items-center text-white">
-              <MapPin className="w-5 h-5 mr-1 text-cyan-300" />
-              <span>{localizedMeetingPoint}</span>
-            </div>
+          <div className="max-w-3xl">
+            <h1 className="mb-2 text-2xl font-bold leading-tight text-white sm:text-3xl md:text-5xl">{localizedTitle}</h1>
+            <p className="max-w-2xl text-sm leading-relaxed text-gray-200 sm:text-base md:text-lg">
+              {localizedSummary}
+            </p>
           </div>
         </div>
       </div>
 
       {/* Contenido principal */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-6 sm:py-8 md:py-12">
+        <section className="mb-6 rounded-2xl bg-white p-4 shadow-md dark:bg-gray-800 sm:p-5">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex items-start rounded-xl border border-gray-100 bg-gray-50/80 p-3 dark:border-gray-700 dark:bg-gray-900/40">
+              <Clock className="mr-3 mt-0.5 h-5 w-5 flex-shrink-0 text-cyan-500" />
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('durationLabel')}</p>
+                <p className="mt-1 text-sm text-gray-900 dark:text-white">{t('durationHours', { hours: durationHours })}</p>
+              </div>
+            </div>
+            <div className="flex items-start rounded-xl border border-gray-100 bg-gray-50/80 p-3 dark:border-gray-700 dark:bg-gray-900/40">
+              <Users className="mr-3 mt-0.5 h-5 w-5 flex-shrink-0 text-cyan-500" />
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('groupSizeLabel')}</p>
+                <p className="mt-1 text-sm text-gray-900 dark:text-white">{t('groupRange', { min: minGuests, max: maxGuests })}</p>
+              </div>
+            </div>
+            <div className="flex items-start rounded-xl border border-gray-100 bg-gray-50/80 p-3 dark:border-gray-700 dark:bg-gray-900/40 sm:col-span-2 lg:col-span-1">
+              <MapPin className="mr-3 mt-0.5 h-5 w-5 flex-shrink-0 text-cyan-500" />
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('meetingPointLabel')}</p>
+                <p className="mt-1 text-sm text-gray-900 dark:text-white">{localizedMeetingPoint}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Columna izquierda */}
           <div className="lg:col-span-2 space-y-8">
@@ -191,7 +206,7 @@ export default async function TourDetailPage({
           {/* Columna derecha */}
           <div className="space-y-6">
             {/* Tarjeta de reserva */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 sticky top-6">
+            <div className="rounded-xl bg-white p-6 shadow-md dark:bg-gray-800 lg:sticky lg:top-24">
               <ReservationFormWrapper
                 tourId={tour.id}
                 tourName={localizedTitle}
