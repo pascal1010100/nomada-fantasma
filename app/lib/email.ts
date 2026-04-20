@@ -59,6 +59,7 @@ interface SendConfirmationEmailProps {
     tourName: string;
     date: string;
     requestedTime?: string | null;
+    meetingPoint?: string | null;
     guests: number;
     totalPrice: number;
     locale?: string;
@@ -734,6 +735,8 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
                         tourDate: data.date,
                         requestedTime: data.requestedTime,
                         guests: data.guests,
+                        totalPrice: data.totalPrice,
+                        meetingPoint: data.meetingPoint,
                         notes: data.customerNotes || undefined,
                         reservationId: data.reservationId,
                         operationsEmail: adminEmail,

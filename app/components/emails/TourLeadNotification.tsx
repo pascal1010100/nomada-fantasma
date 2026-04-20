@@ -20,6 +20,8 @@ interface TourLeadNotificationProps {
     tourDate: string;
     requestedTime?: string | null;
     guests?: number;
+    totalPrice?: number | null;
+    meetingPoint?: string | null;
     notes?: string;
     reservationId: string;
     adminPanelUrl?: string;
@@ -53,6 +55,8 @@ export const TourLeadNotification = ({
     tourDate,
     requestedTime,
     guests,
+    totalPrice,
+    meetingPoint,
     notes,
     reservationId,
     adminPanelUrl,
@@ -205,6 +209,18 @@ export const TourLeadNotification = ({
                                         <tr>
                                             <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>VIAJEROS</td>
                                             <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>{guests} {guests === 1 ? 'persona' : 'personas'}</td>
+                                        </tr>
+                                    ) : null}
+                                    {meetingPoint ? (
+                                        <tr>
+                                            <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>ENCUENTRO</td>
+                                            <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>{meetingPoint}</td>
+                                        </tr>
+                                    ) : null}
+                                    {typeof totalPrice === 'number' && totalPrice > 0 ? (
+                                        <tr>
+                                            <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>TOTAL ESTIMADO</td>
+                                            <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>Q{totalPrice.toFixed(2)}</td>
                                         </tr>
                                     ) : null}
                                     <tr>

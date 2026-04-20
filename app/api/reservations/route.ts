@@ -335,17 +335,17 @@ export async function POST(request: Request) {
                 ('tour_name' in reservation ? reservation.tour_name : reservation.tour_name) ||
                 null;
 
-            if (!resolvedTourName && reservationTourId) {
-                const tourLookup = await supabaseAdmin
+            const tourLookup = reservationTourId
+                ? await supabaseAdmin
                     .schema('public')
                     .from('tours')
-                    .select('title')
+                    .select('title, meeting_point')
                     .eq('id', reservationTourId)
-                    .maybeSingle<{ title: string | null }>();
+                    .maybeSingle<{ title: string | null; meeting_point: string | null }>()
+                : null;
 
-                if (tourLookup.data?.title) {
-                    resolvedTourName = tourLookup.data.title;
-                }
+            if (!resolvedTourName && tourLookup?.data?.title) {
+                resolvedTourName = tourLookup.data.title;
             }
 
             if (!resolvedTourName) {
@@ -363,6 +363,7 @@ export async function POST(request: Request) {
                 tourName: resolvedTourName,
                 date: reservationDate,
                 requestedTime: reservationRequestedTime,
+                meetingPoint: tourLookup?.data?.meeting_point ?? null,
                 guests: reservationGuests,
                 totalPrice: ('total_price' in reservation ? reservation.total_price : reservation.total_price) || 0,
                 locale,
