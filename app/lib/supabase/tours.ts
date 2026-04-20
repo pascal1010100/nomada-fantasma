@@ -68,7 +68,11 @@ export async function getToursByPuebloFromDB(puebloSlug: string) {
   const { data, error } = await supabaseAdmin
     .from('tours')
     .select('*')
-    .eq('pueblo_slug', puebloSlug);
+    .eq('pueblo_slug', puebloSlug)
+    .eq('is_active', true)
+    .order('is_featured', { ascending: false })
+    .order('rating', { ascending: false })
+    .order('created_at', { ascending: false });
 
   if (error) {
     console.error(`Error fetching tours for pueblo '${puebloSlug}':`, error);
