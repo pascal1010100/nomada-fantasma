@@ -1,8 +1,8 @@
 import type { Guide } from '../lago-atitlan/data';
+import { atitlanTowns } from '../lago-atitlan/data';
 import type { Tour } from '@/app/lib/types';
-import { Users } from 'lucide-react';
 import ToursSection from './ToursSection';
-import GuideCard from './GuideCard';
+import IndependentGuidesSection from './IndependentGuidesSection';
 
 interface RawGuide {
   name: string;
@@ -23,17 +23,30 @@ interface TownExperiencesPanelProps {
   guideBio: string;
 }
 
-function toGuideCardModel(guide: RawGuide, index: number, bio: string): Guide {
+function toGuideCardModel(
+  guide: RawGuide,
+  index: number,
+  bio: string,
+  townSlug: string
+): Guide {
+  const fallbackTown = atitlanTowns.find((town) => town.slug === townSlug);
+  const legacyGuide =
+    fallbackTown?.guides.find(
+      (candidate) =>
+        candidate.name.toLowerCase() === guide.name.toLowerCase() ||
+        candidate.contact === guide.contact
+    ) ?? null;
+
   return {
-    id: `guide-${index}`,
+    id: legacyGuide?.id ?? `guide-${index}`,
     name: guide.name,
-    photo: '/images/guides/default-avatar.svg',
-    bio,
+    photo: legacyGuide?.photo ?? '/images/guides/default-avatar.svg',
+    bio: legacyGuide?.bio ?? bio,
     specialties: guide.tours,
     languages: guide.languages,
     contact: guide.contact,
-    rating: 5.0,
-    reviews: 10,
+    rating: legacyGuide?.rating ?? 5.0,
+    reviews: legacyGuide?.reviews ?? 10,
   };
 }
 
@@ -64,25 +77,15 @@ export default function TownExperiencesPanel({
         <ToursSection puebloSlug={townSlug} tours={tours} className="mb-12" />
       </section>
 
-      {guides.length > 0 && (
-        <section className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg border border-purple-200 dark:border-purple-900/30">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            <Users className="w-6 h-6 mr-2 text-purple-500" />
-            {guidesTitle}
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-            {guidesSubtitle}
-          </p>
-          <div className="grid grid-cols-1 gap-6">
-            {guides.map((guide, index) => (
-              <GuideCard
-                key={`${townName}-${guide.name}-${index}`}
-                guide={toGuideCardModel(guide, index, guideBio)}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      <IndependentGuidesSection
+        title={guidesTitle}
+        subtitle={guidesSubtitle}
+        guides={guides.map((guide, index) => ({
+          ...toGuideCardModel(guide, index, guideBio, townSlug),
+          tours: guide.tours,
+          townName,
+        }))}
+      />
     </div>
   );
 }

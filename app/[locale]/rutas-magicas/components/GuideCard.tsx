@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 
 interface GuideCardProps {
-    guide: Guide;
+    guide: Guide & { townName?: string };
 }
 
 const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
@@ -72,6 +72,11 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
                     <div className="flex-1 text-center sm:text-left space-y-4">
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                             <div>
+                                {guide.townName && (
+                                    <div className="mb-2 inline-flex items-center rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-700 dark:text-cyan-300">
+                                        {guide.townName}
+                                    </div>
+                                )}
                                 <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
                                     {guide.name}
                                 </h3>

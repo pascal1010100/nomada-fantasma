@@ -4,6 +4,7 @@ import RouteDetailPageClient from './RouteDetailPageClient';
 import { getRecommendedToursFromDB, getTourBySlugFromDB, type SupabaseTour } from '@/app/lib/supabase/tours';
 import { getActiveTownsFromDB, getTownBySlugFromDB, type TownContentRecord } from '@/app/lib/supabase/towns';
 import { getEditorialRouteBySlug } from '../lib/editorialRoutes';
+import { atitlanTowns } from '../lago-atitlan/data';
 
 function toDurationDays(durationHours: number | null): number {
   if (!durationHours || durationHours <= 0) {
@@ -80,6 +81,47 @@ function mapTourToRoute(tour: SupabaseTour, town?: TownContentRecord | null): Ro
   };
 }
 
+function buildTownGuides(towns: TownContentRecord[]) {
+  const allGuides = towns.flatMap((town) => {
+    const currentGuides = town.guides.length > 0
+      ? town.guides
+      : (atitlanTowns.find((legacyTown) => legacyTown.slug === town.slug)?.guides.map((guide) => ({
+          name: guide.name,
+          contact: guide.contact,
+          languages: guide.languages,
+          tours: guide.specialties,
+        })) ?? []);
+
+    return currentGuides.map((guide, index) => {
+      const legacyGuide =
+        atitlanTowns
+          .find((legacyTown) => legacyTown.slug === town.slug)
+          ?.guides.find(
+            (candidate) =>
+              candidate.name.toLowerCase() === guide.name.toLowerCase() ||
+              candidate.contact === guide.contact
+          ) ?? null;
+
+      return {
+        id: legacyGuide?.id ?? `${town.slug}-guide-${index}`,
+        name: guide.name,
+        photo: legacyGuide?.photo ?? '/images/guides/default-avatar.svg',
+        rating: legacyGuide?.rating ?? 5,
+        reviews: legacyGuide?.reviews ?? 10,
+        contact: guide.contact,
+        languages: guide.languages,
+        tours: guide.tours,
+        townName: town.title,
+        bio: legacyGuide?.bio ?? 'Guia local independiente disponible para experiencias personalizadas en la zona.',
+      };
+    });
+  });
+
+  // Until guides are migrated to a dedicated catalog, keep the lake page curated
+  // and avoid flooding the section with legacy placeholder records.
+  return allGuides.slice(0, 1);
+}
+
 async function buildRelatedRoutes(currentSlug: string): Promise<Route[]> {
   const relatedTours = await getRecommendedToursFromDB(currentSlug, 3);
 
@@ -106,6 +148,7 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
         route={atitlanRoute}
         isAtitlanPage={true}
         pueblos={towns.map(mapTownToRoute)}
+        guides={buildTownGuides(towns)}
         relatedRoutes={relatedRoutes}
         mapHref={`/${locale}/mapa`}
       />
@@ -119,6 +162,7 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
         route={editorialRoute}
         isAtitlanPage={false}
         pueblos={[]}
+        guides={[]}
         relatedRoutes={[]}
         mapHref={`/${locale}/mapa`}
       />
@@ -140,6 +184,7 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
       route={mapTourToRoute(tour, town)}
       isAtitlanPage={false}
       pueblos={[]}
+      guides={[]}
       relatedRoutes={relatedRoutes}
       mapHref={`/${locale}/mapa?town=${tour.pueblo_slug}`}
     />

@@ -8,11 +8,24 @@ import type { Route } from '../lib/types';
 import RouteCard from '../components/RouteCard';
 import RouteActionButtons from '../components/RouteActionButtons';
 import BookingModal from '../components/BookingModal';
+import IndependentGuidesSection from '../components/IndependentGuidesSection';
 
 type RouteDetailPageClientProps = {
   route: Route;
   isAtitlanPage: boolean;
   pueblos: Route[];
+  guides: Array<{
+    id: string;
+    name: string;
+    photo: string;
+    rating: number;
+    reviews: number;
+    contact: string;
+    languages: string[];
+    tours: string[];
+    townName?: string;
+    bio: string;
+  }>;
   relatedRoutes: Route[];
   mapHref: string;
 };
@@ -21,6 +34,7 @@ export default function RouteDetailPageClient({
   route,
   isAtitlanPage,
   pueblos,
+  guides,
   relatedRoutes,
   mapHref,
 }: RouteDetailPageClientProps) {
@@ -29,6 +43,7 @@ export default function RouteDetailPageClient({
   const tRoute = useTranslations('RouteDetail');
   const tRoutes = useTranslations('Routes');
   const tLake = useTranslations('LakeInfo');
+  const tTown = useTranslations('Town');
   const locale = useLocale();
 
   const i18nSlug = isAtitlanPage ? 'lago-atitlan' : route.slug;
@@ -305,46 +320,60 @@ export default function RouteDetailPageClient({
         </div>
       )}
 
-      <div className="bg-gray-50 dark:bg-gray-900/50 py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">{tRoute('othersTitle')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {relatedRoutes.map((relatedRoute) => (
-              <div key={relatedRoute.id} className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-                <div className="h-40 relative">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 hover:scale-105"
-                    style={{ backgroundImage: `url(${relatedRoute.coverImage})` }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-transparent to-transparent" />
-                  </div>
-                  <div className="absolute top-3 left-3">
-                    <span className="px-2 py-1 bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm text-gray-800 dark:text-gray-200 text-xs font-medium rounded-full">
-                      {relatedRoute.region.charAt(0).toUpperCase() + relatedRoute.region.slice(1)}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h3 className="font-bold text-gray-900 dark:text-white mb-1">{relatedRoute.title}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-3">{relatedRoute.summary}</p>
-                  <div className="flex justify-between items-center gap-4">
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">
-                      Q{relatedRoute.price.toLocaleString()}
-                    </span>
-                    <Link
-                      href={`/${locale}/rutas-magicas/${relatedRoute.slug}`}
-                      className="text-sm font-medium text-electricBlue hover:text-cyberPurple dark:text-cyberPurple dark:hover:text-electricBlue transition-colors flex items-center"
-                    >
-                      {tRoute('viewDetails')}
-                      <ArrowRight className="w-4 h-4 ml-1" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
+      {isAtitlanPage && guides.length > 0 && (
+        <div className="bg-gray-50 py-16 dark:bg-gray-950/60">
+          <div className="container mx-auto px-4">
+            <IndependentGuidesSection
+              title={tTown('guidesTitle')}
+              subtitle={tTown('guidesSubtitle')}
+              guides={guides}
+            />
           </div>
         </div>
-      </div>
+      )}
+
+      {!isAtitlanPage && relatedRoutes.length > 0 && (
+        <div className="bg-gray-50 dark:bg-gray-900/50 py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">{tRoute('othersTitle')}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedRoutes.map((relatedRoute) => (
+                <div key={relatedRoute.id} className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+                  <div className="h-40 relative">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-500 hover:scale-105"
+                      style={{ backgroundImage: `url(${relatedRoute.coverImage})` }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-transparent to-transparent" />
+                    </div>
+                    <div className="absolute top-3 left-3">
+                      <span className="px-2 py-1 bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm text-gray-800 dark:text-gray-200 text-xs font-medium rounded-full">
+                        {relatedRoute.region.charAt(0).toUpperCase() + relatedRoute.region.slice(1)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-1">{relatedRoute.title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-3">{relatedRoute.summary}</p>
+                    <div className="flex justify-between items-center gap-4">
+                      <span className="text-lg font-bold text-gray-900 dark:text-white">
+                        Q{relatedRoute.price.toLocaleString()}
+                      </span>
+                      <Link
+                        href={`/${locale}/rutas-magicas/${relatedRoute.slug}`}
+                        className="text-sm font-medium text-electricBlue hover:text-cyberPurple dark:text-cyberPurple dark:hover:text-electricBlue transition-colors flex items-center"
+                      >
+                        {tRoute('viewDetails')}
+                        <ArrowRight className="w-4 h-4 ml-1" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <BookingModal
         isOpen={isBookingModalOpen}
