@@ -1105,8 +1105,8 @@
             "cabalgata-panoramica-san-pedro": {
                 "title": "Free Riders Horseback Volcano View Trail Adventure",
                 "name": "Free Riders Horseback Volcano View Trail Adventure",
-                "summary": "A panoramic horseback ride in San Pedro with lake and volcano views, welcoming both beginners and more experienced riders.",
-                "description": "Book your ride with Free Riders Guild and Rancho Moises to experience San Pedro on horseback through rural roads, mountain scenery, and open views over Lake Atitlan. The ride currently runs on Tuesdays and Thursdays, includes basic instruction before departure, and can suit beginners as well as more advanced riders.",
+                "summary": "A panoramic horseback ride in San Pedro with group, extended, and private options from Q350 per person.",
+                "description": "Book your ride with Free Riders Guild and Rancho Moises to experience San Pedro on horseback through rural roads, mountain scenery, and open views over Lake Atitlan. Choose a basic prescheduled group ride from Q350, an extended or split-private ride from Q500 per person with a 2-person minimum, or a private ride from Q1000.",
                 "duration": "3 hours",
                 "difficulty": "All levels",
                 "meetingPoint": "Meetup to be confirmed between San Pedro Dock / Crown Coffee or Rancho Moises",
@@ -1114,7 +1114,10 @@
                 "includes": [
                     "Horse for the ride",
                     "Basic instruction before departure",
-                    "Panoramic horseback route with Free Riders Guild and Rancho Moises"
+                    "Panoramic horseback route with Free Riders Guild and Rancho Moises",
+                    "Basic prescheduled group ride from Q350 per person",
+                    "Extended or split-private option from Q500 per person, 2-person minimum",
+                    "Private ride from Q1000"
                 ],
                 "notIncludes": [
                     "Transportation to the starting point",
@@ -1132,7 +1135,7 @@
                 "highlights": [
                     "Views of the lake, volcanoes, and mountains around San Pedro",
                     "Welcoming for beginners with basic instruction before the ride",
-                    "Options for intermediate or advanced riders depending on availability",
+                    "Basic, extended/split-private, and private ride options",
                     "Tuesdays and Thursdays from 10:00 am to 1:00 pm"
                 ],
                 "itinerary": [
@@ -1163,8 +1166,8 @@
                         "answer": "Not necessarily. This ride welcomes beginners and more experienced riders, with basic instruction before departure."
                     },
                     {
-                        "question": "Is this only for beginners?",
-                        "answer": "No. Depending on availability, the experience can also suit intermediate or more confident riders, with options like trot, gallop, or canter."
+                        "question": "What pricing options are available?",
+                        "answer": "The basic prescheduled group ride starts at Q350 per person. The extended or split-private option starts at Q500 per person with a 2-person minimum. The private ride starts at Q1000."
                     }
                 ]
             }

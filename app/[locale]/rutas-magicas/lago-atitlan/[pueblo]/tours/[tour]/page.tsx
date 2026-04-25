@@ -5,12 +5,65 @@ import Image from 'next/image';
 import Link from 'next/link';
 import ReservationFormWrapper from '@/app/[locale]/rutas-magicas/components/ReservationFormWrapper';
 import type { Database } from '@/types/database.types';
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { getTourCoverImage } from '@/app/lib/tours';
 
 type Tour = Database['public']['Tables']['tours']['Row'];
 type ItineraryItem = { time: string; title: string; description: string };
 type FaqItem = { question: string; answer: string };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ pueblo: string; tour: string; locale: string }>;
+}): Promise<Metadata> {
+  const { pueblo, tour: tourSlug, locale } = await params;
+  const tour = (await getTourBySlugFromDB(tourSlug, pueblo)) as Tour | null;
+
+  if (!tour) {
+    return {
+      title: 'Nómada Fantasma',
+    };
+  }
+
+  const title = locale === 'en' ? (tour.title_en ?? tour.title) : tour.title;
+  const description =
+    locale === 'en'
+      ? (tour.description_en ?? tour.description ?? '')
+      : (tour.description ?? tour.description_en ?? '');
+  const image = getTourCoverImage(tour);
+  const url = `/${locale}/rutas-magicas/lago-atitlan/${pueblo}/tours/${tourSlug}`;
+
+  return {
+    title: `${title} | Nómada Fantasma`,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      type: 'website',
+      title,
+      description,
+      url,
+      siteName: 'Nómada Fantasma',
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
+  };
+}
 
 export default async function TourDetailPage({
   params,

@@ -8,12 +8,15 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
+const siteDescription =
+  "Experiencias locales, rutas, guias y transportes alrededor del Lago de Atitlan.";
+
 // Metadata de la aplicación (Podemos hacer esto dinámico después)
 export const metadata: Metadata = {
   metadataBase: new URL('https://nomadafantasma.com'),
   title: "Nómada Fantasma",
-  description: "Cartografía náutica-tecnológica para nómadas digitales.",
-  keywords: ["nómada", "mapas", "navegación", "viajes", "tecnología", "cyberpunk"],
+  description: siteDescription,
+  keywords: ["Atitlan", "San Pedro", "tours", "guias locales", "shuttles", "experiencias"],
   manifest: "/site.webmanifest",
   icons: {
     icon: [
@@ -32,7 +35,7 @@ export const metadata: Metadata = {
     locale: "es_ES", // TODO: Dynamic locale
     url: "https://nomadafantasma.com",
     title: "Nómada Fantasma",
-    description: "Cartografía náutica-tecnológica para nómadas digitales.",
+    description: siteDescription,
     siteName: "Nómada Fantasma",
     images: [
       {
@@ -46,7 +49,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Nómada Fantasma",
-    description: "Cartografía náutica-tecnológica para nómadas digitales.",
+    description: siteDescription,
     images: ["/og-image.jpg"],
     creator: "@nomadafantasma",
   },
