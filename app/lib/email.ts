@@ -148,7 +148,7 @@ async function sendEmailWithRetry(
 }
 
 export async function sendShuttleRequestEmail(data: SendShuttleRequestEmailProps) {
-    const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'operaciones@nomadafantasma.com';
 
     if (!resend) {
         logger.info('📧 [SHUTTLE EMAIL SIMULATION] -----------------------------------------');
@@ -655,7 +655,7 @@ function buildShuttleOpsSubject(prefix: string, origin: string, destination: str
 }
 
 export async function sendTourConfirmationEmails(data: SendConfirmationEmailProps): Promise<MultiRecipientSendResult> {
-    const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'operaciones@nomadafantasma.com';
     const agencyEmail = data.agencyEmail?.trim() || null;
     const requestKind = data.requestKind ?? 'tour';
     const isGuide = requestKind === 'guide';
@@ -810,7 +810,7 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
 }
 
 export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmationEmailsProps & { bookingId?: string }): Promise<MultiRecipientSendResult> {
-    const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'operaciones@nomadafantasma.com';
     const agencyEmail = data.agencyEmail?.trim() || null;
 
     if (!resend) {
