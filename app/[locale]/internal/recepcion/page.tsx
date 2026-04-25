@@ -407,6 +407,7 @@ export default function RecepcionRequestsPage() {
     const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
     const [error, setError] = useState('');
     const [data, setData] = useState<InternalResponse | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | RequestStatus>('all');
     const [kindFilter, setKindFilter] = useState<'all' | InternalRequestItem['kind']>('all');
     const [dateFrom, setDateFrom] = useState('');
@@ -491,10 +492,31 @@ export default function RecepcionRequestsPage() {
 
     const filteredItems = useMemo(() => {
         const items = data?.items ?? [];
+        const normalizedQuery = searchQuery.trim().toLowerCase();
         return items.filter((item) => {
             const normalizedStatus = normalizeStatus(item.status);
             if (statusFilter !== 'all' && normalizedStatus !== statusFilter) return false;
             if (kindFilter !== 'all' && item.kind !== kindFilter) return false;
+
+            if (normalizedQuery) {
+                const searchableText = [
+                    item.id,
+                    item.serviceName,
+                    item.customerName,
+                    item.customerEmail,
+                    item.customerWhatsapp,
+                    item.locationLabel,
+                    item.details,
+                    item.adminNotes,
+                    getKindLabel(item.kind),
+                    getStatusLabel(normalizedStatus),
+                ]
+                    .filter(Boolean)
+                    .join(' ')
+                    .toLowerCase();
+
+                if (!searchableText.includes(normalizedQuery)) return false;
+            }
 
             const createdAt = new Date(item.createdAt);
             if (Number.isNaN(createdAt.getTime())) return false;
@@ -511,7 +533,7 @@ export default function RecepcionRequestsPage() {
 
             return true;
         });
-    }, [data, statusFilter, kindFilter, dateFrom, dateTo]);
+    }, [data, searchQuery, statusFilter, kindFilter, dateFrom, dateTo]);
 
     const summary = useMemo(
         () => ({
@@ -856,7 +878,7 @@ export default function RecepcionRequestsPage() {
             </div>
             <h1 className="text-2xl font-bold mb-2">Panel Operativo San Pedro</h1>
             <p className="text-sm text-muted-foreground mb-6">
-                Vista interna para operar solicitudes de tours y shuttles sin salir del flujo.
+                Vista interna para operar solicitudes de tours, guias y shuttles sin salir del flujo.
             </p>
             <section className="mb-6 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-slate-900/88 via-slate-900/72 to-cyan-950/30 shadow-[0_16px_50px_rgba(8,15,30,0.28)]">
                 <div className="flex flex-col gap-4 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
@@ -949,7 +971,17 @@ export default function RecepcionRequestsPage() {
                             <p className="text-xs uppercase tracking-[0.18em] text-cyan-200/80">Pulso operativo</p>
                             <h2 className="mt-1 text-lg font-semibold text-white">Filtro y prioridad del día</h2>
                         </div>
-                        <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-4 xl:max-w-4xl">
+                        <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2 xl:max-w-5xl xl:grid-cols-5">
+                            <label className="text-sm md:col-span-2 xl:col-span-1">
+                                <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Buscar</span>
+                                <input
+                                    type="search"
+                                    value={searchQuery}
+                                    onChange={(event) => setSearchQuery(event.target.value)}
+                                    placeholder="Cliente, email, servicio o ID"
+                                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2.5 text-sm text-white shadow-inner placeholder:text-slate-500"
+                                />
+                            </label>
                             <label className="text-sm">
                                 <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Estado</span>
                                 <select
@@ -1002,6 +1034,7 @@ export default function RecepcionRequestsPage() {
                         <button
                             type="button"
                             onClick={() => {
+                                setSearchQuery('');
                                 setStatusFilter('all');
                                 setKindFilter('all');
                                 setDateFrom('');
