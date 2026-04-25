@@ -39,12 +39,13 @@ export const CreateReservationSchema = z.object({
     tourId: z.string().uuid().optional(),
     accommodationId: z.string().uuid().optional(),
     guideId: z.string().uuid().optional(),
+    guideServiceId: z.string().uuid().optional(),
 
     // Backward compatibility
     tourName: z.string().optional(),
 
     // Pricing
-    totalPrice: z.number().positive().optional(),
+    totalPrice: z.number().positive().nullable().optional(),
 
     // Notes
     notes: z.string().max(1000, 'Notes too long').optional(),
@@ -70,6 +71,13 @@ export const CreateReservationSchema = z.object({
             message: 'guideId is required for guide reservations',
         });
     }
+    if (data.type === 'guide' && !data.guideServiceId) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['guideServiceId'],
+            message: 'guideServiceId is required for guide reservations',
+        });
+    }
 });
 
 export type CreateReservationInput = z.infer<typeof CreateReservationSchema>;
@@ -87,8 +95,9 @@ export function sanitizeReservationInput(input: CreateReservationInput) {
         tour_id: input.tourId || null,
         accommodation_id: input.accommodationId || null,
         guide_id: input.guideId || null,
+        guide_service_id: input.guideServiceId || null,
         tour_name: input.tourName?.trim() || null,
-        total_price: input.totalPrice || null,
+        total_price: typeof input.totalPrice === 'number' ? input.totalPrice : null,
         notes: input.notes?.trim() || null,
     };
 }

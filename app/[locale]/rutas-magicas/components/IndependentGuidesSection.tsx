@@ -12,6 +12,12 @@ type GuideEntry = {
   tours: string[];
   townName?: string;
   bio: string;
+  services?: Array<{
+    id: string;
+    title: string;
+    priceLabel?: string | null;
+    description?: string | null;
+  }>;
 };
 
 type IndependentGuidesSectionProps = {
@@ -64,6 +70,7 @@ export default function IndependentGuidesSection({
               rating: guide.rating,
               reviews: guide.reviews,
               townName: guide.townName,
+              services: guide.services,
             }}
           />
         ))}

@@ -1,8 +1,14 @@
 import type { Guide } from '../lago-atitlan/data';
 import { atitlanTowns } from '../lago-atitlan/data';
 import type { Tour } from '@/app/lib/types';
+import type { GuideWithServices } from '@/app/lib/supabase/guides';
 import ToursSection from './ToursSection';
 import IndependentGuidesSection from './IndependentGuidesSection';
+import {
+  localizeGuideBio,
+  localizeGuideLanguage,
+  localizeGuideService,
+} from '../lib/guideLocalization';
 
 interface RawGuide {
   name: string;
@@ -12,10 +18,12 @@ interface RawGuide {
 }
 
 interface TownExperiencesPanelProps {
+  locale: string;
   townName: string;
   townSlug: string;
   tours: Tour[];
   guides: RawGuide[];
+  relationalGuides?: GuideWithServices[];
   experiencesTitle: string;
   experiencesSubtitle: string;
   guidesTitle: string;
@@ -51,16 +59,65 @@ function toGuideCardModel(
 }
 
 export default function TownExperiencesPanel({
+  locale,
   townName,
   townSlug,
   tours,
   guides,
+  relationalGuides = [],
   experiencesTitle,
   experiencesSubtitle,
   guidesTitle,
   guidesSubtitle,
   guideBio,
 }: TownExperiencesPanelProps) {
+  const guideEntries = relationalGuides.length > 0
+    ? relationalGuides.map((guide) => ({
+        id: guide.id,
+        name: guide.name,
+        photo: guide.photo_url || '/images/guides/default-avatar.svg',
+        bio: localizeGuideBio(locale, guide.slug, guide.bio || guideBio),
+        specialties: guide.services.map((service) =>
+          localizeGuideService(locale, service.slug, {
+            title: service.title,
+          }).title || service.title
+        ),
+        languages: guide.languages.map((language) => localizeGuideLanguage(locale, language)),
+        contact: guide.whatsapp || guide.email || '',
+        rating: 5,
+        reviews: 10,
+        tours: guide.services.map((service) =>
+          localizeGuideService(locale, service.slug, {
+            title: service.title,
+          }).title || service.title
+        ),
+        townName,
+        services: guide.services.map((service) => ({
+          id: service.id,
+          title:
+            localizeGuideService(locale, service.slug, {
+              title: service.title,
+              description: service.description ?? undefined,
+            }).title || service.title,
+          description:
+            localizeGuideService(locale, service.slug, {
+              title: service.title,
+              description: service.description ?? undefined,
+            }).description || service.description || undefined,
+          priceLabel:
+            typeof service.price_from === 'number' && typeof service.price_to === 'number'
+              ? `Q${service.price_from}-${service.price_to}`
+              : typeof service.price_from === 'number'
+                ? `Q${service.price_from}`
+                : null,
+        })),
+      }))
+    : guides.map((guide, index) => ({
+        ...toGuideCardModel(guide, index, guideBio, townSlug),
+        tours: guide.tours,
+        townName,
+      }));
+
   return (
     <div className="space-y-8">
       <section id="experiencias-section">
@@ -80,11 +137,7 @@ export default function TownExperiencesPanel({
       <IndependentGuidesSection
         title={guidesTitle}
         subtitle={guidesSubtitle}
-        guides={guides.map((guide, index) => ({
-          ...toGuideCardModel(guide, index, guideBio, townSlug),
-          tours: guide.tours,
-          townName,
-        }))}
+        guides={guideEntries}
       />
     </div>
   );

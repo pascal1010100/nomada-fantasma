@@ -387,11 +387,12 @@
         "comingSoon": "Coming Soon"
     },
     "GuideCard": {
-        "reviews": "{count} reviews",
-        "book": "Book",
-        "tipCoffee": "Buy me a coffee",
         "specialties": "Specialties:",
-        "languages": "Languages:"
+        "languages": "Languages:",
+        "requestBooking": "Request booking",
+        "bookingNoteLabel": "How it works",
+        "bookingNote": "We review availability with the guide and then confirm payment and final logistics by email.",
+        "tailoredTrips": "Tailored local routes"
     },
     "RouteDetail": {
         "townsAroundLake": "Towns around the lake",
@@ -1301,7 +1302,7 @@
         "actionMap": "View map",
         "actionExperiences": "View experiences",
         "guidesTitle": "Independent Local Guides",
-        "guidesSubtitle": "Connect directly with local guides. Nomada Fantasma does not charge commission.",
+        "guidesSubtitle": "Reserve personalized outings with verified local guides and let Nomada Fantasma coordinate the next steps with you.",
         "guideBio": "Local guide expert in the region.",
         "activitiesTitle": "Popular Activities",
         "weatherTitle": "Current Weather",
@@ -1484,6 +1485,36 @@
         "footerNote": "This is an automatic email sent after your request was received.",
         "footerSignature": "Nómada Fantasma - Epic Travels in Guatemala 🇬🇹"
     },
+    "GuideEmail": {
+        "preview": "Guide request received: {tourName}",
+        "eyebrow": "Nomada Fantasma",
+        "title": "Your guide request is in",
+        "subtitle": "We have received your request and our team is now reviewing availability and the next steps to coordinate the experience.",
+        "statusBadge": "Pending confirmation",
+        "greeting": "Hello {customerName}",
+        "intro": "We have received your request for {tourName}. Thanks for choosing Nomada Fantasma to coordinate this local experience in Guatemala.",
+        "summaryTitle": "Your request summary",
+        "summaryTour": "Service",
+        "summaryDate": "Date",
+        "summaryTime": "Time",
+        "summaryTravelers": "Travelers",
+        "summaryWhatsapp": "WhatsApp",
+        "summaryTotal": "Estimated total",
+        "detailsTraveler": "person",
+        "detailsTravelersPlural": "people",
+        "nextStepsTitle": "What happens next",
+        "nextStep1": "We review availability with the guide for your selected date and coordinate the logistics of the service.",
+        "nextStep2": "You will receive the available payment methods by email to confirm your spot.",
+        "nextStep3": "Once payment is confirmed, we will send your final reservation details.",
+        "paymentTitle": "Payment and confirmation",
+        "paymentDesc": "You do not need to make a payment yet. We will email you the available payment options and the exact next steps to secure your booking.",
+        "requestIdLabel": "Request ID",
+        "contactTitle": "Need help before we reply?",
+        "contactLine": "If you have questions, write to us or message us on WhatsApp and we will gladly help you.",
+        "contactWhatsApp": "Open WhatsApp",
+        "footerNote": "This is an automatic email sent after your guide request was received.",
+        "footerSignature": "Nómada Fantasma - Epic Travels in Guatemala 🇬🇹"
+    },
     "ShuttleEmail": {
         "preview": "Shuttle reservation received: {origin} -> {destination}",
         "subject": "Shuttle reservation received: {origin} -> {destination}",
@@ -1538,7 +1569,9 @@
             "invalidType": "Reservation type is not valid.",
             "requiredTour": "A tour is required for this reservation.",
             "requiredAccommodation": "An accommodation is required for this reservation.",
-            "requiredGuide": "A guide is required for this reservation."
+            "requiredGuide": "A guide is required for this reservation.",
+            "requiredGuideService": "A guide service is required for this reservation.",
+            "invalidGuideService": "The selected service does not belong to the specified guide."
         },
         "rateLimitExceeded": "Too many requests. Please try again later.",
         "databaseError": "Error saving the reservation to the database.",

@@ -108,6 +108,48 @@ describe('Validations', () => {
       const result = CreateReservationSchema.safeParse(data);
       expect(result.success).toBe(true);
     });
+
+    it('should validate correct guide reservation', () => {
+      const data = {
+        name: 'Jane Doe',
+        email: 'jane@example.com',
+        date: '2026-12-25',
+        guests: 2,
+        type: 'guide' as const,
+        guideId: '550e8400-e29b-41d4-a716-446655440000',
+        guideServiceId: '660e8400-e29b-41d4-a716-446655440000',
+      };
+      const result = CreateReservationSchema.safeParse(data);
+      expect(result.success).toBe(true);
+    });
+
+    it('should allow null totalPrice when reservation pricing is pending', () => {
+      const data = {
+        name: 'Jane Doe',
+        email: 'jane@example.com',
+        date: '2026-12-25',
+        guests: 2,
+        type: 'guide' as const,
+        guideId: '550e8400-e29b-41d4-a716-446655440000',
+        guideServiceId: '660e8400-e29b-41d4-a716-446655440000',
+        totalPrice: null,
+      };
+      const result = CreateReservationSchema.safeParse(data);
+      expect(result.success).toBe(true);
+    });
+
+    it('should require guideServiceId for guide type', () => {
+      const data = {
+        name: 'Jane Doe',
+        email: 'jane@example.com',
+        date: '2026-12-25',
+        guests: 2,
+        type: 'guide' as const,
+        guideId: '550e8400-e29b-41d4-a716-446655440000',
+      };
+      const result = CreateReservationSchema.safeParse(data);
+      expect(result.success).toBe(false);
+    });
   });
 
   describe('ShuttleRequestSchema', () => {
@@ -115,6 +157,7 @@ describe('Validations', () => {
       const data = {
         customerName: 'John Doe',
         customerEmail: 'john@example.com',
+        customerWhatsapp: '50212345678',
         routeOrigin: 'Panajachel',
         routeDestination: 'Chichicastenango',
         date: '2026-03-15',
@@ -257,6 +300,21 @@ describe('Validations', () => {
       const sanitized = sanitizeReservationInput(input);
       expect(sanitized.whatsapp).toBeNull();
       expect(sanitized.tour_id).toBeNull();
+    });
+
+    it('should keep null totalPrice as null after sanitizing', () => {
+      const input = {
+        name: 'Jane Doe',
+        email: 'jane@example.com',
+        type: 'guide' as const,
+        date: '2026-12-25',
+        guests: 1,
+        guideId: '550e8400-e29b-41d4-a716-446655440000',
+        guideServiceId: '660e8400-e29b-41d4-a716-446655440000',
+        totalPrice: null,
+      };
+      const sanitized = sanitizeReservationInput(input);
+      expect(sanitized.total_price).toBeNull();
     });
   });
 });

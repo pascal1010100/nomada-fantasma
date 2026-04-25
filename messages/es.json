@@ -387,11 +387,12 @@
         "comingSoon": "Próximamente"
     },
     "GuideCard": {
-        "reviews": "{count} reseñas",
-        "book": "Reservar",
-        "tipCoffee": "Invítame un café",
         "specialties": "Especialidades:",
-        "languages": "Idiomas:"
+        "languages": "Idiomas:",
+        "requestBooking": "Solicitar reserva",
+        "bookingNoteLabel": "Como funciona",
+        "bookingNote": "Revisamos disponibilidad con el guia y luego confirmamos pago y logistica final por correo.",
+        "tailoredTrips": "Rutas locales personalizadas"
     },
     "RouteDetail": {
         "townsAroundLake": "Pueblos alrededor del lago",
@@ -1301,7 +1302,7 @@
         "actionMap": "Ver mapa",
         "actionExperiences": "Ver experiencias",
         "guidesTitle": "Guías Locales Independientes",
-        "guidesSubtitle": "Conecta directamente con guías locales. Nómada Fantasma no cobra comisión.",
+        "guidesSubtitle": "Reserva salidas personalizadas con guías locales verificados y deja que Nómada Fantasma coordine contigo los siguientes pasos.",
         "guideBio": "Guía local experto en la región.",
         "activitiesTitle": "Actividades Populares",
         "weatherTitle": "Clima Actual",
@@ -1484,6 +1485,36 @@
         "footerNote": "Este es un correo automático enviado después de recibir tu solicitud.",
         "footerSignature": "Nómada Fantasma - Viajes Épicos en Guatemala 🇬🇹"
     },
+    "GuideEmail": {
+        "preview": "Recibimos tu solicitud de guía: {tourName}",
+        "eyebrow": "Nómada Fantasma",
+        "title": "Tu solicitud de guía ya está en proceso",
+        "subtitle": "Recibimos tu solicitud y nuestro equipo ya está revisando disponibilidad y próximos pasos para coordinar la experiencia.",
+        "statusBadge": "Pendiente de confirmación",
+        "greeting": "Hola {customerName}",
+        "intro": "Hemos recibido tu solicitud para {tourName}. Gracias por elegir a Nómada Fantasma para coordinar esta experiencia local en Guatemala.",
+        "summaryTitle": "Resumen de tu solicitud",
+        "summaryTour": "Servicio",
+        "summaryDate": "Fecha",
+        "summaryTime": "Hora",
+        "summaryTravelers": "Viajeros",
+        "summaryWhatsapp": "WhatsApp",
+        "summaryTotal": "Total estimado",
+        "detailsTraveler": "persona",
+        "detailsTravelersPlural": "personas",
+        "nextStepsTitle": "Qué sigue ahora",
+        "nextStep1": "Revisamos disponibilidad con el guía para la fecha elegida y coordinamos la logística del servicio.",
+        "nextStep2": "Recibirás por correo las opciones de pago disponibles para confirmar tu espacio.",
+        "nextStep3": "Cuando el pago esté confirmado, te enviaremos los detalles finales de tu reserva.",
+        "paymentTitle": "Pago y confirmación",
+        "paymentDesc": "Todavía no necesitas realizar un pago. Te enviaremos por correo las opciones disponibles y los pasos exactos para asegurar tu reserva.",
+        "requestIdLabel": "ID de solicitud",
+        "contactTitle": "¿Necesitas ayuda antes de nuestra respuesta?",
+        "contactLine": "Si tienes preguntas, escríbenos o envíanos un mensaje por WhatsApp y con gusto te ayudamos.",
+        "contactWhatsApp": "Abrir WhatsApp",
+        "footerNote": "Este es un correo automático enviado después de recibir tu solicitud de guía.",
+        "footerSignature": "Nómada Fantasma - Viajes Épicos en Guatemala 🇬🇹"
+    },
     "ShuttleEmail": {
         "preview": "Reserva de shuttle recibida: {origin} -> {destination}",
         "subject": "Reserva de shuttle recibida: {origin} -> {destination}",
@@ -1538,7 +1569,9 @@
             "invalidType": "El tipo de reserva no es válido.",
             "requiredTour": "Se requiere un tour para esta reserva.",
             "requiredAccommodation": "Se requiere un hospedaje para esta reserva.",
-            "requiredGuide": "Se requiere un guía para esta reserva."
+            "requiredGuide": "Se requiere un guía para esta reserva.",
+            "requiredGuideService": "Se requiere un servicio de guía para esta reserva.",
+            "invalidGuideService": "El servicio seleccionado no corresponde al guía indicado."
         },
         "rateLimitExceeded": "Demasiadas solicitudes. Intenta más tarde.",
         "databaseError": "Error al registrar la reserva en la base de datos.",

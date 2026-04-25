@@ -3,11 +3,12 @@ import { NextResponse } from 'next/server';
 import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/app/lib/supabase/server';
 import { sendTourConfirmationEmails } from '@/app/lib/email';
-import { checkRateLimit, getClientIP } from '@/app/lib/rate-limit';
+import { checkRateLimitShared, getClientIP } from '@/app/lib/rate-limit';
 import { getLocaleFromRequest } from '@/app/lib/locale';
 import logger from '@/app/lib/logger';
 import { buildRequestMetadataNote } from '@/app/lib/request-metadata';
 import { getAuthorizedAdminContext } from '@/app/lib/admin-auth';
+import { recordInternalNotification } from '@/app/lib/internal-notifications';
 import {
     CreateReservationSchema,
     sanitizeReservationInput,
@@ -19,6 +20,7 @@ import type { Database } from '@/types/database.types';
 type ReservationInsert = Database['public']['Tables']['reservations']['Insert'];
 type ReservationRow = Database['public']['Tables']['reservations']['Row'];
 type ReservationUpdate = Database['public']['Tables']['reservations']['Update'];
+type GuideServiceRow = Database['public']['Tables']['guide_services']['Row'];
 type LegacyReservationRow = {
     id: string;
     customer_name?: string | null;
@@ -35,12 +37,21 @@ type LegacyReservationRow = {
     created_at?: string | null;
 };
 type ReservationRecord = ReservationRow | LegacyReservationRow;
-const DEFAULT_AGENCY_EMAIL = process.env.DEFAULT_AGENCY_EMAIL?.trim() || null;
+const DEFAULT_AGENCY_EMAIL =
+    process.env.DEFAULT_AGENCY_EMAIL?.trim() ||
+    process.env.ADMIN_EMAIL?.trim() ||
+    null;
 
 function normalizeEmail(value: string | null | undefined): string | null {
     const candidate = value?.trim();
     if (!candidate) return null;
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate) ? candidate : null;
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof Error && error.message) return error.message;
+    if (typeof error === 'string' && error.trim()) return error;
+    return fallback;
 }
 
 async function getTourAgencyEmail(tourId: string | null | undefined): Promise<string | null> {
@@ -77,17 +88,79 @@ async function getTourAgencyEmail(tourId: string | null | undefined): Promise<st
     return normalizeEmail(agencyResult.data.email) ?? normalizeEmail(DEFAULT_AGENCY_EMAIL);
 }
 
+async function getGuideProviderEmail(guideId: string | null | undefined): Promise<string | null> {
+    const fallbackEmail = normalizeEmail(DEFAULT_AGENCY_EMAIL);
+    if (!guideId) return fallbackEmail;
+
+    const guideResult = await supabaseAdmin
+        .schema('public')
+        .from('guides')
+        .select('agency_id, email, is_active')
+        .eq('id', guideId)
+        .maybeSingle<{ agency_id: string | null; email: string | null; is_active: boolean | null }>();
+
+    if (guideResult.error) {
+        logger.warn('Unable to resolve guide provider assignment:', guideResult.error);
+        return fallbackEmail;
+    }
+
+    if (!guideResult.data?.is_active) return fallbackEmail;
+
+    const guideEmail = normalizeEmail(guideResult.data.email);
+    if (guideEmail) return guideEmail;
+
+    const agencyId = guideResult.data.agency_id;
+    if (!agencyId) return fallbackEmail;
+
+    const agencyResult = await supabaseAdmin
+        .schema('public')
+        .from('agencies')
+        .select('email, is_active')
+        .eq('id', agencyId)
+        .maybeSingle<{ email: string | null; is_active: boolean | null }>();
+
+    if (agencyResult.error) {
+        logger.warn('Unable to resolve agency email for guide:', agencyResult.error);
+        return fallbackEmail;
+    }
+
+    if (!agencyResult.data?.is_active) return fallbackEmail;
+    return normalizeEmail(agencyResult.data.email) ?? fallbackEmail;
+}
+
+async function getGuideServiceContext(guideId: string, guideServiceId: string): Promise<{
+    serviceName: string;
+}> {
+    const serviceResult = await supabaseAdmin
+        .schema('public')
+        .from('guide_services')
+        .select('id, guide_id, title')
+        .eq('id', guideServiceId)
+        .maybeSingle<Pick<GuideServiceRow, 'id' | 'guide_id' | 'title'>>();
+
+    if (serviceResult.error || !serviceResult.data) {
+        throw new Error('invalid_guide_service');
+    }
+
+    if (serviceResult.data.guide_id !== guideId) {
+        throw new Error('guide_service_mismatch');
+    }
+
+    return {
+        serviceName: serviceResult.data.title,
+    };
+}
+
 // POST: Create a new reservation
 export async function POST(request: Request) {
     try {
         // Detect locale FIRST (before rate limiting to use translations)
         const locale = getLocaleFromRequest(request);
-        const t = await getTranslations({ locale, namespace: 'ReservationEmail' });
         const tApi = await getTranslations({ locale, namespace: 'ReservationApi' });
 
         // Rate limiting
         const ip = getClientIP(request);
-        const rateLimitResult = checkRateLimit(ip);
+        const rateLimitResult = await checkRateLimitShared(ip);
         
         if (!rateLimitResult.allowed) {
             return NextResponse.json(
@@ -130,6 +203,12 @@ export async function POST(request: Request) {
                 if (field === 'guideId' && issue.code === 'custom') {
                     return NextResponse.json(
                         { error: tApi('errors.requiredGuide') },
+                        { status: 400 }
+                    );
+                }
+                if (field === 'guideServiceId' && issue.code === 'custom') {
+                    return NextResponse.json(
+                        { error: tApi('errors.requiredGuideService') },
                         { status: 400 }
                     );
                 }
@@ -181,6 +260,35 @@ export async function POST(request: Request) {
             );
         }
 
+        if (sanitizedData.reservation_type === 'guide' && !sanitizedData.guide_service_id) {
+            return NextResponse.json(
+                { error: tApi('errors.requiredGuideService') },
+                { status: 400 }
+            );
+        }
+
+        let guideServiceName: string | null = null;
+        if (sanitizedData.reservation_type === 'guide' && sanitizedData.guide_id && sanitizedData.guide_service_id) {
+            try {
+                const guideContext = await getGuideServiceContext(
+                    sanitizedData.guide_id,
+                    sanitizedData.guide_service_id
+                );
+                guideServiceName = guideContext.serviceName;
+            } catch (error) {
+                if (
+                    error instanceof Error &&
+                    (error.message === 'invalid_guide_service' || error.message === 'guide_service_mismatch')
+                ) {
+                    return NextResponse.json(
+                        { error: tApi('errors.invalidGuideService') },
+                        { status: 400 }
+                    );
+                }
+                throw error;
+            }
+        }
+
         const metadataNote = buildRequestMetadataNote({
             locale,
             price: sanitizedData.total_price ?? undefined,
@@ -198,7 +306,9 @@ export async function POST(request: Request) {
             tour_id: sanitizedData.tour_id,
             accommodation_id: sanitizedData.accommodation_id,
             guide_id: sanitizedData.guide_id,
+            guide_service_id: sanitizedData.guide_service_id,
             tour_name: sanitizedData.tour_name,
+            guide_service_name: guideServiceName,
             total_price: sanitizedData.total_price,
             notes: sanitizedData.notes,
             status: 'pending',
@@ -226,7 +336,9 @@ export async function POST(request: Request) {
                 tour_id: sanitizedData.tour_id,
                 accommodation_id: sanitizedData.accommodation_id,
                 guide_id: sanitizedData.guide_id,
+                guide_service_id: sanitizedData.guide_service_id,
                 tour_name: sanitizedData.tour_name,
+                guide_service_name: guideServiceName,
                 total_price: sanitizedData.total_price,
                 notes: sanitizedData.notes,
                 status: 'pending',
@@ -250,7 +362,7 @@ export async function POST(request: Request) {
                 reservation_date: sanitizedData.date,
                 guests: sanitizedData.number_of_people,
                 tour_id: sanitizedData.tour_id,
-                tour_name: sanitizedData.tour_name,
+                tour_name: sanitizedData.tour_name || guideServiceName,
                 total_price: sanitizedData.total_price,
                 reservation_type: sanitizedData.reservation_type,
                 customer_notes: sanitizedData.notes,
@@ -301,6 +413,12 @@ export async function POST(request: Request) {
         }
 
         const reservation = newReservation as ReservationRecord;
+        const reservationType =
+            'reservation_type' in reservation && typeof reservation.reservation_type === 'string'
+                ? reservation.reservation_type
+                : 'tour';
+        const emailNamespace = reservationType === 'guide' ? 'GuideEmail' : 'ReservationEmail';
+        const t = await getTranslations({ locale, namespace: emailNamespace });
         const reservationEmail =
             ('email' in reservation ? reservation.email : reservation.customer_email) || '';
         const reservationName =
@@ -317,6 +435,10 @@ export async function POST(request: Request) {
             ('whatsapp' in reservation ? reservation.whatsapp : reservation.customer_phone) || '';
         const reservationNotes =
             ('notes' in reservation ? reservation.notes : reservation.customer_notes) || '';
+        const reservationGuideServiceName =
+            'guide_service_name' in reservation && typeof reservation.guide_service_name === 'string'
+                ? reservation.guide_service_name
+                : null;
         const currentAttempts =
             'email_attempts' in reservation && typeof reservation.email_attempts === 'number'
                 ? reservation.email_attempts
@@ -332,6 +454,7 @@ export async function POST(request: Request) {
             emailAttempted = true;
             const reservationTourId = 'tour_id' in reservation ? reservation.tour_id : null;
             let resolvedTourName =
+                reservationGuideServiceName ||
                 ('tour_name' in reservation ? reservation.tour_name : reservation.tour_name) ||
                 null;
 
@@ -352,8 +475,22 @@ export async function POST(request: Request) {
                 resolvedTourName = 'Tour Nómada Fantasma';
             }
 
-            const agencyEmail = await getTourAgencyEmail(reservationTourId);
+            const reservationGuideId = 'guide_id' in reservation ? reservation.guide_id : null;
+            const agencyEmail =
+                reservationType === 'guide'
+                    ? await getGuideProviderEmail(reservationGuideId)
+                    : await getTourAgencyEmail(reservationTourId);
+            if (!agencyEmail) {
+                logger.warn('No agency email resolved for reservation; provider email will be skipped', {
+                    reservationId: newReservation.id,
+                    reservationType: 'reservation_type' in reservation ? reservation.reservation_type : null,
+                    tourId: reservationTourId,
+                    guideId: reservationGuideId,
+                    tourName: resolvedTourName,
+                });
+            }
             const emailResult = await sendTourConfirmationEmails({
+                requestKind: reservationType === 'guide' ? 'guide' : 'tour',
                 to: reservationEmail,
                 agencyEmail,
                 reservationId: newReservation.id,
@@ -370,7 +507,8 @@ export async function POST(request: Request) {
                 t: t,
             });
             emailSent = emailResult.success;
-            const customerRecipient = emailResult.recipients.find((recipient) => recipient.label === 'tour_customer');
+            const customerRecipientLabel = reservationType === 'guide' ? 'guide_customer' : 'tour_customer';
+            const customerRecipient = emailResult.recipients.find((recipient) => recipient.label === customerRecipientLabel);
             customerEmailSent = customerRecipient ? customerRecipient.success : emailResult.success;
             emailRecipientStatuses = emailResult.recipients.map((recipient) => ({
                 label: recipient.label,
@@ -387,6 +525,31 @@ export async function POST(request: Request) {
                             ? JSON.stringify(rawError)
                             : 'Unknown email error';
                 logger.warn('Email failed but reservation was saved to DB');
+            }
+
+            for (const recipient of emailResult.recipients) {
+                const recipientType =
+                    recipient.label.endsWith('_customer')
+                        ? 'customer'
+                        : recipient.label.endsWith('_admin')
+                            ? 'admin'
+                            : 'agency';
+                const errorMessage = recipient.success
+                    ? null
+                    : getErrorMessage(recipient.error, `No se pudo enviar ${recipient.label}.`);
+
+                await recordInternalNotification({
+                    requestKind: reservationType === 'guide' ? 'guide' : 'tour',
+                    requestId: newReservation.id,
+                    recipientType,
+                    recipientEmail: recipient.to,
+                    template: recipient.label.endsWith('_customer') ? 'booking_received_customer' : 'booking_received_ops',
+                    deliveryStatus: recipient.success ? 'sent' : 'failed',
+                    subject: recipient.subject,
+                    providerMessageId: recipient.id,
+                    errorMessage,
+                    triggeredBy: 'system',
+                });
             }
         }
 

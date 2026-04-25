@@ -10,6 +10,12 @@ export interface Guide {
     contact: string; // WhatsApp link or number
     rating: number;
     reviews: number;
+    services?: Array<{
+        id: string;
+        title: string;
+        priceLabel?: string | null;
+        description?: string | null;
+    }>;
 }
 
 export interface MicroRoutePoint {

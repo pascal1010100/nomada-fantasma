@@ -1,4 +1,5 @@
 import { getToursByPuebloFromDB } from '@/app/lib/supabase/tours';
+import { getActiveGuidesByTownSlugFromDB } from '@/app/lib/supabase/guides';
 import { notFound } from 'next/navigation';
 import { getNearbyTownsFromDB, getTownBySlugFromDB } from '@/app/lib/supabase/towns';
 import { ArrowLeft, MapPin, Wifi, Star } from 'lucide-react';
@@ -21,8 +22,11 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
     notFound();
   }
 
-  const tours = await getToursByPuebloFromDB(slug);
-  const nearbyTowns = await getNearbyTownsFromDB(slug);
+  const [tours, nearbyTowns, guides] = await Promise.all([
+    getToursByPuebloFromDB(slug),
+    getNearbyTownsFromDB(slug),
+    getActiveGuidesByTownSlugFromDB(slug),
+  ]);
 
   const tRoutes = await getTranslations({ locale, namespace: 'Data.routes' });
   const tTown = await getTranslations({ locale, namespace: 'Town' });
@@ -113,10 +117,12 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
           panels={{
             experiences: (
               <TownExperiencesPanel
+                locale={locale}
                 townName={viewModel.localizedTitle}
                 townSlug={slug}
                 tours={tours}
                 guides={town.guides}
+                relationalGuides={guides}
                 experiencesTitle={tTown('experiencesIn', { name: viewModel.localizedTitle })}
                 experiencesSubtitle={tTown('experiencesSubtitle', { name: viewModel.localizedTitle })}
                 guidesTitle={tTown('guidesTitle')}

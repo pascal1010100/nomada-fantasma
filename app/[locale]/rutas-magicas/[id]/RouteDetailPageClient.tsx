@@ -378,8 +378,16 @@ export default function RouteDetailPageClient({
       <BookingModal
         isOpen={isBookingModalOpen}
         onClose={() => setIsBookingModalOpen(false)}
+        guideId={route.id}
         guideName={route.title}
         guidePhone="50255555555"
+        services={[
+          {
+            id: `legacy-route-${route.id}`,
+            title: route.title,
+            priceLabel: `Q${route.price.toLocaleString()}`,
+          },
+        ]}
       />
     </div>
   );
