@@ -42,7 +42,9 @@ export default function TourCard({ tour, puebloSlug, className = '' }: TourCardP
   const timeLabel = pickupTime
     ? (locale === 'es' ? `Recogidas desde ${pickupTimeLabel}` : `Pickups start around ${pickupTimeLabel}`)
     : durationLabel;
-  const priceValue = (tour.price ?? tour.price_min ?? 0);
+  const priceValue = (tour.price_min ?? tour.price ?? 0);
+  const priceMaxValue = (tour.price_max ?? tour.price_min ?? tour.price ?? 0);
+  const hasPriceRange = priceMaxValue > priceValue;
 
   return (
     <motion.div
@@ -99,7 +101,9 @@ export default function TourCard({ tour, puebloSlug, className = '' }: TourCardP
                   <span className="text-xl font-bold text-gray-900 dark:text-white">
                     Q{priceValue.toLocaleString()}
                   </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">{t('perPerson')}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">
+                    {hasPriceRange ? t('fromPrice') : t('perPerson')}
+                  </span>
                 </div>
               </div>
 

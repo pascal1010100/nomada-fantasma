@@ -436,14 +436,23 @@
         "durationHours": "{hours} hours",
         "groupRange": "Group: {min}-{max} people",
         "descriptionTitle": "About this experience",
+        "rideOptionsTitle": "Available options",
+        "rideOptionsSubtitle": "Before booking, choose the ride style that best fits your group and budget.",
         "itineraryTitle": "Itinerary",
         "includesTitle": "What's included",
         "faqTitle": "Frequently asked questions",
         "importantInfoTitle": "Important information",
+        "availabilityLabel": "Availability",
+        "soloFriendlyLabel": "Available from 1 guest",
+        "requestBasedAvailability": "Scheduled based on availability",
+        "fixedAvailability": "Fixed days and start time",
         "meetingPointLabel": "Meeting point",
         "durationLabel": "Duration",
         "groupSizeLabel": "Group size",
-        "whatToBringTitle": "What to bring"
+        "whatToBringTitle": "What to bring",
+        "perPersonLabel": "per person",
+        "perGroupLabel": "per group",
+        "minimumGuestsLabel": "Minimum {min} people"
     },
     "RouteActions": {
         "exploreTownsAndTours": "Explore towns and tours",
@@ -1105,8 +1114,49 @@
             "cabalgata-panoramica-san-pedro": {
                 "title": "Free Riders Horseback Volcano View Trail Adventure",
                 "name": "Free Riders Horseback Volcano View Trail Adventure",
-                "summary": "A panoramic horseback ride in San Pedro with group, extended, and private options from Q350 per person.",
-                "description": "Book your ride with Free Riders Guild and Rancho Moises to experience San Pedro on horseback through rural roads, mountain scenery, and open views over Lake Atitlan. Choose a basic prescheduled group ride from Q350, an extended or split-private ride from Q500 per person with a 2-person minimum, or a private ride from Q1000.",
+                "summary": "A panoramic horseback ride in San Pedro with group, split-private, and private options from Q350, lasting roughly 1.5 to 3 hours.",
+                "description": "Book your ride with Free Riders Guild and Rancho Moises to experience San Pedro on horseback through rural roads, mountain scenery, and open views over Lake Atitlan. Choose a basic prescheduled group ride from Q350, a split-private or extended ride from Q500 per person with a 2-person minimum, or a private ride from Q1000. All ride formats include basic instruction and are open to all levels.",
+                "durationLabel": "1.5 to 3 hours",
+                "groupLabel": "From 1 guest · some options require at least 2",
+                "bookingOptions": [
+                    {
+                        "id": "basic-group",
+                        "name": "Basic group ride",
+                        "description": "Shared scheduled ride, usually on Tuesdays and Thursdays and sometimes Saturdays. Starts at 10:00 am, lasts about 1.5 to 2 hours, and works best for riders with basic experience.",
+                        "price": 350,
+                        "pricingMode": "per_person",
+                        "availabilityMode": "fixed_schedule",
+                        "minGuests": 1,
+                        "maxGuests": 10,
+                        "availableDays": ["tuesday", "thursday"],
+                        "startTimes": ["10:00"],
+                        "durationLabel": "1.5 to 2 hours"
+                    },
+                    {
+                        "id": "extended-split-private",
+                        "name": "Extended / split-private ride",
+                        "description": "A more flexible option for couples or small groups. It can be scheduled at different times based on availability and usually runs longer than the basic ride.",
+                        "price": 500,
+                        "pricingMode": "per_person",
+                        "availabilityMode": "request_based",
+                        "minGuests": 2,
+                        "maxGuests": 10,
+                        "availableDays": ["Every day"],
+                        "durationLabel": "Variable duration depending on route and availability"
+                    },
+                    {
+                        "id": "private-ride",
+                        "name": "Private ride",
+                        "description": "Private experience with flexible scheduling based on availability and dedicated coordination for your group.",
+                        "price": 1000,
+                        "pricingMode": "per_group",
+                        "availabilityMode": "request_based",
+                        "minGuests": 1,
+                        "maxGuests": 10,
+                        "availableDays": ["Every day"],
+                        "durationLabel": "Variable duration depending on the private experience"
+                    }
+                ],
                 "duration": "3 hours",
                 "difficulty": "All levels",
                 "meetingPoint": "Meetup to be confirmed between San Pedro Dock / Crown Coffee or Rancho Moises",
@@ -1115,13 +1165,12 @@
                     "Horse for the ride",
                     "Basic instruction before departure",
                     "Panoramic horseback route with Free Riders Guild and Rancho Moises",
-                    "Basic prescheduled group ride from Q350 per person",
-                    "Extended or split-private option from Q500 per person, 2-person minimum",
-                    "Private ride from Q1000"
+                    "Basic support during the ride",
+                    "Scenic route with lake, volcano, and mountain views"
                 ],
                 "notIncludes": [
                     "Transportation to the starting point",
-                    "Professional photos",
+                    "Full photo and video package",
                     "Meals or drinks",
                     "Tips"
                 ],
@@ -1134,9 +1183,8 @@
                 ],
                 "highlights": [
                     "Views of the lake, volcanoes, and mountains around San Pedro",
-                    "Welcoming for beginners with basic instruction before the ride",
-                    "Basic, extended/split-private, and private ride options",
-                    "Tuesdays and Thursdays from 10:00 am to 1:00 pm"
+                    "All ride formats include basic instruction and are open to all levels",
+                    "Full photo and video add-on available for Q500"
                 ],
                 "itinerary": [
                     {
@@ -1167,7 +1215,15 @@
                     },
                     {
                         "question": "What pricing options are available?",
-                        "answer": "The basic prescheduled group ride starts at Q350 per person. The extended or split-private option starts at Q500 per person with a 2-person minimum. The private ride starts at Q1000."
+                        "answer": "The basic prescheduled group ride starts at Q350 per person. The split-private or extended option starts at Q500 per person with a 2-person minimum. The private ride starts at Q1000."
+                    },
+                    {
+                        "question": "What is the main difference between the options?",
+                        "answer": "The basic option is a fixed group departure, usually Tuesdays and Thursdays at 10:00 am, and lasts around 1.5 to 2 hours. The split-private and private options can be scheduled at other times based on availability and may run longer."
+                    },
+                    {
+                        "question": "Are there any add-ons or special packages?",
+                        "answer": "Yes. A full photo and video add-on is available for an extra Q500. Wedding, modeling, and special event packages are also available starting from Q5000."
                     }
                 ]
             }
@@ -1276,6 +1332,7 @@
         "viewDetails": "View details",
         "book": "Book",
         "perPerson": "/ person",
+        "fromPrice": "from",
         "hours": "{count, plural, one {hour} other {hours}}",
         "children": "Children: {price}",
         "maxCapacity": "Up to {max} people",
@@ -1331,12 +1388,25 @@
         "headerDesc": "Fill the form to secure your spot",
         "priceAdult": "Price per person",
         "perPerson": "per person",
+        "perGroup": "per group",
         "priceChild": "Child price",
         "totalEstimated": "Estimated total:",
+        "rideOptionTitle": "Choose your ride option",
+        "rideOptionHelp": "Select the option that best matches your group before sending the request.",
+        "minimumGuestsOption": "Requires at least {min} people",
+        "soloFriendlyShort": "From 1 guest",
+        "requestBasedAvailabilityShort": "Flexible schedule",
+        "fixedAvailabilityShort": "Fixed schedule",
+        "optionFlexibleFallback": "Timing depends on availability",
+        "selectedOptionNotePrefix": "Selected option",
+        "durationLabel": "Duration",
+        "availabilityLabel": "Availability",
+        "groupSizeLabel": "Guests",
         "dateLabel": "Tour date",
         "dateToday": "Today",
         "dateTodayDisabled": "Today (not available)",
         "dateHelp": "Select one of the available days",
+        "dateHelpFlexible": "Choose your preferred date and we will confirm availability with you",
         "timeLabel": "Start time",
         "timeHelp": "Select one of the available start times for this tour",
         "timeHelpSelectable": "Select one of the available start times for this tour",

@@ -4,6 +4,7 @@ import { Clock, Users, MapPin, ArrowLeft, CheckCircle2, XCircle } from 'lucide-r
 import Image from 'next/image';
 import Link from 'next/link';
 import ReservationFormWrapper from '@/app/[locale]/rutas-magicas/components/ReservationFormWrapper';
+import type { BookingOptionConfig as BookingOption } from '@/app/lib/tour-booking-options';
 import type { Database } from '@/types/database.types';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
@@ -107,6 +108,12 @@ export default async function TourDetailPage({
   const localizedSummary = tTours.has(`${tourKey}.summary`) ? tTours(`${tourKey}.summary`) : description;
   const localizedDescription = tTours.has(`${tourKey}.description`) ? tTours(`${tourKey}.description`) : fullDescription;
   const localizedMeetingPoint = tTours.has(`${tourKey}.meetingPoint`) ? tTours(`${tourKey}.meetingPoint`) : meetingPoint;
+  const localizedDurationLabel = tTours.has(`${tourKey}.durationLabel`)
+    ? tTours(`${tourKey}.durationLabel`)
+    : t('durationHours', { hours: durationHours });
+  const localizedGroupLabel = tTours.has(`${tourKey}.groupLabel`)
+    ? tTours(`${tourKey}.groupLabel`)
+    : t('groupRange', { min: minGuests, max: maxGuests });
   const readRaw = <T,>(key: string, fallback: T) => {
     try {
       return tTours.raw(key) as T;
@@ -119,6 +126,7 @@ export default async function TourDetailPage({
   const localizedItinerary = readRaw<ItineraryItem[]>(`${tourKey}.itinerary`, itinerary);
   const localizedWhatToBring = readRaw<string[]>(`${tourKey}.whatToBring`, whatToBring);
   const localizedFaqs = readRaw<FaqItem[]>(`${tourKey}.faqs`, faqs);
+  const bookingOptions = readRaw<BookingOption[]>(`${tourKey}.bookingOptions`, []);
 
   // Obtener otros tours del mismo pueblo para recomendaciones
   // const otherTours = getToursByPueblo(pueblo).filter(t => t.slug !== tourSlug);
@@ -162,14 +170,14 @@ export default async function TourDetailPage({
               <Clock className="mr-3 mt-0.5 h-5 w-5 flex-shrink-0 text-cyan-500" />
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('durationLabel')}</p>
-                <p className="mt-1 text-sm text-gray-900 dark:text-white">{t('durationHours', { hours: durationHours })}</p>
+                <p className="mt-1 text-sm text-gray-900 dark:text-white">{localizedDurationLabel}</p>
               </div>
             </div>
             <div className="flex items-start rounded-xl border border-gray-100 bg-gray-50/80 p-3 dark:border-gray-700 dark:bg-gray-900/40">
               <Users className="mr-3 mt-0.5 h-5 w-5 flex-shrink-0 text-cyan-500" />
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('groupSizeLabel')}</p>
-                <p className="mt-1 text-sm text-gray-900 dark:text-white">{t('groupRange', { min: minGuests, max: maxGuests })}</p>
+                <p className="mt-1 text-sm text-gray-900 dark:text-white">{localizedGroupLabel}</p>
               </div>
             </div>
             <div className="flex items-start rounded-xl border border-gray-100 bg-gray-50/80 p-3 dark:border-gray-700 dark:bg-gray-900/40 sm:col-span-2 lg:col-span-1">
@@ -269,37 +277,8 @@ export default async function TourDetailPage({
                 availableDays={safeAvailableDays}
                 startTimes={safeStartTimes}
                 pickupTime={pickupTime}
+                bookingOptions={bookingOptions}
               />
-            </div>
-
-            {/* Información adicional */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">{t('importantInfoTitle')}</h3>
-              <ul className="space-y-3">
-                <li className="flex items-start">
-                  <MapPin className="w-5 h-5 text-cyan-500 mt-0.5 mr-2 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-sm text-gray-900 dark:text-white">{t('meetingPointLabel')}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{localizedMeetingPoint}</p>
-                  </div>
-                </li>
-                <li className="flex items-start">
-                  <Clock className="w-5 h-5 text-cyan-500 mt-0.5 mr-2 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-sm text-gray-900 dark:text-white">{t('durationLabel')}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('durationHours', { hours: durationHours })}</p>
-                  </div>
-                </li>
-                <li className="flex items-start">
-                  <Users className="w-5 h-5 text-cyan-500 mt-0.5 mr-2 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-sm text-gray-900 dark:text-white">{t('groupSizeLabel')}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {t('groupRange', { min: minGuests, max: maxGuests })}
-                    </p>
-                  </div>
-                </li>
-              </ul>
             </div>
 
             {/* Qué llevar */}

@@ -7,6 +7,11 @@ import { motion } from 'framer-motion';
 import { trackEvent } from '../../../lib/analytics';
 import { useTranslations, useLocale } from 'next-intl';
 import { formatTourTimeDisplay } from '@/app/lib/tours';
+import {
+  calculateBookingTotal,
+  resolveBookingOptionConfig,
+} from '@/app/lib/tour-booking-options';
+import type { BookingOptionConfig as BookingOption } from '@/app/lib/tour-booking-options';
 
 type ReservationFormProps = {
   tourId: string;
@@ -18,143 +23,7 @@ type ReservationFormProps = {
   availableDays: string[];
   startTimes?: string[];
   pickupTime?: string;
-};
-
-const normalizeDayName = (value: string) =>
-  value
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-
-const dayNameToIndex: Record<string, number> = {
-  sunday: 0,
-  monday: 1,
-  tuesday: 2,
-  wednesday: 3,
-  thursday: 4,
-  friday: 5,
-  saturday: 6,
-  domingo: 0,
-  lunes: 1,
-  martes: 2,
-  miercoles: 3,
-  jueves: 4,
-  viernes: 5,
-  sabado: 6,
-};
-
-const toDateKey = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-const parseLocalDate = (value: string) => {
-  const trimmed = value.trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    return new Date(`${trimmed}T00:00:00`);
-  }
-  return new Date(trimmed);
-};
-
-const buildAvailableDates = (availableDays: string[]) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const weekdayIndexes: number[] = [];
-  const dateKeys: string[] = [];
-  const dateSet = new Set<string>();
-  const everyDayTokens = new Set([
-    'todos los dias',
-    'every day',
-    'everyday',
-    'daily',
-    'all days'
-  ]);
-  let hasEveryDay = false;
-
-  availableDays.forEach((value) => {
-    const parsedDate = parseLocalDate(value);
-    if (!Number.isNaN(parsedDate.getTime())) {
-      parsedDate.setHours(0, 0, 0, 0);
-      if (parsedDate <= today) {
-        return;
-      }
-      const key = toDateKey(parsedDate);
-      if (!dateSet.has(key)) {
-        dateSet.add(key);
-        dateKeys.push(key);
-      }
-      return;
-    }
-
-    const normalized = normalizeDayName(value);
-    if (everyDayTokens.has(normalized)) {
-      hasEveryDay = true;
-      return;
-    }
-    const mappedIndex = dayNameToIndex[normalized];
-    if (mappedIndex !== undefined) {
-      if (!weekdayIndexes.includes(mappedIndex)) {
-        weekdayIndexes.push(mappedIndex);
-      }
-      return;
-    }
-
-    const numericIndex = Number.parseInt(normalized, 10);
-    if (!Number.isNaN(numericIndex)) {
-      const normalizedIndex = numericIndex >= 0 && numericIndex <= 6
-        ? numericIndex
-        : numericIndex >= 1 && numericIndex <= 7
-          ? numericIndex % 7
-          : null;
-      if (normalizedIndex !== null && !weekdayIndexes.includes(normalizedIndex)) {
-        weekdayIndexes.push(normalizedIndex);
-      }
-    }
-  });
-
-  if (hasEveryDay) {
-    for (let offset = 1; offset < 29; offset += 1) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + offset);
-      const key = toDateKey(date);
-      if (!dateSet.has(key)) {
-        dateSet.add(key);
-        dateKeys.push(key);
-      }
-    }
-  }
-
-  if (weekdayIndexes.length > 0) {
-    for (let offset = 1; offset < 29; offset += 1) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + offset);
-      if (weekdayIndexes.includes(date.getDay())) {
-        const key = toDateKey(date);
-        if (!dateSet.has(key)) {
-          dateSet.add(key);
-          dateKeys.push(key);
-        }
-      }
-    }
-  }
-
-  if (dateKeys.length === 0) {
-    for (let offset = 1; offset < 29; offset += 1) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + offset);
-      const key = toDateKey(date);
-      if (!dateSet.has(key)) {
-        dateSet.add(key);
-        dateKeys.push(key);
-      }
-    }
-  }
-
-  return dateKeys.sort();
+  bookingOptions?: BookingOption[];
 };
 
 export default function ReservationForm({
@@ -166,40 +35,58 @@ export default function ReservationForm({
   availableDays,
   startTimes = [],
   pickupTime,
+  bookingOptions = [],
 }: ReservationFormProps) {
   const router = useRouter();
   const t = useTranslations('Reservation');
   const locale = useLocale();
   const dateLocale = locale === 'es' ? 'es-GT' : 'en-US';
-  const normalizedAvailableDays = useMemo(
-    () => buildAvailableDates(availableDays),
-    [availableDays]
+  const normalizedBookingOptions = useMemo(
+    () => bookingOptions.filter((option) => option && option.id && option.name),
+    [bookingOptions]
   );
-  const normalizedAvailableDaysKey = useMemo(
-    () => normalizedAvailableDays.join('|'),
-    [normalizedAvailableDays]
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(normalizedBookingOptions[0]?.id ?? null);
+  const selectedOption = useMemo(
+    () => normalizedBookingOptions.find((option) => option.id === selectedOptionId) ?? normalizedBookingOptions[0] ?? null,
+    [normalizedBookingOptions, selectedOptionId]
   );
-  const normalizedStartTimes = useMemo(
-    () => startTimes.map((value) => value.trim()).filter(Boolean),
-    [startTimes]
+  const optionConfig = useMemo(
+    () => resolveBookingOptionConfig({
+      option: selectedOption,
+      availableDays,
+      startTimes,
+      pickupTime,
+      minCapacity,
+      maxCapacity,
+    }),
+    [selectedOption, availableDays, startTimes, pickupTime, minCapacity, maxCapacity]
   );
-  const normalizedPickupTime = pickupTime?.trim() ?? '';
-  const pickupTimeLabel = formatTourTimeDisplay(normalizedPickupTime);
-  const normalizedStartTimesKey = useMemo(
-    () => normalizedStartTimes.join('|'),
-    [normalizedStartTimes]
+  const selectedAvailabilityMode = optionConfig.availabilityMode;
+  const activeAvailableDays = optionConfig.availableDates;
+  const activeAvailableDaysKey = useMemo(
+    () => activeAvailableDays.join('|'),
+    [activeAvailableDays]
   );
-  const hasStartTimes = normalizedStartTimes.length > 0;
-  const hasPickupWindow = Boolean(normalizedPickupTime);
-  const minGuests = Math.max(1, minCapacity);
+  const activeStartTimes = optionConfig.startTimes;
+  const activeStartTimesKey = useMemo(
+    () => activeStartTimes.join('|'),
+    [activeStartTimes]
+  );
+  const activePickupTime = optionConfig.pickupTime;
+  const pickupTimeLabel = formatTourTimeDisplay(activePickupTime);
+  const hasStartTimes = activeStartTimes.length > 0;
+  const hasPickupWindow = Boolean(activePickupTime);
+  const effectiveMinGuests = optionConfig.minGuests;
+  const effectiveMaxGuests = optionConfig.maxGuests;
+  const minGuests = effectiveMinGuests;
   const guestOptions = useMemo(() => {
-    const maxGuests = Math.max(minGuests, maxCapacity);
+    const maxGuests = Math.max(minGuests, effectiveMaxGuests);
     return Array.from({ length: maxGuests - minGuests + 1 }, (_, index) => minGuests + index);
-  }, [maxCapacity, minGuests]);
+  }, [effectiveMaxGuests, minGuests]);
 
   // Estados del formulario
-  const [date, setDate] = useState(normalizedAvailableDays[0] || '');
-  const [selectedTime, setSelectedTime] = useState(normalizedPickupTime || normalizedStartTimes[0] || '');
+  const [date, setDate] = useState(activeAvailableDays[0] || '');
+  const [selectedTime, setSelectedTime] = useState(activePickupTime || activeStartTimes[0] || '');
   const [guests, setGuests] = useState(minGuests);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -221,19 +108,6 @@ export default function ReservationForm({
 
   // Efecto para reiniciar el estado cuando cambia el tour
   useEffect(() => {
-    const nextDate = normalizedAvailableDays[0] || '';
-    if (nextDate !== date) {
-      setDate(nextDate);
-    }
-    const nextTime = normalizedPickupTime || normalizedStartTimes[0] || '';
-    if (nextTime !== selectedTime) {
-      setSelectedTime(nextTime);
-    }
-    setGuests((currentGuests) => {
-      if (currentGuests < minGuests) return minGuests;
-      if (currentGuests > maxCapacity) return Math.max(minGuests, maxCapacity);
-      return currentGuests;
-    });
     setError('');
     setFormData({
       name: '',
@@ -252,7 +126,59 @@ export default function ReservationForm({
       tour_id: tourId,
       price: price
     });
-  }, [tourId, normalizedAvailableDaysKey, normalizedStartTimesKey, normalizedPickupTime, price, minGuests, maxCapacity]);
+  }, [tourId, price]);
+
+  useEffect(() => {
+    const nextDate = activeAvailableDays[0] || '';
+    if (!date || !activeAvailableDays.includes(date)) {
+      setDate(nextDate);
+    }
+
+    const nextTime = activePickupTime || activeStartTimes[0] || '';
+    if (hasPickupWindow) {
+      if (selectedTime !== nextTime) {
+        setSelectedTime(nextTime);
+      }
+      return;
+    }
+
+    if (hasStartTimes) {
+      if (!selectedTime || !activeStartTimes.includes(selectedTime)) {
+        setSelectedTime(nextTime);
+      }
+      return;
+    }
+
+    if (selectedTime) {
+      setSelectedTime('');
+    }
+  }, [
+    activeAvailableDays,
+    activeAvailableDaysKey,
+    activeStartTimes,
+    activeStartTimesKey,
+    activePickupTime,
+    hasPickupWindow,
+    hasStartTimes,
+    date,
+    selectedTime,
+  ]);
+
+  useEffect(() => {
+    setSelectedOptionId((current) => {
+      if (!normalizedBookingOptions.length) {
+        return null;
+      }
+      if (current && normalizedBookingOptions.some((option) => option.id === current)) {
+        return current;
+      }
+      return normalizedBookingOptions[0].id;
+    });
+  }, [normalizedBookingOptions]);
+
+  useEffect(() => {
+    setGuests(minGuests);
+  }, [selectedOptionId, minGuests]);
 
   // Track when user starts filling the form
   useEffect(() => {
@@ -291,14 +217,14 @@ export default function ReservationForm({
     if (hasStartTimes && !hasPickupWindow && !selectedTime) {
       errors.push(t('errors.requiredTime'));
     }
-    if (maxCapacity < 1) {
-      errors.push(t('errors.maxCapacity', { max: maxCapacity }));
+    if (effectiveMaxGuests < 1) {
+      errors.push(t('errors.maxCapacity', { max: effectiveMaxGuests }));
     }
     if (guests < minGuests) {
       errors.push(t('errors.minCapacity', { min: minGuests }));
     }
-    if (guests > maxCapacity) {
-      errors.push(t('errors.maxCapacity', { max: maxCapacity }));
+    if (guests > effectiveMaxGuests) {
+      errors.push(t('errors.maxCapacity', { max: effectiveMaxGuests }));
     }
 
     return errors;
@@ -329,8 +255,18 @@ export default function ReservationForm({
 
   // Calcular el total
   const calculateTotal = () => {
-    return price * guests;
+    return calculateBookingTotal(selectedOption?.price ?? price, guests, selectedOption?.pricingMode);
   };
+
+  const reservationNotes = useMemo(() => {
+    const notes = formData.specialRequests.trim();
+    if (!selectedOption) {
+      return notes;
+    }
+
+    const optionLine = `${t('selectedOptionNotePrefix')}: ${selectedOption.name}`;
+    return notes ? `${optionLine}\n${notes}` : optionLine;
+  }, [formData.specialRequests, selectedOption, t]);
 
   // Manejar el envío del formulario
   const handleSubmit = async (e: FormEvent) => {
@@ -365,7 +301,8 @@ export default function ReservationForm({
       trackEvent('submit_reservation', {
         tour_id: tourId,
         total: calculateTotal(),
-        date: date
+        date: date,
+        booking_option: selectedOption?.id ?? null
       });
 
       // Llamada real a la API
@@ -379,14 +316,14 @@ export default function ReservationForm({
           tourId,
           tourName,
           date,
-          time: (normalizedPickupTime || selectedTime) || undefined,
+          time: (activePickupTime || selectedTime) || undefined,
           guests,
           type: 'tour',
           totalPrice: calculateTotal(),
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
-          notes: formData.specialRequests
+          notes: reservationNotes
         }),
       });
 
@@ -417,11 +354,12 @@ export default function ReservationForm({
       const searchParams = new URLSearchParams({
         tourId,
         date,
-        ...((normalizedPickupTime || selectedTime) ? { time: (normalizedPickupTime || selectedTime) } : {}),
+        ...((activePickupTime || selectedTime) ? { time: (activePickupTime || selectedTime) } : {}),
         adults: guests.toString(),
         total: calculateTotal().toString(),
         emailSent: emailStatus,
-        name: encodeURIComponent(formData.name)
+        name: encodeURIComponent(formData.name),
+        ...(selectedOption?.name ? { option: selectedOption.name } : {})
       });
 
       setSuccess(true);
@@ -429,7 +367,8 @@ export default function ReservationForm({
       // Track successful reservation
       trackEvent('complete_reservation', {
         tour_id: tourId,
-        total: calculateTotal()
+        total: calculateTotal(),
+        booking_option: selectedOption?.id ?? null
       });
 
       // Redirigir después de un breve retraso para mostrar el mensaje de éxito
@@ -490,27 +429,90 @@ export default function ReservationForm({
         <p className="text-gray-500 dark:text-gray-400">{t('headerDesc')}</p>
       </div>
 
-      {/* Precio */}
-      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-gray-800 dark:to-gray-800 p-5 rounded-xl border border-cyan-100 dark:border-gray-700">
-        <div className="flex justify-between items-center">
+      {normalizedBookingOptions.length > 0 && (
+        <div className="space-y-4 border-b border-gray-200 pb-5 dark:border-gray-700">
           <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('priceAdult')}</p>
-            <div className="flex items-baseline mt-1">
-              <span className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">Q{price.toLocaleString()}</span>
-              <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">{t('perPerson')}</span>
+            <h4 className="text-base font-semibold text-gray-900 dark:text-white">{t('rideOptionTitle')}</h4>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('rideOptionHelp')}</p>
+          </div>
+
+          <div className="grid gap-2">
+            {normalizedBookingOptions.map((option) => {
+              const optionMinGuests = Math.max(1, option.minGuests ?? 1);
+              const isSelected = option.id === selectedOption?.id;
+
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setSelectedOptionId(option.id)}
+                  className={`rounded-xl border px-4 py-3 text-left transition-all ${
+                    isSelected
+                      ? 'border-cyan-500 bg-cyan-50 shadow-sm dark:border-cyan-400 dark:bg-cyan-950/30'
+                      : 'border-gray-200 bg-white hover:border-cyan-300 dark:border-gray-700 dark:bg-gray-900/40'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{option.name}</p>
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        {optionMinGuests > 1 ? t('minimumGuestsOption', { min: optionMinGuests }) : t('soloFriendlyShort')}
+                        {' · '}
+                        {option.availabilityMode === 'request_based' ? t('requestBasedAvailabilityShort') : t('fixedAvailabilityShort')}
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="text-base font-bold text-cyan-600 dark:text-cyan-400">Q{option.price.toLocaleString()}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                        {option.pricingMode === 'per_group' ? t('perGroup') : t('perPerson')}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedOption && (
+            <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-4 dark:border-gray-700 dark:bg-gray-900/30">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{selectedOption.name}</p>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    {selectedOption.description || selectedOption.durationLabel || t('optionFlexibleFallback')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div>
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('durationLabel')}</p>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                    {selectedOption.durationLabel ?? t('optionFlexibleFallback')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('availabilityLabel')}</p>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                    {selectedOption.availabilityMode === 'request_based' ? t('requestBasedAvailabilityShort') : t('fixedAvailabilityShort')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('groupSizeLabel')}</p>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                    {Math.max(1, selectedOption.minGuests ?? 1) > 1
+                      ? t('minimumGuestsOption', { min: Math.max(1, selectedOption.minGuests ?? 1) })
+                      : t('soloFriendlyShort')}
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
-        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('totalEstimated')}</span>
-            <span className="text-lg font-bold text-gray-900 dark:text-white">Q{calculateTotal().toLocaleString()}</span>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Fecha y Hora */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Fecha */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 flex items-center">
@@ -524,7 +526,7 @@ export default function ReservationForm({
               className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-3.5 text-sm appearance-none pr-10 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
               disabled={isLoading}
             >
-              {normalizedAvailableDays.map((day, index) => {
+              {activeAvailableDays.map((day, index) => {
                 const dateObj = new Date(`${day}T00:00:00`);
 
                 return (
@@ -544,7 +546,7 @@ export default function ReservationForm({
             </div>
           </div>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {t('dateHelp')}
+            {selectedAvailabilityMode === 'request_based' ? t('dateHelpFlexible') : t('dateHelp')}
           </p>
         </div>
 
@@ -566,7 +568,7 @@ export default function ReservationForm({
                 className="w-full bg-transparent text-sm focus:outline-none"
                 disabled={isLoading}
               >
-                {normalizedStartTimes.map((timeOption) => (
+                {activeStartTimes.map((timeOption) => (
                   <option key={timeOption} value={timeOption}>
                     {timeOption}
                   </option>
@@ -577,13 +579,13 @@ export default function ReservationForm({
             )}
           </div>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {hasPickupWindow ? t('pickupWindowHelp') : hasStartTimes ? t('timeHelp') : t('timeToConfirm')}
+            {hasPickupWindow ? t('pickupWindowHelp') : hasStartTimes ? t('timeHelpSelectable') : t('timeHelpFlexible')}
           </p>
         </div>
       </div>
 
       {/* Participantes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 flex items-center">
             <User className="w-4 h-4 mr-2 text-cyan-600" />
@@ -602,14 +604,14 @@ export default function ReservationForm({
             ))}
           </select>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {t('guestRangeHelp', { min: minGuests, max: maxCapacity })}
+            {t('guestRangeHelp', { min: minGuests, max: effectiveMaxGuests })}
           </p>
         </div>
       </div>
 
       {/* Información del Contacto */}
-      <div className="pt-2">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+      <div className="border-t border-gray-200 pt-5 dark:border-gray-700">
+        <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-900 dark:text-white">
           <Info className="w-5 h-5 mr-2 text-cyan-600" />
           {t('contactTitle')}
         </h3>
@@ -726,12 +728,19 @@ export default function ReservationForm({
       </div>
 
       {/* Resumen del precio */}
-      <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-        <div className="flex justify-between mb-2">
-          <span className="text-gray-600 dark:text-gray-300">
-            {guests} {guests === 1 ? t('adultsSingular') : t('adultsPlural')}
-          </span>
-          <span className="font-medium">Q{calculateTotal().toLocaleString()}</span>
+      <div className="rounded-xl border border-gray-200 bg-gray-50/60 p-4 dark:border-gray-700 dark:bg-gray-900/30">
+        <div className="mb-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            {selectedOption?.name ?? t('summaryTotal')}
+          </p>
+          <div className="mt-2 flex justify-between">
+            <span className="text-gray-600 dark:text-gray-300">
+            {selectedOption?.pricingMode === 'per_group'
+              ? selectedOption.name
+              : `${guests} ${guests === 1 ? t('adultsSingular') : t('adultsPlural')}`}
+            </span>
+            <span className="font-medium">Q{calculateTotal().toLocaleString()}</span>
+          </div>
         </div>
 
         <div className="border-t border-gray-200 dark:border-gray-700 mt-3 pt-3">
@@ -739,14 +748,6 @@ export default function ReservationForm({
             <span>{t('summaryTotal')}</span>
             <span>Q{calculateTotal().toLocaleString()}</span>
           </div>
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            {t('capacityRemaining', { rem: Math.max(0, maxCapacity - guests) })}
-          </p>
-          {maxCapacity - guests > 0 && maxCapacity - guests <= 3 && (
-            <p className="mt-1 text-xs text-amber-600 dark:text-amber-300">
-              {t('lowCapacityWarning', { rem: Math.max(0, maxCapacity - guests) })}
-            </p>
-          )}
         </div>
       </div>
 

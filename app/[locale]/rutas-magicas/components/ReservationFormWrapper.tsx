@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
+import type { BookingOptionConfig as BookingOption } from '@/app/lib/tour-booking-options';
 // Cargar el componente de forma dinámica con SSR deshabilitado
 function ReservationFormLoading() {
   const t = useTranslations('Reservation');
@@ -30,6 +31,7 @@ interface ReservationFormWrapperProps {
   availableDays: string[];
   startTimes?: string[];
   pickupTime?: string;
+  bookingOptions?: BookingOption[];
 }
 
 export default function ReservationFormWrapper({
@@ -41,6 +43,7 @@ export default function ReservationFormWrapper({
   availableDays,
   startTimes = [],
   pickupTime,
+  bookingOptions = [],
 }: ReservationFormWrapperProps) {
   const t = useTranslations('Reservation');
   // Asegurarse de que availableDays y startTimes sean arrays
@@ -66,6 +69,7 @@ export default function ReservationFormWrapper({
         availableDays={defaultAvailableDays}
         startTimes={safeStartTimes}
         pickupTime={pickupTime}
+        bookingOptions={bookingOptions}
       />
     </div>
   );
