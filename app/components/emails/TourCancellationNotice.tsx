@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Body, Container, Head, Heading, Html, Preview, Section, Text } from '@react-email/components';
 
 interface TourCancellationNoticeProps {
+    serviceKind?: 'tour' | 'guide';
     reservationId: string;
     tourName: string;
     tourDate: string;
@@ -29,6 +30,7 @@ function formatDate(dateString: string) {
 }
 
 export default function TourCancellationNotice({
+    serviceKind = 'tour',
     reservationId,
     tourName,
     tourDate,
@@ -38,6 +40,9 @@ export default function TourCancellationNotice({
     guests,
     cancellationReason,
 }: TourCancellationNoticeProps) {
+    const serviceLabel = serviceKind === 'guide' ? 'Servicio de guía' : 'Tour';
+    const serviceLabelUpper = serviceKind === 'guide' ? 'SERVICIO' : 'TOUR';
+
     return (
         <Html>
             <Head />
@@ -52,17 +57,20 @@ export default function TourCancellationNotice({
                             Reserva cancelada
                         </Heading>
                         <Text style={{ color: '#ffe4e6', fontSize: '15px', lineHeight: '1.7', margin: '12px 0 0' }}>
-                            Esta solicitud ya no requiere gestión operativa por parte de la agencia.
+                            Esta solicitud ya no requiere gestión operativa por parte del proveedor.
                         </Text>
                     </Section>
 
                     <Section style={{ padding: '28px 36px 36px' }}>
                         <Text style={{ color: '#0f172a', fontSize: '16px', fontWeight: 700, margin: '0 0 14px' }}>
-                            {tourName}
+                            {serviceLabel}: {tourName}
                         </Text>
 
                         <Text style={{ color: '#475569', fontSize: '14px', lineHeight: '1.7', margin: '0 0 10px' }}>
                             <strong>ID:</strong> {reservationId}
+                        </Text>
+                        <Text style={{ color: '#475569', fontSize: '14px', lineHeight: '1.7', margin: '0 0 10px' }}>
+                            <strong>{serviceLabelUpper}:</strong> {tourName}
                         </Text>
                         <Text style={{ color: '#475569', fontSize: '14px', lineHeight: '1.7', margin: '0 0 10px' }}>
                             <strong>Fecha:</strong> {formatDate(tourDate)}

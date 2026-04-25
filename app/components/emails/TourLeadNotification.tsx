@@ -18,6 +18,7 @@ interface TourLeadNotificationProps {
     customerWhatsapp?: string | null;
     tourName: string;
     tourDate: string;
+    serviceKind?: 'tour' | 'guide';
     requestedTime?: string | null;
     guests?: number;
     totalPrice?: number | null;
@@ -53,6 +54,7 @@ export const TourLeadNotification = ({
     customerWhatsapp,
     tourName,
     tourDate,
+    serviceKind = 'tour',
     requestedTime,
     guests,
     totalPrice,
@@ -67,17 +69,20 @@ export const TourLeadNotification = ({
 }: TourLeadNotificationProps) => {
     const normalizedOperationsEmail = (operationsEmail || 'hola@nomadafantasma.com').trim();
     const normalizedWhatsapp = customerWhatsapp?.replace(/[^0-9]/g, '') || '';
+    const kindLabel = serviceKind === 'guide' ? 'guia' : 'tour';
+    const kindLabelCapitalized = serviceKind === 'guide' ? 'guia' : 'tour';
+    const headingTitle = serviceKind === 'guide' ? 'Nueva solicitud de guia' : 'Nueva solicitud de tour';
+    const tableKindLabel = serviceKind === 'guide' ? 'GUIA' : 'TOUR';
 
-    const replySubject = `Disponibilidad tour ${reservationId} · ${tourName}`;
-    const confirmSubject = `Disponible tour ${reservationId} · ${tourName}`;
-    const denySubject = `No disponible tour ${reservationId} · ${tourName}`;
+    const confirmSubject = `Disponible ${kindLabel} ${reservationId} · ${tourName}`;
+    const denySubject = `No disponible ${kindLabel} ${reservationId} · ${tourName}`;
 
     const confirmBody = [
         'Hola equipo de operaciones,',
         '',
-        'Confirmamos disponibilidad para esta reserva de tour.',
+        `Confirmamos disponibilidad para esta reserva de ${kindLabel}.`,
         '',
-        `Tour: ${tourName}`,
+        `${kindLabelCapitalized.charAt(0).toUpperCase() + kindLabelCapitalized.slice(1)}: ${tourName}`,
         `Fecha: ${formatDate(tourDate)}`,
         requestedTime ? `Hora: ${requestedTime}` : null,
         guests ? `Viajeros: ${guests}` : null,
@@ -91,9 +96,9 @@ export const TourLeadNotification = ({
     const denyBody = [
         'Hola equipo de operaciones,',
         '',
-        'No tenemos disponibilidad para este tour en la fecha solicitada.',
+        `No tenemos disponibilidad para este ${kindLabel} en la fecha solicitada.`,
         '',
-        `Tour: ${tourName}`,
+        `${kindLabelCapitalized.charAt(0).toUpperCase() + kindLabelCapitalized.slice(1)}: ${tourName}`,
         `Fecha: ${formatDate(tourDate)}`,
         requestedTime ? `Hora: ${requestedTime}` : null,
         '',
@@ -108,7 +113,6 @@ export const TourLeadNotification = ({
 
     const confirmMailto = `mailto:${normalizedOperationsEmail}?subject=${encodeURIComponent(confirmSubject)}&body=${encodeURIComponent(confirmBody)}`;
     const denyMailto = `mailto:${normalizedOperationsEmail}?subject=${encodeURIComponent(denySubject)}&body=${encodeURIComponent(denyBody)}`;
-    const manualMailto = `mailto:${normalizedOperationsEmail}?subject=${encodeURIComponent(replySubject)}`;
 
     return (
         <Html>
@@ -134,7 +138,7 @@ export const TourLeadNotification = ({
                             {roleLabel || 'Lead de Operaciones'}
                         </Text>
                         <Heading style={{ color: '#ffffff', fontSize: '30px', lineHeight: '1.15', fontWeight: 700, margin: 0 }}>
-                            Nueva solicitud de tour
+                            {headingTitle}
                         </Heading>
                         <Text style={{ color: '#fee2e2', fontSize: '15px', lineHeight: '1.7', margin: '14px 0 0' }}>
                             {tourName}
@@ -192,7 +196,7 @@ export const TourLeadNotification = ({
                             <table width="100%" cellPadding="0" cellSpacing="0" role="presentation">
                                 <tbody>
                                     <tr>
-                                        <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>TOUR</td>
+                                        <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>{tableKindLabel}</td>
                                         <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>{tourName}</td>
                                     </tr>
                                     <tr>

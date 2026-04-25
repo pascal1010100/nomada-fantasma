@@ -11,12 +11,11 @@ import TourLeadNotification from '../components/emails/TourLeadNotification';
 import TourCancellationNotice from '../components/emails/TourCancellationNotice';
 import TourProviderConfirmationEmail from '../components/emails/TourProviderConfirmationEmail';
 import logger from './logger';
-import { CONTACT_INFO } from './constants';
 
 // Initialize Resend only if API key is present
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
-const RESEND_FROM = process.env.RESEND_FROM || 'onboarding@resend.dev';
+const RESEND_FROM = process.env.RESEND_FROM || process.env.FROM_EMAIL || 'onboarding@resend.dev';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nomadafantasma.com';
 const EMAIL_SEND_SPACING_MS = 650;
 const EMAIL_RATE_LIMIT_RETRY_MS = 1200;
@@ -50,6 +49,7 @@ function redactForLog(value: unknown): unknown {
 }
 
 interface SendConfirmationEmailProps {
+    requestKind?: 'tour' | 'guide';
     to: string;
     agencyEmail?: string | null;
     reservationId: string;
@@ -248,11 +248,13 @@ type BuildCustomerActionEmailInput = {
     template: ManualCustomerEmailTemplate;
     locale: string;
     customerName: string;
-    kind: 'tour' | 'shuttle';
+    kind: 'tour' | 'guide' | 'shuttle';
     serviceName: string;
     date: string;
     travelers?: number;
     price?: number;
+    priceText?: string;
+    priceLabelOverride?: string;
     requestId: string;
     paymentOptions?: PaymentOption[];
     pickupTime?: string;
@@ -281,8 +283,8 @@ function formatEmailDate(value: string, locale: string) {
 export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): CustomerActionEmailContent {
     const isEnglish = data.locale.startsWith('en');
     const serviceKindLabel = isEnglish
-        ? data.kind === 'tour' ? 'Tour' : 'Shuttle'
-        : data.kind === 'tour' ? 'Tour' : 'Shuttle';
+        ? data.kind === 'tour' ? 'Tour' : data.kind === 'guide' ? 'Guide' : 'Shuttle'
+        : data.kind === 'tour' ? 'Tour' : data.kind === 'guide' ? 'Guia' : 'Shuttle';
     const formattedDate = formatEmailDate(data.date, data.locale);
     const travelerValue =
         typeof data.travelers === 'number'
@@ -297,10 +299,16 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
     const serviceLabel = isEnglish ? serviceKindLabel : serviceKindLabel;
     const dateLabel = isEnglish ? 'Date' : 'Fecha';
     const travelersLabel = isEnglish ? 'Travelers' : 'Viajeros';
-    const priceLabel = isEnglish
-        ? data.kind === 'tour' ? 'Total' : 'Quoted price'
-        : data.kind === 'tour' ? 'Total' : 'Precio cotizado';
-    const priceValue = typeof data.price === 'number' ? `Q${data.price.toFixed(2)}` : undefined;
+    const defaultPriceLabel = isEnglish
+        ? data.kind === 'shuttle' ? 'Quoted price' : 'Total'
+        : data.kind === 'shuttle' ? 'Precio cotizado' : 'Total';
+    const priceLabel = data.priceLabelOverride ?? defaultPriceLabel;
+    const priceValue =
+        typeof data.priceText === 'string' && data.priceText.trim()
+            ? data.priceText.trim()
+            : typeof data.price === 'number'
+                ? `Q${data.price.toFixed(2)}`
+                : undefined;
     const contactTitle = isEnglish ? 'Need help?' : '¿Necesitas ayuda?';
     const contactLine = isEnglish
         ? 'If you have questions, reply to this email or contact our team directly.'
@@ -459,7 +467,7 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
         const timeLabel = isEnglish ? 'Time' : 'Hora';
         const locLabel = isEnglish ? 'Pickup' : 'Recogida';
         eliteInfoBody = `${infoBody}\n\n• ${timeLabel}: ${data.travelTime || '-'}\n• ${locLabel}: ${data.pickupLocation || '-'}`;
-    } else if (data.kind === 'tour' && (data.pickupTime || data.meetingPoint)) {
+    } else if ((data.kind === 'tour' || data.kind === 'guide') && (data.pickupTime || data.meetingPoint)) {
         const timeLabel = isEnglish ? 'Pickup Time' : 'Hora de recogida';
         const meetLabel = isEnglish ? 'Meeting Point' : 'Punto de encuentro';
         eliteInfoBody = `${infoBody}\n\n• ${timeLabel}: ${data.pickupTime || '-'}\n• ${meetLabel}: ${data.meetingPoint || '-'}`;
@@ -501,6 +509,7 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
 }
 
 type TourCancellationAgencyEmailProps = {
+    serviceKind?: 'tour' | 'guide';
     to: string;
     reservationId: string;
     tourName: string;
@@ -528,6 +537,7 @@ type ShuttleCancellationAgencyEmailProps = {
 };
 
 type TourProviderConfirmationEmailProps = {
+    serviceKind?: 'tour' | 'guide';
     to: string;
     reservationId: string;
     tourName: string;
@@ -542,20 +552,24 @@ type TourProviderConfirmationEmailProps = {
 };
 
 export async function sendTourCancellationAgencyEmail(data: TourCancellationAgencyEmailProps): Promise<SendEmailResult> {
+    const serviceKind = data.serviceKind ?? 'tour';
+    const subjectPrefix = serviceKind === 'guide' ? 'Servicio de guia cancelado' : 'Tour cancelado';
+    const retryLabel = serviceKind === 'guide' ? 'guide_provider_cancellation' : 'tour_agency_cancellation';
+
     if (!resend) {
         logger.info('📧 [TOUR CANCELLATION AGENCY EMAIL SIMULATION] --------------------');
         logger.info(`To: ${data.to}`);
-        logger.info(`Subject: Tour cancelado: ${data.tourName}`);
+        logger.info(`Subject: ${subjectPrefix}: ${data.tourName}`);
         logger.info('----------------------------------------------------------------');
         return { success: true, id: 'simulated_' + Date.now() };
     }
 
     try {
-        return await sendEmailWithRetry('tour_agency_cancellation', () =>
+        return await sendEmailWithRetry(retryLabel, () =>
             resend.emails.send({
                 from: RESEND_FROM,
                 to: [data.to],
-                subject: `Tour cancelado: ${data.tourName}`,
+                subject: `${subjectPrefix}: ${data.tourName}`,
                 react: TourCancellationNotice(data),
             })
         );
@@ -566,21 +580,25 @@ export async function sendTourCancellationAgencyEmail(data: TourCancellationAgen
 }
 
 export async function sendTourProviderConfirmationEmail(data: TourProviderConfirmationEmailProps): Promise<SendEmailResult> {
+    const serviceKind = data.serviceKind ?? 'tour';
+    const subjectPrefix = serviceKind === 'guide' ? 'Servicio de guia confirmado para operar' : 'Tour confirmado para operar';
+    const retryLabel = serviceKind === 'guide' ? 'guide_provider_booking_confirmed' : 'tour_agency_booking_confirmed';
+
     if (!resend) {
         logger.info('📧 [TOUR PROVIDER CONFIRMATION SIMULATION] ---------------------------');
         logger.info(`To Agency: ${data.to}`);
-        logger.info(`Subject: Tour confirmado para operar: ${data.tourName}`);
+        logger.info(`Subject: ${subjectPrefix}: ${data.tourName}`);
         logger.info('Agency Template Data:', JSON.stringify(redactForLog(data), null, 2));
         logger.info('-------------------------------------------------------------------');
         return { success: true, id: 'simulated_' + Date.now() };
     }
 
     try {
-        return await sendEmailWithRetry('tour_agency_booking_confirmed', () =>
+        return await sendEmailWithRetry(retryLabel, () =>
             resend.emails.send({
                 from: RESEND_FROM,
                 to: [data.to],
-                subject: `Tour confirmado para operar: ${data.tourName}`,
+                subject: `${subjectPrefix}: ${data.tourName}`,
                 react: TourProviderConfirmationEmail(data),
             })
         );
@@ -639,6 +657,14 @@ function buildShuttleOpsSubject(prefix: string, origin: string, destination: str
 export async function sendTourConfirmationEmails(data: SendConfirmationEmailProps): Promise<MultiRecipientSendResult> {
     const adminEmail = process.env.ADMIN_EMAIL || 'josemanu0885@gmail.com';
     const agencyEmail = data.agencyEmail?.trim() || null;
+    const requestKind = data.requestKind ?? 'tour';
+    const isGuide = requestKind === 'guide';
+    const requestLabel = isGuide ? 'guia' : 'tour';
+    const customerLabel = isGuide ? 'guide_customer' : 'tour_customer';
+    const adminLabel = isGuide ? 'guide_admin' : 'tour_admin';
+    const agencyLabel = isGuide ? 'guide_agency' : 'tour_agency';
+    const adminSubject = `Nueva solicitud de ${requestLabel}: ${data.tourName}`;
+    const agencySubject = `Solicitud de ${requestLabel} asignada: ${data.tourName}`;
 
     if (!resend) {
         logger.info('📧 [TOUR CONFIRMATION SIMULATION] --------------------------------------');
@@ -646,35 +672,35 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
         logger.info(`Subject: ${data.t('preview', { tourName: data.tourName })}`);
         logger.info('Customer Template Data:', JSON.stringify(redactForLog(data), null, 2));
         logger.info(`To Admin: ${adminEmail}`);
-        logger.info(`Subject: Nueva solicitud de tour: ${data.tourName}`);
+        logger.info(`Subject: ${adminSubject}`);
         logger.info('Admin Template Data:', JSON.stringify(redactForLog(data), null, 2));
         if (agencyEmail) {
             logger.info(`To Agency: ${agencyEmail}`);
-            logger.info(`Subject: Solicitud de tour asignada: ${data.tourName}`);
+            logger.info(`Subject: ${agencySubject}`);
             logger.info('Agency Template Data:', JSON.stringify(redactForLog(data), null, 2));
         }
         logger.info('-----------------------------------------------------------------------');
         const simulatedRecipients: RecipientDeliveryResult[] = [
             {
-                label: 'tour_customer',
+                label: customerLabel,
                 to: data.to,
                 subject: data.t('preview', { tourName: data.tourName }),
                 success: true,
                 id: 'simulated_' + Date.now(),
             },
             {
-                label: 'tour_admin',
+                label: adminLabel,
                 to: adminEmail,
-                subject: `Nueva solicitud de tour: ${data.tourName}`,
+                subject: adminSubject,
                 success: true,
                 id: 'simulated_' + Date.now(),
             },
         ];
         if (agencyEmail) {
             simulatedRecipients.push({
-                label: 'tour_agency',
+                label: agencyLabel,
                 to: agencyEmail,
-                subject: `Solicitud de tour asignada: ${data.tourName}`,
+                subject: agencySubject,
                 success: true,
                 id: 'simulated_' + Date.now(),
             });
@@ -690,24 +716,24 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
             kind: 'customer' | 'operations';
         }> = [
                 {
-                    label: 'tour_customer',
+                    label: customerLabel,
                     to: data.to,
                     subject: data.t('preview', { tourName: data.tourName }),
                     kind: 'customer',
                 },
                 {
-                    label: 'tour_admin',
+                    label: adminLabel,
                     to: adminEmail,
-                    subject: `Nueva solicitud de tour: ${data.tourName}`,
+                    subject: adminSubject,
                     kind: 'operations',
                 },
             ];
 
         if (agencyEmail) {
             queue.push({
-                label: 'tour_agency',
+                label: agencyLabel,
                 to: agencyEmail,
-                subject: `Solicitud de tour asignada: ${data.tourName}`,
+                subject: agencySubject,
                 kind: 'operations',
             });
         }
@@ -717,9 +743,9 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
         for (let i = 0; i < queue.length; i += 1) {
             const item = queue[i];
             const roleLabel =
-                item.label === 'tour_admin'
+                item.label === adminLabel
                     ? 'ADMIN'
-                    : item.label === 'tour_agency'
+                    : item.label === agencyLabel
                         ? 'AGENCIA'
                         : undefined;
             const reactComponent =
@@ -733,6 +759,7 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
                         customerWhatsapp: data.customerPhone || '',
                         tourName: data.tourName,
                         tourDate: data.date,
+                        serviceKind: requestKind,
                         requestedTime: data.requestedTime,
                         guests: data.guests,
                         totalPrice: data.totalPrice,
@@ -740,12 +767,12 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
                         notes: data.customerNotes || undefined,
                         reservationId: data.reservationId,
                         operationsEmail: adminEmail,
-                        adminPanelUrl: item.label === 'tour_admin'
+                        adminPanelUrl: item.label === adminLabel
                             ? `${SITE_URL}/es/internal/recepcion`
                             : undefined,
                         roleLabel,
-                        showAdminPanel: item.label === 'tour_admin',
-                        showAgencyInstructions: item.label === 'tour_agency',
+                        showAdminPanel: item.label === adminLabel,
+                        showAgencyInstructions: item.label === agencyLabel,
                     });
 
             const result = await sendEmailWithRetry(item.label, () =>

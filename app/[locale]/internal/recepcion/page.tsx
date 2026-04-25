@@ -1,15 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useParams, useRouter } from 'next/navigation';
 import { stripRequestMetadata } from '@/app/lib/request-metadata';
 import { supabase } from '@/app/lib/supabase/client';
 import TransitionModal, { ModalStatus } from './components/TransitionModal';
 
 type InternalRequestItem = {
     id: string;
-    kind: 'tour' | 'shuttle';
+    kind: 'tour' | 'guide' | 'shuttle';
     createdAt: string;
     customerName: string;
     customerEmail: string;
@@ -32,7 +31,7 @@ type InternalRequestItem = {
     notifications: Array<{
         id: string;
         created_at: string;
-        request_kind: 'tour' | 'shuttle';
+        request_kind: 'tour' | 'guide' | 'shuttle';
         request_id: string;
         recipient_type: 'customer' | 'agency' | 'admin';
         recipient_email: string;
@@ -52,6 +51,7 @@ type InternalResponse = {
     summary: {
         total: number;
         tours: number;
+        guides: number;
         shuttles: number;
         emailFailed: number;
     };
@@ -129,7 +129,9 @@ function getStatusLabel(status: RequestStatus): string {
 }
 
 function getKindLabel(kind: InternalRequestItem['kind']): string {
-    return kind === 'tour' ? 'Tour' : 'Shuttle';
+    if (kind === 'tour') return 'Tour';
+    if (kind === 'guide') return 'Guia';
+    return 'Shuttle';
 }
 
 function getEmailStatusLabel(status: string | null): string {
@@ -202,18 +204,18 @@ function formatMoney(value: number | null): string | null {
 }
 
 function getPartySizeLabel(kind: InternalRequestItem['kind'], value: number | null): string {
-    if (!value || value < 1) return kind === 'tour' ? 'Sin viajeros' : 'Sin pasajeros';
-    const label = kind === 'tour' ? (value === 1 ? 'viajero' : 'viajeros') : (value === 1 ? 'pasajero' : 'pasajeros');
+    if (!value || value < 1) return kind === 'shuttle' ? 'Sin pasajeros' : 'Sin viajeros';
+    const label = kind === 'shuttle' ? (value === 1 ? 'pasajero' : 'pasajeros') : (value === 1 ? 'viajero' : 'viajeros');
     return `${value} ${label}`;
 }
 
 function getTimingLabel(item: InternalRequestItem): string {
-    if (!item.requestedTime) return item.kind === 'tour' ? 'Por confirmar' : 'Sin hora';
+    if (!item.requestedTime) return item.kind === 'shuttle' ? 'Sin hora' : 'Por confirmar';
     return item.requestedTime;
 }
 
 function shouldShowTiming(item: InternalRequestItem): boolean {
-    return item.kind === 'shuttle' && Boolean(item.requestedTime);
+    return Boolean(item.requestedTime);
 }
 
 function getServiceWindowBadge(item: InternalRequestItem, status: RequestStatus) {
@@ -373,7 +375,9 @@ function renderQualityBadge(status: RequestStatus, note: string | null) {
 }
 
 export default function RecepcionRequestsPage() {
-    const locale = useLocale();
+    const params = useParams<{ locale?: string | string[] }>();
+    const rawLocale = params?.locale;
+    const locale = Array.isArray(rawLocale) ? rawLocale[0] : rawLocale || 'es';
     const router = useRouter();
     const [actor, setActor] = useState('recepcion');
     const [operatorEmail, setOperatorEmail] = useState('');
@@ -513,6 +517,7 @@ export default function RecepcionRequestsPage() {
         () => ({
             total: filteredItems.length,
             tours: filteredItems.filter((item) => item.kind === 'tour').length,
+            guides: filteredItems.filter((item) => item.kind === 'guide').length,
             shuttles: filteredItems.filter((item) => item.kind === 'shuttle').length,
             emailFailed: filteredItems.filter((item) => item.emailStatus === 'failed').length,
         }),
@@ -617,7 +622,7 @@ export default function RecepcionRequestsPage() {
         return [];
     };
 
-    const getEmailActions = (status: RequestStatus): Array<{ label: string; template: ManualEmailTemplate }> => {
+    const getEmailActions = (item: InternalRequestItem, status: RequestStatus): Array<{ label: string; template: ManualEmailTemplate }> => {
         if (status === 'processing') {
             return [
                 { label: 'Enviar métodos de pago', template: 'payment_instructions' },
@@ -831,7 +836,7 @@ export default function RecepcionRequestsPage() {
     };
 
     return (
-        <div className="relative max-w-6xl mx-auto px-4 py-8">
+        <div className="relative mx-auto max-w-7xl px-4 py-8">
             <div className="pointer-events-none fixed right-4 top-4 z-50 flex w-full max-w-sm flex-col gap-2">
                 {toasts.map((toast) => (
                     <div
@@ -969,6 +974,7 @@ export default function RecepcionRequestsPage() {
                                 >
                                     <option value="all">Todos</option>
                                     <option value="tour">Tours</option>
+                                    <option value="guide">Guias</option>
                                     <option value="shuttle">Shuttles</option>
                                 </select>
                             </label>
@@ -1010,6 +1016,9 @@ export default function RecepcionRequestsPage() {
                         </span>
                         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
                             Tours: {summary.tours}
+                        </span>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
+                            Guias: {summary.guides}
                         </span>
                         <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
                             Shuttles: {summary.shuttles}
@@ -1058,13 +1067,13 @@ export default function RecepcionRequestsPage() {
                     const showTiming = shouldShowTiming(item);
                     const locationSummary = summarizeLocationLabel(item.locationLabel, item.kind);
                     const primaryActions = getActions(normalizedStatus);
-                    const manualEmailActions = getEmailActions(normalizedStatus);
+                    const manualEmailActions = getEmailActions(item, normalizedStatus);
 
                     return (
-                        <article key={itemKey} className="rounded-2xl border bg-card/35 p-4 shadow-sm transition hover:border-cyan-400/30 hover:shadow-cyan-500/5">
+                        <article key={itemKey} className="overflow-hidden rounded-2xl border border-white/10 bg-card/35 shadow-sm transition hover:border-cyan-400/30 hover:shadow-cyan-500/5">
                             <div className="flex flex-col gap-4">
-                                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                                    <div className="min-w-0 flex-1">
+                                <div className="grid gap-5 p-4 sm:p-5 xl:grid-cols-[minmax(0,1fr)_390px] xl:items-start">
+                                    <div className="min-w-0">
                                         <div className="flex flex-wrap items-center gap-2">
                                             <span className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-[11px] font-medium text-cyan-100">
                                                 {getKindLabel(item.kind)}
@@ -1111,7 +1120,7 @@ export default function RecepcionRequestsPage() {
                                             </div>
                                         </div>
 
-                                        <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                                        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                                             <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
                                                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Cliente</p>
                                                 <p className="mt-1 text-sm font-medium">{item.customerName}</p>
@@ -1126,7 +1135,7 @@ export default function RecepcionRequestsPage() {
                                             {locationSummary ? (
                                                 <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5 sm:col-span-2">
                                                     <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                                                        {item.kind === 'tour' ? 'Encuentro' : 'Recogida'}
+                                                        {item.kind === 'shuttle' ? 'Recogida' : 'Encuentro'}
                                                     </p>
                                                     <p className="mt-1 text-sm text-foreground/90">{locationSummary}</p>
                                                 </div>
@@ -1134,7 +1143,7 @@ export default function RecepcionRequestsPage() {
                                         </div>
                                     </div>
 
-                                    <div className="flex w-full flex-col gap-2 xl:w-72 xl:flex-shrink-0">
+                                    <aside className="space-y-3 rounded-2xl border border-white/10 bg-background/35 p-3.5">
                                         <div className="flex flex-wrap gap-2">
                                             {primaryActions.map((action) => {
                                                 const actionKey = `${item.kind}-${item.id}-${action.to}`;
@@ -1154,142 +1163,145 @@ export default function RecepcionRequestsPage() {
                                         <button
                                             type="button"
                                             onClick={() => toggleCard(item)}
-                                            className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-left text-muted-foreground transition hover:border-cyan-400/30 hover:text-cyan-100"
+                                            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-left text-sm text-muted-foreground transition hover:border-cyan-400/30 hover:text-cyan-100"
                                         >
                                             {isExpanded ? 'Ocultar detalle' : 'Ver detalle'}
                                         </button>
-                                    </div>
+
+                                        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                                            <div className="flex items-center justify-between gap-3">
+                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Correos al usuario</p>
+                                                <span className={`rounded-full border px-2 py-0.5 text-[11px] ${getEmailStatusClasses(item.emailStatus)}`}>
+                                                    {getEmailStatusLabel(item.emailStatus)}
+                                                </span>
+                                            </div>
+                                            <div className="mt-3 flex flex-wrap gap-2">
+                                                {manualEmailActions.map((action) => {
+                                                    const emailKey = `${item.kind}-${item.id}-${action.template}`;
+                                                    return (
+                                                        <button
+                                                            key={emailKey}
+                                                            type="button"
+                                                            onClick={() => sendCustomerEmail(item, action.template)}
+                                                            disabled={Boolean(emailActionLoadingId) || authLoading}
+                                                            className="rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-3 py-2 text-sm transition hover:border-emerald-400/40 hover:text-emerald-100 disabled:opacity-50"
+                                                        >
+                                                            {emailActionLoadingId === emailKey ? 'Enviando...' : action.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                                {manualEmailActions.length === 0 ? (
+                                                    <span className="text-sm text-muted-foreground">Sin correos manuales para este estado.</span>
+                                                ) : null}
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                            <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                                                <p className="text-muted-foreground">Intentos email</p>
+                                                <p className="mt-1 font-medium text-foreground">{item.emailAttempts}</p>
+                                            </div>
+                                            <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                                                <p className="text-muted-foreground">Tipo</p>
+                                                <p className="mt-1 font-medium text-foreground">{getKindLabel(item.kind)}</p>
+                                            </div>
+                                        </div>
+
+                                        {item.emailLastError ? (
+                                            <p className="text-xs text-rose-400">{item.emailLastError}</p>
+                                        ) : null}
+                                    </aside>
                                 </div>
 
                                 {isExpanded ? (
-                                    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
+                                    <div className="space-y-4 border-t border-white/10 p-4 pt-4 sm:p-5 sm:pt-4">
                                         <div className="min-w-0 space-y-4">
-                                            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
-                                                <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
-                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Siguiente paso</p>
-                                                    <p className="mt-1 text-sm text-muted-foreground">{getChecklist(normalizedStatus)}</p>
-                                                </div>
-                                                <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
-                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Registro operativo</p>
-                                                    <div className="mt-2">{renderQualityBadge(normalizedStatus, item.adminNotes)}</div>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                                                <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                                                    Creada: {formatTimestamp(item.createdAt)}
-                                                </span>
-                                                {normalizedStatus === 'confirmed' ? (
-                                                    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                                                        Confirmado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Pendiente'}
-                                                    </span>
-                                                ) : null}
-                                                {normalizedStatus === 'cancelled' ? (
-                                                    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                                                        Cancelado: {item.cancelledAt ? formatTimestamp(item.cancelledAt) : 'Pendiente'}
-                                                    </span>
-                                                ) : null}
-                                                {normalizedStatus === 'completed' ? (
-                                                    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                                                        Servicio cerrado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Sin registro'}
-                                                    </span>
-                                                ) : null}
-                                            </div>
-
-                                            {(normalizedStatus === 'confirmed' ||
-                                                normalizedStatus === 'cancelled' ||
-                                                normalizedStatus === 'completed') ? (
-                                                <div className="rounded-xl border border-white/10 bg-background/40 p-3">
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Nota operativa</p>
-                                                        {item.adminNotes && item.adminNotes.length > 110 ? (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => toggleNote(item)}
-                                                                className="text-xs text-cyan-300 transition hover:text-cyan-200"
-                                                            >
-                                                                {expandedNotes[itemKey] ? 'Ver menos' : 'Ver mas'}
-                                                            </button>
-                                                        ) : null}
+                                                <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
+                                                    <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
+                                                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Siguiente paso</p>
+                                                        <p className="mt-1 text-sm text-muted-foreground">{getChecklist(normalizedStatus)}</p>
                                                     </div>
-                                                    <p className="mt-2 text-sm text-muted-foreground">
-                                                        {item.adminNotes
-                                                            ? (expandedNotes[itemKey] ? getReadableAdminNote(item.adminNotes) || 'Sin nota operativa registrada.' : getNotePreview(item.adminNotes))
-                                                            : 'Sin nota operativa relevante.'}
-                                                    </p>
+                                                    <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
+                                                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Registro operativo</p>
+                                                        <div className="mt-2">{renderQualityBadge(normalizedStatus, item.adminNotes)}</div>
+                                                    </div>
                                                 </div>
-                                            ) : null}
-                                        </div>
 
-                                        <aside className="w-full rounded-2xl border border-white/10 bg-background/40 p-3.5">
-                                            <div>
-                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Correos al usuario</p>
-                                                <div className="mt-2 flex flex-wrap gap-2">
-                                                    {manualEmailActions.map((action) => {
-                                                        const emailKey = `${item.kind}-${item.id}-${action.template}`;
-                                                        return (
-                                                            <button
-                                                                key={emailKey}
-                                                                type="button"
-                                                                onClick={() => sendCustomerEmail(item, action.template)}
-                                                                disabled={Boolean(emailActionLoadingId) || authLoading}
-                                                                className="rounded-lg border border-emerald-400/20 bg-emerald-500/5 px-3 py-1.5 text-sm transition hover:border-emerald-400/40 hover:text-emerald-100 disabled:opacity-50"
-                                                            >
-                                                                {emailActionLoadingId === emailKey ? 'Enviando...' : action.label}
-                                                            </button>
-                                                        );
-                                                    })}
-                                                    {manualEmailActions.length === 0 ? (
-                                                        <span className="text-sm text-muted-foreground">Sin correos manuales para este estado.</span>
+                                                <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                                    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                        Creada: {formatTimestamp(item.createdAt)}
+                                                    </span>
+                                                    {normalizedStatus === 'confirmed' ? (
+                                                        <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                            Confirmado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Pendiente'}
+                                                        </span>
+                                                    ) : null}
+                                                    {normalizedStatus === 'cancelled' ? (
+                                                        <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                            Cancelado: {item.cancelledAt ? formatTimestamp(item.cancelledAt) : 'Pendiente'}
+                                                        </span>
+                                                    ) : null}
+                                                    {normalizedStatus === 'completed' ? (
+                                                        <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                            Servicio cerrado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Sin registro'}
+                                                        </span>
                                                     ) : null}
                                                 </div>
-                                            </div>
 
-                                            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                                                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-                                                    <p className="text-muted-foreground">Intentos email</p>
-                                                    <p className="mt-1 font-medium text-foreground">{item.emailAttempts}</p>
-                                                </div>
-                                                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-                                                    <p className="text-muted-foreground">Tipo</p>
-                                                    <p className="mt-1 font-medium text-foreground">{getKindLabel(item.kind)}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="mt-3">
-                                                <div className="flex items-center justify-between gap-3">
-                                                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Notificaciones</p>
-                                                    <span className="text-[11px] text-muted-foreground">
-                                                        {notifications.length} registro{notifications.length === 1 ? '' : 's'}
-                                                    </span>
-                                                </div>
-                                                <div className="mt-2 space-y-2">
-                                                    {notifications.length > 0 ? notifications.slice(0, 3).map((notification) => (
-                                                        <div
-                                                            key={notification.id}
-                                                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs"
-                                                        >
-                                                            <div className="flex flex-wrap items-center gap-2">
-                                                                <span className={`rounded-full border px-2 py-0.5 ${getNotificationStatusClasses(notification.delivery_status)}`}>
-                                                                    {notification.delivery_status === 'sent' ? 'Enviado' : 'Falló'}
-                                                                </span>
-                                                                <span className="rounded-full border border-white/10 bg-black/10 px-2 py-0.5 text-muted-foreground">
-                                                                    {getNotificationRecipientLabel(notification.recipient_type)}
-                                                                </span>
-                                                                <span className="text-foreground/90">{getNotificationTemplateLabel(notification.template)}</span>
-                                                            </div>
-                                                            <p className="mt-1 break-all text-muted-foreground">{notification.recipient_email}</p>
+                                                {(normalizedStatus === 'confirmed' ||
+                                                    normalizedStatus === 'cancelled' ||
+                                                    normalizedStatus === 'completed') ? (
+                                                    <div className="rounded-xl border border-white/10 bg-background/40 p-3">
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Nota operativa</p>
+                                                            {item.adminNotes && item.adminNotes.length > 110 ? (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => toggleNote(item)}
+                                                                    className="text-xs text-cyan-300 transition hover:text-cyan-200"
+                                                                >
+                                                                    {expandedNotes[itemKey] ? 'Ver menos' : 'Ver mas'}
+                                                                </button>
+                                                            ) : null}
                                                         </div>
-                                                    )) : (
-                                                        <span className="text-sm text-muted-foreground">Aún no hay trazabilidad registrada.</span>
-                                                    )}
-                                                </div>
-                                            </div>
+                                                        <p className="mt-2 text-sm text-muted-foreground">
+                                                            {item.adminNotes
+                                                                ? (expandedNotes[itemKey] ? getReadableAdminNote(item.adminNotes) || 'Sin nota operativa registrada.' : getNotePreview(item.adminNotes))
+                                                                : 'Sin nota operativa relevante.'}
+                                                        </p>
+                                                    </div>
+                                                ) : null}
+                                        </div>
 
-                                            {item.emailLastError ? (
-                                                <p className="mt-3 text-xs text-rose-400">{item.emailLastError}</p>
-                                            ) : null}
-                                        </aside>
+                                        <section className="rounded-2xl border border-white/10 bg-background/40 p-3.5">
+                                            <div className="flex items-center justify-between gap-3">
+                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Notificaciones</p>
+                                                <span className="text-[11px] text-muted-foreground">
+                                                    {notifications.length} registro{notifications.length === 1 ? '' : 's'}
+                                                </span>
+                                            </div>
+                                            <div className="mt-3 grid gap-2 lg:grid-cols-2 2xl:grid-cols-3">
+                                                {notifications.length > 0 ? notifications.slice(0, 6).map((notification) => (
+                                                    <div
+                                                        key={notification.id}
+                                                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs"
+                                                    >
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <span className={`rounded-full border px-2 py-0.5 ${getNotificationStatusClasses(notification.delivery_status)}`}>
+                                                                {notification.delivery_status === 'sent' ? 'Enviado' : 'Falló'}
+                                                            </span>
+                                                            <span className="rounded-full border border-white/10 bg-black/10 px-2 py-0.5 text-muted-foreground">
+                                                                {getNotificationRecipientLabel(notification.recipient_type)}
+                                                            </span>
+                                                            <span className="text-foreground/90">{getNotificationTemplateLabel(notification.template)}</span>
+                                                        </div>
+                                                        <p className="mt-1 break-all text-muted-foreground">{notification.recipient_email}</p>
+                                                    </div>
+                                                )) : (
+                                                    <span className="text-sm text-muted-foreground">Aún no hay trazabilidad registrada.</span>
+                                                )}
+                                            </div>
+                                        </section>
                                     </div>
                                 ) : null}
                             </div>

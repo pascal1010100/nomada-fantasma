@@ -9,7 +9,7 @@ import { normalizeLocale } from '@/app/lib/locale';
 import { parseRequestMetadata } from '@/app/lib/request-metadata';
 import type { Database } from '@/types/database.types';
 
-type RequestKind = 'tour' | 'shuttle';
+type RequestKind = 'tour' | 'guide' | 'shuttle';
 type ManualTemplate = 'payment_instructions' | 'not_available' | 'booking_confirmed';
 type ReservationRow = Database['public']['Tables']['reservations']['Row'];
 type ShuttleBookingRow = Database['public']['Tables']['shuttle_bookings']['Row'];
@@ -20,6 +20,12 @@ type ReservationEmailRow = ReservationRow & {
 
 type ShuttleEmailRow = ShuttleBookingRow & {
   customer_locale?: string | null;
+};
+
+type GuidePriceDetails = {
+  price?: number;
+  priceText?: string;
+  priceLabelOverride?: string;
 };
 
 const TEMPLATE_WHITELIST: ManualTemplate[] = ['payment_instructions', 'not_available', 'booking_confirmed'];
@@ -100,6 +106,59 @@ function getPaymentOptions(locale: string, requestId: string, serviceName: strin
   return options;
 }
 
+async function getGuidePriceDetails(
+  reservation: ReservationEmailRow,
+  locale: string,
+  metadataPrice?: number
+): Promise<GuidePriceDetails> {
+  if (typeof reservation.total_price === 'number') {
+    return { price: reservation.total_price };
+  }
+
+  if (typeof metadataPrice === 'number') {
+    return { price: metadataPrice };
+  }
+
+  if (!reservation.guide_service_id) {
+    return {};
+  }
+
+  const serviceResult = await supabaseAdmin
+    .from('guide_services')
+    .select('price_from, price_to')
+    .eq('id', reservation.guide_service_id)
+    .maybeSingle<{ price_from: number | null; price_to: number | null }>();
+
+  if (serviceResult.error) {
+    logger.warn('Unable to resolve guide service price for manual email:', serviceResult.error);
+    return {};
+  }
+
+  const from = serviceResult.data?.price_from;
+  const to = serviceResult.data?.price_to;
+
+  if (typeof from === 'number' && typeof to === 'number') {
+    if (from === to) {
+      return { price: from };
+    }
+
+    return {
+      priceText: `Q${from.toFixed(2)} - Q${to.toFixed(2)}`,
+      priceLabelOverride: locale.startsWith('en') ? 'Estimated range' : 'Rango estimado',
+    };
+  }
+
+  if (typeof from === 'number') {
+    return { price: from };
+  }
+
+  if (typeof to === 'number') {
+    return { price: to };
+  }
+
+  return {};
+}
+
 
 async function getShuttleRoutePrice(origin: string, destination: string, type: string): Promise<number | undefined> {
   const routeResult = await supabaseAdmin
@@ -143,8 +202,8 @@ export async function POST(request: Request) {
     const template = normalizeTemplate(body?.template);
     const actor = normalizeActor(adminContext.actor);
 
-    if (!kind || !['tour', 'shuttle'].includes(kind)) {
-      return NextResponse.json({ error: 'kind es requerido (tour o shuttle).' }, { status: 400 });
+    if (!kind || !['tour', 'guide', 'shuttle'].includes(kind)) {
+      return NextResponse.json({ error: 'kind es requerido (tour, guide o shuttle).' }, { status: 400 });
     }
     if (!id) {
       return NextResponse.json({ error: 'id es requerido.' }, { status: 400 });
@@ -153,7 +212,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'template inválido.' }, { status: 400 });
     }
 
-    if (kind === 'tour') {
+    if (kind === 'tour' || kind === 'guide') {
       const reservationResult = await supabaseAdmin
         .from('reservations')
         .select('*')
@@ -167,15 +226,26 @@ export async function POST(request: Request) {
       const reservation = reservationResult.data;
       const metadata = parseRequestMetadata(reservation.admin_notes);
       const locale = normalizeLocale(reservation.customer_locale ?? metadata.locale);
-      const tTours = await getTranslations({ locale, namespace: 'Data.tours' });
-      const fallbackService = reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma tour' : 'Tour Nómada Fantasma');
-      const tourKey = reservation.tour_name?.toLowerCase().replace(/\s+/g, '-') || '';
-      const serviceName = tourKey && tTours.has(`${tourKey}.title`) ? tTours(`${tourKey}.title`) : fallbackService;
-      // Optimized for elite voucher: fetch tour specifics
+      const fallbackService =
+        kind === 'guide'
+          ? reservation.guide_service_name || reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma guide service' : 'Servicio de guia Nómada Fantasma')
+          : reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma tour' : 'Tour Nómada Fantasma');
+      let serviceName = fallbackService;
+      if (kind === 'tour') {
+        const tTours = await getTranslations({ locale, namespace: 'Data.tours' });
+        const tourKey = reservation.tour_name?.toLowerCase().replace(/\s+/g, '-') || '';
+        serviceName = tourKey && tTours.has(`${tourKey}.title`) ? tTours(`${tourKey}.title`) : fallbackService;
+      }
+
+      const guidePriceDetails =
+        kind === 'guide'
+          ? await getGuidePriceDetails(reservation, locale, metadata.price)
+          : {};
+
       let pickupTime: string | undefined;
       let meetingPoint: string | undefined;
 
-      if (reservation.tour_id) {
+      if (kind === 'tour' && reservation.tour_id) {
           const { data: tourData } = await supabaseAdmin
               .from('tours')
               .select('pickup_time, meeting_point')
@@ -191,11 +261,18 @@ export async function POST(request: Request) {
         template,
         locale,
         customerName: reservation.full_name,
-        kind: 'tour',
+        kind,
         serviceName,
         date: reservation.date,
         travelers: reservation.number_of_people,
-        price: typeof reservation.total_price === 'number' ? reservation.total_price : metadata.price,
+        price:
+          kind === 'guide'
+            ? guidePriceDetails.price
+            : typeof reservation.total_price === 'number'
+              ? reservation.total_price
+              : metadata.price,
+        priceText: kind === 'guide' ? guidePriceDetails.priceText : undefined,
+        priceLabelOverride: kind === 'guide' ? guidePriceDetails.priceLabelOverride : undefined,
         requestId: reservation.id,
         paymentOptions: getPaymentOptions(locale, reservation.id, serviceName),
         pickupTime,
@@ -206,13 +283,13 @@ export async function POST(request: Request) {
         to: reservation.email,
         subject,
         react,
-        label: `manual_${template}_tour`,
+        label: `manual_${template}_${kind}`,
       });
 
       if (!emailResult.success) {
         const errorMessage = emailResult.error instanceof Error ? emailResult.error.message : 'No se pudo enviar el correo manual.';
         await recordInternalNotification({
-          requestKind: 'tour',
+          requestKind: kind,
           requestId: reservation.id,
           recipientType: 'customer',
           recipientEmail: reservation.email,
@@ -227,7 +304,7 @@ export async function POST(request: Request) {
       }
 
       await recordInternalNotification({
-        requestKind: 'tour',
+        requestKind: kind,
         requestId: reservation.id,
         recipientType: 'customer',
         recipientEmail: reservation.email,

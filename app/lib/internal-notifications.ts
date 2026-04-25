@@ -8,7 +8,7 @@ export type InternalNotificationStatus = 'sent' | 'failed';
 export type InternalNotificationRecord = {
     id: string;
     created_at: string;
-    request_kind: 'tour' | 'shuttle';
+    request_kind: 'tour' | 'guide' | 'shuttle';
     request_id: string;
     recipient_type: InternalNotificationRecipient;
     recipient_email: string;
@@ -22,7 +22,7 @@ export type InternalNotificationRecord = {
 };
 
 type InsertNotificationInput = {
-    requestKind: 'tour' | 'shuttle';
+    requestKind: 'tour' | 'guide' | 'shuttle';
     requestId: string;
     recipientType: InternalNotificationRecipient;
     recipientEmail: string;
@@ -61,17 +61,21 @@ export async function recordInternalNotification(input: InsertNotificationInput)
 }
 
 export async function listInternalNotificationsForRequests(
-    refs: Array<{ kind: 'tour' | 'shuttle'; id: string }>,
+    refs: Array<{ kind: 'tour' | 'guide' | 'shuttle'; id: string }>,
     limitPerRequest = 4
 ): Promise<Record<string, InternalNotificationRecord[]>> {
     if (refs.length === 0) return {};
 
     const uniqueTourIds = [...new Set(refs.filter((ref) => ref.kind === 'tour').map((ref) => ref.id))];
+    const uniqueGuideIds = [...new Set(refs.filter((ref) => ref.kind === 'guide').map((ref) => ref.id))];
     const uniqueShuttleIds = [...new Set(refs.filter((ref) => ref.kind === 'shuttle').map((ref) => ref.id))];
 
     const orClauses: string[] = [];
     if (uniqueTourIds.length > 0) {
         orClauses.push(`and(request_kind.eq.tour,request_id.in.(${uniqueTourIds.join(',')}))`);
+    }
+    if (uniqueGuideIds.length > 0) {
+        orClauses.push(`and(request_kind.eq.guide,request_id.in.(${uniqueGuideIds.join(',')}))`);
     }
     if (uniqueShuttleIds.length > 0) {
         orClauses.push(`and(request_kind.eq.shuttle,request_id.in.(${uniqueShuttleIds.join(',')}))`);

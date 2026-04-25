@@ -12,6 +12,7 @@ import {
 } from '@react-email/components';
 
 interface TourProviderConfirmationEmailProps {
+    serviceKind?: 'tour' | 'guide';
     reservationId: string;
     tourName: string;
     tourDate: string;
@@ -40,6 +41,7 @@ function formatDate(dateString: string) {
 }
 
 export default function TourProviderConfirmationEmail({
+    serviceKind = 'tour',
     reservationId,
     tourName,
     tourDate,
@@ -51,6 +53,9 @@ export default function TourProviderConfirmationEmail({
     customerWhatsapp,
     customerNotes,
 }: TourProviderConfirmationEmailProps) {
+    const serviceLabel = serviceKind === 'guide' ? 'Servicio de guía' : 'Tour';
+    const serviceLabelUpper = serviceKind === 'guide' ? 'SERVICIO' : 'TOUR';
+
     return (
         <Html>
             <Head>
@@ -73,7 +78,7 @@ export default function TourProviderConfirmationEmail({
                             Confirmacion operativa
                         </Text>
                         <Heading style={{ color: '#ffffff', fontSize: '30px', lineHeight: '1.15', fontWeight: 700, margin: 0 }}>
-                            Tour confirmado para operar
+                            {serviceLabel} confirmado para operar
                         </Heading>
                         <Text style={{ color: '#ccfbf1', fontSize: '15px', lineHeight: '1.7', margin: '14px 0 0' }}>
                             Esta reserva ya fue confirmada con pago recibido. Favor coordinar la experiencia con base en la informacion siguiente.
@@ -83,12 +88,12 @@ export default function TourProviderConfirmationEmail({
                     <Section style={{ padding: '32px 36px' }}>
                         <Section style={{ backgroundColor: '#f8fbfd', border: '1px solid #e2edf5', borderRadius: '18px', padding: '22px', margin: '0 0 24px' }}>
                             <Heading style={{ color: '#0f172a', fontSize: '18px', fontWeight: 700, margin: '0 0 16px' }}>
-                                Datos del tour
+                                Datos del servicio
                             </Heading>
                             <table width="100%" cellPadding="0" cellSpacing="0" role="presentation">
                                 <tbody>
                                     <tr>
-                                        <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>TOUR</td>
+                                        <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>{serviceLabelUpper}</td>
                                         <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>{tourName}</td>
                                     </tr>
                                     <tr>

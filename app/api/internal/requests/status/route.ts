@@ -21,8 +21,12 @@ type ReservationUpdate = Database['public']['Tables']['reservations']['Update'];
 type ShuttleBookingUpdate = Database['public']['Tables']['shuttle_bookings']['Update'];
 type ReservationStatusRow = ReservationRow & { customer_locale?: string | null };
 type ShuttleStatusRow = ShuttleBookingRow & { customer_locale?: string | null };
+type GuideProviderContext = {
+    email: string | null;
+    meetingPoint: string | null;
+};
 
-type RequestKind = 'tour' | 'shuttle';
+type RequestKind = 'tour' | 'guide' | 'shuttle';
 type RequestStatus = 'pending' | 'processing' | 'confirmed' | 'cancelled' | 'completed';
 const CONFLICT_MESSAGE = 'Conflict: request was updated by another operator. Please refresh.';
 
@@ -59,8 +63,12 @@ function getErrorMessage(error: unknown, fallback: string): string {
     return fallback;
 }
 
+function getFallbackAgencyEmail(): string | null {
+    return normalizeEmail(process.env.DEFAULT_AGENCY_EMAIL) ?? normalizeEmail(process.env.ADMIN_EMAIL);
+}
+
 async function getTourAgencyEmail(tourId: string | null | undefined): Promise<string | null> {
-    const fallbackAgencyEmail = normalizeEmail(process.env.DEFAULT_AGENCY_EMAIL);
+    const fallbackAgencyEmail = getFallbackAgencyEmail();
     if (!tourId) return fallbackAgencyEmail;
 
     const tourResult = await supabaseAdmin
@@ -92,8 +100,64 @@ async function getTourAgencyEmail(tourId: string | null | undefined): Promise<st
     return normalizeEmail(agencyResult.data.email) ?? fallbackAgencyEmail;
 }
 
+async function getGuideProviderContext(
+    guideId: string | null | undefined,
+    guideServiceId: string | null | undefined
+): Promise<GuideProviderContext> {
+    const fallbackEmail = getFallbackAgencyEmail();
+    let providerEmail: string | null = fallbackEmail;
+    let meetingPoint: string | null = null;
+
+    if (guideId) {
+        const guideResult = await supabaseAdmin
+            .from('guides')
+            .select('agency_id, email, is_active')
+            .eq('id', guideId)
+            .maybeSingle<{ agency_id: string | null; email: string | null; is_active: boolean | null }>();
+
+        if (guideResult.error) {
+            logger.warn('Unable to resolve guide provider assignment for status notification:', guideResult.error);
+        } else if (guideResult.data?.is_active) {
+            const guideEmail = normalizeEmail(guideResult.data.email);
+            if (guideEmail) {
+                providerEmail = guideEmail;
+            }
+
+            if (!guideEmail && guideResult.data.agency_id) {
+                const agencyResult = await supabaseAdmin
+                    .from('agencies')
+                    .select('email, is_active')
+                    .eq('id', guideResult.data.agency_id)
+                    .maybeSingle<{ email: string | null; is_active: boolean | null }>();
+
+                if (agencyResult.error) {
+                    logger.warn('Unable to resolve guide agency email for status notification:', agencyResult.error);
+                } else if (agencyResult.data?.is_active) {
+                    providerEmail = normalizeEmail(agencyResult.data.email) ?? fallbackEmail;
+                }
+            }
+        }
+    }
+
+    if (guideServiceId) {
+        const serviceResult = await supabaseAdmin
+            .from('guide_services')
+            .select('meeting_point')
+            .eq('id', guideServiceId)
+            .maybeSingle<{ meeting_point: string | null }>();
+
+        if (serviceResult.error) {
+            logger.warn('Unable to resolve guide service meeting point for status notification:', serviceResult.error);
+        } else {
+            meetingPoint = serviceResult.data?.meeting_point ?? null;
+        }
+    }
+
+    return { email: providerEmail, meetingPoint };
+}
+
 async function getShuttleAgencyEmail(origin: string, destination: string, type: string): Promise<string | null> {
-    const fallbackAgencyEmail = normalizeEmail(process.env.DEFAULT_AGENCY_EMAIL);
+    const fallbackAgencyEmail = getFallbackAgencyEmail();
 
     const routeResult = await supabaseAdmin
         .from('shuttle_routes')
@@ -137,6 +201,7 @@ type CancellationNotificationResult = {
 };
 
 async function notifyTourCancellation(
+    requestKind: 'tour' | 'guide',
     reservation: ReservationStatusRow,
     note: string,
     actor: string,
@@ -145,12 +210,14 @@ async function notifyTourCancellation(
     const metadata = parseRequestMetadata(reservation.admin_notes);
     const locale = normalizeLocale(reservation.customer_locale ?? metadata.locale);
     const serviceName =
-        reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma tour' : 'Tour Nómada Fantasma');
+        requestKind === 'guide'
+            ? reservation.guide_service_name || reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma guide service' : 'Servicio de guia Nómada Fantasma')
+            : reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma tour' : 'Tour Nómada Fantasma');
     const { subject, react } = buildCustomerActionEmail({
         template: 'booking_cancelled',
         locale,
         customerName: reservation.full_name,
-        kind: 'tour',
+        kind: requestKind,
         serviceName,
         date: reservation.date,
         travelers: reservation.number_of_people,
@@ -167,10 +234,10 @@ async function notifyTourCancellation(
         to: reservation.email,
         subject,
         react,
-        label: 'auto_booking_cancelled_tour',
+        label: `auto_booking_cancelled_${requestKind}`,
     });
     await recordInternalNotification({
-        requestKind: 'tour',
+        requestKind,
         requestId: reservation.id,
         recipientType: 'customer',
         recipientEmail: reservation.email,
@@ -190,9 +257,16 @@ async function notifyTourCancellation(
         nextNotes = appendAdminLine(nextNotes, `[${emailLastAttemptAt}] (${actor}) email:auto_booking_cancelled_customer:failed ${errorMessage}`);
     }
 
-    const agencyEmail = await getTourAgencyEmail(reservation.tour_id);
+    const guideProviderContext =
+        requestKind === 'guide'
+            ? await getGuideProviderContext(reservation.guide_id, reservation.guide_service_id)
+            : null;
+    const agencyEmail = requestKind === 'guide'
+        ? guideProviderContext?.email ?? null
+        : await getTourAgencyEmail(reservation.tour_id);
     if (agencyEmail) {
         const agencyResult = await sendTourCancellationAgencyEmail({
+            serviceKind: requestKind,
             to: agencyEmail,
             reservationId: reservation.id,
             tourName: serviceName,
@@ -204,13 +278,13 @@ async function notifyTourCancellation(
             cancellationReason: note,
         });
         await recordInternalNotification({
-            requestKind: 'tour',
+            requestKind,
             requestId: reservation.id,
             recipientType: 'agency',
             recipientEmail: agencyEmail,
             template: 'booking_cancelled',
             deliveryStatus: agencyResult.success ? 'sent' : 'failed',
-            subject: `Tour cancelado: ${serviceName}`,
+            subject: `${requestKind === 'guide' ? 'Servicio de guia cancelado' : 'Tour cancelado'}: ${serviceName}`,
             providerMessageId: agencyResult.id,
             errorMessage: agencyResult.success ? null : getErrorMessage(agencyResult.error, 'No se pudo notificar la cancelación a la agencia.'),
             triggeredBy: actor,
@@ -236,13 +310,20 @@ async function notifyTourCancellation(
 }
 
 async function notifyTourConfirmed(
+    requestKind: 'tour' | 'guide',
     reservation: ReservationStatusRow,
     actor: string,
     adminNotes: string | null
 ): Promise<CancellationNotificationResult> {
     let nextNotes = adminNotes;
     const warnings: string[] = [];
-    const agencyEmail = await getTourAgencyEmail(reservation.tour_id);
+    const guideProviderContext =
+        requestKind === 'guide'
+            ? await getGuideProviderContext(reservation.guide_id, reservation.guide_service_id)
+            : null;
+    const agencyEmail = requestKind === 'guide'
+        ? guideProviderContext?.email ?? null
+        : await getTourAgencyEmail(reservation.tour_id);
 
     if (!agencyEmail) {
         return {
@@ -253,7 +334,9 @@ async function notifyTourConfirmed(
     }
 
     let meetingPoint: string | null = null;
-    if (reservation.tour_id) {
+    if (requestKind === 'guide') {
+        meetingPoint = guideProviderContext?.meetingPoint ?? null;
+    } else if (reservation.tour_id) {
         const tourResult = await supabaseAdmin
             .from('tours')
             .select('meeting_point')
@@ -267,8 +350,12 @@ async function notifyTourConfirmed(
         }
     }
 
-    const serviceName = reservation.tour_name || 'Tour Nómada Fantasma';
+    const serviceName =
+        requestKind === 'guide'
+            ? reservation.guide_service_name || reservation.tour_name || 'Servicio de guia Nómada Fantasma'
+            : reservation.tour_name || 'Tour Nómada Fantasma';
     const agencyResult = await sendTourProviderConfirmationEmail({
+        serviceKind: requestKind,
         to: agencyEmail,
         reservationId: reservation.id,
         tourName: serviceName,
@@ -283,13 +370,13 @@ async function notifyTourConfirmed(
     });
 
     await recordInternalNotification({
-        requestKind: 'tour',
+        requestKind,
         requestId: reservation.id,
         recipientType: 'agency',
         recipientEmail: agencyEmail,
         template: 'booking_confirmed_provider',
         deliveryStatus: agencyResult.success ? 'sent' : 'failed',
-        subject: `Tour confirmado para operar: ${serviceName}`,
+        subject: `${requestKind === 'guide' ? 'Servicio de guia confirmado para operar' : 'Tour confirmado para operar'}: ${serviceName}`,
         providerMessageId: agencyResult.id,
         errorMessage: agencyResult.success ? null : getErrorMessage(agencyResult.error, 'No se pudo enviar la confirmación final al proveedor.'),
         triggeredBy: actor,
@@ -473,8 +560,8 @@ export async function PATCH(request: Request) {
         const note = normalizeNote(body?.note);
         const actor = normalizeActor(adminContext.actor);
 
-        if (!kind || !['tour', 'shuttle'].includes(kind)) {
-            return NextResponse.json({ error: 'kind es requerido (tour o shuttle).' }, { status: 400 });
+        if (!kind || !['tour', 'guide', 'shuttle'].includes(kind)) {
+            return NextResponse.json({ error: 'kind es requerido (tour, guide o shuttle).' }, { status: 400 });
         }
 
         if (!id) {
@@ -488,7 +575,7 @@ export async function PATCH(request: Request) {
             return NextResponse.json({ error: 'currentStatus es requerido y debe ser valido.' }, { status: 400 });
         }
 
-        if (kind === 'tour') {
+        if (kind === 'tour' || kind === 'guide') {
             const reservationResult = await supabaseAdmin
                 .from('reservations')
                 .select('*')
@@ -544,7 +631,7 @@ export async function PATCH(request: Request) {
             }
 
             const transitionInsert: TransitionInsert = {
-                request_kind: 'tour',
+                request_kind: kind,
                 request_id: id,
                 from_status: currentStatus,
                 to_status: nextStatusRaw,
@@ -579,8 +666,9 @@ export async function PATCH(request: Request) {
 
             let warning: string | undefined;
 
-            if (nextStatusRaw === 'confirmed') {
+            if ((kind === 'tour' || kind === 'guide') && nextStatusRaw === 'confirmed') {
                 const confirmationNotification = await notifyTourConfirmed(
+                    kind,
                     reservationResult.data as ReservationStatusRow,
                     actor,
                     updatePayload.admin_notes ?? reservationResult.data.admin_notes
@@ -602,8 +690,9 @@ export async function PATCH(request: Request) {
                 }
             }
 
-            if (nextStatusRaw === 'cancelled' && note) {
+            if ((kind === 'tour' || kind === 'guide') && nextStatusRaw === 'cancelled' && note) {
                 const notificationResult = await notifyTourCancellation(
+                    kind,
                     reservationResult.data as ReservationStatusRow,
                     note,
                     actor,

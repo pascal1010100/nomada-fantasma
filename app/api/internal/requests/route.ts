@@ -27,7 +27,7 @@ type LegacyReservationRow = {
 
 type InternalRequestItem = {
     id: string;
-    kind: 'tour' | 'shuttle';
+    kind: 'tour' | 'guide' | 'shuttle';
     createdAt: string;
     customerName: string;
     customerEmail: string;
@@ -61,27 +61,37 @@ function mapReservation(
     relatedTour?: Pick<TourRow, 'id' | 'title' | 'slug' | 'meeting_point' | 'pickup_time'> | null
 ): InternalRequestItem {
     const isModern = 'full_name' in row;
+    const reservationKind =
+        isModern && row.reservation_type === 'guide'
+            ? 'guide'
+            : 'tour';
     const createdAt = row.created_at ?? '';
     const fallbackDate = createdAt ? createdAt.slice(0, 10) : '';
     const serviceName = isModern
-        ? relatedTour?.title || row.tour_name || 'Tour sin nombre'
+        ? reservationKind === 'guide'
+            ? row.guide_service_name || row.tour_name || 'Servicio de guia sin nombre'
+            : relatedTour?.title || row.tour_name || 'Tour sin nombre'
         : row.tour_name || relatedTour?.title || 'Tour sin nombre';
     const details = isModern
         ? row.notes || serviceName
         : row.customer_notes || serviceName;
     return {
         id: row.id,
-        kind: 'tour',
+        kind: reservationKind,
         createdAt,
         customerName: isModern ? row.full_name : (row.customer_name ?? 'Sin nombre'),
         customerEmail: isModern ? row.email : (row.customer_email ?? ''),
         customerWhatsapp: isModern ? row.whatsapp : null,
         date: isModern ? (row.date ?? fallbackDate) : (row.reservation_date ?? fallbackDate),
         serviceName,
-        serviceSlug: relatedTour?.slug ?? null,
-        requestedTime: isModern ? (row.requested_time ?? relatedTour?.pickup_time ?? null) : null,
+        serviceSlug: reservationKind === 'tour' ? (relatedTour?.slug ?? null) : null,
+        requestedTime: isModern
+            ? reservationKind === 'tour'
+                ? (row.requested_time ?? relatedTour?.pickup_time ?? null)
+                : (row.requested_time ?? null)
+            : null,
         partySize: isModern ? (row.number_of_people ?? null) : null,
-        locationLabel: relatedTour?.meeting_point ?? null,
+        locationLabel: reservationKind === 'tour' ? (relatedTour?.meeting_point ?? null) : null,
         totalPrice: isModern ? (row.total_price ?? null) : null,
         details,
         status: row.status ?? null,
@@ -166,7 +176,7 @@ export async function GET(request: Request) {
         const reservationsResult = await supabaseAdmin
             .from('reservations')
             .select('*')
-            .eq('reservation_type', 'tour')
+            .in('reservation_type', ['tour', 'guide'])
             .order('created_at', { ascending: false })
             .limit(Math.min(Math.max(limit * 6, 120), 500));
 
@@ -192,6 +202,7 @@ export async function GET(request: Request) {
             const scopedReservations = (reservationsResult.data ?? [])
                 .filter((row) => {
                     const typedRow = row as ReservationRow;
+                    if (typedRow.reservation_type === 'guide') return true;
                     const matchesTourId = typedRow.tour_id ? sanPedroTourIds.has(typedRow.tour_id) : false;
                     const tourName = typedRow.tour_name?.toLowerCase() ?? '';
                     const customerNotes = typedRow.notes?.toLowerCase() ?? '';
@@ -223,7 +234,8 @@ export async function GET(request: Request) {
             success: true,
             summary: {
                 total: enrichedItems.length,
-                tours: reservationItems.length,
+                tours: reservationItems.filter((item) => item.kind === 'tour').length,
+                guides: reservationItems.filter((item) => item.kind === 'guide').length,
                 shuttles: shuttleItems.length,
                 emailFailed: enrichedItems.filter((item) => item.emailStatus === 'failed').length,
             },
