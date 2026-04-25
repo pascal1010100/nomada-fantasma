@@ -1,6 +1,5 @@
 import "../globals.css";
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/app/providers/theme-provider";
 import ChatButton from "../components/ChatButton";
 import Navbar from "../components/layout/Navbar";
@@ -8,14 +7,6 @@ import Footer from "../components/layout/Footer";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-
-// Configuración de fuentes
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-  adjustFontFallback: false,
-});
 
 // Metadata de la aplicación (Podemos hacer esto dinámico después)
 export const metadata: Metadata = {
@@ -106,7 +97,7 @@ export default async function LocaleLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${inter.variable} font-sans antialiased bg-background text-foreground min-h-screen flex flex-col`}
+        className="font-sans antialiased bg-background text-foreground min-h-screen flex flex-col"
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider

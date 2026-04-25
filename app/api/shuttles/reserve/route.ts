@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getTranslations } from 'next-intl/server';
 import { sendShuttleConfirmationEmails } from '@/app/lib/email';
 import { supabaseAdmin } from '@/app/lib/supabase/server';
-import { checkRateLimit, getClientIP } from '@/app/lib/rate-limit';
+import { checkRateLimitShared, getClientIP } from '@/app/lib/rate-limit';
 import { getLocaleFromRequest } from '@/app/lib/locale';
 import logger from '@/app/lib/logger';
 import { buildRequestMetadataNote } from '@/app/lib/request-metadata';
@@ -12,7 +12,10 @@ import type { Database } from '@/types/database.types';
 type ShuttleBookingInsert = Database['public']['Tables']['shuttle_bookings']['Insert'];
 type ShuttleBookingRow = Database['public']['Tables']['shuttle_bookings']['Row'];
 type ShuttleBookingUpdate = Database['public']['Tables']['shuttle_bookings']['Update'];
-const DEFAULT_AGENCY_EMAIL = process.env.DEFAULT_AGENCY_EMAIL?.trim() || null;
+const DEFAULT_AGENCY_EMAIL =
+    process.env.DEFAULT_AGENCY_EMAIL?.trim() ||
+    process.env.ADMIN_EMAIL?.trim() ||
+    null;
 
 type ShuttleRouteAssignment = {
     agencyEmail: string | null;
@@ -74,7 +77,7 @@ export async function POST(request: Request) {
 
         // Rate limiting
         const ip = getClientIP(request);
-        const rateLimitResult = checkRateLimit(ip);
+        const rateLimitResult = await checkRateLimitShared(ip);
         
         if (!rateLimitResult.allowed) {
             return NextResponse.json(

@@ -1,7 +1,7 @@
 export const runtime = "edge";
 
 import { PROJECT_KNOWLEDGE, CHAT_PERSONALITY } from './knowledge';
-import { checkRateLimit, getClientIP } from '@/app/lib/rate-limit';
+import { checkRateLimitShared, getClientIP } from '@/app/lib/rate-limit';
 import { getLocaleFromRequest } from '@/app/lib/locale';
 import logger from '@/app/lib/logger';
 
@@ -19,7 +19,7 @@ export async function POST(req: Request): Promise<Response> {
   try {
     // rate limit by client IP
     const ip = getClientIP(req);
-    const rate = checkRateLimit(ip);
+    const rate = await checkRateLimitShared(ip);
     if (!rate.allowed) {
       return new Response(
         JSON.stringify({ error: "Rate limit exceeded" }),

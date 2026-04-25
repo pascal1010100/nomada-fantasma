@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS "public"."internal_request_transitions" (
     "to_status" "text" NOT NULL,
     "note" "text",
     "actor" "text" DEFAULT 'recepcion'::"text" NOT NULL,
-    CONSTRAINT "internal_request_transitions_request_kind_check" CHECK (("request_kind" = ANY (ARRAY['tour'::"text", 'shuttle'::"text"])))
+    CONSTRAINT "internal_request_transitions_request_kind_check" CHECK (("request_kind" = ANY (ARRAY['tour'::"text", 'guide'::"text", 'shuttle'::"text"])))
 );
 
 
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS "public"."internal_request_notifications" (
     CONSTRAINT "internal_request_notifications_channel_check" CHECK (("channel" = 'email'::"text")),
     CONSTRAINT "internal_request_notifications_delivery_status_check" CHECK (("delivery_status" = ANY (ARRAY['sent'::"text", 'failed'::"text"]))),
     CONSTRAINT "internal_request_notifications_recipient_type_check" CHECK (("recipient_type" = ANY (ARRAY['customer'::"text", 'agency'::"text", 'admin'::"text"]))),
-    CONSTRAINT "internal_request_notifications_request_kind_check" CHECK (("request_kind" = ANY (ARRAY['tour'::"text", 'shuttle'::"text'])))
+    CONSTRAINT "internal_request_notifications_request_kind_check" CHECK (("request_kind" = ANY (ARRAY['tour'::"text", 'guide'::"text", 'shuttle'::"text'])))
 );
 
 
@@ -160,6 +160,53 @@ CREATE TABLE IF NOT EXISTS "public"."towns" (
 
 
 ALTER TABLE "public"."towns" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."guides" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "slug" "text" NOT NULL,
+    "town_slug" "text" NOT NULL,
+    "agency_id" "uuid",
+    "name" "text" NOT NULL,
+    "bio" "text",
+    "photo_url" "text",
+    "languages" "text"[] DEFAULT '{}'::"text"[] NOT NULL,
+    "whatsapp" "text",
+    "email" "text",
+    "is_active" boolean DEFAULT true NOT NULL,
+    "is_verified" boolean DEFAULT false NOT NULL,
+    "sort_order" integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE "public"."guides" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."guide_services" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "guide_id" "uuid" NOT NULL,
+    "slug" "text" NOT NULL,
+    "title" "text" NOT NULL,
+    "description" "text",
+    "duration_hours" numeric(6,2),
+    "price_from" numeric(10,2),
+    "price_to" numeric(10,2),
+    "currency" "text" DEFAULT 'GTQ'::"text" NOT NULL,
+    "meeting_point" "text",
+    "available_days" "text"[] DEFAULT '{}'::"text"[] NOT NULL,
+    "start_times" "text"[] DEFAULT '{}'::"text"[] NOT NULL,
+    "is_active" boolean DEFAULT true NOT NULL,
+    "sort_order" integer DEFAULT 0 NOT NULL,
+    CONSTRAINT "guide_services_id_guide_id_unique" UNIQUE ("id", "guide_id"),
+    CONSTRAINT "guide_services_guide_slug_unique" UNIQUE ("guide_id", "slug")
+);
+
+
+ALTER TABLE "public"."guide_services" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."places" (
@@ -210,6 +257,8 @@ CREATE TABLE IF NOT EXISTS "public"."reservations" (
     "reservation_type" "text" DEFAULT 'tour'::"text",
     "accommodation_id" "uuid",
     "guide_id" "uuid",
+    "guide_service_id" "uuid",
+    "guide_service_name" "text",
     "email_delivery_status" "text" DEFAULT 'pending'::"text",
     "email_attempts" integer DEFAULT 0,
     "email_last_attempt_at" timestamp with time zone,
@@ -218,7 +267,9 @@ CREATE TABLE IF NOT EXISTS "public"."reservations" (
     "confirmed_at" timestamp with time zone,
     "cancelled_at" timestamp with time zone,
     CONSTRAINT "reservations_email_delivery_status_check" CHECK (("email_delivery_status" = ANY (ARRAY['pending'::"text", 'sent'::"text", 'failed'::"text", 'not_requested'::"text"]))),
+    CONSTRAINT "reservations_guide_service_required_check" CHECK ((("reservation_type" <> 'guide'::"text") OR (("guide_id" IS NOT NULL) AND ("guide_service_id" IS NOT NULL) AND ("nullif"("btrim"("guide_service_name"), ''::"text") IS NOT NULL)))),
     CONSTRAINT "reservations_number_of_people_check" CHECK (("number_of_people" > 0)),
+    CONSTRAINT "reservations_reservation_type_check" CHECK (("reservation_type" = ANY (ARRAY['tour'::"text", 'accommodation'::"text", 'guide'::"text"]))),
     CONSTRAINT "reservations_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'processing'::"text", 'confirmed'::"text", 'cancelled'::"text", 'completed'::"text"])))
 );
 
@@ -353,6 +404,18 @@ ALTER TABLE ONLY "public"."agencies"
     ADD CONSTRAINT "agencies_slug_key" UNIQUE ("slug");
 
 
+ALTER TABLE ONLY "public"."guides"
+    ADD CONSTRAINT "guides_pkey" PRIMARY KEY ("id");
+
+
+ALTER TABLE ONLY "public"."guides"
+    ADD CONSTRAINT "guides_slug_key" UNIQUE ("slug");
+
+
+ALTER TABLE ONLY "public"."guide_services"
+    ADD CONSTRAINT "guide_services_pkey" PRIMARY KEY ("id");
+
+
 
 ALTER TABLE ONLY "public"."internal_request_transitions"
     ADD CONSTRAINT "internal_request_transitions_pkey" PRIMARY KEY ("id");
@@ -434,6 +497,21 @@ CREATE INDEX "idx_internal_request_notifications_recipient" ON "public"."interna
 CREATE INDEX "idx_internal_request_notifications_request" ON "public"."internal_request_notifications" USING "btree" ("request_kind", "request_id", "created_at" DESC);
 
 
+CREATE INDEX "idx_guides_agency_id" ON "public"."guides" USING "btree" ("agency_id");
+
+
+CREATE INDEX "idx_guides_active_sort" ON "public"."guides" USING "btree" ("town_slug", "sort_order") WHERE ("is_active" = true);
+
+
+CREATE INDEX "idx_guides_town_slug" ON "public"."guides" USING "btree" ("town_slug");
+
+
+CREATE INDEX "idx_guide_services_active_sort" ON "public"."guide_services" USING "btree" ("guide_id", "sort_order") WHERE ("is_active" = true);
+
+
+CREATE INDEX "idx_guide_services_guide_id" ON "public"."guide_services" USING "btree" ("guide_id");
+
+
 
 CREATE INDEX "idx_towns_is_active" ON "public"."towns" USING "btree" ("is_active") WHERE ("is_active" = true);
 
@@ -458,6 +536,9 @@ CREATE INDEX "idx_places_town_active" ON "public"."places" USING "btree" ("town_
 CREATE INDEX "idx_reservations_email_delivery_status" ON "public"."reservations" USING "btree" ("email_delivery_status");
 
 
+CREATE INDEX "idx_reservations_guide_service_id" ON "public"."reservations" USING "btree" ("guide_service_id");
+
+
 
 CREATE INDEX "idx_shuttle_bookings_email_delivery_status" ON "public"."shuttle_bookings" USING "btree" ("email_delivery_status");
 
@@ -468,6 +549,26 @@ CREATE INDEX "idx_shuttle_routes_agency_id" ON "public"."shuttle_routes" USING "
 
 
 CREATE INDEX "idx_tours_agency_id" ON "public"."tours" USING "btree" ("agency_id");
+
+
+ALTER TABLE ONLY "public"."guides"
+    ADD CONSTRAINT "guides_agency_id_fkey" FOREIGN KEY ("agency_id") REFERENCES "public"."agencies"("id") ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+ALTER TABLE ONLY "public"."guides"
+    ADD CONSTRAINT "guides_town_slug_fkey" FOREIGN KEY ("town_slug") REFERENCES "public"."towns"("slug") ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+ALTER TABLE ONLY "public"."guide_services"
+    ADD CONSTRAINT "guide_services_guide_id_fkey" FOREIGN KEY ("guide_id") REFERENCES "public"."guides"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+ALTER TABLE ONLY "public"."reservations"
+    ADD CONSTRAINT "reservations_guide_id_fkey" FOREIGN KEY ("guide_id") REFERENCES "public"."guides"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+ALTER TABLE ONLY "public"."reservations"
+    ADD CONSTRAINT "reservations_guide_service_guide_fkey" FOREIGN KEY ("guide_service_id", "guide_id") REFERENCES "public"."guide_services"("id", "guide_id") ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 
@@ -504,12 +605,26 @@ CREATE POLICY "Only service role can view leads" ON "public"."reservations" FOR 
 CREATE POLICY "Public can view active accommodations" ON "public"."accommodations" FOR SELECT USING (("is_active" = true));
 
 
+CREATE POLICY "Public can view active guides" ON "public"."guides" FOR SELECT USING (("is_active" = true));
+
+
+CREATE POLICY "Public can view active guide services" ON "public"."guide_services" FOR SELECT USING ((("is_active" = true) AND (EXISTS ( SELECT 1
+   FROM "public"."guides"
+  WHERE (("guides"."id" = "guide_services"."guide_id") AND ("guides"."is_active" = true))))));
+
+
 
 CREATE POLICY "Public can view active places" ON "public"."places" FOR SELECT USING (("is_active" = true));
 
 
 
 CREATE POLICY "Service role can manage agencies" ON "public"."agencies" USING (("auth"."role"() = 'service_role'::"text"));
+
+
+CREATE POLICY "Service role can manage guides" ON "public"."guides" USING (("auth"."role"() = 'service_role'::"text")) WITH CHECK (("auth"."role"() = 'service_role'::"text"));
+
+
+CREATE POLICY "Service role can manage guide services" ON "public"."guide_services" USING (("auth"."role"() = 'service_role'::"text")) WITH CHECK (("auth"."role"() = 'service_role'::"text"));
 
 
 
@@ -541,6 +656,12 @@ ALTER TABLE "public"."accommodations" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."agencies" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."guides" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."guide_services" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."internal_admin_users" ENABLE ROW LEVEL SECURITY;
@@ -586,6 +707,16 @@ GRANT ALL ON TABLE "public"."accommodations" TO "service_role";
 REVOKE ALL ON TABLE "public"."agencies" FROM "anon";
 REVOKE ALL ON TABLE "public"."agencies" FROM "authenticated";
 GRANT ALL ON TABLE "public"."agencies" TO "service_role";
+
+
+GRANT SELECT ON TABLE "public"."guides" TO "anon";
+GRANT SELECT ON TABLE "public"."guides" TO "authenticated";
+GRANT ALL ON TABLE "public"."guides" TO "service_role";
+
+
+GRANT SELECT ON TABLE "public"."guide_services" TO "anon";
+GRANT SELECT ON TABLE "public"."guide_services" TO "authenticated";
+GRANT ALL ON TABLE "public"."guide_services" TO "service_role";
 
 
 
@@ -667,5 +798,3 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
-

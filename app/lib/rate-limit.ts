@@ -1,11 +1,11 @@
 /**
  * Rate Limiting Utility
  * 
- * Centralized rate limiting logic that can be easily replaced with Redis/Upstash
- * in the future without changing API route code.
- * 
- * Current implementation: In-memory Map (works for single instance)
- * Future: Replace with Redis for distributed rate limiting
+ * Centralized rate limiting logic.
+ *
+ * Default implementation: in-memory Map for local/dev.
+ * Production option: set RATE_LIMIT_STORE=supabase and run the rate_limit_buckets
+ * migration to use a shared Postgres-backed limiter across serverless instances.
  */
 
 type RateLimitEntry = {
@@ -31,6 +31,13 @@ export interface RateLimitResult {
 const DEFAULT_CONFIG: RateLimitConfig = {
   max: 5,
   windowMs: 10 * 60 * 1000, // 10 minutes
+};
+
+type SupabaseRateLimitRow = {
+  allowed: boolean;
+  remaining: number;
+  reset_at: string;
+  retry_after: number | null;
 };
 
 /**
@@ -77,6 +84,58 @@ export function checkRateLimit(
     remaining: config.max - entry.count,
     resetAt: entry.start + config.windowMs,
   };
+}
+
+function shouldUseSupabaseRateLimit(): boolean {
+  return process.env.RATE_LIMIT_STORE?.trim().toLowerCase() === 'supabase';
+}
+
+/**
+ * Shared rate limit check for API routes.
+ *
+ * Uses Supabase when RATE_LIMIT_STORE=supabase, and falls back to the local
+ * in-memory limiter if the RPC is unavailable so requests do not fail closed
+ * during deploys before migrations are applied.
+ */
+export async function checkRateLimitShared(
+  identifier: string,
+  config: RateLimitConfig = DEFAULT_CONFIG
+): Promise<RateLimitResult> {
+  if (!shouldUseSupabaseRateLimit()) {
+    return checkRateLimit(identifier, config);
+  }
+
+  try {
+    const { supabaseAdmin } = await import('./supabase/server');
+    const { data, error } = await supabaseAdmin.rpc('check_rate_limit' as never, {
+      p_identifier: identifier,
+      p_max: config.max,
+      p_window_ms: config.windowMs,
+    } as never);
+
+    if (error) {
+      console.warn('Supabase rate limit unavailable, falling back to local store:', error.message);
+      return checkRateLimit(identifier, config);
+    }
+
+    const row = Array.isArray(data)
+      ? (data[0] as SupabaseRateLimitRow | undefined)
+      : (data as SupabaseRateLimitRow | null);
+
+    if (!row) {
+      return checkRateLimit(identifier, config);
+    }
+
+    return {
+      allowed: row.allowed,
+      remaining: row.remaining,
+      resetAt: new Date(row.reset_at).getTime(),
+      retryAfter: row.retry_after ?? undefined,
+    };
+  } catch (error) {
+    console.warn('Supabase rate limit failed, falling back to local store:', error);
+    return checkRateLimit(identifier, config);
+  }
 }
 
 /**
