@@ -964,73 +964,86 @@ export default function RecepcionRequestsPage() {
                 </div>
             </section>
 
-            <section className="mb-6 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/90 via-slate-900/75 to-cyan-950/40 shadow-[0_20px_60px_rgba(8,15,30,0.35)]">
-                <div className="border-b border-white/10 px-4 py-4 sm:px-5">
-                    <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+            <section className="mb-4 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/55 shadow-[0_14px_42px_rgba(8,15,30,0.28)]">
+                <div className="border-b border-white/10 px-4 py-3 sm:px-5">
+                    <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                         <div>
-                            <p className="text-xs uppercase tracking-[0.18em] text-cyan-200/80">Pulso operativo</p>
-                            <h2 className="mt-1 text-lg font-semibold text-white">Filtro y prioridad del día</h2>
+                            <p className="text-[11px] uppercase tracking-[0.16em] text-cyan-200/75">Operación</p>
+                            <h2 className="mt-0.5 text-base font-semibold text-white">Solicitudes y filtros</h2>
                         </div>
-                        <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2 xl:max-w-5xl xl:grid-cols-5">
-                            <label className="text-sm md:col-span-2 xl:col-span-1">
-                                <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Buscar</span>
-                                <input
-                                    type="search"
-                                    value={searchQuery}
-                                    onChange={(event) => setSearchQuery(event.target.value)}
-                                    placeholder="Cliente, email, servicio o ID"
-                                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2.5 text-sm text-white shadow-inner placeholder:text-slate-500"
-                                />
-                            </label>
-                            <label className="text-sm">
-                                <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Estado</span>
-                                <select
-                                    value={statusFilter}
-                                    onChange={(event) => setStatusFilter(event.target.value as 'all' | RequestStatus)}
-                                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2.5 text-sm text-white shadow-inner"
-                                >
-                                    <option value="all">Todos</option>
-                                    <option value="pending">Nuevas</option>
-                                    <option value="processing">En gestión</option>
-                                    <option value="confirmed">Confirmadas</option>
-                                    <option value="completed">Completadas</option>
-                                    <option value="cancelled">Canceladas</option>
-                                </select>
-                            </label>
-                            <label className="text-sm">
-                                <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Tipo</span>
-                                <select
-                                    value={kindFilter}
-                                    onChange={(event) => setKindFilter(event.target.value as 'all' | InternalRequestItem['kind'])}
-                                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2.5 text-sm text-white shadow-inner"
-                                >
-                                    <option value="all">Todos</option>
-                                    <option value="tour">Tours</option>
-                                    <option value="guide">Guias</option>
-                                    <option value="shuttle">Shuttles</option>
-                                </select>
-                            </label>
-                            <label className="text-sm">
-                                <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Desde</span>
-                                <input
-                                    type="date"
-                                    value={dateFrom}
-                                    onChange={(event) => setDateFrom(event.target.value)}
-                                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2.5 text-sm text-white shadow-inner"
-                                />
-                            </label>
-                            <label className="text-sm">
-                                <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Hasta</span>
-                                <input
-                                    type="date"
-                                    value={dateTo}
-                                    onChange={(event) => setDateTo(event.target.value)}
-                                    className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-3 py-2.5 text-sm text-white shadow-inner"
-                                />
-                            </label>
+                        <div className="flex flex-wrap gap-2 text-xs">
+                            <span className="rounded-full border border-cyan-400/15 bg-cyan-500/10 px-3 py-1.5 text-cyan-100">
+                                {summary.total} visibles
+                            </span>
+                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-300">
+                                Tours {summary.tours}
+                            </span>
+                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-300">
+                                Guias {summary.guides}
+                            </span>
+                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-300">
+                                Shuttles {summary.shuttles}
+                            </span>
                         </div>
                     </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
+
+                    <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_160px_160px_170px_170px_auto] lg:items-end">
+                        <label className="text-sm">
+                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Buscar</span>
+                            <input
+                                type="search"
+                                value={searchQuery}
+                                onChange={(event) => setSearchQuery(event.target.value)}
+                                placeholder="Cliente, email, servicio o ID"
+                                className="w-full rounded-xl border border-white/10 bg-slate-950/45 px-3 py-2 text-sm text-white shadow-inner placeholder:text-slate-500"
+                            />
+                        </label>
+                        <label className="text-sm">
+                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Estado</span>
+                            <select
+                                value={statusFilter}
+                                onChange={(event) => setStatusFilter(event.target.value as 'all' | RequestStatus)}
+                                className="w-full rounded-xl border border-white/10 bg-slate-950/45 px-3 py-2 text-sm text-white shadow-inner"
+                            >
+                                <option value="all">Todos</option>
+                                <option value="pending">Nuevas</option>
+                                <option value="processing">En gestión</option>
+                                <option value="confirmed">Confirmadas</option>
+                                <option value="completed">Completadas</option>
+                                <option value="cancelled">Canceladas</option>
+                            </select>
+                        </label>
+                        <label className="text-sm">
+                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Tipo</span>
+                            <select
+                                value={kindFilter}
+                                onChange={(event) => setKindFilter(event.target.value as 'all' | InternalRequestItem['kind'])}
+                                className="w-full rounded-xl border border-white/10 bg-slate-950/45 px-3 py-2 text-sm text-white shadow-inner"
+                            >
+                                <option value="all">Todos</option>
+                                <option value="tour">Tours</option>
+                                <option value="guide">Guias</option>
+                                <option value="shuttle">Shuttles</option>
+                            </select>
+                        </label>
+                        <label className="text-sm">
+                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Desde</span>
+                            <input
+                                type="date"
+                                value={dateFrom}
+                                onChange={(event) => setDateFrom(event.target.value)}
+                                className="w-full rounded-xl border border-white/10 bg-slate-950/45 px-3 py-2 text-sm text-white shadow-inner"
+                            />
+                        </label>
+                        <label className="text-sm">
+                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Hasta</span>
+                            <input
+                                type="date"
+                                value={dateTo}
+                                onChange={(event) => setDateTo(event.target.value)}
+                                className="w-full rounded-xl border border-white/10 bg-slate-950/45 px-3 py-2 text-sm text-white shadow-inner"
+                            />
+                        </label>
                         <button
                             type="button"
                             onClick={() => {
@@ -1040,50 +1053,48 @@ export default function RecepcionRequestsPage() {
                                 setDateFrom('');
                                 setDateTo('');
                             }}
-                            className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:border-cyan-400/30 hover:text-cyan-100"
+                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300 transition hover:border-cyan-400/30 hover:text-cyan-100"
                         >
-                            Limpiar filtros
+                            Limpiar
                         </button>
-                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
-                            Total visible: {summary.total}
-                        </span>
-                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
-                            Tours: {summary.tours}
-                        </span>
-                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
-                            Guias: {summary.guides}
-                        </span>
-                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-400">
-                            Shuttles: {summary.shuttles}
-                        </span>
                     </div>
                 </div>
 
-                <div className="grid gap-3 px-4 py-4 sm:px-5 md:grid-cols-2 xl:grid-cols-5">
-                    <div className="rounded-2xl border border-amber-400/20 bg-gradient-to-br from-amber-500/16 to-amber-500/4 p-4 shadow-[0_10px_30px_rgba(245,158,11,0.12)]">
-                        <p className="text-[11px] uppercase tracking-wide text-amber-200/80">Nuevas</p>
-                        <p className="mt-2 text-3xl font-semibold text-white">{queueSummary.pending}</p>
-                        <p className="mt-2 text-xs text-amber-100/75">Pendientes por iniciar hoy</p>
+                <div className="grid gap-2 px-4 py-3 sm:px-5 sm:grid-cols-2 xl:grid-cols-5">
+                    <div className="rounded-xl border border-amber-400/15 bg-amber-500/8 px-3 py-2.5">
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-[11px] uppercase tracking-wide text-amber-200/80">Nuevas</p>
+                            <p className="text-xl font-semibold text-white">{queueSummary.pending}</p>
+                        </div>
+                        <p className="mt-1 text-[11px] text-amber-100/70">Pendientes por iniciar</p>
                     </div>
-                    <div className="rounded-2xl border border-sky-400/20 bg-gradient-to-br from-sky-500/16 to-sky-500/4 p-4 shadow-[0_10px_30px_rgba(14,165,233,0.12)]">
-                        <p className="text-[11px] uppercase tracking-wide text-sky-200/80">En gestión</p>
-                        <p className="mt-2 text-3xl font-semibold text-white">{queueSummary.processing}</p>
-                        <p className="mt-2 text-xs text-sky-100/75">{operations.processingStale} llevan más de {PROCESSING_STALE_HOURS}h</p>
+                    <div className="rounded-xl border border-sky-400/15 bg-sky-500/8 px-3 py-2.5">
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-[11px] uppercase tracking-wide text-sky-200/80">En gestión</p>
+                            <p className="text-xl font-semibold text-white">{queueSummary.processing}</p>
+                        </div>
+                        <p className="mt-1 text-[11px] text-sky-100/70">{operations.processingStale} con más de {PROCESSING_STALE_HOURS}h</p>
                     </div>
-                    <div className="rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-emerald-500/16 to-emerald-500/4 p-4 shadow-[0_10px_30px_rgba(16,185,129,0.12)]">
-                        <p className="text-[11px] uppercase tracking-wide text-emerald-200/80">Confirmadas</p>
-                        <p className="mt-2 text-3xl font-semibold text-white">{queueSummary.confirmed}</p>
-                        <p className="mt-2 text-xs text-emerald-100/75">{operations.pendingToday} nuevas entraron hoy</p>
+                    <div className="rounded-xl border border-emerald-400/15 bg-emerald-500/8 px-3 py-2.5">
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-[11px] uppercase tracking-wide text-emerald-200/80">Confirmadas</p>
+                            <p className="text-xl font-semibold text-white">{queueSummary.confirmed}</p>
+                        </div>
+                        <p className="mt-1 text-[11px] text-emerald-100/70">{operations.pendingToday} nuevas hoy</p>
                     </div>
-                    <div className="rounded-2xl border border-rose-400/20 bg-gradient-to-br from-rose-500/18 to-rose-500/4 p-4 shadow-[0_10px_30px_rgba(244,63,94,0.14)]">
-                        <p className="text-[11px] uppercase tracking-wide text-rose-200/85">Urgentes</p>
-                        <p className="mt-2 text-3xl font-semibold text-white">{operations.confirmedOverdue}</p>
-                        <p className="mt-2 text-xs text-rose-100/75">Confirmadas con fecha ya vencida</p>
+                    <div className="rounded-xl border border-rose-400/15 bg-rose-500/8 px-3 py-2.5">
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-[11px] uppercase tracking-wide text-rose-200/85">Urgentes</p>
+                            <p className="text-xl font-semibold text-white">{operations.confirmedOverdue}</p>
+                        </div>
+                        <p className="mt-1 text-[11px] text-rose-100/70">Confirmadas vencidas</p>
                     </div>
-                    <div className="rounded-2xl border border-fuchsia-400/20 bg-gradient-to-br from-fuchsia-500/16 to-fuchsia-500/4 p-4 shadow-[0_10px_30px_rgba(217,70,239,0.12)]">
-                        <p className="text-[11px] uppercase tracking-wide text-fuchsia-200/85">Emails fallidos</p>
-                        <p className="mt-2 text-3xl font-semibold text-white">{summary.emailFailed}</p>
-                        <p className="mt-2 text-xs text-fuchsia-100/75">Requieren revisión manual</p>
+                    <div className="rounded-xl border border-fuchsia-400/15 bg-fuchsia-500/8 px-3 py-2.5">
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-[11px] uppercase tracking-wide text-fuchsia-200/85">Email</p>
+                            <p className="text-xl font-semibold text-white">{summary.emailFailed}</p>
+                        </div>
+                        <p className="mt-1 text-[11px] text-fuchsia-100/70">Fallidos</p>
                     </div>
                 </div>
             </section>
