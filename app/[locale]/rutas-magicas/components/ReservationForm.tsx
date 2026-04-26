@@ -323,7 +323,9 @@ export default function ReservationForm({
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
-          notes: reservationNotes
+          notes: reservationNotes,
+          bookingOptionId: selectedOption?.id,
+          bookingOptionName: selectedOption?.name,
         }),
       });
 

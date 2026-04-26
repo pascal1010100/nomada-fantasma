@@ -263,6 +263,7 @@ export async function POST(request: Request) {
         customerName: reservation.full_name,
         kind,
         serviceName,
+        bookingOptionName: metadata.bookingOptionName,
         date: reservation.date,
         travelers: reservation.number_of_people,
         price:

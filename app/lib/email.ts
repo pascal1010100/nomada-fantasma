@@ -57,6 +57,7 @@ interface SendConfirmationEmailProps {
     customerPhone?: string | null;
     customerNotes?: string | null;
     tourName: string;
+    bookingOptionName?: string | null;
     date: string;
     requestedTime?: string | null;
     meetingPoint?: string | null;
@@ -250,6 +251,7 @@ type BuildCustomerActionEmailInput = {
     customerName: string;
     kind: 'tour' | 'guide' | 'shuttle';
     serviceName: string;
+    bookingOptionName?: string;
     date: string;
     travelers?: number;
     price?: number;
@@ -299,6 +301,7 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
     const serviceLabel = isEnglish ? serviceKindLabel : serviceKindLabel;
     const dateLabel = isEnglish ? 'Date' : 'Fecha';
     const travelersLabel = isEnglish ? 'Travelers' : 'Viajeros';
+    const optionLabel = isEnglish ? 'Ride option' : 'Modalidad';
     const defaultPriceLabel = isEnglish
         ? data.kind === 'shuttle' ? 'Quoted price' : 'Total'
         : data.kind === 'shuttle' ? 'Precio cotizado' : 'Total';
@@ -342,6 +345,8 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
                 summaryTitle,
                 serviceLabel,
                 serviceValue: data.serviceName,
+                optionLabel: data.bookingOptionName ? optionLabel : undefined,
+                optionValue: data.bookingOptionName,
                 dateLabel,
                 dateValue: formattedDate,
                 travelersLabel,
@@ -385,6 +390,8 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
                 summaryTitle,
                 serviceLabel,
                 serviceValue: data.serviceName,
+                optionLabel: data.bookingOptionName ? optionLabel : undefined,
+                optionValue: data.bookingOptionName,
                 dateLabel,
                 dateValue: formattedDate,
                 travelersLabel,
@@ -426,6 +433,8 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
                 summaryTitle,
                 serviceLabel,
                 serviceValue: data.serviceName,
+                optionLabel: data.bookingOptionName ? optionLabel : undefined,
+                optionValue: data.bookingOptionName,
                 dateLabel,
                 dateValue: formattedDate,
                 travelersLabel,
@@ -489,6 +498,8 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
             summaryTitle,
             serviceLabel,
             serviceValue: data.serviceName,
+            optionLabel: data.bookingOptionName ? optionLabel : undefined,
+            optionValue: data.bookingOptionName,
             dateLabel,
             dateValue: formattedDate,
             travelersLabel,
@@ -541,6 +552,7 @@ type TourProviderConfirmationEmailProps = {
     to: string;
     reservationId: string;
     tourName: string;
+    bookingOptionName?: string | null;
     tourDate: string;
     requestedTime?: string | null;
     meetingPoint?: string | null;
@@ -758,6 +770,7 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
                         customerEmail: data.to,
                         customerWhatsapp: data.customerPhone || '',
                         tourName: data.tourName,
+                        bookingOptionName: data.bookingOptionName,
                         tourDate: data.date,
                         serviceKind: requestKind,
                         requestedTime: data.requestedTime,

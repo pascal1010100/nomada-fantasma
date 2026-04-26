@@ -18,6 +18,8 @@ interface CustomerActionEmailProps {
   summaryTitle: string;
   serviceLabel: string;
   serviceValue: string;
+  optionLabel?: string;
+  optionValue?: string;
   dateLabel: string;
   dateValue: string;
   travelersLabel: string;
@@ -48,6 +50,8 @@ export default function CustomerActionEmail({
   summaryTitle,
   serviceLabel,
   serviceValue,
+  optionLabel,
+  optionValue,
   dateLabel,
   dateValue,
   travelersLabel,
@@ -118,6 +122,16 @@ export default function CustomerActionEmail({
                       {serviceValue}
                     </td>
                   </tr>
+                  {optionLabel && optionValue ? (
+                    <tr>
+                      <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingBottom: '12px' }}>
+                        {optionLabel}
+                      </td>
+                      <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 700, textAlign: 'right', paddingBottom: '12px' }}>
+                        {optionValue}
+                      </td>
+                    </tr>
+                  ) : null}
                   <tr>
                     <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingBottom: '12px' }}>
                       {dateLabel}

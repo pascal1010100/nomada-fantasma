@@ -16,6 +16,7 @@ type SearchParams = {
   adults?: string;
   total: string;
   emailSent?: string;
+  option?: string;
 };
 
 export default async function ConfirmationPage({
@@ -25,7 +26,7 @@ export default async function ConfirmationPage({
   searchParams: Promise<SearchParams>;
   params: Promise<{ locale: string }>;
 }) {
-  const { tourId, date, time, total, adults, emailSent } = await searchParams;
+  const { tourId, date, time, total, adults, emailSent, option } = await searchParams;
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'ReservationConfirmation' });
   const tTours = await getTranslations({ locale, namespace: 'Data.tours' });
@@ -101,6 +102,7 @@ export default async function ConfirmationPage({
     time: time || (displayTour.pickupTime ? t('pickupWindowValue', { time: formatTourTimeDisplay(displayTour.pickupTime) }) : t('timeFallback')),
     adults: reservationAdults,
     total: total ? parseFloat(total) : 0,
+    option: option ? decodeURIComponent(option) : '',
   };
   const emailStatus = emailSent ?? 'unknown';
   const emailBadgeClass =
@@ -211,6 +213,11 @@ export default async function ConfirmationPage({
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('participantsLabel')}</p>
                   <div className="mt-1 space-y-1">
+                    {reservation.option ? (
+                      <p className="text-sm text-cyan-700 dark:text-cyan-300">
+                        {t('optionLabel')}: {reservation.option}
+                      </p>
+                    ) : null}
                     <p className="text-base font-medium text-gray-900 dark:text-white">
                       {reservation.adults} {participantLabel} • Q{adultPrice.toFixed(2)} {t('perPerson')}
                     </p>

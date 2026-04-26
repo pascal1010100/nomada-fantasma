@@ -15,6 +15,7 @@ interface TourProviderConfirmationEmailProps {
     serviceKind?: 'tour' | 'guide';
     reservationId: string;
     tourName: string;
+    bookingOptionName?: string | null;
     tourDate: string;
     requestedTime?: string | null;
     meetingPoint?: string | null;
@@ -44,6 +45,7 @@ export default function TourProviderConfirmationEmail({
     serviceKind = 'tour',
     reservationId,
     tourName,
+    bookingOptionName,
     tourDate,
     requestedTime,
     meetingPoint,
@@ -96,6 +98,12 @@ export default function TourProviderConfirmationEmail({
                                         <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>{serviceLabelUpper}</td>
                                         <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>{tourName}</td>
                                     </tr>
+                                    {bookingOptionName ? (
+                                        <tr>
+                                            <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>MODALIDAD</td>
+                                            <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>{bookingOptionName}</td>
+                                        </tr>
+                                    ) : null}
                                     <tr>
                                         <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>FECHA</td>
                                         <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>{formatDate(tourDate)}</td>

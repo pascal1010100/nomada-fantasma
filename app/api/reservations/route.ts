@@ -292,6 +292,8 @@ export async function POST(request: Request) {
         const metadataNote = buildRequestMetadataNote({
             locale,
             price: sanitizedData.total_price ?? undefined,
+            bookingOptionId: sanitizedData.booking_option_id ?? undefined,
+            bookingOptionName: sanitizedData.booking_option_name ?? undefined,
         });
 
         // Explicitly create an object with only the fields for insertion
@@ -503,6 +505,7 @@ export async function POST(request: Request) {
                 meetingPoint: tourLookup?.data?.meeting_point ?? null,
                 guests: reservationGuests,
                 totalPrice: ('total_price' in reservation ? reservation.total_price : reservation.total_price) || 0,
+                bookingOptionName: sanitizedData.booking_option_name ?? undefined,
                 locale,
                 t: t,
             });

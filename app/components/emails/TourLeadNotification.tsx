@@ -17,6 +17,7 @@ interface TourLeadNotificationProps {
     customerEmail: string;
     customerWhatsapp?: string | null;
     tourName: string;
+    bookingOptionName?: string | null;
     tourDate: string;
     serviceKind?: 'tour' | 'guide';
     requestedTime?: string | null;
@@ -53,6 +54,7 @@ export const TourLeadNotification = ({
     customerEmail,
     customerWhatsapp,
     tourName,
+    bookingOptionName,
     tourDate,
     serviceKind = 'tour',
     requestedTime,
@@ -199,6 +201,12 @@ export const TourLeadNotification = ({
                                         <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>{tableKindLabel}</td>
                                         <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>{tourName}</td>
                                     </tr>
+                                    {bookingOptionName ? (
+                                        <tr>
+                                            <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>MODALIDAD</td>
+                                            <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>{bookingOptionName}</td>
+                                        </tr>
+                                    ) : null}
                                     <tr>
                                         <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingBottom: '10px' }}>FECHA</td>
                                         <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 600, textAlign: 'right', paddingBottom: '10px' }}>{formatDate(tourDate)}</td>

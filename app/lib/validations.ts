@@ -49,6 +49,8 @@ export const CreateReservationSchema = z.object({
 
     // Notes
     notes: z.string().max(1000, 'Notes too long').optional(),
+    bookingOptionId: z.string().max(100).optional(),
+    bookingOptionName: z.string().max(200).optional(),
 }).superRefine((data, ctx) => {
     if (data.type === 'tour' && !data.tourId && !data.tourName) {
         ctx.addIssue({
@@ -99,6 +101,8 @@ export function sanitizeReservationInput(input: CreateReservationInput) {
         tour_name: input.tourName?.trim() || null,
         total_price: typeof input.totalPrice === 'number' ? input.totalPrice : null,
         notes: input.notes?.trim() || null,
+        booking_option_id: input.bookingOptionId?.trim() || null,
+        booking_option_name: input.bookingOptionName?.trim() || null,
     };
 }
 

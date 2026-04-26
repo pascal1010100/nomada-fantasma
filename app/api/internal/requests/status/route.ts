@@ -219,6 +219,7 @@ async function notifyTourCancellation(
         customerName: reservation.full_name,
         kind: requestKind,
         serviceName,
+        bookingOptionName: metadata.bookingOptionName,
         date: reservation.date,
         travelers: reservation.number_of_people,
         price: typeof reservation.total_price === 'number' ? reservation.total_price : metadata.price,
@@ -354,11 +355,13 @@ async function notifyTourConfirmed(
         requestKind === 'guide'
             ? reservation.guide_service_name || reservation.tour_name || 'Servicio de guia Nómada Fantasma'
             : reservation.tour_name || 'Tour Nómada Fantasma';
+    const metadata = parseRequestMetadata(reservation.admin_notes);
     const agencyResult = await sendTourProviderConfirmationEmail({
         serviceKind: requestKind,
         to: agencyEmail,
         reservationId: reservation.id,
         tourName: serviceName,
+        bookingOptionName: metadata.bookingOptionName,
         tourDate: reservation.date,
         requestedTime: reservation.requested_time,
         meetingPoint,
