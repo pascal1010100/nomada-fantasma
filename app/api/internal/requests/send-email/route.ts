@@ -3,14 +3,14 @@ import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/app/lib/supabase/server';
 import { getAuthorizedAdminContext } from '@/app/lib/admin-auth';
 import logger from '@/app/lib/logger';
-import { buildCustomerActionEmail, sendManualCustomerEmail } from '@/app/lib/email';
+import { buildCustomerActionEmail, sendManualCustomerEmail, sendTourProviderConfirmationEmail } from '@/app/lib/email';
 import { recordInternalNotification } from '@/app/lib/internal-notifications';
 import { normalizeLocale } from '@/app/lib/locale';
 import { parseRequestMetadata } from '@/app/lib/request-metadata';
 import type { Database } from '@/types/database.types';
 
 type RequestKind = 'tour' | 'guide' | 'shuttle';
-type ManualTemplate = 'payment_instructions' | 'not_available' | 'booking_confirmed';
+type ManualTemplate = 'payment_instructions' | 'not_available' | 'booking_confirmed' | 'provider_confirmation';
 type ReservationRow = Database['public']['Tables']['reservations']['Row'];
 type ShuttleBookingRow = Database['public']['Tables']['shuttle_bookings']['Row'];
 
@@ -28,11 +28,32 @@ type GuidePriceDetails = {
   priceLabelOverride?: string;
 };
 
-const TEMPLATE_WHITELIST: ManualTemplate[] = ['payment_instructions', 'not_available', 'booking_confirmed'];
+const TEMPLATE_WHITELIST: ManualTemplate[] = ['payment_instructions', 'not_available', 'booking_confirmed', 'provider_confirmation'];
+
+type ProviderContext = {
+  email: string | null;
+  meetingPoint: string | null;
+};
 
 function normalizeActor(raw: string | null): string {
   const value = (raw ?? '').trim();
   return value ? value.slice(0, 80) : 'recepcion';
+}
+
+function normalizeEmail(value: string | null | undefined): string | null {
+  const candidate = value?.trim();
+  if (!candidate) return null;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate) ? candidate : null;
+}
+
+function getFallbackAgencyEmail(): string | null {
+  return normalizeEmail(process.env.DEFAULT_AGENCY_EMAIL) ?? normalizeEmail(process.env.ADMIN_EMAIL);
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === 'string' && error.trim()) return error;
+  return fallback;
 }
 
 type PaymentOption = {
@@ -189,6 +210,93 @@ function normalizeTemplate(value: unknown): ManualTemplate | null {
     : null;
 }
 
+async function getTourAgencyEmail(tourId: string | null | undefined): Promise<string | null> {
+  const fallbackAgencyEmail = getFallbackAgencyEmail();
+  if (!tourId) return fallbackAgencyEmail;
+
+  const tourResult = await supabaseAdmin
+    .from('tours')
+    .select('agency_id')
+    .eq('id', tourId)
+    .maybeSingle<{ agency_id: string | null }>();
+
+  if (tourResult.error) {
+    logger.warn('Unable to resolve tour provider for manual provider email:', tourResult.error);
+    return fallbackAgencyEmail;
+  }
+
+  const agencyId = tourResult.data?.agency_id;
+  if (!agencyId) return fallbackAgencyEmail;
+
+  const agencyResult = await supabaseAdmin
+    .from('agencies')
+    .select('email, is_active')
+    .eq('id', agencyId)
+    .maybeSingle<{ email: string | null; is_active: boolean | null }>();
+
+  if (agencyResult.error) {
+    logger.warn('Unable to resolve tour provider email for manual provider email:', agencyResult.error);
+    return fallbackAgencyEmail;
+  }
+
+  if (!agencyResult.data?.is_active) return fallbackAgencyEmail;
+  return normalizeEmail(agencyResult.data.email) ?? fallbackAgencyEmail;
+}
+
+async function getGuideProviderContext(
+  guideId: string | null | undefined,
+  guideServiceId: string | null | undefined
+): Promise<ProviderContext> {
+  const fallbackEmail = getFallbackAgencyEmail();
+  let providerEmail: string | null = fallbackEmail;
+  let meetingPoint: string | null = null;
+
+  if (guideId) {
+    const guideResult = await supabaseAdmin
+      .from('guides')
+      .select('agency_id, email, is_active')
+      .eq('id', guideId)
+      .maybeSingle<{ agency_id: string | null; email: string | null; is_active: boolean | null }>();
+
+    if (guideResult.error) {
+      logger.warn('Unable to resolve guide provider for manual provider email:', guideResult.error);
+    } else if (guideResult.data?.is_active) {
+      const guideEmail = normalizeEmail(guideResult.data.email);
+      if (guideEmail) {
+        providerEmail = guideEmail;
+      } else if (guideResult.data.agency_id) {
+        const agencyResult = await supabaseAdmin
+          .from('agencies')
+          .select('email, is_active')
+          .eq('id', guideResult.data.agency_id)
+          .maybeSingle<{ email: string | null; is_active: boolean | null }>();
+
+        if (agencyResult.error) {
+          logger.warn('Unable to resolve guide agency for manual provider email:', agencyResult.error);
+        } else if (agencyResult.data?.is_active) {
+          providerEmail = normalizeEmail(agencyResult.data.email) ?? fallbackEmail;
+        }
+      }
+    }
+  }
+
+  if (guideServiceId) {
+    const serviceResult = await supabaseAdmin
+      .from('guide_services')
+      .select('meeting_point')
+      .eq('id', guideServiceId)
+      .maybeSingle<{ meeting_point: string | null }>();
+
+    if (serviceResult.error) {
+      logger.warn('Unable to resolve guide meeting point for manual provider email:', serviceResult.error);
+    } else {
+      meetingPoint = serviceResult.data?.meeting_point ?? null;
+    }
+  }
+
+  return { email: providerEmail, meetingPoint };
+}
+
 export async function POST(request: Request) {
   try {
     const adminContext = await getAuthorizedAdminContext(request);
@@ -235,6 +343,83 @@ export async function POST(request: Request) {
         const tTours = await getTranslations({ locale, namespace: 'Data.tours' });
         const tourKey = reservation.tour_name?.toLowerCase().replace(/\s+/g, '-') || '';
         serviceName = tourKey && tTours.has(`${tourKey}.title`) ? tTours(`${tourKey}.title`) : fallbackService;
+      }
+
+      if (template === 'provider_confirmation') {
+        const guideProviderContext =
+          kind === 'guide'
+            ? await getGuideProviderContext(reservation.guide_id, reservation.guide_service_id)
+            : null;
+        const providerEmail = kind === 'guide'
+          ? guideProviderContext?.email ?? null
+          : await getTourAgencyEmail(reservation.tour_id);
+
+        if (!providerEmail) {
+          return NextResponse.json({ error: 'No hay correo de proveedor configurado para esta solicitud.' }, { status: 400 });
+        }
+
+        let meetingPoint: string | null = null;
+        if (kind === 'guide') {
+          meetingPoint = guideProviderContext?.meetingPoint ?? null;
+        } else if (reservation.tour_id) {
+          const tourResult = await supabaseAdmin
+            .from('tours')
+            .select('meeting_point')
+            .eq('id', reservation.tour_id)
+            .maybeSingle<{ meeting_point: string | null }>();
+
+          if (tourResult.error) {
+            logger.warn('Unable to resolve meeting point for manual provider email:', tourResult.error);
+          } else {
+            meetingPoint = tourResult.data?.meeting_point ?? null;
+          }
+        }
+
+        const providerResult = await sendTourProviderConfirmationEmail({
+          serviceKind: kind,
+          to: providerEmail,
+          reservationId: reservation.id,
+          tourName: fallbackService,
+          bookingOptionName: metadata.bookingOptionName,
+          tourDate: reservation.date,
+          requestedTime: reservation.requested_time,
+          meetingPoint,
+          customerName: reservation.full_name,
+          customerEmail: reservation.email,
+          customerWhatsapp: reservation.whatsapp,
+          customerNotes: reservation.notes,
+          guests: reservation.number_of_people,
+        });
+        const subject = `${kind === 'guide' ? 'Servicio de guia confirmado para operar' : 'Tour confirmado para operar'}: ${fallbackService}`;
+
+        await recordInternalNotification({
+          requestKind: kind,
+          requestId: reservation.id,
+          recipientType: 'agency',
+          recipientEmail: providerEmail,
+          template: 'booking_confirmed_provider',
+          deliveryStatus: providerResult.success ? 'sent' : 'failed',
+          subject,
+          providerMessageId: providerResult.id,
+          errorMessage: providerResult.success ? null : getErrorMessage(providerResult.error, 'No se pudo enviar la confirmación al proveedor.'),
+          triggeredBy: actor,
+        });
+
+        if (!providerResult.success) {
+          return NextResponse.json(
+            { error: getErrorMessage(providerResult.error, 'No se pudo enviar la confirmación al proveedor.') },
+            { status: 502 }
+          );
+        }
+
+        await supabaseAdmin
+          .from('reservations')
+          .update({
+            admin_notes: appendAuditNote(reservation.admin_notes, actor, template),
+          } as Database['public']['Tables']['reservations']['Update'])
+          .eq('id', reservation.id);
+
+        return NextResponse.json({ success: true, subject, recipientEmail: providerEmail });
       }
 
       const guidePriceDetails =
@@ -335,6 +520,13 @@ export async function POST(request: Request) {
 
     if (shuttleResult.error || !shuttleResult.data) {
       return NextResponse.json({ error: 'Shuttle no encontrado.' }, { status: 404 });
+    }
+
+    if (template === 'provider_confirmation') {
+      return NextResponse.json(
+        { error: 'El reenvío operativo al proveedor todavía está disponible solo para tours y guías.' },
+        { status: 400 }
+      );
     }
 
     const shuttle = shuttleResult.data;

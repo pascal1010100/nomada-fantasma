@@ -8,6 +8,30 @@ import type { Database } from '@/types/database.types';
 type ReservationRow = Database['public']['Tables']['reservations']['Row'];
 type ShuttleBookingRow = Database['public']['Tables']['shuttle_bookings']['Row'];
 type TourRow = Database['public']['Tables']['tours']['Row'];
+type ProviderInfo = {
+    name: string | null;
+    email: string | null;
+    isActive: boolean;
+};
+type AgencyLite = {
+    id: string;
+    name: string | null;
+    email: string | null;
+    is_active: boolean | null;
+};
+type GuideLite = {
+    id: string;
+    name: string | null;
+    agency_id: string | null;
+    email: string | null;
+    is_active: boolean | null;
+};
+type ShuttleRouteLite = {
+    origin: string;
+    destination: string;
+    type: string | null;
+    agency_id: string | null;
+};
 type LegacyReservationRow = {
     id: string;
     created_at: string;
@@ -47,6 +71,7 @@ type InternalRequestItem = {
     adminNotes: string | null;
     confirmedAt: string | null;
     cancelledAt: string | null;
+    provider: ProviderInfo | null;
     notifications: InternalNotificationRecord[];
 };
 
@@ -58,7 +83,8 @@ function normalizeLimit(rawValue: string | null): number {
 
 function mapReservation(
     row: ReservationRow | LegacyReservationRow,
-    relatedTour?: Pick<TourRow, 'id' | 'title' | 'slug' | 'meeting_point' | 'pickup_time'> | null
+    relatedTour?: Pick<TourRow, 'id' | 'title' | 'slug' | 'meeting_point' | 'pickup_time'> | null,
+    provider: ProviderInfo | null = null
 ): InternalRequestItem {
     const isModern = 'full_name' in row;
     const reservationKind =
@@ -101,11 +127,12 @@ function mapReservation(
         adminNotes: row.admin_notes ?? null,
         confirmedAt: row.confirmed_at ?? null,
         cancelledAt: row.cancelled_at ?? null,
+        provider,
         notifications: [],
     };
 }
 
-function mapShuttle(row: ShuttleBookingRow): InternalRequestItem {
+function mapShuttle(row: ShuttleBookingRow, provider: ProviderInfo | null = null): InternalRequestItem {
     const createdAt = row.created_at ?? '';
     const serviceName = `${row.route_origin ?? ''} → ${row.route_destination ?? ''}`;
     const shuttleType = row.type === 'private' ? 'Privado' : row.type === 'shared' ? 'Compartido' : 'Shuttle';
@@ -131,8 +158,35 @@ function mapShuttle(row: ShuttleBookingRow): InternalRequestItem {
         adminNotes: row.admin_notes,
         confirmedAt: row.confirmed_at,
         cancelledAt: row.cancelled_at,
+        provider,
         notifications: [],
     };
+}
+
+function mapAgencyProvider(agency: AgencyLite | null | undefined): ProviderInfo | null {
+    if (!agency) return null;
+    return {
+        name: agency.name,
+        email: agency.email,
+        isActive: agency.is_active ?? false,
+    };
+}
+
+function mapGuideProvider(guide: GuideLite | null | undefined, agenciesById: Map<string, AgencyLite>): ProviderInfo | null {
+    if (!guide || guide.is_active === false) return null;
+    const guideEmail = guide.email?.trim() || null;
+    if (guideEmail) {
+        return {
+            name: guide.name,
+            email: guideEmail,
+            isActive: true,
+        };
+    }
+    return mapAgencyProvider(guide.agency_id ? agenciesById.get(guide.agency_id) : null);
+}
+
+function getShuttleRouteKey(origin: string | null | undefined, destination: string | null | undefined, type: string | null | undefined): string {
+    return `${origin ?? ''}::${destination ?? ''}::${type ?? 'shared'}`.toLowerCase();
 }
 
 export async function GET(request: Request) {
@@ -159,7 +213,7 @@ export async function GET(request: Request) {
 
         const sanPedroToursResult = await supabaseAdmin
             .from('tours')
-            .select('id, title, slug, meeting_point, pickup_time')
+            .select('id, title, slug, meeting_point, pickup_time, agency_id')
             .eq('pueblo_slug', 'san-pedro');
 
         if (sanPedroToursResult.error) {
@@ -168,10 +222,21 @@ export async function GET(request: Request) {
         }
 
         const sanPedroTours = (sanPedroToursResult.data ?? []) as Array<
-            Pick<TourRow, 'id' | 'title' | 'slug' | 'meeting_point' | 'pickup_time'>
+            Pick<TourRow, 'id' | 'title' | 'slug' | 'meeting_point' | 'pickup_time' | 'agency_id'>
         >;
         const sanPedroTourIds = new Set(sanPedroTours.map((tour) => tour.id));
         const toursById = new Map(sanPedroTours.map((tour) => [tour.id, tour]));
+        const agenciesResult = await supabaseAdmin
+            .from('agencies')
+            .select('id, name, email, is_active');
+
+        if (agenciesResult.error) {
+            logger.warn('Unable to fetch provider agencies for internal panel:', agenciesResult.error);
+        }
+
+        const agenciesById = new Map(
+            ((agenciesResult.data ?? []) as AgencyLite[]).map((agency) => [agency.id, agency])
+        );
 
         const reservationsResult = await supabaseAdmin
             .from('reservations')
@@ -211,19 +276,63 @@ export async function GET(request: Request) {
                 })
                 .slice(0, limit);
 
+            const guideIds = Array.from(new Set(
+                scopedReservations
+                    .map((row) => (row as ReservationRow).guide_id)
+                    .filter((value): value is string => Boolean(value))
+            ));
+            let guidesById = new Map<string, GuideLite>();
+
+            if (guideIds.length > 0) {
+                const guidesResult = await supabaseAdmin
+                    .from('guides')
+                    .select('id, name, agency_id, email, is_active')
+                    .in('id', guideIds);
+
+                if (guidesResult.error) {
+                    logger.warn('Unable to fetch guide providers for internal panel:', guidesResult.error);
+                } else {
+                    guidesById = new Map(
+                        ((guidesResult.data ?? []) as GuideLite[]).map((guide) => [guide.id, guide])
+                    );
+                }
+            }
+
             reservationItems = scopedReservations.map((row) => {
                 const typedRow = row as ReservationRow;
                 const relatedTour = typedRow.tour_id ? toursById.get(typedRow.tour_id) ?? null : null;
-                return mapReservation(typedRow, relatedTour);
+                const provider = typedRow.reservation_type === 'guide'
+                    ? mapGuideProvider(typedRow.guide_id ? guidesById.get(typedRow.guide_id) : null, agenciesById)
+                    : mapAgencyProvider(relatedTour?.agency_id ? agenciesById.get(relatedTour.agency_id) : null);
+                return mapReservation(typedRow, relatedTour, provider);
             });
         }
 
-        const shuttleItems = (shuttleResult.data ?? []).map(mapShuttle);
+        const shuttleRoutesResult = await supabaseAdmin
+            .from('shuttle_routes')
+            .select('origin, destination, type, agency_id');
+
+        if (shuttleRoutesResult.error) {
+            logger.warn('Unable to fetch shuttle providers for internal panel:', shuttleRoutesResult.error);
+        }
+
+        const shuttleAgencyByRoute = new Map(
+            ((shuttleRoutesResult.data ?? []) as ShuttleRouteLite[]).map((route) => [
+                getShuttleRouteKey(route.origin, route.destination, route.type),
+                route.agency_id,
+            ])
+        );
+
+        const shuttleItems = (shuttleResult.data ?? []).map((row) => {
+            const agencyId = shuttleAgencyByRoute.get(getShuttleRouteKey(row.route_origin, row.route_destination, row.type));
+            return mapShuttle(row, mapAgencyProvider(agencyId ? agenciesById.get(agencyId) : null));
+        });
         const items = [...reservationItems, ...shuttleItems].sort((a, b) =>
             b.createdAt.localeCompare(a.createdAt)
         );
         const notificationsByRequest = await listInternalNotificationsForRequests(
-            items.map((item) => ({ kind: item.kind, id: item.id }))
+            items.map((item) => ({ kind: item.kind, id: item.id })),
+            8
         );
         const enrichedItems = items.map((item) => ({
             ...item,

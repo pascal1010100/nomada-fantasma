@@ -28,6 +28,11 @@ type InternalRequestItem = {
     adminNotes: string | null;
     confirmedAt: string | null;
     cancelledAt: string | null;
+    provider: {
+        name: string | null;
+        email: string | null;
+        isActive: boolean;
+    } | null;
     notifications: Array<{
         id: string;
         created_at: string;
@@ -60,6 +65,7 @@ type InternalResponse = {
 type NoteQuality = 'strong' | 'weak' | 'risk';
 type ToastKind = 'success' | 'error' | 'info';
 type ManualEmailTemplate = 'payment_instructions' | 'not_available' | 'booking_confirmed';
+type ProviderEmailTemplate = 'provider_confirmation';
 type ToastMessage = {
     id: number;
     kind: ToastKind;
@@ -158,6 +164,8 @@ function getNotificationRecipientLabel(type: InternalRequestItem['notifications'
 function getNotificationTemplateLabel(template: string): string {
     if (template === 'payment_instructions') return 'Pago';
     if (template === 'booking_confirmed') return 'Confirmación';
+    if (template === 'booking_confirmed_provider') return 'Confirmación proveedor';
+    if (template === 'provider_confirmation') return 'Confirmación proveedor';
     if (template === 'booking_cancelled') return 'Cancelación';
     if (template === 'not_available') return 'No disponible';
     return template;
@@ -175,6 +183,27 @@ function getChecklist(status: RequestStatus): string {
     if (status === 'confirmed') return 'Confirmar logistica final y cerrar al completar servicio.';
     if (status === 'cancelled') return 'Caso cancelado. Verificar motivo en nota.';
     return 'Caso finalizado. Sin acciones pendientes.';
+}
+
+function getLatestProviderNotification(item: InternalRequestItem) {
+    return item.notifications.find((notification) => notification.recipient_type === 'agency') ?? null;
+}
+
+function getProviderStatusLabel(item: InternalRequestItem): string {
+    const latest = getLatestProviderNotification(item);
+    if (!item.provider?.email) return 'Sin correo';
+    if (!item.provider.isActive) return 'Inactivo';
+    if (!latest) return 'Sin envío';
+    return latest.delivery_status === 'sent' ? 'Enviado' : 'Falló';
+}
+
+function getProviderStatusClasses(item: InternalRequestItem): string {
+    const latest = getLatestProviderNotification(item);
+    if (!item.provider?.email || !item.provider.isActive) {
+        return 'border-amber-400/25 bg-amber-500/10 text-amber-200';
+    }
+    if (!latest) return 'border-white/10 bg-white/5 text-muted-foreground';
+    return getNotificationStatusClasses(latest.delivery_status);
 }
 
 function formatTimestamp(value: string | null): string {
@@ -684,7 +713,7 @@ export default function RecepcionRequestsPage() {
                 item,
                 nextStatus,
                 title: 'Confirmar Pago',
-                description: `Estás a punto de confirmar el pago de ${item.customerName}. Esto enviará automáticamente el Voucher de reserva a su correo.`,
+                description: `Estás a punto de confirmar el pago de ${item.customerName}. Esto notificará al proveedor y enviará automáticamente el voucher de reserva al cliente.`,
                 confirmLabel: 'Finalizar y Notificar',
                 modalStatus: 'confirmed',
                 showNoteInput: true,
@@ -847,6 +876,49 @@ export default function RecepcionRequestsPage() {
                       : 'Correo de confirmación enviado';
 
             pushToast('success', successTitle, item.customerEmail);
+            await fetchRequests();
+        } catch (requestError) {
+            const message = requestError instanceof Error ? requestError.message : 'Error de red';
+            setError(message);
+            pushToast('error', 'Error de red', message);
+        } finally {
+            setEmailActionLoadingId(null);
+        }
+    };
+
+    const sendProviderEmail = async (item: InternalRequestItem, template: ProviderEmailTemplate) => {
+        const loadingKey = `${item.kind}-${item.id}-${template}`;
+        setEmailActionLoadingId(loadingKey);
+        setError('');
+
+        try {
+            const response = await fetch('/api/internal/requests/send-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-admin-actor': actor.trim() || 'recepcion',
+                },
+                body: JSON.stringify({
+                    kind: item.kind,
+                    id: item.id,
+                    template,
+                }),
+            });
+
+            const payload = await response.json();
+            if (!response.ok) {
+                if (response.status === 401) {
+                    await supabase.auth.signOut();
+                    router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}&error=auth-required`);
+                    return;
+                }
+                const message = payload?.error || 'No se pudo enviar el correo al proveedor.';
+                setError(message);
+                pushToast('error', 'No se pudo notificar al proveedor', message);
+                return;
+            }
+
+            pushToast('success', 'Proveedor notificado', payload?.recipientEmail || item.provider?.email || 'Correo enviado');
             await fetchRequests();
         } catch (requestError) {
             const message = requestError instanceof Error ? requestError.message : 'Error de red';
@@ -1112,6 +1184,13 @@ export default function RecepcionRequestsPage() {
                     const locationSummary = summarizeLocationLabel(item.locationLabel, item.kind);
                     const primaryActions = getActions(normalizedStatus);
                     const manualEmailActions = getEmailActions(item, normalizedStatus);
+                    const providerNotification = getLatestProviderNotification(item);
+                    const providerEmailKey = `${item.kind}-${item.id}-provider_confirmation`;
+                    const canSendProviderConfirmation =
+                        (item.kind === 'tour' || item.kind === 'guide') &&
+                        Boolean(item.provider?.email) &&
+                        item.provider?.isActive !== false &&
+                        (normalizedStatus === 'confirmed' || normalizedStatus === 'completed');
 
                     return (
                         <article key={itemKey} className="overflow-hidden rounded-2xl border border-white/10 bg-card/35 shadow-sm transition hover:border-cyan-400/30 hover:shadow-cyan-500/5">
@@ -1238,6 +1317,42 @@ export default function RecepcionRequestsPage() {
                                                     <span className="text-sm text-muted-foreground">Sin correos manuales para este estado.</span>
                                                 ) : null}
                                             </div>
+                                        </div>
+
+                                        <div className="rounded-2xl border border-cyan-400/10 bg-cyan-500/[0.04] p-3">
+                                            <div className="flex items-center justify-between gap-3">
+                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Proveedor</p>
+                                                <span className={`rounded-full border px-2 py-0.5 text-[11px] ${getProviderStatusClasses(item)}`}>
+                                                    {getProviderStatusLabel(item)}
+                                                </span>
+                                            </div>
+                                            <div className="mt-2 min-w-0">
+                                                <p className="truncate text-sm font-medium text-foreground">
+                                                    {item.provider?.name || 'Sin proveedor asignado'}
+                                                </p>
+                                                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                                                    {item.provider?.email || 'Falta correo operativo'}
+                                                </p>
+                                                {providerNotification ? (
+                                                    <p className="mt-1 text-[11px] text-muted-foreground">
+                                                        Último envío: {getNotificationTemplateLabel(providerNotification.template)}
+                                                    </p>
+                                                ) : null}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => sendProviderEmail(item, 'provider_confirmation')}
+                                                disabled={!canSendProviderConfirmation || Boolean(emailActionLoadingId) || authLoading}
+                                                className="mt-3 w-full rounded-xl border border-cyan-400/20 bg-cyan-500/5 px-3 py-2 text-left text-sm text-cyan-100 transition hover:border-cyan-400/40 disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                {emailActionLoadingId === providerEmailKey
+                                                    ? 'Enviando...'
+                                                    : canSendProviderConfirmation
+                                                        ? 'Reenviar confirmación al proveedor'
+                                                        : normalizedStatus === 'confirmed' || normalizedStatus === 'completed'
+                                                            ? 'Proveedor sin correo disponible'
+                                                            : 'Se notificará al confirmar pago'}
+                                            </button>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-2 text-xs">
