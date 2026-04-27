@@ -6,6 +6,7 @@ import ShuttleConfirmationEmail from '../components/emails/ShuttleConfirmationEm
 import ShuttleAdminNotification from '../components/emails/ShuttleAdminNotification';
 import ShuttleAgencyNotification from '../components/emails/ShuttleAgencyNotification';
 import ShuttleCancellationNotice from '../components/emails/ShuttleCancellationNotice';
+import ShuttleProviderConfirmationEmail from '../components/emails/ShuttleProviderConfirmationEmail';
 import CustomerActionEmail from '../components/emails/CustomerActionEmail';
 import TourLeadNotification from '../components/emails/TourLeadNotification';
 import TourCancellationNotice from '../components/emails/TourCancellationNotice';
@@ -547,6 +548,21 @@ type ShuttleCancellationAgencyEmailProps = {
     cancellationReason: string;
 };
 
+type ShuttleProviderConfirmationEmailProps = {
+    to: string;
+    bookingId: string;
+    origin: string;
+    destination: string;
+    travelDate: string;
+    travelTime?: string | null;
+    passengers: number;
+    pickupLocation: string;
+    type?: string | null;
+    customerName: string;
+    customerEmail: string;
+    customerWhatsapp?: string | null;
+};
+
 type TourProviderConfirmationEmailProps = {
     serviceKind?: 'tour' | 'guide';
     to: string;
@@ -616,6 +632,31 @@ export async function sendTourProviderConfirmationEmail(data: TourProviderConfir
         );
     } catch (error) {
         logger.error('Error sending tour provider confirmation email:', error);
+        return { success: false, error };
+    }
+}
+
+export async function sendShuttleProviderConfirmationEmail(data: ShuttleProviderConfirmationEmailProps): Promise<SendEmailResult> {
+    if (!resend) {
+        logger.info('📧 [SHUTTLE PROVIDER CONFIRMATION SIMULATION] --------------------');
+        logger.info(`To Agency: ${data.to}`);
+        logger.info(`Subject: Shuttle confirmado para operar: ${data.origin} -> ${data.destination}`);
+        logger.info('Agency Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        logger.info('----------------------------------------------------------------');
+        return { success: true, id: 'simulated_' + Date.now() };
+    }
+
+    try {
+        return await sendEmailWithRetry('shuttle_agency_booking_confirmed', () =>
+            resend.emails.send({
+                from: RESEND_FROM,
+                to: [data.to],
+                subject: `Shuttle confirmado para operar: ${data.origin} -> ${data.destination}`,
+                react: ShuttleProviderConfirmationEmail(data),
+            })
+        );
+    } catch (error) {
+        logger.error('Error sending shuttle provider confirmation email:', error);
         return { success: false, error };
     }
 }

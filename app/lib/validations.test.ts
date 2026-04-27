@@ -160,7 +160,7 @@ describe('Validations', () => {
         customerWhatsapp: '50212345678',
         routeOrigin: 'Panajachel',
         routeDestination: 'Chichicastenango',
-        date: '2026-03-15',
+        date: '2099-03-15',
         time: '10:00',
         passengers: 4,
         pickupLocation: 'Hotel Example, Panajachel',

@@ -146,7 +146,16 @@ export const ShuttleRequestSchema = z.object({
     customerWhatsapp: z.string().min(7), // Mapped to 'whatsappRequired'
     routeOrigin: z.string().min(1), // Mapped to 'originRequired'
     routeDestination: z.string().min(1), // Mapped to 'destinationRequired'
-    date: z.string().min(1), // Mapped to 'dateRequired'
+    date: z.string().min(1).refine((value) => {
+        const trimmed = value.trim();
+        const parsed = /^\d{4}-\d{2}-\d{2}$/.test(trimmed)
+            ? new Date(`${trimmed}T12:00:00`)
+            : new Date(trimmed);
+        if (Number.isNaN(parsed.getTime())) return false;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return parsed.getTime() > today.getTime();
+    }), // Mapped to 'dateRequired'
     time: z.string().min(1), // Mapped to 'timeRequired'
     passengers: z.number().int().min(1), // Mapped to 'minPassengers'
     pickupLocation: z.string().min(5), // Mapped to 'pickupLocationRequired'
@@ -212,6 +221,8 @@ export function mapZodErrorToTranslationKey(issue: z.ZodIssue): string {
             return 'invalidEmail'; // fallback
 
         case z.ZodIssueCode.custom: {
+            if (mappedField === 'date') return 'dateRequired';
+            if (mappedField === 'time') return 'timeRequired';
             // For custom errors, try to extract from message
             const message = issue.message.toLowerCase();
             if (message.includes('origen')) return 'originRequired';

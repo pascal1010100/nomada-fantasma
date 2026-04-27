@@ -561,7 +561,10 @@ export type Database = {
           id: string
           passengers: number
           pickup_location: string
+          agency_id: string | null
+          price: number | null
           route_destination: string
+          route_id: string | null
           route_origin: string
           status: string | null
           travel_date: string
@@ -584,7 +587,10 @@ export type Database = {
           id?: string
           passengers?: number
           pickup_location: string
+          agency_id?: string | null
+          price?: number | null
           route_destination: string
+          route_id?: string | null
           route_origin: string
           status?: string | null
           travel_date: string
@@ -607,14 +613,32 @@ export type Database = {
           id?: string
           passengers?: number
           pickup_location?: string
+          agency_id?: string | null
+          price?: number | null
           route_destination?: string
+          route_id?: string | null
           route_origin?: string
           status?: string | null
           travel_date?: string
           travel_time?: string
           type?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "shuttle_bookings_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shuttle_bookings_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "shuttle_routes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shuttle_routes: {
         Row: {

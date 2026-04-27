@@ -3,7 +3,12 @@ import { getTranslations } from 'next-intl/server';
 import { supabaseAdmin } from '@/app/lib/supabase/server';
 import { getAuthorizedAdminContext } from '@/app/lib/admin-auth';
 import logger from '@/app/lib/logger';
-import { buildCustomerActionEmail, sendManualCustomerEmail, sendTourProviderConfirmationEmail } from '@/app/lib/email';
+import {
+  buildCustomerActionEmail,
+  sendManualCustomerEmail,
+  sendShuttleProviderConfirmationEmail,
+  sendTourProviderConfirmationEmail,
+} from '@/app/lib/email';
 import { recordInternalNotification } from '@/app/lib/internal-notifications';
 import { normalizeLocale } from '@/app/lib/locale';
 import { parseRequestMetadata } from '@/app/lib/request-metadata';
@@ -241,6 +246,51 @@ async function getTourAgencyEmail(tourId: string | null | undefined): Promise<st
 
   if (!agencyResult.data?.is_active) return fallbackAgencyEmail;
   return normalizeEmail(agencyResult.data.email) ?? fallbackAgencyEmail;
+}
+
+async function getAgencyEmailById(agencyId: string): Promise<string | null> {
+  const fallbackAgencyEmail = getFallbackAgencyEmail();
+  const agencyResult = await supabaseAdmin
+    .from('agencies')
+    .select('email, is_active')
+    .eq('id', agencyId)
+    .maybeSingle<{ email: string | null; is_active: boolean | null }>();
+
+  if (agencyResult.error) {
+    logger.warn('Unable to resolve provider email by agency id:', agencyResult.error);
+    return fallbackAgencyEmail;
+  }
+
+  if (!agencyResult.data?.is_active) return fallbackAgencyEmail;
+  return normalizeEmail(agencyResult.data.email) ?? fallbackAgencyEmail;
+}
+
+async function getShuttleAgencyEmail(
+  origin: string,
+  destination: string,
+  type: string,
+  agencyIdOverride?: string | null
+): Promise<string | null> {
+  const fallbackAgencyEmail = getFallbackAgencyEmail();
+  if (agencyIdOverride) return getAgencyEmailById(agencyIdOverride);
+
+  const routeResult = await supabaseAdmin
+    .from('shuttle_routes')
+    .select('agency_id')
+    .eq('origin', origin)
+    .eq('destination', destination)
+    .eq('type', type)
+    .limit(1)
+    .maybeSingle<{ agency_id: string | null }>();
+
+  if (routeResult.error) {
+    logger.warn('Unable to resolve shuttle provider for manual provider email:', routeResult.error);
+    return fallbackAgencyEmail;
+  }
+
+  const agencyId = routeResult.data?.agency_id;
+  if (!agencyId) return fallbackAgencyEmail;
+  return getAgencyEmailById(agencyId);
 }
 
 async function getGuideProviderContext(
@@ -522,18 +572,72 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Shuttle no encontrado.' }, { status: 404 });
     }
 
+    const shuttle = shuttleResult.data;
+
     if (template === 'provider_confirmation') {
-      return NextResponse.json(
-        { error: 'El reenvío operativo al proveedor todavía está disponible solo para tours y guías.' },
-        { status: 400 }
+      const agencyEmail = await getShuttleAgencyEmail(
+        shuttle.route_origin,
+        shuttle.route_destination,
+        shuttle.type ?? 'shared',
+        shuttle.agency_id
       );
+
+      if (!agencyEmail) {
+        return NextResponse.json({ error: 'No hay correo de proveedor asignado para este shuttle.' }, { status: 400 });
+      }
+
+      const providerResult = await sendShuttleProviderConfirmationEmail({
+        to: agencyEmail,
+        bookingId: shuttle.id,
+        origin: shuttle.route_origin,
+        destination: shuttle.route_destination,
+        travelDate: shuttle.travel_date,
+        travelTime: shuttle.travel_time,
+        passengers: shuttle.passengers,
+        pickupLocation: shuttle.pickup_location,
+        type: shuttle.type,
+        customerName: shuttle.customer_name,
+        customerEmail: shuttle.customer_email,
+        customerWhatsapp: shuttle.customer_whatsapp,
+      });
+      const subject = `Shuttle confirmado para operar: ${shuttle.route_origin} -> ${shuttle.route_destination}`;
+
+      await recordInternalNotification({
+        requestKind: 'shuttle',
+        requestId: shuttle.id,
+        recipientType: 'agency',
+        recipientEmail: agencyEmail,
+        template: 'booking_confirmed_provider',
+        deliveryStatus: providerResult.success ? 'sent' : 'failed',
+        subject,
+        providerMessageId: providerResult.id,
+        errorMessage: providerResult.success ? null : getErrorMessage(providerResult.error, 'No se pudo enviar la confirmación final al proveedor.'),
+        triggeredBy: actor,
+      });
+
+      if (!providerResult.success) {
+        return NextResponse.json(
+          { error: getErrorMessage(providerResult.error, 'No se pudo enviar la confirmación final al proveedor.') },
+          { status: 502 }
+        );
+      }
+
+      await supabaseAdmin
+        .from('shuttle_bookings')
+        .update({
+          admin_notes: appendAuditNote(shuttle.admin_notes, actor, template),
+        } as Database['public']['Tables']['shuttle_bookings']['Update'])
+        .eq('id', shuttle.id);
+
+      return NextResponse.json({ success: true, subject });
     }
 
-    const shuttle = shuttleResult.data;
     const metadata = parseRequestMetadata(shuttle.admin_notes);
     const locale = normalizeLocale(shuttle.customer_locale ?? metadata.locale);
     const serviceName = `${shuttle.route_origin} → ${shuttle.route_destination}`;
-    const price = typeof metadata.price === 'number'
+    const price = typeof shuttle.price === 'number'
+      ? shuttle.price
+      : typeof metadata.price === 'number'
       ? metadata.price
       : await getShuttleRoutePrice(shuttle.route_origin, shuttle.route_destination, shuttle.type ?? 'shared');
     const { subject, react } = buildCustomerActionEmail({

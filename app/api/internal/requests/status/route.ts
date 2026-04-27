@@ -5,6 +5,7 @@ import {
     buildCustomerActionEmail,
     sendManualCustomerEmail,
     sendShuttleCancellationAgencyEmail,
+    sendShuttleProviderConfirmationEmail,
     sendTourCancellationAgencyEmail,
     sendTourProviderConfirmationEmail,
 } from '@/app/lib/email';
@@ -156,8 +157,27 @@ async function getGuideProviderContext(
     return { email: providerEmail, meetingPoint };
 }
 
-async function getShuttleAgencyEmail(origin: string, destination: string, type: string): Promise<string | null> {
+async function getAgencyEmailById(agencyId: string): Promise<string | null> {
     const fallbackAgencyEmail = getFallbackAgencyEmail();
+
+    const agencyResult = await supabaseAdmin
+        .from('agencies')
+        .select('email, is_active')
+        .eq('id', agencyId)
+        .maybeSingle<{ email: string | null; is_active: boolean | null }>();
+
+    if (agencyResult.error) {
+        logger.warn('Unable to resolve agency email by id:', agencyResult.error);
+        return fallbackAgencyEmail;
+    }
+
+    if (!agencyResult.data?.is_active) return fallbackAgencyEmail;
+    return normalizeEmail(agencyResult.data.email) ?? fallbackAgencyEmail;
+}
+
+async function getShuttleAgencyEmail(origin: string, destination: string, type: string, agencyIdOverride?: string | null): Promise<string | null> {
+    const fallbackAgencyEmail = getFallbackAgencyEmail();
+    if (agencyIdOverride) return getAgencyEmailById(agencyIdOverride);
 
     const routeResult = await supabaseAdmin
         .from('shuttle_routes')
@@ -400,6 +420,71 @@ async function notifyTourConfirmed(
     };
 }
 
+async function notifyShuttleConfirmed(
+    shuttle: ShuttleStatusRow,
+    actor: string,
+    adminNotes: string | null
+): Promise<CancellationNotificationResult> {
+    let nextNotes = adminNotes;
+    const warnings: string[] = [];
+    const agencyEmail = await getShuttleAgencyEmail(
+        shuttle.route_origin,
+        shuttle.route_destination,
+        shuttle.type ?? 'shared',
+        shuttle.agency_id
+    );
+
+    if (!agencyEmail) {
+        return {
+            auditNotes: nextNotes,
+            emailAttemptsDelta: 0,
+            warnings: [],
+        };
+    }
+
+    const agencyResult = await sendShuttleProviderConfirmationEmail({
+        to: agencyEmail,
+        bookingId: shuttle.id,
+        origin: shuttle.route_origin,
+        destination: shuttle.route_destination,
+        travelDate: shuttle.travel_date,
+        travelTime: shuttle.travel_time,
+        passengers: shuttle.passengers,
+        pickupLocation: shuttle.pickup_location,
+        type: shuttle.type,
+        customerName: shuttle.customer_name,
+        customerEmail: shuttle.customer_email,
+        customerWhatsapp: shuttle.customer_whatsapp,
+    });
+
+    await recordInternalNotification({
+        requestKind: 'shuttle',
+        requestId: shuttle.id,
+        recipientType: 'agency',
+        recipientEmail: agencyEmail,
+        template: 'booking_confirmed_provider',
+        deliveryStatus: agencyResult.success ? 'sent' : 'failed',
+        subject: `Shuttle confirmado para operar: ${shuttle.route_origin} -> ${shuttle.route_destination}`,
+        providerMessageId: agencyResult.id,
+        errorMessage: agencyResult.success ? null : getErrorMessage(agencyResult.error, 'No se pudo enviar la confirmación final al proveedor del shuttle.'),
+        triggeredBy: actor,
+    });
+
+    if (agencyResult.success) {
+        nextNotes = appendAdminLine(nextNotes, `[${new Date().toISOString()}] (${actor}) email:auto_booking_confirmed_shuttle_agency:sent`);
+    } else {
+        const errorMessage = getErrorMessage(agencyResult.error, 'No se pudo enviar la confirmación final al proveedor del shuttle.');
+        warnings.push(errorMessage);
+        nextNotes = appendAdminLine(nextNotes, `[${new Date().toISOString()}] (${actor}) email:auto_booking_confirmed_shuttle_agency:failed ${errorMessage}`);
+    }
+
+    return {
+        auditNotes: nextNotes,
+        emailAttemptsDelta: 0,
+        warnings,
+    };
+}
+
 async function notifyShuttleCancellation(
     shuttle: ShuttleStatusRow,
     note: string,
@@ -417,7 +502,11 @@ async function notifyShuttleCancellation(
         serviceName,
         date: shuttle.travel_date,
         travelers: shuttle.passengers,
-        price: typeof metadata.price === 'number' ? metadata.price : undefined,
+        price: typeof shuttle.price === 'number'
+            ? shuttle.price
+            : typeof metadata.price === 'number'
+                ? metadata.price
+                : undefined,
         requestId: shuttle.id,
         cancellationReason: note,
     });
@@ -453,7 +542,7 @@ async function notifyShuttleCancellation(
         nextNotes = appendAdminLine(nextNotes, `[${emailLastAttemptAt}] (${actor}) email:auto_booking_cancelled_customer:failed ${errorMessage}`);
     }
 
-    const agencyEmail = await getShuttleAgencyEmail(shuttle.route_origin, shuttle.route_destination, shuttle.type ?? 'shared');
+    const agencyEmail = await getShuttleAgencyEmail(shuttle.route_origin, shuttle.route_destination, shuttle.type ?? 'shared', shuttle.agency_id);
     if (agencyEmail) {
         const agencyResult = await sendShuttleCancellationAgencyEmail({
             to: agencyEmail,
@@ -821,6 +910,29 @@ export async function PATCH(request: Request) {
         }
 
         let warning: string | undefined;
+
+        if (nextStatusRaw === 'confirmed') {
+            const confirmationNotification = await notifyShuttleConfirmed(
+                shuttleResult.data as ShuttleStatusRow,
+                actor,
+                updatePayload.admin_notes ?? shuttleResult.data.admin_notes
+            );
+
+            const confirmationPersist = await supabaseAdmin
+                .from('shuttle_bookings')
+                .update({
+                    admin_notes: confirmationNotification.auditNotes,
+                } as ShuttleBookingUpdate)
+                .eq('id', id);
+
+            if (confirmationPersist.error) {
+                logger.error('Error persisting shuttle provider confirmation metadata:', confirmationPersist.error);
+            }
+
+            if (confirmationNotification.warnings.length > 0) {
+                warning = confirmationNotification.warnings.join(' ');
+            }
+        }
 
         if (nextStatusRaw === 'cancelled' && note) {
             const notificationResult = await notifyShuttleCancellation(

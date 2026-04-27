@@ -279,6 +279,9 @@ ALTER TABLE "public"."reservations" OWNER TO "postgres";
 
 CREATE TABLE IF NOT EXISTS "public"."shuttle_bookings" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "route_id" "text",
+    "agency_id" "uuid",
+    "price" numeric(10,2),
     "customer_name" "text" NOT NULL,
     "customer_email" "text" NOT NULL,
     "customer_whatsapp" "text",
@@ -543,6 +546,12 @@ CREATE INDEX "idx_reservations_guide_service_id" ON "public"."reservations" USIN
 CREATE INDEX "idx_shuttle_bookings_email_delivery_status" ON "public"."shuttle_bookings" USING "btree" ("email_delivery_status");
 
 
+CREATE INDEX "idx_shuttle_bookings_agency_id" ON "public"."shuttle_bookings" USING "btree" ("agency_id");
+
+
+CREATE INDEX "idx_shuttle_bookings_route_id" ON "public"."shuttle_bookings" USING "btree" ("route_id");
+
+
 
 CREATE INDEX "idx_shuttle_routes_agency_id" ON "public"."shuttle_routes" USING "btree" ("agency_id");
 
@@ -574,6 +583,14 @@ ALTER TABLE ONLY "public"."reservations"
 
 ALTER TABLE ONLY "public"."shuttle_routes"
     ADD CONSTRAINT "shuttle_routes_agency_id_fkey" FOREIGN KEY ("agency_id") REFERENCES "public"."agencies"("id") ON DELETE SET NULL;
+
+
+ALTER TABLE ONLY "public"."shuttle_bookings"
+    ADD CONSTRAINT "shuttle_bookings_agency_id_fkey" FOREIGN KEY ("agency_id") REFERENCES "public"."agencies"("id") ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+ALTER TABLE ONLY "public"."shuttle_bookings"
+    ADD CONSTRAINT "shuttle_bookings_route_id_fkey" FOREIGN KEY ("route_id") REFERENCES "public"."shuttle_routes"("id") ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 

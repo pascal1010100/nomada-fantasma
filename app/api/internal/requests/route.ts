@@ -149,7 +149,7 @@ function mapShuttle(row: ShuttleBookingRow, provider: ProviderInfo | null = null
         requestedTime: row.travel_time ?? null,
         partySize: row.passengers ?? null,
         locationLabel: row.pickup_location ?? null,
-        totalPrice: null,
+        totalPrice: row.price ?? null,
         details: `${shuttleType} · ${row.route_origin ?? ''} -> ${row.route_destination ?? ''}`,
         status: row.status,
         emailStatus: row.email_delivery_status,
@@ -324,7 +324,7 @@ export async function GET(request: Request) {
         );
 
         const shuttleItems = (shuttleResult.data ?? []).map((row) => {
-            const agencyId = shuttleAgencyByRoute.get(getShuttleRouteKey(row.route_origin, row.route_destination, row.type));
+            const agencyId = row.agency_id ?? shuttleAgencyByRoute.get(getShuttleRouteKey(row.route_origin, row.route_destination, row.type));
             return mapShuttle(row, mapAgencyProvider(agencyId ? agenciesById.get(agencyId) : null));
         });
         const items = [...reservationItems, ...shuttleItems].sort((a, b) =>
