@@ -125,12 +125,12 @@ export default function Navbar() {
           : "bg-transparent border-transparent"
           }`}
       >
-        <nav aria-label="Principal" className="flex min-h-[var(--nf-navbar-height)] items-center justify-between px-6 py-3">
-          <Link href={`/${locale}`} className="group inline-flex items-center gap-2">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-card/70">
+        <nav aria-label="Principal" className="flex min-h-[var(--nf-navbar-height)] items-center justify-between gap-3 px-4 py-3 md:px-6">
+          <Link href={`/${locale}`} className="group inline-flex min-w-0 items-center gap-2">
+            <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-border bg-card/70">
               <Ghost className="h-4 w-4" />
             </span>
-            <span className="text-sm font-semibold tracking-tight">{t("brandName")}</span>
+            <span className="truncate text-sm font-semibold tracking-tight max-[380px]:max-w-[8.5rem]">{t("brandName")}</span>
           </Link>
 
           <ul className="hidden items-center gap-2 md:flex">
@@ -156,7 +156,7 @@ export default function Navbar() {
             <li className="pl-1"><ThemeToggle /></li>
           </ul>
 
-          <div className="flex items-center gap-2 md:hidden">
+          <div className="flex shrink-0 items-center gap-1.5 md:hidden">
             <LanguageSwitcher />
             <ThemeToggle />
             <button
@@ -183,7 +183,7 @@ export default function Navbar() {
               animate={{ opacity: 0.5 }}
               exit={{ opacity: 0 }}
               transition={{ duration: prefersReduced ? 0 : 0.18 }}
-              className="md:hidden fixed inset-0 z-40 bg-black/50"
+              className="md:hidden fixed inset-0 z-[95] bg-black/50"
             />
             <motion.div
               key="drawer"
@@ -197,7 +197,7 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: prefersReduced ? 0 : 0.22 }}
-              className="md:hidden fixed right-0 top-0 z-50 h-dvh w-[80vw] max-w-[420px] min-w-[280px] glass-enhanced border-l border-border shadow-2xl"
+              className="md:hidden fixed right-0 top-0 z-[100] h-dvh w-[80vw] max-w-[420px] min-w-[280px] glass-enhanced border-l border-border shadow-2xl"
             >
               <nav className="flex h-full flex-col">
                 <div className="flex items-center justify-between p-4 border-b border-border">

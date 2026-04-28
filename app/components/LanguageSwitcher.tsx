@@ -25,7 +25,7 @@ export default function LanguageSwitcher() {
     return (
         <Link
             href={href}
-            className="group relative flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:border-primary/50 hover:bg-white/10 transition-all duration-300 active:scale-95"
+            className="group relative flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 transition-all duration-300 hover:border-primary/50 hover:bg-white/10 active:scale-95 max-[430px]:gap-0 max-[430px]:px-2"
             title={t('switch')}
         >
             {/* The "文" symbol - represents language/literature across many cultures */}
@@ -36,7 +36,7 @@ export default function LanguageSwitcher() {
                 文
             </span>
 
-            <div className="flex flex-col items-start leading-none">
+            <div className="flex flex-col items-start leading-none max-[430px]:sr-only">
                 <span className="text-[10px] uppercase font-bold tracking-widest opacity-50">
                     {locale.toUpperCase()}
                 </span>
