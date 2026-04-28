@@ -65,13 +65,13 @@ export default function RutasMagicasClient({ routes }: RutasMagicasClientProps) 
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.05)_0%,transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_0%,rgba(168,85,247,0.05)_0%,transparent_50%)]" />
       </div>
 
-      <div className="relative pt-28">
+      <div className="relative nf-page-safe-loose">
         <ParticlesBackground />
 
         <HeroSection onSearch={handleSearch} defaultQuery={searchQuery} />
 
         <main className="relative z-10">
-          <div id="destinos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 md:pt-20 md:pb-16 lg:pt-24 lg:pb-20 scroll-mt-28">
+          <div id="destinos" className="nf-scroll-mt-nav max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 md:pt-20 md:pb-16 lg:pt-24 lg:pb-20">
             <div className="mx-auto mb-10 max-w-3xl text-center md:mb-14">
               <div className="mb-4 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
                 {t('sectionEyebrow')}

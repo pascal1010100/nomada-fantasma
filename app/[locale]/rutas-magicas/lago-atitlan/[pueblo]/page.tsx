@@ -51,7 +51,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
 
         <div className="relative z-10 container mx-auto px-4 h-full flex flex-col">
           {/* Botón de volver */}
-          <div className="pt-20 md:pt-24">
+          <div className="nf-page-safe-loose">
             <Link
               href={`/${locale}/rutas-magicas/lago-atitlan`}
               className="inline-flex items-center text-white/90 hover:text-white transition-colors duration-200 group/back"

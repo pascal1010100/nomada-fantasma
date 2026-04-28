@@ -81,13 +81,13 @@ const AboutPage = () => {
   ]
 
   return (
-    <div className="relative min-h-screen pt-20 overflow-hidden bg-background">
+    <div className="relative min-h-screen overflow-hidden bg-background">
       <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
         {/* Background element can be placed here */}
       </div>
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-16 md:pt-32 md:pb-24">
+      <section className="relative nf-page-safe-loose pb-16 md:pb-24">
         <div className="container px-4 mx-auto text-center">
           <motion.div
             className="inline-flex items-center px-4 py-2 text-sm font-medium glass-enhanced rounded-full border border-primary/20 mb-8"

@@ -73,7 +73,7 @@ export default function ShuttlesClient({
     return (
         <div className="min-h-screen bg-background pb-32">
             {/* Hero Section */}
-            <section className="px-4 pt-6 sm:px-6">
+            <section className="nf-page-safe-loose px-4 sm:px-6">
                 <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[30px] border border-white/10 bg-card/70 shadow-2xl shadow-black/30">
                     <div className="absolute inset-0 z-0 overflow-hidden">
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(53,237,255,0.24),transparent_28%),radial-gradient(circle_at_50%_28%,rgba(170,109,255,0.18),transparent_24%)]" />

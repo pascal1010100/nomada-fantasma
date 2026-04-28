@@ -36,7 +36,7 @@ export default function TownTabs({ panels, defaultTabId = 'experiences' }: TownT
     return (
         <div className="w-full">
             {/* Tab Navigation */}
-            <div className="sticky top-[48px] md:top-[53px] z-40 transition-all duration-300 pt-2 pb-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm mb-8">
+            <div className="sticky nf-sticky-below-nav z-40 transition-all duration-300 pt-2 pb-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm mb-8">
                 <nav className="flex space-x-8 overflow-x-auto px-4 sm:px-0 no-scrollbar" aria-label="Tabs">
                     {tabs.map((tab) => (
                         <button

@@ -334,7 +334,7 @@ export default function ReservarClient() {
             <div className="nf-grid pointer-events-none fixed inset-0 z-0 opacity-30" />
             <div className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-b from-background via-background to-background/95" />
 
-            <div className="relative z-10 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="relative z-10 nf-page-safe-loose px-4 pb-12 sm:px-6 lg:px-8">
                 <div className="max-w-5xl mx-auto">
                     {/* Header with back button */}
                     <motion.div

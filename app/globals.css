@@ -9,6 +9,9 @@
 :root {
   --radius: 16px;
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --nf-navbar-height: 64px;
+  --nf-page-top: calc(var(--nf-navbar-height) + env(safe-area-inset-top));
+  --nf-page-top-loose: calc(var(--nf-page-top) + 1rem);
 
   /* LIGHT THEME (BASE) */
   --background: 210 40% 98%;
@@ -93,6 +96,21 @@
 
 /* Clases de utilidad */
 @layer utilities {
+  .nf-page-safe {
+    padding-top: var(--nf-page-top);
+  }
+
+  .nf-page-safe-loose {
+    padding-top: var(--nf-page-top-loose);
+  }
+
+  .nf-sticky-below-nav {
+    top: var(--nf-page-top);
+  }
+
+  .nf-scroll-mt-nav {
+    scroll-margin-top: var(--nf-page-top-loose);
+  }
 
   /* Efecto de texto neón */
   .text-neon {

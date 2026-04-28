@@ -144,7 +144,7 @@ export default async function TourDetailPage({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/30 to-transparent" />
 
-        <div className="container mx-auto flex h-full flex-col justify-end px-4 pb-6 pt-24 relative z-10 sm:pb-8 sm:pt-28">
+        <div className="container mx-auto flex h-full flex-col justify-end px-4 pb-6 nf-page-safe-loose relative z-10 sm:pb-8">
           <Link
             href={`/${locale}/rutas-magicas/lago-atitlan/${pueblo}`}
             className="mb-4 inline-flex items-center text-sm text-white hover:text-cyan-300 transition-colors"

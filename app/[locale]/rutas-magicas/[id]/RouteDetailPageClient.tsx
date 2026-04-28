@@ -90,7 +90,7 @@ export default function RouteDetailPageClient({
         </div>
 
         <div className="relative z-10 container mx-auto px-4 h-full flex flex-col">
-          <div className="pt-20 md:pt-24">
+          <div className="nf-page-safe-loose">
             <Link
               href={`/${locale}/rutas-magicas`}
               className="inline-flex items-center text-white/90 hover:text-white transition-colors duration-200 group"

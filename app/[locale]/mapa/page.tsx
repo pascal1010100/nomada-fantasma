@@ -133,7 +133,7 @@ export default function MapaPage() {
         {/* Efecto de partículas sutiles */}
         <ParticlesBackground />
 
-        <div className="relative z-10 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 nf-page-safe-loose pb-16 px-4 sm:px-6 lg:px-8">
           {/* Header Section */}
           <div className="max-w-6xl mx-auto">
             {/* Badge */}

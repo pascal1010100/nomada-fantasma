@@ -61,7 +61,7 @@ export default function InternalLoginClient({ locale }: { locale: string }) {
     };
 
     return (
-        <div className="min-h-[calc(100vh-6rem)] bg-background px-4 pb-10 pt-28 sm:pt-32">
+        <div className="min-h-[calc(100vh-6rem)] bg-background px-4 pb-10 nf-page-safe-loose">
             <div className="mx-auto max-w-md rounded-3xl border border-white/10 bg-card/70 p-6 shadow-2xl backdrop-blur">
                 <div className="mb-6">
                     <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Nómada Fantasma Ops</p>

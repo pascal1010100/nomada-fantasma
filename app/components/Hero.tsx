@@ -74,10 +74,10 @@ export default function Hero() {
     : { animate: { rotate: [0, 10, 0] }, transition: { duration: 80, repeat: Infinity, ease: "linear" } };
 
   return (
-    <section className="px-4 sm:px-6">
+    <section className="nf-page-safe-loose px-4 sm:px-6">
       <div
         className="
-          relative mx-auto mt-10 max-w-6xl overflow-hidden rounded-[28px]
+          relative mx-auto max-w-6xl overflow-hidden rounded-[28px]
           border bg-card/70 hero-halo min-h-[540px]
         "
       >

@@ -42,7 +42,7 @@ export default async function TourReservationPage({
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
             </div>
 
-            <div className="relative z-10 container mx-auto px-4 py-8 sm:py-12">
+            <div className="relative z-10 container mx-auto px-4 pb-8 nf-page-safe-loose sm:pb-12">
                 {/* Header Navigation */}
                 <div className="mb-8">
                     <Link

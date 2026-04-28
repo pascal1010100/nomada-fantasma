@@ -78,7 +78,7 @@ const ContactoClient = () => {
   ];
 
   return (
-    <div className="min-h-screen pt-20 pb-20 bg-background overflow-hidden relative">
+    <div className="min-h-screen nf-page-safe-loose pb-20 bg-background overflow-hidden relative">
       {/* Background Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]" />
