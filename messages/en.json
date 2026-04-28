@@ -554,22 +554,26 @@
             },
             "san-pedro": {
                 "title": "San Pedro La Laguna",
-                "summary": "Party and adventure",
-                "fullDescription": "Guaranteed fun and adventure.",
+                "summary": "Volcano, coffee, and local life",
+                "fullDescription": "San Pedro is a practical base for exploring Atitlan: volcano hikes, boats, Spanish schools, local coffee, and food near the docks. The town combines local Tz'utujil life in the upper area with a more traveler-focused lakefront zone. In the afternoon, La Finca and Playa La Finca are good options if you want a quieter side of the lake.",
                 "vibe": "Party & Adventure",
                 "highlights": [
-                    "San Pedro Volcano",
-                    "Nightlife"
+                    "San Pedro Volcano: best early and with a local guide",
+                    "La Finca and Playa La Finca for a quieter lake spot",
+                    "Two docks: main for Panajachel and secondary for Santiago",
+                    "Food: Pita Sabij, Al Tempo, and cafes near the docks",
+                    "Local zone: market, shops, and services in the upper town"
                 ],
                 "activities": [
-                    "Hike San Pedro Volcano (4-6 hour ascent)",
-                    "Sunrise kayaking on the lake",
-                    "Spanish classes at local schools",
-                    "Coffee tours through local farms",
-                    "Visit the local artisan market",
-                    "Traditional cooking classes",
-                    "Sunrise yoga with lake views",
-                    "Boat trip to other lake villages"
+                    "Hike San Pedro Volcano with a local guide",
+                    "Walk or take a tuk-tuk toward La Finca and Playa La Finca",
+                    "Kayak early or take a short lake boat ride",
+                    "Eat at Pita Sabij or try bread and pizza at Al Tempo",
+                    "Drink local coffee at Cafe Las Cristalinas or Cafe Atitlan",
+                    "Go out at night around Bar Sublime",
+                    "Study Spanish at local schools",
+                    "Visit the market and the upper part of town",
+                    "Connect to San Juan, Santiago, and Panajachel from the right dock"
                 ],
                 "weather": {
                     "condition": "Sunny"
@@ -578,40 +582,40 @@
                     {
                         "route": "Boats to Panajachel",
                         "times": [
-                            "Depart every 20 min from the main dock (6:00 AM - 5:00 PM). Price: Q25."
+                            "Depart every 20-30 min from the main dock, usually 6:00 AM - 5:00 PM. Approx. price: Q25-35."
                         ]
                     },
                     {
                         "route": "Boats to Santiago",
                         "times": [
-                            "Direct every hour or via other villages. Last boat around 4:30 PM."
+                            "Depart from the secondary dock. Usually direct every hour or via nearby villages. Last boats are commonly around 4:30 PM."
                         ]
                     },
                     {
                         "route": "Tuk-tuks to San Juan",
                         "times": [
-                            "10 min ride. Price: Q10-15 per person. Available all day."
+                            "Approx. 10 min ride. Typical price: Q10-15 per person. Confirm locally before riding."
                         ]
                     },
                     {
                         "route": "Shuttles to Antigua",
                         "times": [
-                            "Daily departures at 4:30 AM, 8:30 AM, and 2:00 PM. Book with your hostel."
+                            "Common departures are early morning, mid-morning, and afternoon, often around 5:00 AM, 9:00-9:30 AM, and 2:00-2:30 PM. Confirm availability before booking."
                         ]
                     }
                 ],
                 "services": {
                     "atms": [
-                        "Banco Industrial",
                         "Banrural",
-                        "5B"
+                        "ATM 5B",
+                        "Bring cash recommended"
                     ],
                     "essentials": [
-                        "Pharmacies: Farmacia San Pedro, Farmacia La Bendicion",
-                        "Laundries: Lavanderia La Esquina, Lavanderia Central",
-                        "Supermarkets: Despensa Familiar, Supermercado San Pedro",
-                        "Medical center: San Pedro La Laguna Health Center",
-                        "Post office: In the town center"
+                        "Pharmacies available around the town center",
+                        "Local laundries near the tourist area",
+                        "Basic grocery stores and small supermarkets",
+                        "Local health center for basic medical attention",
+                        "Carry cash, especially for boats, tuk-tuks, and small shops"
                     ]
                 }
             },
@@ -1365,14 +1369,17 @@
         "guidesSubtitle": "Reserve personalized outings with verified local guides and let Nomada Fantasma coordinate the next steps with you.",
         "guideBio": "Local guide expert in the region.",
         "activitiesTitle": "Popular Activities",
-        "weatherTitle": "Current Weather",
+        "highlightsTitle": "Town highlights",
+        "weatherTitle": "Typical Weather",
         "humidity": "Humidity",
         "wind": "Wind",
         "feelsLike": "Feels Like",
-        "howToGetTitle": "How to get there",
-        "servicesTitle": "Essential Services",
+        "howToGetTitle": "Transport connections",
+        "servicesTitle": "Useful Services",
         "atmsTitle": "ATMs",
         "essentialsTitle": "Essentials",
+        "quickActionsTitle": "Quick actions",
+        "actionShuttles": "Book transportation",
         "noAtms": "No ATMs available. Bring cash.",
         "nearbyTitle": "Other nearby towns",
         "badge": "MAGIC TOWN",

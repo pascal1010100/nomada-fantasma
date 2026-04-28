@@ -554,22 +554,26 @@
             },
             "san-pedro": {
                 "title": "San Pedro La Laguna",
-                "summary": "Fiesta y aventura",
-                "fullDescription": "Diversión y aventura garantizada.",
+                "summary": "Volcán, cafés y vida local",
+                "fullDescription": "San Pedro es una base práctica para explorar Atitlán: volcán, lanchas, español, café local y comida cerca de los muelles. El pueblo combina vida local tz'utujil en la parte alta con una zona más viajera junto al lago. En la tarde, La Finca y Playa La Finca son una buena opción si buscas un lado más tranquilo.",
                 "vibe": "Fiesta & Aventura",
                 "highlights": [
-                    "Volcán San Pedro",
-                    "Vida Nocturna"
+                    "Volcán San Pedro: mejor temprano y con guía local",
+                    "La Finca y Playa La Finca para un lado más tranquilo del lago",
+                    "Dos muelles: principal para Panajachel y secundario para Santiago",
+                    "Comida: Pita Sabij, Al Tempo y cafés cerca de los muelles",
+                    "Zona local: mercado, tiendas y servicios en la parte alta"
                 ],
                 "activities": [
-                    "Senderismo al Volcán San Pedro (4-6 horas de subida)",
-                    "Kayak al amanecer en el lago",
-                    "Clases de español en escuelas locales",
-                    "Tours de café por fincas locales",
-                    "Visita al mercado local de artesanías",
-                    "Clases de cocina tradicional",
-                    "Yoga al amanecer con vista al lago",
-                    "Paseo en bote a otros pueblos del lago"
+                    "Subir el Volcán San Pedro con guía local",
+                    "Caminar o ir en tuk-tuk hacia La Finca y Playa La Finca",
+                    "Kayak temprano o paseo corto en lancha",
+                    "Comer en Pita Sabij o probar pan y pizza en Al Tempo",
+                    "Tomar café local en Cafe Las Cristalinas o Cafe Atitlan",
+                    "Salir de noche por Bar Sublime",
+                    "Estudiar español en escuelas locales",
+                    "Visitar el mercado y la parte alta del pueblo",
+                    "Conectar con San Juan, Santiago y Panajachel desde el muelle correcto"
                 ],
                 "weather": {
                     "condition": "Soleado"
@@ -578,40 +582,40 @@
                     {
                         "route": "Lanchas a Panajachel",
                         "times": [
-                            "Salen cada 20 min desde el muelle principal (6:00 AM - 5:00 PM). Precio: Q25."
+                            "Salen cada 20-30 min desde el muelle principal, normalmente 6:00 AM - 5:00 PM. Precio aprox.: Q25-35."
                         ]
                     },
                     {
                         "route": "Lanchas a Santiago",
                         "times": [
-                            "Directo cada hora o vía otros pueblos. Última lancha ~4:30 PM."
+                            "Salen desde el muelle secundario. Normalmente hay viajes directos cada hora o vía pueblos cercanos. Las últimas lanchas suelen salir alrededor de 4:30 PM."
                         ]
                     },
                     {
                         "route": "Tuk-tuks a San Juan",
                         "times": [
-                            "Trayecto de 10 min. Precio: Q10-15 por persona. Disponible todo el día."
+                            "Trayecto aprox. de 10 min. Precio típico: Q10-15 por persona. Confirmar localmente antes de subir."
                         ]
                     },
                     {
                         "route": "Shuttles a Antigua",
                         "times": [
-                            "Salidas diarias 4:30 AM, 8:30 AM, 2:00 PM. Reserva con tu hostal."
+                            "Salidas comunes temprano, media mañana y tarde, normalmente alrededor de 5:00 AM, 9:00-9:30 AM y 2:00-2:30 PM. Confirmar disponibilidad antes de reservar."
                         ]
                     }
                 ],
                 "services": {
                     "atms": [
-                        "Banco Industrial",
                         "Banrural",
-                        "5B"
+                        "ATM 5B",
+                        "Llevar efectivo recomendado"
                     ],
                     "essentials": [
-                        "Farmacias: Farmacia San Pedro, Farmacia La Bendición",
-                        "Lavanderías: Lavandería La Esquina, Lavandería Central",
-                        "Supermercados: Despensa Familiar, Supermercado San Pedro",
-                        "Centro médico: Centro de Salud San Pedro La Laguna",
-                        "Oficina de correos: En el centro del pueblo"
+                        "Farmacias disponibles alrededor del centro",
+                        "Lavanderías locales cerca del área turística",
+                        "Tiendas básicas y pequeños supermercados",
+                        "Centro de salud local para atención médica básica",
+                        "Llevar efectivo, especialmente para lanchas, tuk-tuks y tiendas pequeñas"
                     ]
                 }
             },
@@ -1365,14 +1369,17 @@
         "guidesSubtitle": "Reserva salidas personalizadas con guías locales verificados y deja que Nómada Fantasma coordine contigo los siguientes pasos.",
         "guideBio": "Guía local experto en la región.",
         "activitiesTitle": "Actividades Populares",
-        "weatherTitle": "Clima Actual",
+        "highlightsTitle": "Claves del pueblo",
+        "weatherTitle": "Clima típico",
         "humidity": "Humedad",
         "wind": "Viento",
         "feelsLike": "Sensación",
-        "howToGetTitle": "Cómo llegar",
-        "servicesTitle": "Servicios Esenciales",
+        "howToGetTitle": "Conexiones de transporte",
+        "servicesTitle": "Servicios útiles",
         "atmsTitle": "Cajeros (ATMs)",
         "essentialsTitle": "Esenciales",
+        "quickActionsTitle": "Acciones rápidas",
+        "actionShuttles": "Reservar transporte",
         "noAtms": "No hay cajeros disponibles. Llevar efectivo.",
         "nearbyTitle": "Otros pueblos cercanos",
         "badge": "PUEBLO MÁGICO",

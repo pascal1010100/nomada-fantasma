@@ -134,6 +134,7 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
               <TownDiscoverPanel
                 aboutTitle={tTown('about', { name: viewModel.localizedTitle })}
                 fullDescription={viewModel.localizedFull}
+                highlightsTitle={tTown('highlightsTitle')}
                 highlights={viewModel.localizedHighlights}
                 activitiesTitle={tTown('activitiesTitle')}
                 activities={viewModel.localizedActivities}
@@ -157,6 +158,11 @@ export default async function TownPage({ params }: { params: Promise<{ pueblo: s
                 atmsTitle={tTown('atmsTitle')}
                 noAtmsLabel={tTown('noAtms')}
                 essentialsTitle={tTown('essentialsTitle')}
+                quickActionsTitle={tTown('quickActionsTitle')}
+                mapActionLabel={tTown('actionMap')}
+                shuttleActionLabel={tTown('actionShuttles')}
+                locale={locale}
+                townSlug={slug}
                 transportSchedule={viewModel.localizedTransportSchedule}
                 services={viewModel.localizedServices}
               />
