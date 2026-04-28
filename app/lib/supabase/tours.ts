@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/app/lib/supabase/server';
 import type { Database } from '@/types/database.types';
 import { normalizeId, normalizeSlug, type Tour } from '@/app/lib/types';
 import { getTourCoverImage } from '@/app/lib/tours';
+import logger from '@/app/lib/logger';
 
 export type SupabaseTour = Database['public']['Tables']['tours']['Row'];
 
@@ -100,26 +101,40 @@ export async function getToursByPuebloFromDB(puebloSlug: string) {
 
 export async function getRecommendedToursFromDB(excludeSlug?: string, limit = 3): Promise<SupabaseTour[]> {
   const normalizedExcludeSlug = normalizeSlug(excludeSlug);
-  let query = supabaseAdmin
-    .from('tours')
-    .select('*')
-    .eq('is_active', true)
-    .order('is_featured', { ascending: false })
-    .order('rating', { ascending: false })
-    .limit(limit);
+  try {
+    let query = supabaseAdmin
+      .from('tours')
+      .select('*')
+      .eq('is_active', true)
+      .order('is_featured', { ascending: false })
+      .order('rating', { ascending: false })
+      .limit(limit);
 
-  if (normalizedExcludeSlug) {
-    query = query.neq('slug', normalizedExcludeSlug);
-  }
+    if (normalizedExcludeSlug) {
+      query = query.neq('slug', normalizedExcludeSlug);
+    }
 
-  const { data, error } = await query;
+    const { data, error } = await query;
 
-  if (error) {
-    console.error(`Error fetching recommended tours excluding '${excludeSlug ?? ''}':`, error);
+    if (error) {
+      logger.warn('Unable to load recommended tours; continuing without related routes.', {
+        excludeSlug: normalizedExcludeSlug,
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      });
+      return [];
+    }
+
+    return data ?? [];
+  } catch (error) {
+    logger.warn('Unable to load recommended tours; continuing without related routes.', {
+      excludeSlug: normalizedExcludeSlug,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return [];
   }
-
-  return data ?? [];
 }
 
 export async function getActiveToursFromDB(): Promise<SupabaseTour[]> {
