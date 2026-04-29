@@ -426,7 +426,7 @@ export default function ReservarClient() {
                                     >
                                         <div className="text-center mb-8">
                                             <h2 className="text-2xl font-bold mb-2">Elige tu tipo de experiencia</h2>
-                                            <p className="text-muted-foreground">Selecciona cómo quieres vivir tu aventura nómada</p>
+                                            <p className="text-muted-foreground">Selecciona cómo quieres viajar o qué necesitas reservar</p>
                                         </div>
 
                                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

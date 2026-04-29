@@ -23,7 +23,7 @@
         "badge": "VERIFIED MAP · SAN PEDRO LA LAGUNA",
         "title1": "Nomad",
         "title2": "Ghost",
-        "description": "Your compass to explore the magic of Guatemala. Find reliable transport, unforgettable routes, and experiences curated for nomads and adventurous souls.",
+        "description": "Explore Guatemala with clear information, reliable transport, and local experiences that are easy to book.",
         "magicalRoutes": "Magical Routes",
         "shuttles": "Shuttles & Transport",
         "stats": {
@@ -111,7 +111,7 @@
         "privateTransferChip2": "Group or special luggage",
         "privateTransferChip3": "Direct coordination",
         "card": {
-            "eliteService": "Elite Service",
+            "eliteService": "Private service",
             "sharedType": "Shared Shuttle",
             "privateType": "Private Transfer",
             "from": "From",
@@ -130,7 +130,7 @@
             "successEmailPending": "We’re finalizing your email confirmation",
             "successEmailProcessing": "Preparing confirmation",
             "successBtn": "Got it, thanks",
-            "title": "Elite Booking",
+            "title": "Booking Request",
             "titlePrivate": "Private Transfer Inquiry",
             "customRoute": "Custom Route",
             "originLabel": "Origin",
@@ -149,7 +149,7 @@
             "pickupPlaceholder": "Hotel name or exact address",
             "submitting": "Processing...",
             "submitBtn": "Request Booking",
-            "footerInfo": "Elite Confirmation • Response in < 24h",
+            "footerInfo": "Email confirmation • Response in under 24h",
             "errorGeneric": "Error sending request",
             "validationErrors": {
                 "nameRequired": "Please enter your name",
@@ -257,7 +257,7 @@
         "badge": "Contact",
         "titleTop": "Let's talk about your",
         "titleGradient": "Next Trip",
-        "description": "Our team is ready to help you plan your digital nomad adventure. Connect with us and start your journey.",
+        "description": "Our team is ready to help you plan your trip through Guatemala. Message us and we will help with your questions.",
         "cardChat": {
             "title": "Chat with us",
             "desc": "Our team is ready to answer your questions in real time.",
@@ -270,7 +270,7 @@
         },
         "cardVisit": {
             "title": "Visit us",
-            "desc": "Are you a digital nomad? Meet our recommended workspaces.",
+            "desc": "Find useful places, services, and recommended spots on the map.",
             "action": "View on map"
         },
         "formBadge": "Contact form",
@@ -290,15 +290,15 @@
         "infoScheduleWeek": "Monday to Friday: 9:00 - 18:00",
         "infoScheduleSat": "Saturday: 10:00 - 14:00",
         "infoSocial": "Follow us on social media",
-        "footerCopyright": "© {year} Ghost Nomad — Made with 💙 from the open sea.",
+        "footerCopyright": "© {year} Nomada Fantasma — Made with 💙 from Guatemala.",
         "footerPrivacy": "Privacy Policy",
         "footerTerms": "Terms of Use"
     },
     "Map": {
-        "badge": "Explore the nomad world",
+        "badge": "Explore with useful data",
         "titleTop": "Interactive Map",
         "titleGradient": "Ghost Nomad",
-        "description": "Discover the best destinations for digital nomads in Guatemala. Fast WiFi, coworking spaces and vibrant community.",
+        "description": "Find useful places in Guatemala: WiFi, stays, transport, banks, docks, and local experiences.",
         "stats": {
             "places": "Places",
             "wifi": "WiFi",
@@ -347,7 +347,7 @@
             "noResultsTitle": "No results for this search",
             "noResultsDescription": "Try other terms or adjust your filters."
         },
-        "north": "North Heading"
+        "north": "North"
     },
     "Routes": {
         "badge": "Explore Guatemala",
@@ -946,8 +946,8 @@
             },
             "pana-kayak-sunset": {
                 "title": "Sunset Kayak on the Lake",
-                "summary": "A unique experience kayaking on the waters of Lake Atitlán at sunset.",
-                "description": "Enjoy the breathtaking views of the volcanoes as you kayak on the calm waters of the lake. This experience includes a stop at a private beach to enjoy a snack and drinks as the sun sets behind the volcanoes.",
+                "summary": "A sunset kayak ride on Lake Atitlan.",
+                "description": "Enjoy volcano views while paddling through calm lake water. This experience includes a stop at a private beach for a snack and drinks as the sun goes down.",
                 "duration": "2.5 hours",
                 "difficulty": "Moderate",
                 "meetingPoint": "Panajachel Public Beach",

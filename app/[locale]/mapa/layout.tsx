@@ -2,11 +2,11 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Carta Fantasma · Mapa Nómada',
-  description: 'Carta náutica ciberpunk: Wi-Fi, hospedaje, cowork, bancos y puertos.',
+  title: 'Mapa Nómada Fantasma',
+  description: 'Mapa útil de Guatemala: Wi-Fi, hospedaje, cowork, bancos, muelles y experiencias locales.',
   openGraph: {
-    title: 'Carta Fantasma · Mapa Nómada',
-    description: 'Carta náutica ciberpunk: Wi-Fi, hospedaje, cowork, bancos y puertos.',
+    title: 'Mapa Nómada Fantasma',
+    description: 'Mapa útil de Guatemala: Wi-Fi, hospedaje, cowork, bancos, muelles y experiencias locales.',
     images: [
       {
         url: '/og-image.jpg',

@@ -424,7 +424,7 @@ Cada fase debe salir con verificacion puntual:
 
 La experiencia actual combina:
 
-- cartografia y exploracion
+- mapa util y exploracion
 - tonos cyberpunk controlados
 - sensacion de operacion premium
 - energia local y misterio del territorio

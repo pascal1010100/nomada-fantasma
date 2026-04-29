@@ -23,7 +23,7 @@
         "badge": "MAPA VERIFICADO · SAN PEDRO LA LAGUNA",
         "title1": "Nómada",
         "title2": "Fantasma",
-        "description": "Tu brújula para explorar la magia de Guatemala. Encuentra transporte seguro, rutas inolvidables y experiencias diseñadas para nómadas y almas aventureras.",
+        "description": "Explora Guatemala con información clara, transporte seguro y experiencias locales fáciles de reservar.",
         "magicalRoutes": "Rutas Mágicas",
         "shuttles": "Transporte / Shuttles",
         "stats": {
@@ -111,7 +111,7 @@
         "privateTransferChip2": "Grupo o equipaje especial",
         "privateTransferChip3": "Coordinación directa",
         "card": {
-            "eliteService": "Servicio Elite",
+            "eliteService": "Servicio privado",
             "sharedType": "Shuttle Compartido",
             "privateType": "Traslado Privado",
             "from": "Desde",
@@ -130,7 +130,7 @@
             "successEmailPending": "Estamos terminando de preparar tu confirmación por correo",
             "successEmailProcessing": "Preparando confirmación",
             "successBtn": "Entendido, gracias",
-            "title": "Reserva Elite",
+            "title": "Solicitud de reserva",
             "titlePrivate": "Consulta Traslado Privado",
             "customRoute": "Ruta Personalizada",
             "originLabel": "Origen",
@@ -149,7 +149,7 @@
             "pickupPlaceholder": "Nombre del Hotel o dirección exacta",
             "submitBtn": "Solicitar Reserva",
             "submitting": "Procesando...",
-            "footerInfo": "Confirmación Elite • Respuesta en < 24h",
+            "footerInfo": "Confirmación por correo • Respuesta en menos de 24h",
             "errorGeneric": "Error al enviar la solicitud",
             "validationErrors": {
                 "nameRequired": "Por favor ingresa tu nombre",
@@ -169,7 +169,7 @@
         "badge": "Cómo funciona",
         "titleTop": "Planifica, reserva",
         "titleGradient": "y viaja sin fricción",
-        "description": "Nómada Fantasma conecta destinos, experiencias, hospedajes y transporte en un solo flujo para nómadas digitales. Exploras, eliges y reservas con respaldo local.",
+        "description": "Nómada Fantasma conecta destinos, experiencias, hospedajes y transporte en un solo flujo simple. Exploras, eliges y reservas con respaldo local.",
         "btnExplore": "Ver destinos",
         "btnContact": "Contáctanos",
         "philosophyTitle": "Lógica del negocio y del servicio",
@@ -195,7 +195,7 @@
             }
         },
         "servicesTitle": "Servicios disponibles",
-        "servicesDesc": "Todo lo esencial para planear y ejecutar tu viaje nómada.",
+        "servicesDesc": "Todo lo esencial para planear y ejecutar tu viaje con confianza.",
         "services": {
             "map": {
                 "title": "Mapa inteligente",
@@ -257,7 +257,7 @@
         "badge": "Contacto",
         "titleTop": "Hablemos sobre tu",
         "titleGradient": "Próximo Viaje",
-        "description": "Nuestro equipo está listo para ayudarte a planificar tu aventura nómada digital. Conecta con nosotros y empieza tu travesía.",
+        "description": "Nuestro equipo está listo para ayudarte a planificar tu viaje por Guatemala. Escríbenos y resolvemos tus dudas.",
         "cardChat": {
             "title": "Chatea con nosotros",
             "desc": "Nuestro equipo está listo para responder tus preguntas en tiempo real.",
@@ -270,7 +270,7 @@
         },
         "cardVisit": {
             "title": "Visítanos",
-            "desc": "¿Eres nómada digital? Conoce nuestros espacios de trabajo recomendados.",
+            "desc": "Encuentra lugares útiles, servicios y espacios recomendados en el mapa.",
             "action": "Ver en el mapa"
         },
         "formBadge": "Formulario de contacto",
@@ -290,15 +290,15 @@
         "infoScheduleWeek": "Lunes a Viernes: 9:00 - 18:00",
         "infoScheduleSat": "Sábado: 10:00 - 14:00",
         "infoSocial": "Síguenos en redes",
-        "footerCopyright": "© {year} Nómada Fantasma — Hecho con 💙 desde mar abierto.",
+        "footerCopyright": "© {year} Nómada Fantasma — Hecho con 💙 desde Guatemala.",
         "footerPrivacy": "Política de privacidad",
         "footerTerms": "Términos de uso"
     },
     "Map": {
-        "badge": "Explora el mundo nómada",
+        "badge": "Explora con datos útiles",
         "titleTop": "Mapa Interactivo",
         "titleGradient": "Nómada Fantasma",
-        "description": "Descubre los mejores destinos para nómadas digitales en Guatemala. WiFi rápido, espacios de coworking y comunidad vibrante.",
+        "description": "Encuentra lugares útiles en Guatemala: WiFi, hospedaje, transporte, bancos, muelles y experiencias locales.",
         "stats": {
             "places": "Lugares",
             "wifi": "WiFi",
@@ -347,7 +347,7 @@
             "noResultsTitle": "No hay resultados con esta búsqueda",
             "noResultsDescription": "Prueba con otros términos o revisa los filtros."
         },
-        "north": "Rumbo Norte"
+        "north": "Norte"
     },
     "Routes": {
         "badge": "Explora Guatemala",
@@ -946,8 +946,8 @@
             },
             "pana-kayak-sunset": {
                 "title": "Kayak al Atardecer en el Lago",
-                "summary": "Una experiencia única navegando las aguas del Lago de Atitlán al atardecer.",
-                "description": "Disfruta de las impresionantes vistas de los volcanes mientras navegas en kayak por las tranquilas aguas del lago. Esta experiencia incluye una parada en una playa privada para disfrutar de un snack y bebidas mientras el sol se oculta detrás de los volcanes.",
+                "summary": "Paseo en kayak por el Lago de Atitlán durante el atardecer.",
+                "description": "Disfruta las vistas de los volcanes mientras remas en kayak por aguas tranquilas del lago. Esta experiencia incluye una parada en una playa privada para tomar un snack y bebidas mientras cae el sol.",
                 "duration": "2.5 horas",
                 "difficulty": "Moderado",
                 "meetingPoint": "Playa Pública de Panajachel",
@@ -987,7 +987,7 @@
                     },
                     {
                         "time": "4:30 PM",
-                        "title": "Navegación",
+                        "title": "Paseo en kayak",
                         "description": "Recorrido por la costa con paradas para fotos."
                     },
                     {

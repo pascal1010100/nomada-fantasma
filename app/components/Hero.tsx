@@ -60,7 +60,7 @@ export default function Hero() {
     },
   });
 
-  // Cartografía sutil
+  // Mapa visual sutil
   const mapAnimProps: MotionProps = reduce
     ? {}
     : {
@@ -68,7 +68,7 @@ export default function Hero() {
       transition: { duration: 22, repeat: Infinity, ease: "easeInOut" },
     };
 
-  // Rosa náutica (rotación lenta)
+  // Marca circular (rotación lenta)
   const compassAnim: MotionProps = reduce
     ? {}
     : { animate: { rotate: [0, 10, 0] }, transition: { duration: 80, repeat: Infinity, ease: "linear" } };
@@ -85,7 +85,7 @@ export default function Hero() {
         <div className="nf-grid pointer-events-none absolute inset-0 z-0" />
         <div className="nf-vignette pointer-events-none absolute inset-0 z-10" />
 
-        {/* CARTOGRAFÍA */}
+        {/* MAPA VISUAL */}
         <motion.div
           className="theme--carto map-surface absolute inset-0 z-[18] will-change-transform"
           aria-hidden="true"
@@ -95,7 +95,7 @@ export default function Hero() {
         {/* HUD SONAR */}
         <div className="theme--sonar sonar-hud absolute inset-0 z-20 opacity-70" aria-hidden="true" />
 
-        {/* ➕ Rosa náutica (debajo de las ondas, integrada) */}
+        {/* ➕ Marca circular (debajo de las ondas, integrada) */}
         <motion.div
           className="compass-rose rose-tr absolute z-[24] pointer-events-none"
           aria-hidden="true"

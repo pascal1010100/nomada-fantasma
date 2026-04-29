@@ -140,7 +140,7 @@ export default function TransitionModal({
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between px-1">
                                         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">
-                                            Bitácora Operativa
+                                            Nota operativa
                                         </label>
                                         <span className="text-[10px] text-gray-600 font-medium">
                                             {noteRequired ? 'Obligatoria' : 'Opcional'}
