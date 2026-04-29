@@ -542,8 +542,9 @@
                 ],
                 "services": {
                     "atms": [
-                        "Banco Industrial",
-                        "Banrural"
+                        "Cajeros limitados",
+                        "Retirar efectivo antes en San Pedro o Panajachel",
+                        "Llevar efectivo recomendado"
                     ],
                     "essentials": [
                         "Farmacia: Farmacia San Marcos",
@@ -668,8 +669,9 @@
                 ],
                 "services": {
                     "atms": [
-                        "Banco Industrial",
-                        "Banrural"
+                        "Cajeros limitados",
+                        "Banrural o servicios locales según disponibilidad",
+                        "Llevar efectivo recomendado"
                     ],
                     "essentials": [
                         "Farmacia: Farmacia San Juan",
@@ -727,9 +729,9 @@
                 ],
                 "services": {
                     "atms": [
-                        "Banco Industrial",
                         "Banrural",
-                        "BAM"
+                        "Cajeros locales según disponibilidad",
+                        "Llevar efectivo recomendado"
                     ],
                     "essentials": [
                         "Farmacia: Farmacia Santiago",
@@ -790,7 +792,8 @@
                         "Banco Industrial",
                         "Banrural",
                         "BAC",
-                        "Banco G&T"
+                        "Banco G&T",
+                        "Mejor punto para retirar efectivo antes de pueblos pequeños"
                     ],
                     "essentials": [
                         "Farmacia: Farmacia Pana",

@@ -542,8 +542,9 @@
                 ],
                 "services": {
                     "atms": [
-                        "Banco Industrial",
-                        "Banrural"
+                        "Limited ATMs",
+                        "Withdraw cash before arriving from San Pedro or Panajachel",
+                        "Bring cash recommended"
                     ],
                     "essentials": [
                         "Pharmacy: Farmacia San Marcos",
@@ -668,8 +669,9 @@
                 ],
                 "services": {
                     "atms": [
-                        "Banco Industrial",
-                        "Banrural"
+                        "Limited ATMs",
+                        "Banrural or local services depending on availability",
+                        "Bring cash recommended"
                     ],
                     "essentials": [
                         "Pharmacy: Farmacia San Juan",
@@ -727,9 +729,9 @@
                 ],
                 "services": {
                     "atms": [
-                        "Banco Industrial",
                         "Banrural",
-                        "BAM"
+                        "Local ATMs depending on availability",
+                        "Bring cash recommended"
                     ],
                     "essentials": [
                         "Pharmacy: Farmacia Santiago",
@@ -790,7 +792,8 @@
                         "Banco Industrial",
                         "Banrural",
                         "BAC",
-                        "Banco G&T"
+                        "Banco G&T",
+                        "Best place to withdraw cash before smaller towns"
                     ],
                     "essentials": [
                         "Pharmacy: Farmacia Pana",
