@@ -115,6 +115,10 @@ export default async function TourDetailPage({
     ? tTours(`${tourKey}.groupLabel`)
     : t('groupRange', { min: minGuests, max: maxGuests });
   const readRaw = <T,>(key: string, fallback: T) => {
+    if (!tTours.has(key)) {
+      return fallback;
+    }
+
     try {
       return tTours.raw(key) as T;
     } catch {

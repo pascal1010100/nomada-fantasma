@@ -497,23 +497,25 @@
             },
             "san-marcos": {
                 "title": "San Marcos La Laguna",
-                "summary": "Yoga, meditación y misticismo maya",
-                "fullDescription": "El centro espiritual del lago.",
+                "summary": "Bienestar, naturaleza y lago tranquilo",
+                "fullDescription": "San Marcos es el pueblo más enfocado en bienestar del lago: yoga, meditación, cacao, terapias y cafés tranquilos cerca del muelle. También funciona para nadar, caminar y descansar, especialmente en Cerro Tzankujil. Es mejor para viajeros que buscan calma y naturaleza, no vida nocturna.",
                 "vibe": "Yoga & Místico",
                 "highlights": [
-                    "Cerro Tzankujil",
-                    "Yoga",
-                    "Cacao"
+                    "Cerro Tzankujil: natación, rocas y vistas al lago",
+                    "Bienestar: yoga, meditación y ceremonias de cacao",
+                    "Ambiente: noches tranquilas y energía de retiro",
+                    "Movimiento: pueblo compacto y fácil de caminar",
+                    "Ideal para: bajar el ritmo, nadar y hacer day retreats"
                 ],
                 "activities": [
-                    "Clases de yoga al amanecer",
-                    "Sesiones de meditación guiada",
-                    "Masajes y terapias alternativas",
-                    "Círculos de canto y sonido",
-                    "Talleres de crecimiento personal",
-                    "Paseos en kayak al atardecer",
-                    "Caminatas por senderos naturales",
-                    "Clases de acroyoga"
+                    "Tomar una clase de yoga con vista al lago",
+                    "Nadar o saltar al agua en Cerro Tzankujil",
+                    "Unirse a una meditación o ceremonia de cacao",
+                    "Caminar por senderos tranquilos cerca del pueblo",
+                    "Hacer kayak temprano o al atardecer",
+                    "Visitar cafés vegetarianos y espacios de bienestar",
+                    "Tomar un tuk-tuk o caminar hacia Tzununá",
+                    "Reservar Indian Nose con guía local si buscas amanecer"
                 ],
                 "weather": {
                     "condition": "Parcialmente nublado"
@@ -621,23 +623,25 @@
             },
             "san-juan": {
                 "title": "San Juan La Laguna",
-                "summary": "Arte y cultura auténtica",
-                "fullDescription": "El pueblo más colorido.",
+                "summary": "Textiles, murales y turismo comunitario",
+                "fullDescription": "San Juan es uno de los pueblos más organizados para turismo cultural en Atitlán. Es conocido por sus cooperativas de tejido con tintes naturales, murales, galerías, café local y calles limpias para caminar con calma. Funciona muy bien como visita de medio día desde San Pedro o como parada tranquila para comprar artesanía con más contexto.",
                 "vibe": "Arte & Cultura",
                 "highlights": [
-                    "Textiles",
-                    "Galerías",
-                    "Mirador"
+                    "Textiles: cooperativas y tintes naturales",
+                    "Murales: calles coloridas y galerías locales",
+                    "Mirador Kaqasiiwaan: subida corta con vistas del lago",
+                    "Café: fincas, tostadores y degustaciones locales",
+                    "Ideal para: cultura, compras y caminata tranquila"
                 ],
                 "activities": [
-                    "Visita a cooperativas de tejido",
-                    "Taller de teñido natural",
-                    "Tour por cafetales orgánicos",
-                    "Recorrido por galerías de arte",
-                    "Caminata por el pueblo y sus murales",
-                    "Clase de tejido tradicional",
-                    "Degustación de café local",
-                    "Paseo en bote al atardecer"
+                    "Visitar cooperativas de tejido y tintes naturales",
+                    "Caminar por los murales y calles principales",
+                    "Subir al Mirador Kaqasiiwaan",
+                    "Hacer un tour de café o una degustación local",
+                    "Entrar a galerías y talleres de arte",
+                    "Comprar textiles directamente a cooperativas",
+                    "Moverte en tuk-tuk desde San Pedro",
+                    "Volver en lancha o caminar si vas con tiempo"
                 ],
                 "weather": {
                     "condition": "Parcialmente nublado"
@@ -679,22 +683,24 @@
             "santiago": {
                 "title": "Santiago Atitlán",
                 "summary": "Tradición y Maximón",
-                "fullDescription": "Historia profunda.",
+                "fullDescription": "Santiago Atitlán es uno de los pueblos con más peso cultural del lago. Aquí la visita se centra en el mercado, la Iglesia de Santiago Apóstol, las cofradías y Maximón, siempre con respeto y, si es posible, con guía local. Es una parada fuerte para entender la vida tz'utujil, probar comida local y ver un Atitlán menos turístico.",
                 "vibe": "Tradición Maya",
                 "highlights": [
-                    "Maximón",
-                    "Iglesia",
-                    "Cultura"
+                    "Maximón: visita con respeto y guía local",
+                    "Mercado: textiles, comida y vida cotidiana",
+                    "Iglesia Santiago Apóstol: historia y comunidad",
+                    "Lanchas: conexión con San Pedro y Panajachel",
+                    "Ideal para: cultura, comida local e historia viva"
                 ],
                 "activities": [
-                    "Recorrido por el mercado indígena",
+                    "Recorrer el mercado municipal por la mañana",
                     "Visita a la Iglesia de Santiago Apóstol",
-                    "Tour por las cofradías mayas",
-                    "Taller de artesanías locales",
-                    "Paseo en bote por el lago",
-                    "Visita al museo local",
-                    "Degustación de comida típica",
-                    "Caminata por el centro histórico"
+                    "Visitar a Maximón con guía local",
+                    "Conocer cofradías y tradiciones comunitarias",
+                    "Probar comida típica cerca del mercado",
+                    "Comprar textiles y artesanía local",
+                    "Caminar el centro con calma y respeto",
+                    "Llegar por lancha desde el muelle secundario de San Pedro"
                 ],
                 "weather": {
                     "condition": "Soleado"
@@ -736,25 +742,25 @@
             },
             "panajachel": {
                 "title": "Panajachel",
-                "summary": "La puerta de entrada al Lago de Atitlán. Conocida cariñosamente como \"Pana\", es el principal punto de acceso al Lago de Atitlán.",
-                "fullDescription": "Panajachel, conocida cariñosamente como \"Pana\", es el principal punto de acceso al Lago de Atitlán. Ofrece una mezcla perfecta entre comodidades modernas y encanto local, con su famosa Calle Santander llena de tiendas, restaurantes y vida nocturna. Es el lugar ideal para comenzar tu aventura en el lago, con fácil acceso a los demás pueblos y una amplia gama de servicios turísticos.",
+                "summary": "Puerta de entrada, servicios y conexiones por lancha",
+                "fullDescription": "Panajachel, o Pana, es el punto más práctico para entrar y salir del Lago de Atitlán. Tiene muelles con conexión a otros pueblos, shuttles, bancos, farmacias, agencias y la Calle Santander para compras, comida y tours. No siempre es el pueblo más tranquilo, pero es el mejor para logística, primeras noches y resolver necesidades de viaje.",
                 "vibe": "Cosmopolita & Compras",
                 "highlights": [
-                    "Calle Santander con tiendas y restaurantes",
-                    "Vida nocturna animada",
-                    "Vistas panorámicas del lago",
-                    "Acceso a otros pueblos del lago",
-                    "Mercado de artesanías"
+                    "Transporte: hub fuerte de lanchas y shuttles",
+                    "Calle Santander: tiendas, comida y agencias",
+                    "Servicios: bancos, farmacias y supermercados",
+                    "Naturaleza: reserva natural y vistas del lago",
+                    "Ideal para: llegada, logística y compras"
                 ],
                 "activities": [
                     "Paseo por la Calle Santander",
-                    "Tour de compras de artesanías",
-                    "Paseo en bote por el lago",
-                    "Tour gastronómico",
-                    "Observación de aves",
-                    "Kayak al atardecer",
-                    "Visita a reservas naturales cercanas",
-                    "Tour fotográfico"
+                    "Comprar artesanías y resolver pendientes de viaje",
+                    "Tomar lancha hacia otros pueblos del lago",
+                    "Visitar la Reserva Natural Atitlán",
+                    "Hacer kayak o paseo en bote al atardecer",
+                    "Reservar shuttles hacia Antigua o Ciudad de Guatemala",
+                    "Comer en restaurantes cerca de Santander",
+                    "Usar Pana como primera o última noche del lago"
                 ],
                 "weather": {
                     "condition": "Parcialmente nublado"
@@ -797,22 +803,25 @@
             },
             "santa-cruz": {
                 "title": "Santa Cruz La Laguna",
-                "summary": "Pueblo tranquilo con las mejores vistas y buceo de altura",
-                "fullDescription": "Santa Cruz La Laguna es un pueblo pintoresco y tranquilo, accesible solo por lancha. Es famoso por tener algunas de las mejores vistas del lago y los volcanes, así como por ser el hogar de la única escuela de buceo profesional en Atitlán. Es el lugar perfecto para relajarse, nadar y disfrutar de la naturaleza sin las multitudes.",
+                "summary": "Vistas amplias, lago tranquilo y caminata a Jaibalito",
+                "fullDescription": "Santa Cruz es una opción tranquila y escénica, accesible principalmente por lancha. La zona del lago concentra hospedajes, restaurantes y actividades acuáticas, mientras que el pueblo local está más arriba en la montaña. Es ideal para descansar, nadar, hacer kayak, caminar hacia Jaibalito y disfrutar vistas grandes sin el ritmo de San Pedro o Panajachel.",
                 "vibe": "Relax & Vistas",
                 "highlights": [
-                    "Buceo de altura en el lago",
-                    "Vistas panorámicas increíbles",
-                    "Senderismo a Jaibalito",
-                    "Hoteles con acceso directo al lago"
+                    "Lago: hospedajes, muelles y zonas tranquilas para nadar",
+                    "Buceo: escuela de buceo de altura en Atitlán",
+                    "Pueblo: comunidad local y CECAP en la parte alta",
+                    "Sendero: caminata escénica hacia Jaibalito",
+                    "Importante: llevar efectivo, servicios limitados"
                 ],
                 "activities": [
-                    "Buceo y snorkeling",
-                    "Kayak y paddleboard",
-                    "Senderismo por la costa",
-                    "Clases de cocina maya",
-                    "Relajación en hamacas frente al lago",
-                    "Visita al centro vocacional CECAP"
+                    "Nadar, hacer kayak o paddleboard",
+                    "Probar buceo de altura en el lago",
+                    "Caminar hacia Jaibalito por la costa",
+                    "Subir al pueblo y visitar CECAP",
+                    "Almorzar en restaurantes frente al lago",
+                    "Descansar en hospedajes con vista",
+                    "Moverte en lancha hacia Pana, San Marcos o San Pedro",
+                    "Llevar efectivo porque no hay cajeros confiables"
                 ],
                 "weather": {
                     "condition": "Soleado"

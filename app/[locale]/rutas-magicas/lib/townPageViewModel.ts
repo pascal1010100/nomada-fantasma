@@ -4,6 +4,7 @@ type RawTown = TownContentRecord;
 
 type TranslatorLike = {
   (key: string, values?: Record<string, string | number | Date>): string;
+  has?: (key: string) => boolean;
   raw: (key: string) => unknown;
 };
 
@@ -37,44 +38,49 @@ function getValueOrFallback<T>(resolver: () => T, fallback: T): T {
   }
 }
 
+function getTranslatedValue(t: TranslatorLike, key: string, fallback: string): string {
+  if (t.has && !t.has(key)) {
+    return fallback;
+  }
+
+  return getValueOrFallback(() => t(key), fallback);
+}
+
+function getTranslatedRaw<T>(t: TranslatorLike, key: string, fallback: T): T {
+  if (t.has && !t.has(key)) {
+    return fallback;
+  }
+
+  return getValueOrFallback(() => t.raw(key) as T, fallback);
+}
+
 export function buildLocalizedTownPageViewModel(
   town: RawTown,
   nearbyTownSource: RawTown[],
   tRoutes: TranslatorLike
 ): LocalizedTownPageViewModel {
-  const localizedTitle = getValueOrFallback(() => tRoutes(`${town.slug}.title`), town.title);
-  const localizedSummary = getValueOrFallback(() => tRoutes(`${town.slug}.summary`), town.summary);
-  const localizedFull = getValueOrFallback(() => tRoutes(`${town.slug}.fullDescription`), town.full_description);
-  const localizedVibe = getValueOrFallback(() => tRoutes(`${town.slug}.vibe`), town.vibe ?? 'Relax & Nature');
-  const lakeTitle = getValueOrFallback(() => tRoutes('lago-atitlan.title'), 'Lago de Atitlán');
-  const localizedHighlights = getValueOrFallback(
-    () => tRoutes.raw(`${town.slug}.highlights`) as string[],
-    town.highlights
-  );
-  const localizedActivities = getValueOrFallback(
-    () => tRoutes.raw(`${town.slug}.activities`) as string[],
-    town.activities
-  );
-  const localizedWeatherCondition = getValueOrFallback(
-    () => tRoutes(`${town.slug}.weather.condition`),
-    town.weather.condition
-  );
-  const localizedTransportSchedule = getValueOrFallback(
-    () => tRoutes.raw(`${town.slug}.transportSchedule`) as RawTown['transport_schedule'],
+  const localizedTitle = getTranslatedValue(tRoutes, `${town.slug}.title`, town.title);
+  const localizedSummary = getTranslatedValue(tRoutes, `${town.slug}.summary`, town.summary);
+  const localizedFull = getTranslatedValue(tRoutes, `${town.slug}.fullDescription`, town.full_description);
+  const localizedVibe = getTranslatedValue(tRoutes, `${town.slug}.vibe`, town.vibe ?? 'Relax & Nature');
+  const lakeTitle = getTranslatedValue(tRoutes, 'lago-atitlan.title', 'Lago de Atitlán');
+  const localizedHighlights = getTranslatedRaw(tRoutes, `${town.slug}.highlights`, town.highlights);
+  const localizedActivities = getTranslatedRaw(tRoutes, `${town.slug}.activities`, town.activities);
+  const localizedWeatherCondition = getTranslatedValue(tRoutes, `${town.slug}.weather.condition`, town.weather.condition);
+  const localizedTransportSchedule = getTranslatedRaw(
+    tRoutes,
+    `${town.slug}.transportSchedule`,
     town.transport_schedule
   );
-  const localizedServices = getValueOrFallback(
-    () => tRoutes.raw(`${town.slug}.services`) as RawTown['services'],
-    town.services
-  );
+  const localizedServices = getTranslatedRaw(tRoutes, `${town.slug}.services`, town.services);
 
   const nearbyTowns = nearbyTownSource
     .filter((candidate) => candidate.slug !== town.slug)
     .map((candidate) => ({
       id: candidate.id,
-      title: candidate.title,
+      title: getTranslatedValue(tRoutes, `${candidate.slug}.title`, candidate.title),
       slug: candidate.slug,
-      summary: candidate.summary,
+      summary: getTranslatedValue(tRoutes, `${candidate.slug}.summary`, candidate.summary),
       coverImage: candidate.cover_image,
     }));
 

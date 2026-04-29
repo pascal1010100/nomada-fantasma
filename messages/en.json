@@ -497,23 +497,25 @@
             },
             "san-marcos": {
                 "title": "San Marcos La Laguna",
-                "summary": "Yoga, meditation and Mayan mysticism",
-                "fullDescription": "The spiritual center of the lake.",
+                "summary": "Wellness, nature, and a quieter lake rhythm",
+                "fullDescription": "San Marcos is the lake's most wellness-focused town: yoga, meditation, cacao, therapies, and calm cafes close to the dock. It also works well for swimming, walking, and slowing down, especially around Cerro Tzankujil. It is best for travelers looking for quiet, nature, and retreat energy, not nightlife.",
                 "vibe": "Yoga & Mystic",
                 "highlights": [
-                    "Tzankujil Hill",
-                    "Yoga",
-                    "Cacao"
+                    "Cerro Tzankujil: swimming, rocks, and lake views",
+                    "Wellness: yoga, meditation, and cacao ceremonies",
+                    "Vibe: quiet nights and retreat energy",
+                    "Movement: compact village and easy walking",
+                    "Best for: slowing down, swimming, and day retreats"
                 ],
                 "activities": [
-                    "Sunrise yoga classes",
-                    "Guided meditation sessions",
-                    "Massages and alternative therapies",
-                    "Singing and sound circles",
-                    "Personal growth workshops",
-                    "Sunset kayaking",
-                    "Walks along nature trails",
-                    "Acroyoga classes"
+                    "Take a yoga class with lake views",
+                    "Swim or jump into the lake at Cerro Tzankujil",
+                    "Join a meditation or cacao ceremony",
+                    "Walk quiet trails near the village",
+                    "Kayak early or around sunset",
+                    "Visit vegetarian cafes and wellness spaces",
+                    "Walk or take a tuk-tuk toward Tzununa",
+                    "Book Indian Nose with a local guide if you want sunrise"
                 ],
                 "weather": {
                     "condition": "Partly cloudy"
@@ -621,23 +623,25 @@
             },
             "san-juan": {
                 "title": "San Juan La Laguna",
-                "summary": "Authentic art and culture",
-                "fullDescription": "The most colorful village.",
+                "summary": "Textiles, murals, and community tourism",
+                "fullDescription": "San Juan is one of the best organized towns for cultural tourism on Atitlan. It is known for weaving cooperatives with natural dyes, murals, galleries, local coffee, and clean streets that are easy to explore slowly. It works very well as a half-day trip from San Pedro or as a calmer stop for buying crafts with more context.",
                 "vibe": "Art & Culture",
                 "highlights": [
-                    "Textiles",
-                    "Galleries",
-                    "Lookout"
+                    "Textiles: cooperatives and natural dyes",
+                    "Murals: colorful streets and local galleries",
+                    "Mirador Kaqasiiwaan: short climb with lake views",
+                    "Coffee: farms, roasters, and local tastings",
+                    "Best for: culture, shopping, and slow exploring"
                 ],
                 "activities": [
-                    "Visit weaving cooperatives",
-                    "Natural dye workshop",
-                    "Organic coffee farm tour",
-                    "Art gallery walk",
-                    "Walk through the village and its murals",
-                    "Traditional weaving class",
-                    "Local coffee tasting",
-                    "Sunset boat ride"
+                    "Visit weaving cooperatives and natural dye workshops",
+                    "Walk through the murals and main streets",
+                    "Climb to Mirador Kaqasiiwaan",
+                    "Take a coffee tour or local tasting",
+                    "Visit galleries and artisan workshops",
+                    "Buy textiles directly from cooperatives",
+                    "Move by tuk-tuk from San Pedro",
+                    "Return by boat or walk if you have time"
                 ],
                 "weather": {
                     "condition": "Partly cloudy"
@@ -679,22 +683,24 @@
             "santiago": {
                 "title": "Santiago Atitlán",
                 "summary": "Tradition and Maximón",
-                "fullDescription": "Deep history.",
+                "fullDescription": "Santiago Atitlan is one of the lake's strongest cultural towns. A visit usually centers on the market, Santiago Apostol Church, local brotherhoods, and Maximon, always with respect and ideally with a local guide. It is a powerful stop for understanding Tz'utujil life, trying local food, and seeing a less tourist-focused side of Atitlan.",
                 "vibe": "Mayan Tradition",
                 "highlights": [
-                    "Maximón",
-                    "Church",
-                    "Culture"
+                    "Maximon: visit respectfully with local guidance",
+                    "Market: textiles, food, and everyday life",
+                    "Santiago Apostol Church: history and community",
+                    "Boats: connections to San Pedro and Panajachel",
+                    "Best for: culture, local food, and living history"
                 ],
                 "activities": [
-                    "Tour through the indigenous market",
+                    "Explore the municipal market in the morning",
                     "Visit Santiago Apostol Church",
-                    "Mayan brotherhoods tour",
-                    "Local crafts workshop",
-                    "Boat ride on the lake",
-                    "Visit the local museum",
-                    "Traditional food tasting",
-                    "Walk through the historic center"
+                    "Visit Maximon with a local guide",
+                    "Learn about brotherhoods and community traditions",
+                    "Try local food near the market",
+                    "Buy textiles and local crafts",
+                    "Walk the center slowly and respectfully",
+                    "Arrive by boat from San Pedro's secondary dock"
                 ],
                 "weather": {
                     "condition": "Sunny"
@@ -736,25 +742,25 @@
             },
             "panajachel": {
                 "title": "Panajachel",
-                "summary": "The gateway to Lake Atitlán. Affectionately known as \"Pana\", it is the main access point to Lake Atitlán.",
-                "fullDescription": "Panajachel, affectionately known as \"Pana\", is the primary entry point to Lake Atitlán. It offers a perfect blend of modern amenities and local charm, with its famous Santander Street filled with shops, restaurants, and nightlife. It's the ideal place to start your lake adventure, with easy access to all other villages and a wide range of tourist services.",
+                "summary": "Gateway town, services, and boat connections",
+                "fullDescription": "Panajachel, or Pana, is the most practical entry and exit point for Lake Atitlan. It has docks connecting to other towns, shuttles, banks, pharmacies, agencies, and Santander Street for shopping, food, and tours. It is not always the quietest town, but it is the best place for logistics, first nights, and solving travel needs.",
                 "vibe": "Cosmopolitan & Shopping",
                 "highlights": [
-                    "Santander Street with shops and restaurants",
-                    "Lively nightlife",
-                    "Panoramic lake views",
-                    "Access to other lake villages",
-                    "Artisans market"
+                    "Transport: strong hub for boats and shuttles",
+                    "Santander Street: shops, food, and agencies",
+                    "Services: banks, pharmacies, and supermarkets",
+                    "Nature: reserve and lake views",
+                    "Best for: arrival, logistics, and shopping"
                 ],
                 "activities": [
                     "Walk along Santander Street",
-                    "Artisan shopping tour",
-                    "Boat ride on the lake",
-                    "Food tour",
-                    "Birdwatching",
-                    "Sunset kayaking",
-                    "Visit nearby nature reserves",
-                    "Photography tour"
+                    "Shop for crafts and solve travel errands",
+                    "Take boats to other lake towns",
+                    "Visit Atitlan Nature Reserve",
+                    "Kayak or take a sunset boat ride",
+                    "Book shuttles to Antigua or Guatemala City",
+                    "Eat near Santander Street",
+                    "Use Pana as your first or last night at the lake"
                 ],
                 "weather": {
                     "condition": "Partly cloudy"
@@ -797,22 +803,25 @@
             },
             "santa-cruz": {
                 "title": "Santa Cruz La Laguna",
-                "summary": "Quiet village with the best views and high-altitude diving",
-                "fullDescription": "Santa Cruz La Laguna is a picturesque and tranquil village, accessible only by boat. It is famous for having some of the best views of the lake and volcanoes, as well as being home to only professional diving school in Atitlán. It is the perfect place to relax, swim, and enjoy nature without the crowds.",
+                "summary": "Wide lake views, calm water, and the walk to Jaibalito",
+                "fullDescription": "Santa Cruz is a quiet, scenic option reached mainly by boat. The lakefront has stays, restaurants, and water activities, while the local village sits higher up the mountain. It is ideal for resting, swimming, kayaking, walking toward Jaibalito, and enjoying wide views without the pace of San Pedro or Panajachel.",
                 "vibe": "Relax & Views",
                 "highlights": [
-                    "High-altitude diving in the lake",
-                    "Incredible panoramic views",
-                    "Hiking to Jaibalito",
-                    "Hotels with direct lake access"
+                    "Lakefront: stays, docks, and quiet swim spots",
+                    "Diving: high-altitude diving school on Atitlan",
+                    "Village: uphill community and CECAP",
+                    "Trail: scenic walk toward Jaibalito",
+                    "Important: bring cash, limited services"
                 ],
                 "activities": [
-                    "Diving and snorkeling",
-                    "Kayaking and paddleboarding",
-                    "Lakeside hiking",
-                    "Mayan cooking classes",
-                    "Relaxing in hammocks by the lake",
-                    "Visit the CECAP vocational center"
+                    "Swim, kayak, or paddleboard",
+                    "Try high-altitude lake diving",
+                    "Walk toward Jaibalito along the shore",
+                    "Go up to the village and visit CECAP",
+                    "Have lunch at lakefront restaurants",
+                    "Rest at stays with lake views",
+                    "Move by boat to Pana, San Marcos, or San Pedro",
+                    "Bring cash because reliable ATMs are not available"
                 ],
                 "weather": {
                     "condition": "Sunny"

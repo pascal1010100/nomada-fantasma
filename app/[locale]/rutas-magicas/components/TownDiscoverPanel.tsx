@@ -152,10 +152,10 @@ export default function TownDiscoverPanel({
                 return (
                   <div
                     key={`${highlight}-${index}`}
-                    className="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 dark:border-white/10 dark:bg-gray-900/45"
+                    className="group flex items-start gap-3 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white px-4 py-3 shadow-[0_1px_0_rgba(15,23,42,0.03)] transition duration-200 hover:-translate-y-0.5 hover:border-cyan-300 hover:shadow-md dark:border-white/10 dark:from-gray-900/65 dark:to-gray-900/35 dark:hover:border-cyan-400/35"
                   >
-                    <span className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-500/10">
-                      <HighlightIcon className="h-4 w-4 text-cyan-500" />
+                    <span className="mt-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-cyan-500/15 bg-cyan-500/10 shadow-inner transition group-hover:bg-cyan-500/15">
+                      <HighlightIcon className="h-4 w-4 text-cyan-500 transition group-hover:scale-110" />
                     </span>
                     <span>
                       <span className="block text-sm font-semibold text-gray-900 dark:text-white">{title}</span>
@@ -173,7 +173,7 @@ export default function TownDiscoverPanel({
         </section>
 
         {primaryHighlights.length > 0 && (
-          <aside className="rounded-2xl border border-cyan-400/20 bg-cyan-50/70 p-5 shadow-sm dark:bg-cyan-950/20">
+          <aside className="rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-50/90 to-white p-5 shadow-sm dark:from-cyan-950/25 dark:to-gray-900/35">
             <h3 className="mb-4 flex items-center text-sm font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:text-cyan-200">
               <Sparkles className="mr-2 h-4 w-4" />
               {highlightsTitle}
@@ -186,10 +186,10 @@ export default function TownDiscoverPanel({
                 return (
                   <div
                     key={`${highlight}-${index}`}
-                    className="flex items-start gap-3 rounded-xl border border-cyan-500/20 bg-white/75 p-4 text-sm leading-6 text-gray-700 dark:bg-gray-900/50 dark:text-gray-300"
+                    className="group flex items-start gap-3 rounded-xl border border-cyan-500/20 bg-white/80 p-4 text-sm leading-6 text-gray-700 shadow-[0_1px_0_rgba(8,145,178,0.06)] transition duration-200 hover:-translate-y-0.5 hover:border-cyan-400/50 hover:bg-white hover:shadow-md dark:bg-gray-900/55 dark:text-gray-300 dark:hover:bg-gray-900/80"
                   >
-                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-500/10">
-                      <HighlightIcon className="h-4 w-4 text-cyan-500" />
+                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-cyan-500/15 bg-cyan-500/10 shadow-inner transition group-hover:bg-cyan-500/15">
+                      <HighlightIcon className="h-5 w-5 text-cyan-500 transition group-hover:scale-110" />
                     </span>
                     <span>
                       <span className="block font-semibold text-gray-900 dark:text-white">{title}</span>
@@ -216,12 +216,15 @@ export default function TownDiscoverPanel({
               return (
                 <div
                   key={`${activity}-${index}`}
-                  className="flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50/80 p-4 dark:border-white/10 dark:bg-gray-900/45"
+                  className="group relative overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4 shadow-[0_1px_0_rgba(15,23,42,0.03)] transition duration-200 hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-md dark:border-white/10 dark:from-gray-900/65 dark:to-gray-900/35 dark:hover:border-purple-400/35"
                 >
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-500/10">
-                    <ActivityIcon className="h-5 w-5 text-purple-500" />
+                  <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent opacity-0 transition group-hover:opacity-100" />
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-purple-500/15 bg-purple-500/10 shadow-inner transition group-hover:bg-purple-500/15">
+                      <ActivityIcon className="h-5 w-5 text-purple-500 transition group-hover:scale-110" />
+                    </div>
+                    <p className="text-sm leading-6 text-gray-700 dark:text-gray-300">{activity}</p>
                   </div>
-                  <p className="text-sm leading-6 text-gray-700 dark:text-gray-300">{activity}</p>
                 </div>
               );
             })}
