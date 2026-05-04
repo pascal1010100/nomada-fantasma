@@ -101,6 +101,16 @@ type MultiRecipientSendResult = {
     error?: unknown;
 };
 
+type TourInitialNotificationLabel =
+    | 'tour_customer'
+    | 'tour_admin'
+    | 'tour_agency'
+    | 'guide_customer'
+    | 'guide_admin'
+    | 'guide_agency';
+
+type ShuttleInitialNotificationLabel = 'shuttle_customer' | 'shuttle_admin' | 'shuttle_agency';
+
 type ManualCustomerEmailTemplate = 'payment_instructions' | 'not_available' | 'booking_confirmed' | 'booking_cancelled';
 
 type ManualCustomerEmailProps = {
@@ -705,6 +715,189 @@ interface SendShuttleConfirmationEmailsProps {
 
 function buildShuttleOpsSubject(prefix: string, origin: string, destination: string, travelDate: string) {
     return `${prefix}: ${origin} -> ${destination} • ${travelDate}`;
+}
+
+export async function sendTourInitialNotificationEmail(
+    data: SendConfirmationEmailProps & {
+        label: TourInitialNotificationLabel;
+        recipientEmail: string;
+    }
+): Promise<RecipientDeliveryResult> {
+    const adminEmail = process.env.ADMIN_EMAIL || 'operaciones@nomadafantasma.com';
+    const requestKind = data.requestKind ?? 'tour';
+    const isGuide = requestKind === 'guide';
+    const requestLabel = isGuide ? 'guia' : 'tour';
+    const adminLabel = isGuide ? 'guide_admin' : 'tour_admin';
+    const agencyLabel = isGuide ? 'guide_agency' : 'tour_agency';
+    const adminSubject = `Nueva solicitud de ${requestLabel}: ${data.tourName}`;
+    const agencySubject = `Solicitud de ${requestLabel} asignada: ${data.tourName}`;
+    const isCustomer = data.label.endsWith('_customer');
+    const subject = isCustomer
+        ? data.t('preview', { tourName: data.tourName })
+        : data.label === agencyLabel
+            ? agencySubject
+            : adminSubject;
+
+    if (!resend) {
+        logger.info('📧 [TOUR INITIAL NOTIFICATION SIMULATION] --------------------------');
+        logger.info(`To: ${data.recipientEmail}`);
+        logger.info(`Subject: ${subject}`);
+        logger.info(`Label: ${data.label}`);
+        logger.info('Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        logger.info('----------------------------------------------------------------');
+        return {
+            label: data.label,
+            to: data.recipientEmail,
+            subject,
+            success: true,
+            id: 'simulated_' + Date.now(),
+        };
+    }
+
+    const roleLabel =
+        data.label === adminLabel
+            ? 'ADMIN'
+            : data.label === agencyLabel
+                ? 'AGENCIA'
+                : undefined;
+    const reactComponent = isCustomer
+        ? ReservationTemplate(data)
+        : TourLeadNotification({
+            customerName: data.customerName,
+            customerEmail: data.to,
+            customerWhatsapp: data.customerPhone || '',
+            tourName: data.tourName,
+            bookingOptionName: data.bookingOptionName,
+            tourDate: data.date,
+            serviceKind: requestKind,
+            requestedTime: data.requestedTime,
+            guests: data.guests,
+            totalPrice: data.totalPrice,
+            meetingPoint: data.meetingPoint,
+            notes: data.customerNotes || undefined,
+            reservationId: data.reservationId,
+            operationsEmail: adminEmail,
+            adminPanelUrl: data.label === adminLabel ? `${SITE_URL}/es/internal/recepcion` : undefined,
+            roleLabel,
+            showAdminPanel: data.label === adminLabel,
+            showAgencyInstructions: data.label === agencyLabel,
+        });
+
+    const result = await sendEmailWithRetry(data.label, () =>
+        resend.emails.send({
+            from: RESEND_FROM,
+            to: [data.recipientEmail],
+            subject,
+            react: reactComponent,
+        })
+    );
+
+    return {
+        label: data.label,
+        to: data.recipientEmail,
+        subject,
+        success: result.success,
+        id: result.id,
+        error: result.error,
+    };
+}
+
+export async function sendShuttleInitialNotificationEmail(
+    data: SendShuttleConfirmationEmailsProps & {
+        bookingId?: string;
+        label: ShuttleInitialNotificationLabel;
+        recipientEmail: string;
+    }
+): Promise<RecipientDeliveryResult> {
+    const adminEmail = process.env.ADMIN_EMAIL || 'operaciones@nomadafantasma.com';
+    const subject = data.label === 'shuttle_customer'
+        ? data.t('subject', { origin: data.origin, destination: data.destination })
+        : data.label === 'shuttle_admin'
+            ? buildShuttleOpsSubject('Shuttle pendiente', data.origin, data.destination, data.travelDate)
+            : buildShuttleOpsSubject('Shuttle asignado', data.origin, data.destination, data.travelDate);
+
+    if (!resend) {
+        logger.info('📧 [SHUTTLE INITIAL NOTIFICATION SIMULATION] -----------------------');
+        logger.info(`To: ${data.recipientEmail}`);
+        logger.info(`Subject: ${subject}`);
+        logger.info(`Label: ${data.label}`);
+        logger.info('Template Data:', JSON.stringify(redactForLog(data), null, 2));
+        logger.info('----------------------------------------------------------------');
+        return {
+            label: data.label,
+            to: data.recipientEmail,
+            subject,
+            success: true,
+            id: 'simulated_' + Date.now(),
+        };
+    }
+
+    const reactComponent =
+        data.label === 'shuttle_customer'
+            ? ShuttleConfirmationEmail({
+                bookingId: data.bookingId,
+                customerName: data.customerName,
+                origin: data.origin,
+                destination: data.destination,
+                travelDate: data.travelDate,
+                travelTime: data.travelTime,
+                passengers: data.passengers,
+                pickupLocation: data.pickupLocation,
+                type: data.type,
+                price: data.price,
+                t: data.t,
+                locale: data.locale,
+            })
+            : data.label === 'shuttle_admin'
+                ? ShuttleAdminNotification({
+                    bookingId: data.bookingId,
+                    customerName: data.customerName,
+                    customerEmail: data.customerEmail,
+                    customerWhatsapp: data.customerWhatsapp,
+                    origin: data.origin,
+                    destination: data.destination,
+                    travelDate: data.travelDate,
+                    travelTime: data.travelTime,
+                    passengers: data.passengers,
+                    pickupLocation: data.pickupLocation,
+                    type: data.type,
+                    price: data.price,
+                    createdAt: data.createdAt,
+                    adminPanelUrl: `${SITE_URL}/es/internal/recepcion`,
+                })
+                : ShuttleAgencyNotification({
+                    bookingId: data.bookingId,
+                    customerName: data.customerName,
+                    customerEmail: data.customerEmail,
+                    customerWhatsapp: data.customerWhatsapp,
+                    origin: data.origin,
+                    destination: data.destination,
+                    travelDate: data.travelDate,
+                    travelTime: data.travelTime,
+                    passengers: data.passengers,
+                    pickupLocation: data.pickupLocation,
+                    type: data.type,
+                    createdAt: data.createdAt,
+                    operationsEmail: adminEmail,
+                });
+
+    const result = await sendEmailWithRetry(data.label, () =>
+        resend.emails.send({
+            from: RESEND_FROM,
+            to: [data.recipientEmail],
+            subject,
+            react: reactComponent,
+        })
+    );
+
+    return {
+        label: data.label,
+        to: data.recipientEmail,
+        subject,
+        success: result.success,
+        id: result.id,
+        error: result.error,
+    };
 }
 
 export async function sendTourConfirmationEmails(data: SendConfirmationEmailProps): Promise<MultiRecipientSendResult> {
