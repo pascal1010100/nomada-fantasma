@@ -52,12 +52,12 @@ const validBody = {
   customerName: 'E2E Shuttle Unit',
   customerEmail: 'shuttle-unit@example.com',
   customerWhatsapp: '50255550000',
-  routeOrigin: 'Panajachel (Atitlán)',
+  routeOrigin: 'San Pedro La Laguna',
   routeDestination: 'Antigua Guatemala',
   date: '2099-05-05',
-  time: '09:00',
+  time: '5:00 AM → 8:30 AM',
   passengers: 2,
-  pickupLocation: 'Hotel Unit Test Panajachel',
+  pickupLocation: 'Hotel Unit Test San Pedro',
   type: 'shared',
 };
 
@@ -128,10 +128,10 @@ describe('POST /api/shuttles/reserve', () => {
     const updateSpy = vi.fn();
     const routeQuery = createSelectQuery({
       data: {
-        id: 'panajachel-antigua',
+        id: 'san-pedro-antigua',
         agency_id: null,
-        price: 150,
-        schedule: ['09:00', '12:00'],
+        price: 200,
+        schedule: ['5:00 AM → 8:30 AM', '7:00 AM → 10:30 AM'],
       },
       error: null,
     });
@@ -166,14 +166,14 @@ describe('POST /api/shuttles/reserve', () => {
       },
     });
     expect(insertSpy).toHaveBeenCalledWith(expect.objectContaining({
-      route_id: 'panajachel-antigua',
-      price: 150,
+      route_id: 'san-pedro-antigua',
+      price: 200,
       customer_locale: 'es',
-      admin_notes: expect.stringContaining('[[meta:price=150.00]]'),
+      admin_notes: expect.stringContaining('[[meta:price=200.00]]'),
     }));
     expect(mocks.sendShuttleConfirmationEmails).toHaveBeenCalledWith(expect.objectContaining({
       bookingId: 'booking-1',
-      price: 150,
+      price: 200,
     }));
     expect(mocks.recordInternalNotification).toHaveBeenCalledTimes(3);
     expect(mocks.recordNotificationJobsForRecipients).toHaveBeenCalledWith(expect.objectContaining({
@@ -185,7 +185,7 @@ describe('POST /api/shuttles/reserve', () => {
       triggeredBy: 'system',
       payload: expect.objectContaining({
         locale: 'es',
-        route_id: 'panajachel-antigua',
+        route_id: 'san-pedro-antigua',
       }),
     }));
     expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({

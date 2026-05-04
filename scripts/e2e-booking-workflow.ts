@@ -200,6 +200,7 @@ async function main() {
       .from('shuttle_routes')
       .select('id, agency_id, origin, destination, type, schedule, price')
       .eq('type', 'shared')
+      .ilike('origin', '%san pedro%')
       .limit(20);
 
     if (routesError) throw routesError;
@@ -230,7 +231,7 @@ async function main() {
         date: travelDate,
         time: route.schedule?.[0] ?? '09:00',
         passengers: 2,
-        pickupLocation: 'Hotel E2E Panajachel',
+        pickupLocation: 'Hotel E2E San Pedro',
         type: route.type,
       },
       testIp
