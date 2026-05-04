@@ -1,6 +1,6 @@
 import { getToursByPuebloFromDB } from '@/app/lib/supabase/tours';
 import { getActiveGuidesByTownSlugFromDB } from '@/app/lib/supabase/guides';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getNearbyTownsFromDB, getTownBySlugFromDB } from '@/app/lib/supabase/towns';
 import { ArrowLeft, MapPin, Wifi, Star } from 'lucide-react';
 import Link from 'next/link';
@@ -13,9 +13,15 @@ import TownExperiencesPanel from '../../components/TownExperiencesPanel';
 import TownDiscoverPanel from '../../components/TownDiscoverPanel';
 import TownPracticalInfoPanel from '../../components/TownPracticalInfoPanel';
 import { buildLocalizedTownPageViewModel } from '../../lib/townPageViewModel';
+import { getCanonicalTownSlug } from '../../lib/townSlugs';
 
 export default async function TownPage({ params }: { params: Promise<{ pueblo: string; locale: string }> }) {
-  const { pueblo: slug, locale } = await params;
+  const { pueblo, locale } = await params;
+  const slug = getCanonicalTownSlug(pueblo);
+  if (slug !== pueblo) {
+    redirect(`/${locale}/rutas-magicas/lago-atitlan/${slug}`);
+  }
+
   const town = await getTownBySlugFromDB(slug);
 
   if (!town) {
