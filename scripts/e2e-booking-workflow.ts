@@ -9,6 +9,7 @@ type SupabaseEnv = {
 
 type ShuttleRoute = {
   id: string;
+  agency_id: string | null;
   origin: string;
   destination: string;
   type: 'shared' | 'private';
@@ -197,7 +198,7 @@ async function main() {
 
     const { data: routes, error: routesError } = await supabase
       .from('shuttle_routes')
-      .select('id, origin, destination, type, schedule, price')
+      .select('id, agency_id, origin, destination, type, schedule, price')
       .eq('type', 'shared')
       .limit(20);
 
@@ -265,7 +266,7 @@ async function main() {
     const [shuttleResult, tourResult, notificationResult, bucketResult] = await Promise.all([
       supabase
         .from('shuttle_bookings')
-        .select('id, route_id, price, status, email_delivery_status, email_attempts, admin_notes')
+        .select('id, route_id, agency_id, price, status, email_delivery_status, email_attempts, admin_notes')
         .eq('id', createdIds.shuttle)
         .single(),
       supabase
@@ -290,6 +291,8 @@ async function main() {
     if (bucketResult.error) throw bucketResult.error;
 
     if (shuttleResult.data.route_id !== route.id) throw new Error('Shuttle route_id was not persisted.');
+    if (shuttleResult.data.agency_id !== route.agency_id) throw new Error('Shuttle agency_id was not persisted.');
+    if (Number(shuttleResult.data.price) !== Number(route.price)) throw new Error('Shuttle price was not persisted.');
     if (shuttleResult.data.email_delivery_status !== 'sent') throw new Error('Shuttle email status was not sent.');
     if (tourResult.data.tour_id !== tour.id) throw new Error('Tour id was not persisted.');
     if (tourResult.data.email_delivery_status !== 'sent') throw new Error('Tour email status was not sent.');
