@@ -1052,7 +1052,7 @@ export default function RecepcionRequestsPage() {
                     </div>
                 ))}
             </div>
-            <h1 className="text-2xl font-bold mb-2">Panel Operativo San Pedro</h1>
+            <h1 className="text-2xl font-bold mb-2">Panel Operativo Nomada</h1>
             <p className="text-sm text-muted-foreground mb-6">
                 Vista interna para operar solicitudes de tours, guias y shuttles sin salir del flujo.
             </p>
