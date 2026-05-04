@@ -103,6 +103,11 @@ type ProcessNotificationsResponse = {
     };
 };
 
+type ProcessNotificationsErrorResponse = {
+    error?: string;
+    detail?: string;
+};
+
 type InternalSessionResponse = {
     success: boolean;
     user: {
@@ -991,11 +996,12 @@ export default function RecepcionRequestsPage() {
         try {
             const response = await fetch('/api/internal/jobs/process-notifications?limit=20', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'x-admin-actor': actor.trim() || 'recepcion',
                 },
             });
-            const payload = (await response.json()) as ProcessNotificationsResponse | { error?: string };
+            const payload = (await response.json()) as ProcessNotificationsResponse | ProcessNotificationsErrorResponse;
 
             if (!response.ok) {
                 if (response.status === 401) {
@@ -1003,7 +1009,9 @@ export default function RecepcionRequestsPage() {
                     router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}&error=auth-required`);
                     return;
                 }
-                const message = 'error' in payload ? payload.error || 'No se pudieron procesar las notificaciones.' : 'No se pudieron procesar las notificaciones.';
+                const baseMessage =
+                    'error' in payload ? payload.error || 'No se pudieron procesar las notificaciones.' : 'No se pudieron procesar las notificaciones.';
+                const message = 'detail' in payload && payload.detail ? `${baseMessage} ${payload.detail}` : baseMessage;
                 setError(message);
                 pushToast('error', 'No se pudieron procesar notificaciones', message);
                 return;

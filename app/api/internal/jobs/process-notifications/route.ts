@@ -9,6 +9,17 @@ function normalizeLimit(value: string | null): number {
   return Math.min(Math.max(parsed, 1), 50);
 }
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return 'Error desconocido';
+  }
+}
+
 async function isAuthorized(request: Request): Promise<boolean> {
   const configuredSecret = process.env.INTERNAL_JOBS_SECRET || process.env.CRON_SECRET;
   const bearer = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
@@ -32,6 +43,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, summary });
   } catch (error) {
     logger.error('Error processing notification jobs:', error);
-    return NextResponse.json({ error: 'No se pudieron procesar las notificaciones.' }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'No se pudieron procesar las notificaciones.',
+        detail: process.env.NODE_ENV === 'production' ? undefined : getErrorMessage(error),
+      },
+      { status: 500 }
+    );
   }
 }

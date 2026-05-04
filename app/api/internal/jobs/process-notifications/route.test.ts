@@ -74,4 +74,18 @@ describe('POST /api/internal/jobs/process-notifications', () => {
     expect(json.error).toBe('Unauthorized');
     expect(mocks.processDueNotificationJobs).not.toHaveBeenCalled();
   });
+
+  it('returns a development error detail when processing fails', async () => {
+    process.env.INTERNAL_JOBS_SECRET = 'test-secret';
+    mocks.processDueNotificationJobs.mockRejectedValue(new Error('relation "notification_jobs" does not exist'));
+
+    const response = await POST(createRequest('test-secret'));
+    const json = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(json).toEqual({
+      error: 'No se pudieron procesar las notificaciones.',
+      detail: 'relation "notification_jobs" does not exist',
+    });
+  });
 });
