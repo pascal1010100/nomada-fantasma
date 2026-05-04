@@ -1187,7 +1187,6 @@ export default function RecepcionRequestsPage() {
                     const providerNotification = getLatestProviderNotification(item);
                     const providerEmailKey = `${item.kind}-${item.id}-provider_confirmation`;
                     const canSendProviderConfirmation =
-                        (item.kind === 'tour' || item.kind === 'guide') &&
                         Boolean(item.provider?.email) &&
                         item.provider?.isActive !== false &&
                         (normalizedStatus === 'confirmed' || normalizedStatus === 'completed');

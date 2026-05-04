@@ -65,6 +65,14 @@ function createSingleSelectQuery(result: unknown) {
   };
 }
 
+function createMaybeSingleSelectQuery(result: unknown) {
+  return {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn().mockResolvedValue(result),
+  };
+}
+
 function createUpdateQuery(result: unknown, updateSpy = vi.fn()) {
   return {
     update: updateSpy.mockReturnValue({
@@ -92,6 +100,10 @@ describe('POST /api/internal/requests/send-email', () => {
     mocks.sendManualCustomerEmail.mockResolvedValue({
       success: true,
       id: 'email-1',
+    });
+    mocks.sendShuttleProviderConfirmationEmail.mockResolvedValue({
+      success: true,
+      id: 'provider-email-1',
     });
     mocks.recordInternalNotification.mockResolvedValue({ error: null });
   });
@@ -188,6 +200,74 @@ describe('POST /api/internal/requests/send-email', () => {
     expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({
       admin_notes: expect.stringContaining('email:payment_instructions'),
       email_delivery_status: 'sent',
+    }));
+  });
+
+  it('sends a shuttle provider confirmation email and records agency notification', async () => {
+    const updateSpy = vi.fn();
+    const shuttle = {
+      id: 'shuttle-1',
+      agency_id: 'agency-1',
+      customer_name: 'Shuttle Customer',
+      customer_email: 'customer@example.com',
+      customer_whatsapp: '50255550000',
+      route_origin: 'Panajachel',
+      route_destination: 'Antigua Guatemala',
+      travel_date: '2099-05-05',
+      travel_time: '09:00',
+      passengers: 2,
+      pickup_location: 'Hotel Unit',
+      type: 'shared',
+      admin_notes: null,
+    };
+    let shuttleCalls = 0;
+
+    mocks.from.mockImplementation((table: string) => {
+      if (table === 'shuttle_bookings') {
+        shuttleCalls += 1;
+        return shuttleCalls === 1
+          ? createSingleSelectQuery({ data: shuttle, error: null })
+          : createUpdateQuery({ error: null }, updateSpy);
+      }
+      if (table === 'agencies') {
+        return createMaybeSingleSelectQuery({
+          data: { email: 'agency@example.com', is_active: true },
+          error: null,
+        });
+      }
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    const response = await POST(createRequest({
+      kind: 'shuttle',
+      id: 'shuttle-1',
+      template: 'provider_confirmation',
+    }));
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json).toMatchObject({
+      success: true,
+      subject: 'Shuttle confirmado para operar: Panajachel -> Antigua Guatemala',
+    });
+    expect(mocks.sendShuttleProviderConfirmationEmail).toHaveBeenCalledWith(expect.objectContaining({
+      to: 'agency@example.com',
+      bookingId: 'shuttle-1',
+      origin: 'Panajachel',
+      destination: 'Antigua Guatemala',
+      customerWhatsapp: '50255550000',
+    }));
+    expect(mocks.recordInternalNotification).toHaveBeenCalledWith(expect.objectContaining({
+      requestKind: 'shuttle',
+      requestId: 'shuttle-1',
+      recipientType: 'agency',
+      recipientEmail: 'agency@example.com',
+      template: 'booking_confirmed_provider',
+      deliveryStatus: 'sent',
+      triggeredBy: 'Recepcion Unit',
+    }));
+    expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({
+      admin_notes: expect.stringContaining('email:provider_confirmation'),
     }));
   });
 });
