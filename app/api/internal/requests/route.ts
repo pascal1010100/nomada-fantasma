@@ -73,6 +73,26 @@ type InternalRequestItem = {
     cancelledAt: string | null;
     provider: ProviderInfo | null;
     notifications: InternalNotificationRecord[];
+    notificationJobs: NotificationJobRecord[];
+};
+
+type NotificationJobRecord = {
+    id: string;
+    created_at: string;
+    updated_at: string;
+    scheduled_at: string;
+    processed_at: string | null;
+    status: 'pending' | 'processing' | 'sent' | 'failed' | 'cancelled';
+    attempts: number;
+    max_attempts: number;
+    request_kind: 'tour' | 'guide' | 'shuttle';
+    request_id: string;
+    recipient_type: 'customer' | 'agency' | 'admin';
+    recipient_email: string;
+    template: string;
+    subject: string | null;
+    provider_message_id: string | null;
+    last_error: string | null;
 };
 
 function normalizeLimit(rawValue: string | null): number {
@@ -129,6 +149,7 @@ function mapReservation(
         cancelledAt: row.cancelled_at ?? null,
         provider,
         notifications: [],
+        notificationJobs: [],
     };
 }
 
@@ -160,6 +181,7 @@ function mapShuttle(row: ShuttleBookingRow, provider: ProviderInfo | null = null
         cancelledAt: row.cancelled_at,
         provider,
         notifications: [],
+        notificationJobs: [],
     };
 }
 
@@ -187,6 +209,52 @@ function mapGuideProvider(guide: GuideLite | null | undefined, agenciesById: Map
 
 function getShuttleRouteKey(origin: string | null | undefined, destination: string | null | undefined, type: string | null | undefined): string {
     return `${origin ?? ''}::${destination ?? ''}::${type ?? 'shared'}`.toLowerCase();
+}
+
+async function listNotificationJobsForRequests(
+    refs: Array<{ kind: 'tour' | 'guide' | 'shuttle'; id: string }>,
+    limitPerRequest = 6
+): Promise<Record<string, NotificationJobRecord[]>> {
+    if (refs.length === 0) return {};
+
+    const uniqueTourIds = [...new Set(refs.filter((ref) => ref.kind === 'tour').map((ref) => ref.id))];
+    const uniqueGuideIds = [...new Set(refs.filter((ref) => ref.kind === 'guide').map((ref) => ref.id))];
+    const uniqueShuttleIds = [...new Set(refs.filter((ref) => ref.kind === 'shuttle').map((ref) => ref.id))];
+
+    const orClauses: string[] = [];
+    if (uniqueTourIds.length > 0) {
+        orClauses.push(`and(request_kind.eq.tour,request_id.in.(${uniqueTourIds.join(',')}))`);
+    }
+    if (uniqueGuideIds.length > 0) {
+        orClauses.push(`and(request_kind.eq.guide,request_id.in.(${uniqueGuideIds.join(',')}))`);
+    }
+    if (uniqueShuttleIds.length > 0) {
+        orClauses.push(`and(request_kind.eq.shuttle,request_id.in.(${uniqueShuttleIds.join(',')}))`);
+    }
+
+    if (orClauses.length === 0) return {};
+
+    const result = await supabaseAdmin
+        .from('notification_jobs' as never)
+        .select('id, created_at, updated_at, scheduled_at, processed_at, status, attempts, max_attempts, request_kind, request_id, recipient_type, recipient_email, template, subject, provider_message_id, last_error')
+        .or(orClauses.join(','))
+        .order('created_at', { ascending: false });
+
+    if (result.error) {
+        logger.error('Unable to fetch notification jobs for internal panel:', result.error);
+        return {};
+    }
+
+    const grouped: Record<string, NotificationJobRecord[]> = {};
+    for (const row of (result.data ?? []) as unknown as NotificationJobRecord[]) {
+        const key = `${row.request_kind}:${row.request_id}`;
+        const entries = grouped[key] ?? [];
+        if (entries.length >= limitPerRequest) continue;
+        entries.push(row);
+        grouped[key] = entries;
+    }
+
+    return grouped;
 }
 
 export async function GET(request: Request) {
@@ -330,14 +398,17 @@ export async function GET(request: Request) {
         const items = [...reservationItems, ...shuttleItems].sort((a, b) =>
             b.createdAt.localeCompare(a.createdAt)
         );
-        const notificationsByRequest = await listInternalNotificationsForRequests(
-            items.map((item) => ({ kind: item.kind, id: item.id })),
-            8
-        );
+        const requestRefs = items.map((item) => ({ kind: item.kind, id: item.id }));
+        const [notificationsByRequest, jobsByRequest] = await Promise.all([
+            listInternalNotificationsForRequests(requestRefs, 8),
+            listNotificationJobsForRequests(requestRefs, 8),
+        ]);
         const enrichedItems = items.map((item) => ({
             ...item,
             notifications: notificationsByRequest[`${item.kind}:${item.id}`] ?? [],
+            notificationJobs: jobsByRequest[`${item.kind}:${item.id}`] ?? [],
         }));
+        const allJobs = enrichedItems.flatMap((item) => item.notificationJobs);
 
         return NextResponse.json({
             success: true,
@@ -347,6 +418,8 @@ export async function GET(request: Request) {
                 guides: reservationItems.filter((item) => item.kind === 'guide').length,
                 shuttles: shuttleItems.length,
                 emailFailed: enrichedItems.filter((item) => item.emailStatus === 'failed').length,
+                notificationJobsPending: allJobs.filter((job) => job.status === 'pending' || job.status === 'processing').length,
+                notificationJobsFailed: allJobs.filter((job) => job.status === 'failed').length,
             },
             items: enrichedItems,
         });

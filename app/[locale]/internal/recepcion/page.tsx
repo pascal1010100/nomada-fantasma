@@ -33,6 +33,24 @@ type InternalRequestItem = {
         email: string | null;
         isActive: boolean;
     } | null;
+    notificationJobs: Array<{
+        id: string;
+        created_at: string;
+        updated_at: string;
+        scheduled_at: string;
+        processed_at: string | null;
+        status: 'pending' | 'processing' | 'sent' | 'failed' | 'cancelled';
+        attempts: number;
+        max_attempts: number;
+        request_kind: 'tour' | 'guide' | 'shuttle';
+        request_id: string;
+        recipient_type: 'customer' | 'agency' | 'admin';
+        recipient_email: string;
+        template: string;
+        subject: string | null;
+        provider_message_id: string | null;
+        last_error: string | null;
+    }>;
     notifications: Array<{
         id: string;
         created_at: string;
@@ -59,6 +77,8 @@ type InternalResponse = {
         guides: number;
         shuttles: number;
         emailFailed: number;
+        notificationJobsPending: number;
+        notificationJobsFailed: number;
     };
     items: InternalRequestItem[];
 };
@@ -71,6 +91,16 @@ type ToastMessage = {
     kind: ToastKind;
     title: string;
     message?: string;
+};
+
+type ProcessNotificationsResponse = {
+    success: boolean;
+    summary: {
+        processed: number;
+        sent: number;
+        failed: number;
+        skipped: number;
+    };
 };
 
 type InternalSessionResponse = {
@@ -175,6 +205,22 @@ function getNotificationStatusClasses(status: 'sent' | 'failed'): string {
     return status === 'sent'
         ? 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200'
         : 'border-rose-400/20 bg-rose-500/10 text-rose-200';
+}
+
+function getNotificationJobStatusLabel(status: InternalRequestItem['notificationJobs'][number]['status']): string {
+    if (status === 'sent') return 'Enviado';
+    if (status === 'failed') return 'Fallido';
+    if (status === 'processing') return 'Procesando';
+    if (status === 'cancelled') return 'Cancelado';
+    return 'Pendiente';
+}
+
+function getNotificationJobStatusClasses(status: InternalRequestItem['notificationJobs'][number]['status']): string {
+    if (status === 'sent') return 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200';
+    if (status === 'failed') return 'border-rose-400/20 bg-rose-500/10 text-rose-200';
+    if (status === 'processing') return 'border-sky-400/20 bg-sky-500/10 text-sky-200';
+    if (status === 'cancelled') return 'border-slate-400/20 bg-slate-500/10 text-slate-300';
+    return 'border-amber-400/20 bg-amber-500/10 text-amber-200';
 }
 
 function getChecklist(status: RequestStatus): string {
@@ -417,6 +463,7 @@ export default function RecepcionRequestsPage() {
     const [loading, setLoading] = useState(false);
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
     const [emailActionLoadingId, setEmailActionLoadingId] = useState<string | null>(null);
+    const [notificationJobsLoading, setNotificationJobsLoading] = useState(false);
 
     // Modern Modal State
     const [modal, setModal] = useState<ModalState>({
@@ -571,6 +618,14 @@ export default function RecepcionRequestsPage() {
             guides: filteredItems.filter((item) => item.kind === 'guide').length,
             shuttles: filteredItems.filter((item) => item.kind === 'shuttle').length,
             emailFailed: filteredItems.filter((item) => item.emailStatus === 'failed').length,
+            notificationJobsPending: filteredItems.reduce(
+                (count, item) => count + item.notificationJobs.filter((job) => job.status === 'pending' || job.status === 'processing').length,
+                0
+            ),
+            notificationJobsFailed: filteredItems.reduce(
+                (count, item) => count + item.notificationJobs.filter((job) => job.status === 'failed').length,
+                0
+            ),
         }),
         [filteredItems]
     );
@@ -929,6 +984,47 @@ export default function RecepcionRequestsPage() {
         }
     };
 
+    const processNotificationJobs = async () => {
+        setNotificationJobsLoading(true);
+        setError('');
+
+        try {
+            const response = await fetch('/api/internal/jobs/process-notifications?limit=20', {
+                method: 'POST',
+                headers: {
+                    'x-admin-actor': actor.trim() || 'recepcion',
+                },
+            });
+            const payload = (await response.json()) as ProcessNotificationsResponse | { error?: string };
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    await supabase.auth.signOut();
+                    router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}&error=auth-required`);
+                    return;
+                }
+                const message = 'error' in payload ? payload.error || 'No se pudieron procesar las notificaciones.' : 'No se pudieron procesar las notificaciones.';
+                setError(message);
+                pushToast('error', 'No se pudieron procesar notificaciones', message);
+                return;
+            }
+
+            const summaryPayload = (payload as ProcessNotificationsResponse).summary;
+            pushToast(
+                'success',
+                'Notificaciones procesadas',
+                `${summaryPayload.sent} enviadas, ${summaryPayload.failed} fallidas, ${summaryPayload.skipped} omitidas.`
+            );
+            await fetchRequests();
+        } catch (requestError) {
+            const message = requestError instanceof Error ? requestError.message : 'Error de red';
+            setError(message);
+            pushToast('error', 'Error de red', message);
+        } finally {
+            setNotificationJobsLoading(false);
+        }
+    };
+
     return (
         <div className="relative mx-auto max-w-7xl px-4 py-8">
             <div className="pointer-events-none fixed right-4 top-4 z-50 flex w-full max-w-sm flex-col gap-2">
@@ -1018,6 +1114,14 @@ export default function RecepcionRequestsPage() {
                             className="rounded-xl border border-cyan-400/30 bg-cyan-500/15 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:border-cyan-300/50 hover:bg-cyan-500/20 disabled:opacity-50"
                         >
                             {loading ? 'Cargando...' : 'Actualizar solicitudes'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={processNotificationJobs}
+                            disabled={!canFetch || notificationJobsLoading || authLoading}
+                            className="rounded-xl border border-fuchsia-400/30 bg-fuchsia-500/15 px-4 py-2 text-sm font-medium text-fuchsia-100 transition hover:border-fuchsia-300/50 hover:bg-fuchsia-500/20 disabled:opacity-50"
+                        >
+                            {notificationJobsLoading ? 'Procesando...' : 'Procesar notificaciones'}
                         </button>
                         <button
                             type="button"
@@ -1169,6 +1273,22 @@ export default function RecepcionRequestsPage() {
                         <p className="mt-1 text-[11px] text-fuchsia-100/70">Fallidos</p>
                     </div>
                 </div>
+                <div className="grid gap-2 px-4 pb-4 sm:px-5 sm:grid-cols-2">
+                    <div className="rounded-xl border border-amber-400/15 bg-amber-500/8 px-3 py-2.5">
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-[11px] uppercase tracking-wide text-amber-200/80">Jobs pendientes</p>
+                            <p className="text-xl font-semibold text-white">{summary.notificationJobsPending}</p>
+                        </div>
+                        <p className="mt-1 text-[11px] text-amber-100/70">Emails por procesar o en curso</p>
+                    </div>
+                    <div className="rounded-xl border border-rose-400/15 bg-rose-500/8 px-3 py-2.5">
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-[11px] uppercase tracking-wide text-rose-200/85">Jobs fallidos</p>
+                            <p className="text-xl font-semibold text-white">{summary.notificationJobsFailed}</p>
+                        </div>
+                        <p className="mt-1 text-[11px] text-rose-100/70">Emails listos para reintentar</p>
+                    </div>
+                </div>
             </section>
 
             <div className="space-y-4">
@@ -1177,6 +1297,7 @@ export default function RecepcionRequestsPage() {
                     const itemKey = `${item.kind}-${item.id}`;
                     const isExpanded = Boolean(expandedCards[itemKey]);
                     const notifications = item.notifications ?? [];
+                    const notificationJobs = item.notificationJobs ?? [];
                     const serviceWindowBadge = getServiceWindowBadge(item, normalizedStatus);
                     const priceLabel = formatMoney(item.totalPrice);
                     const timingLabel = getTimingLabel(item);
@@ -1457,6 +1578,42 @@ export default function RecepcionRequestsPage() {
                                                     </div>
                                                 )) : (
                                                     <span className="text-sm text-muted-foreground">Aún no hay trazabilidad registrada.</span>
+                                                )}
+                                            </div>
+                                        </section>
+
+                                        <section className="rounded-2xl border border-fuchsia-400/10 bg-fuchsia-500/[0.035] p-3.5">
+                                            <div className="flex items-center justify-between gap-3">
+                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Jobs de email</p>
+                                                <span className="text-[11px] text-muted-foreground">
+                                                    {notificationJobs.length} job{notificationJobs.length === 1 ? '' : 's'}
+                                                </span>
+                                            </div>
+                                            <div className="mt-3 grid gap-2 lg:grid-cols-2 2xl:grid-cols-3">
+                                                {notificationJobs.length > 0 ? notificationJobs.slice(0, 6).map((job) => (
+                                                    <div
+                                                        key={job.id}
+                                                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs"
+                                                    >
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <span className={`rounded-full border px-2 py-0.5 ${getNotificationJobStatusClasses(job.status)}`}>
+                                                                {getNotificationJobStatusLabel(job.status)}
+                                                            </span>
+                                                            <span className="rounded-full border border-white/10 bg-black/10 px-2 py-0.5 text-muted-foreground">
+                                                                {getNotificationRecipientLabel(job.recipient_type)}
+                                                            </span>
+                                                            <span className="text-foreground/90">{getNotificationTemplateLabel(job.template)}</span>
+                                                        </div>
+                                                        <p className="mt-1 break-all text-muted-foreground">{job.recipient_email}</p>
+                                                        <p className="mt-1 text-[11px] text-muted-foreground">
+                                                            Intentos {job.attempts}/{job.max_attempts} · próximo {formatTimestamp(job.scheduled_at)}
+                                                        </p>
+                                                        {job.last_error ? (
+                                                            <p className="mt-1 text-[11px] text-rose-300">{job.last_error}</p>
+                                                        ) : null}
+                                                    </div>
+                                                )) : (
+                                                    <span className="text-sm text-muted-foreground">Aún no hay jobs de email registrados.</span>
                                                 )}
                                             </div>
                                         </section>
