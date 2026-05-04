@@ -326,7 +326,14 @@ export async function POST(request: Request) {
             .select()
             .single<ReservationRow>();
 
-        if (insertResult.error && typeof insertResult.error.message === 'string' && insertResult.error.message.includes('customer_locale')) {
+        if (
+            insertResult.error &&
+            typeof insertResult.error.message === 'string' &&
+            (
+                insertResult.error.message.includes('customer_locale') ||
+                insertResult.error.message.includes('admin_notes')
+            )
+        ) {
             const fallbackInsertData: ReservationInsert = {
                 full_name: sanitizedData.full_name,
                 email: sanitizedData.email,
@@ -344,7 +351,6 @@ export async function POST(request: Request) {
                 total_price: sanitizedData.total_price,
                 notes: sanitizedData.notes,
                 status: 'pending',
-                admin_notes: metadataNote,
             };
             insertResult = await supabaseAdmin
                 .schema('public')
