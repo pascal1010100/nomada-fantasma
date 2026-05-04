@@ -239,6 +239,18 @@ CREATE TABLE IF NOT EXISTS "public"."places" (
 ALTER TABLE "public"."places" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."rate_limit_buckets" (
+    "identifier" "text" NOT NULL,
+    "count" integer DEFAULT 0 NOT NULL,
+    "window_start" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "expires_at" timestamp with time zone NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."rate_limit_buckets" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."reservations" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"(),
@@ -259,6 +271,7 @@ CREATE TABLE IF NOT EXISTS "public"."reservations" (
     "guide_id" "uuid",
     "guide_service_id" "uuid",
     "guide_service_name" "text",
+    "customer_locale" "text",
     "email_delivery_status" "text" DEFAULT 'pending'::"text",
     "email_attempts" integer DEFAULT 0,
     "email_last_attempt_at" timestamp with time zone,
@@ -277,6 +290,9 @@ CREATE TABLE IF NOT EXISTS "public"."reservations" (
 ALTER TABLE "public"."reservations" OWNER TO "postgres";
 
 
+COMMENT ON COLUMN "public"."reservations"."customer_locale" IS 'Locale detected when the reservation was created (es/en).';
+
+
 CREATE TABLE IF NOT EXISTS "public"."shuttle_bookings" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "route_id" "text",
@@ -285,6 +301,7 @@ CREATE TABLE IF NOT EXISTS "public"."shuttle_bookings" (
     "customer_name" "text" NOT NULL,
     "customer_email" "text" NOT NULL,
     "customer_whatsapp" "text",
+    "customer_locale" "text",
     "route_origin" "text" NOT NULL,
     "route_destination" "text" NOT NULL,
     "travel_date" "date" NOT NULL,
@@ -307,6 +324,12 @@ CREATE TABLE IF NOT EXISTS "public"."shuttle_bookings" (
 
 
 ALTER TABLE "public"."shuttle_bookings" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."shuttle_bookings"."customer_whatsapp" IS 'Customer WhatsApp number captured during shuttle booking.';
+
+
+COMMENT ON COLUMN "public"."shuttle_bookings"."customer_locale" IS 'Locale detected when the shuttle booking was created (es/en).';
 
 
 CREATE TABLE IF NOT EXISTS "public"."shuttle_routes" (
@@ -387,6 +410,98 @@ COMMENT ON COLUMN "public"."tours"."pueblo_slug" IS 'Relaciona el tour con un pu
 COMMENT ON COLUMN "public"."tours"."agency_id" IS 'Agency responsible for handling this tour booking workflow';
 
 
+CREATE OR REPLACE FUNCTION "public"."check_rate_limit"("p_identifier" "text", "p_max" integer, "p_window_ms" integer)
+RETURNS TABLE("allowed" boolean, "remaining" integer, "reset_at" timestamp with time zone, "retry_after" integer)
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+declare
+  v_now timestamptz := now();
+  v_window interval := (p_window_ms::double precision / 1000.0) * interval '1 second';
+  v_bucket public.rate_limit_buckets%rowtype;
+begin
+  if p_identifier is null or btrim(p_identifier) = '' then
+    raise exception 'identifier is required';
+  end if;
+
+  if p_max < 1 then
+    raise exception 'max must be positive';
+  end if;
+
+  if p_window_ms < 1000 then
+    raise exception 'window_ms must be at least 1000';
+  end if;
+
+  loop
+    select *
+      into v_bucket
+      from public.rate_limit_buckets
+      where identifier = p_identifier
+      for update;
+
+    if not found then
+      begin
+        insert into public.rate_limit_buckets (identifier, count, window_start, expires_at, updated_at)
+        values (p_identifier, 1, v_now, v_now + v_window, v_now)
+        returning * into v_bucket;
+
+        allowed := true;
+        remaining := greatest(p_max - 1, 0);
+        reset_at := v_bucket.expires_at;
+        retry_after := null;
+        return next;
+        return;
+      exception when unique_violation then
+        -- Another request created the bucket first. Retry with row lock.
+      end;
+    else
+      if v_now >= v_bucket.expires_at then
+        update public.rate_limit_buckets
+          set count = 1,
+              window_start = v_now,
+              expires_at = v_now + v_window,
+              updated_at = v_now
+          where identifier = p_identifier
+          returning * into v_bucket;
+
+        allowed := true;
+        remaining := greatest(p_max - 1, 0);
+        reset_at := v_bucket.expires_at;
+        retry_after := null;
+        return next;
+        return;
+      end if;
+
+      if v_bucket.count >= p_max then
+        allowed := false;
+        remaining := 0;
+        reset_at := v_bucket.expires_at;
+        retry_after := greatest(ceil(extract(epoch from (v_bucket.expires_at - v_now)))::integer, 1);
+        return next;
+        return;
+      end if;
+
+      update public.rate_limit_buckets
+        set count = count + 1,
+            updated_at = v_now
+        where identifier = p_identifier
+        returning * into v_bucket;
+
+      allowed := true;
+      remaining := greatest(p_max - v_bucket.count, 0);
+      reset_at := v_bucket.expires_at;
+      retry_after := null;
+      return next;
+      return;
+    end if;
+  end loop;
+end;
+$$;
+
+
+ALTER FUNCTION "public"."check_rate_limit"("p_identifier" "text", "p_max" integer, "p_window_ms" integer) OWNER TO "postgres";
+
+
 
 ALTER TABLE ONLY "public"."accommodations"
     ADD CONSTRAINT "accommodations_pkey" PRIMARY KEY ("id");
@@ -457,6 +572,10 @@ ALTER TABLE ONLY "public"."places"
 
 ALTER TABLE ONLY "public"."places"
     ADD CONSTRAINT "places_slug_key" UNIQUE ("slug");
+
+
+ALTER TABLE ONLY "public"."rate_limit_buckets"
+    ADD CONSTRAINT "rate_limit_buckets_pkey" PRIMARY KEY ("identifier");
 
 
 
@@ -533,6 +652,9 @@ CREATE INDEX "idx_places_slug" ON "public"."places" USING "btree" ("slug");
 
 
 CREATE INDEX "idx_places_town_active" ON "public"."places" USING "btree" ("town_slug") WHERE ("is_active" = true);
+
+
+CREATE INDEX "idx_rate_limit_buckets_expires_at" ON "public"."rate_limit_buckets" USING "btree" ("expires_at");
 
 
 
@@ -634,6 +756,9 @@ CREATE POLICY "Public can view active guide services" ON "public"."guide_service
 CREATE POLICY "Public can view active places" ON "public"."places" FOR SELECT USING (("is_active" = true));
 
 
+CREATE POLICY "Service role can manage rate limit buckets" ON "public"."rate_limit_buckets" USING (("auth"."role"() = 'service_role'::"text")) WITH CHECK (("auth"."role"() = 'service_role'::"text"));
+
+
 
 CREATE POLICY "Service role can manage agencies" ON "public"."agencies" USING (("auth"."role"() = 'service_role'::"text"));
 
@@ -691,6 +816,9 @@ ALTER TABLE "public"."towns" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."places" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."rate_limit_buckets" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."reservations" ENABLE ROW LEVEL SECURITY;
@@ -766,6 +894,11 @@ GRANT SELECT ON TABLE "public"."places" TO "authenticated";
 GRANT ALL ON TABLE "public"."places" TO "service_role";
 
 
+REVOKE ALL ON TABLE "public"."rate_limit_buckets" FROM "anon";
+REVOKE ALL ON TABLE "public"."rate_limit_buckets" FROM "authenticated";
+GRANT ALL ON TABLE "public"."rate_limit_buckets" TO "service_role";
+
+
 
 REVOKE ALL ON TABLE "public"."reservations" FROM "anon";
 REVOKE ALL ON TABLE "public"."reservations" FROM "authenticated";
@@ -788,6 +921,11 @@ GRANT ALL ON TABLE "public"."shuttle_routes" TO "service_role";
 GRANT SELECT ON TABLE "public"."tours" TO "anon";
 GRANT SELECT ON TABLE "public"."tours" TO "authenticated";
 GRANT ALL ON TABLE "public"."tours" TO "service_role";
+
+
+REVOKE ALL ON FUNCTION "public"."check_rate_limit"("p_identifier" "text", "p_max" integer, "p_window_ms" integer) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."check_rate_limit"("p_identifier" "text", "p_max" integer, "p_window_ms" integer) TO "postgres";
+GRANT EXECUTE ON FUNCTION "public"."check_rate_limit"("p_identifier" "text", "p_max" integer, "p_window_ms" integer) TO "service_role";
 
 
 
