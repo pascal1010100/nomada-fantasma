@@ -1026,7 +1026,7 @@ export default function RecepcionRequestsPage() {
     };
 
     return (
-        <div className="relative mx-auto max-w-7xl px-4 py-8">
+        <div className="relative mx-auto max-w-7xl px-4 pb-8 nf-page-safe-loose">
             <div className="pointer-events-none fixed right-4 top-4 z-50 flex w-full max-w-sm flex-col gap-2">
                 {toasts.map((toast) => (
                     <div
