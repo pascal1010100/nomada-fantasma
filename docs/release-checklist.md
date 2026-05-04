@@ -58,8 +58,8 @@ For local verification:
 
 ## 6. Scheduled Notifications
 
-- `vercel.json` runs `/api/internal/jobs/process-notifications` every 5 minutes.
-- This schedule requires Vercel Pro or Enterprise. Hobby projects only support daily cron jobs.
+- `vercel.json` runs `/api/internal/jobs/process-notifications` once per day at 14:00 UTC.
+- This schedule is compatible with Vercel Hobby. For production operations that need faster email retries, upgrade to Vercel Pro/Enterprise and change the schedule to `*/5 * * * *`.
 - Confirm Vercel Project Settings -> Cron Jobs shows the job after deployment.
 - Confirm Vercel production env vars include `CRON_SECRET`.
 - Confirm production logs show successful 200 responses from `vercel-cron/1.0`.
