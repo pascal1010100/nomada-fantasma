@@ -21,11 +21,11 @@ function getErrorMessage(error: unknown): string {
 }
 
 async function isAuthorized(request: Request): Promise<boolean> {
-  const configuredSecret = process.env.INTERNAL_JOBS_SECRET || process.env.CRON_SECRET;
+  const configuredSecrets = [process.env.INTERNAL_JOBS_SECRET, process.env.CRON_SECRET].filter(Boolean);
   const bearer = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
   const headerSecret = request.headers.get('x-internal-job-secret')?.trim();
 
-  if (configuredSecret && (bearer === configuredSecret || headerSecret === configuredSecret)) {
+  if (configuredSecrets.some((secret) => bearer === secret || headerSecret === secret)) {
     return true;
   }
 
@@ -51,4 +51,8 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+export async function GET(request: Request) {
+  return POST(request);
 }

@@ -8,6 +8,8 @@ Use this before touching Supabase remote or deploying production. The goal is to
 - Use Supabase local for development and E2E.
 - Use Supabase remote only for controlled verification.
 - Keep `RESEND_API_KEY` empty during local smoke tests unless intentionally testing real email delivery.
+- Set `INTERNAL_JOBS_SECRET` for manual/admin job processing.
+- Set `CRON_SECRET` in Vercel production so scheduled jobs are authenticated.
 
 ## 2. Database
 
@@ -54,14 +56,23 @@ For local verification:
 - Process pending notifications if any.
 - Confirm failed jobs are visible and retryable.
 
-## 6. Before Remote Data Changes
+## 6. Scheduled Notifications
+
+- `vercel.json` runs `/api/internal/jobs/process-notifications` every 5 minutes.
+- This schedule requires Vercel Pro or Enterprise. Hobby projects only support daily cron jobs.
+- Confirm Vercel Project Settings -> Cron Jobs shows the job after deployment.
+- Confirm Vercel production env vars include `CRON_SECRET`.
+- Confirm production logs show successful 200 responses from `vercel-cron/1.0`.
+- Keep the admin "Procesar notificaciones" button as the manual recovery path.
+
+## 7. Before Remote Data Changes
 
 - Confirm the command targets remote intentionally.
 - Prefer `--dry-run` first.
 - Confirm `RESEND_API_KEY` behavior before creating live reservations.
 - Record what changed in git or operational notes.
 
-## 7. Rollback Notes
+## 8. Rollback Notes
 
 - For code issues, revert the commit and redeploy.
 - For data-only mistakes, prefer a forward fix migration.

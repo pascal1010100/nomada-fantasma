@@ -21,11 +21,11 @@ vi.mock('@/app/lib/logger', () => ({
   },
 }));
 
-const { POST } = await import('./route');
+const { GET, POST } = await import('./route');
 
-function createRequest(secret?: string): Request {
+function createRequest(secret?: string, method = 'POST'): Request {
   return new Request('http://localhost/api/internal/jobs/process-notifications?limit=3', {
-    method: 'POST',
+    method,
     headers: secret ? { authorization: `Bearer ${secret}` } : undefined,
   });
 }
@@ -87,5 +87,26 @@ describe('POST /api/internal/jobs/process-notifications', () => {
       error: 'No se pudieron procesar las notificaciones.',
       detail: 'relation "notification_jobs" does not exist',
     });
+  });
+
+  it('allows cron GET requests with CRON_SECRET', async () => {
+    process.env.CRON_SECRET = 'cron-secret';
+
+    const response = await GET(createRequest('cron-secret', 'GET'));
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json.success).toBe(true);
+    expect(mocks.processDueNotificationJobs).toHaveBeenCalledWith(3);
+  });
+
+  it('accepts CRON_SECRET even when INTERNAL_JOBS_SECRET is also configured', async () => {
+    process.env.INTERNAL_JOBS_SECRET = 'internal-secret';
+    process.env.CRON_SECRET = 'cron-secret';
+
+    const response = await GET(createRequest('cron-secret', 'GET'));
+
+    expect(response.status).toBe(200);
+    expect(mocks.processDueNotificationJobs).toHaveBeenCalledWith(3);
   });
 });
