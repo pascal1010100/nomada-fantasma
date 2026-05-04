@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "test:e2e:booking": "tsx scripts/e2e-booking-workflow.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "eslint --fix"
