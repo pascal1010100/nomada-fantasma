@@ -87,7 +87,7 @@ export default async function LocaleLayout({
   const messages = await getMessages({ locale });
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} className="dark" suppressHydrationWarning>
       <head>
         {/* CSS de Leaflet para el mapa */}
         <link rel="preconnect" href="https://unpkg.com" />
@@ -103,12 +103,7 @@ export default async function LocaleLayout({
         className="font-sans antialiased bg-background text-foreground min-h-screen flex flex-col"
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem={false}
-            disableTransitionOnChange
-          >
+          <ThemeProvider>
             <div className="relative z-0 flex-1">
               <Navbar />
               <main id="main" className="relative z-0">

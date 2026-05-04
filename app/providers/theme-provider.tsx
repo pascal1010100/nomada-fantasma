@@ -1,19 +1,16 @@
 'use client';
 
-import * as React from 'react';
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
-import { type ThemeProviderProps } from 'next-themes';
+import { useEffect, type ReactNode } from 'react';
 
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="dark"
-      enableSystem={false}
-      disableTransitionOnChange
-      {...props}
-    >
-      {children}
-    </NextThemesProvider>
-  );
+type ThemeProviderProps = {
+  children: ReactNode;
+};
+
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('nf-theme');
+    document.documentElement.classList.toggle('dark', savedTheme !== 'light');
+  }, []);
+
+  return children;
 }
