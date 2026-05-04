@@ -25,9 +25,7 @@ export default async function ShuttlesPage() {
         }
 
         if (data) {
-            initialShuttles = (data as ShuttleRoute[]).filter(
-                (route) => route.origin === 'San Pedro La Laguna'
-            );
+            initialShuttles = data as ShuttleRoute[];
         }
     } catch (e) {
         console.error("Error SSR fetching shuttles:", e);
@@ -38,9 +36,7 @@ export default async function ShuttlesPage() {
     if (initialShuttles.length === 0) {
         if (process.env.NODE_ENV !== 'production') {
             const { shuttles } = await import('./mocks/shuttles');
-            initialShuttles = shuttles.filter(
-                (route) => route.origin === 'San Pedro La Laguna'
-            );
+            initialShuttles = shuttles;
             dataSource = 'mock';
         } else {
             dataSource = 'empty';
