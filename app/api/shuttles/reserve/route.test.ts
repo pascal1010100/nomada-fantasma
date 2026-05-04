@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   getClientIP: vi.fn(),
   sendShuttleConfirmationEmails: vi.fn(),
   recordInternalNotification: vi.fn(),
+  recordNotificationJobsForRecipients: vi.fn(),
   from: vi.fn(),
 }));
 
@@ -24,6 +25,10 @@ vi.mock('@/app/lib/email', () => ({
 
 vi.mock('@/app/lib/internal-notifications', () => ({
   recordInternalNotification: mocks.recordInternalNotification,
+}));
+
+vi.mock('@/app/lib/notification-jobs', () => ({
+  recordNotificationJobsForRecipients: mocks.recordNotificationJobsForRecipients,
 }));
 
 vi.mock('@/app/lib/supabase/server', () => ({
@@ -115,6 +120,7 @@ describe('POST /api/shuttles/reserve', () => {
       ],
     });
     mocks.recordInternalNotification.mockResolvedValue({ error: null });
+    mocks.recordNotificationJobsForRecipients.mockResolvedValue(undefined);
   });
 
   it('persists route metadata, sends email, and records notifications', async () => {
@@ -170,6 +176,18 @@ describe('POST /api/shuttles/reserve', () => {
       price: 150,
     }));
     expect(mocks.recordInternalNotification).toHaveBeenCalledTimes(3);
+    expect(mocks.recordNotificationJobsForRecipients).toHaveBeenCalledWith(expect.objectContaining({
+      requestKind: 'shuttle',
+      requestId: 'booking-1',
+      recipients: expect.arrayContaining([
+        expect.objectContaining({ label: 'shuttle_customer', to: 'shuttle-unit@example.com' }),
+      ]),
+      triggeredBy: 'system',
+      payload: expect.objectContaining({
+        locale: 'es',
+        route_id: 'panajachel-antigua',
+      }),
+    }));
     expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({
       email_delivery_status: 'sent',
       email_attempts: 1,

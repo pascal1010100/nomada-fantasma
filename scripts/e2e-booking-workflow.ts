@@ -263,7 +263,7 @@ async function main() {
     }
     createdIds.tour = tourResponse.json.reservation.id;
 
-    const [shuttleResult, tourResult, notificationResult, bucketResult] = await Promise.all([
+    const [shuttleResult, tourResult, notificationResult, jobResult, bucketResult] = await Promise.all([
       supabase
         .from('shuttle_bookings')
         .select('id, route_id, agency_id, price, status, email_delivery_status, email_attempts, admin_notes')
@@ -279,6 +279,10 @@ async function main() {
         .select('request_kind, request_id, recipient_type, delivery_status')
         .in('request_id', [createdIds.shuttle, createdIds.tour]),
       supabase
+        .from('notification_jobs')
+        .select('request_kind, request_id, recipient_type, status')
+        .in('request_id', [createdIds.shuttle, createdIds.tour]),
+      supabase
         .from('rate_limit_buckets')
         .select('identifier, count')
         .eq('identifier', testIp)
@@ -288,6 +292,7 @@ async function main() {
     if (shuttleResult.error) throw shuttleResult.error;
     if (tourResult.error) throw tourResult.error;
     if (notificationResult.error) throw notificationResult.error;
+    if (jobResult.error) throw jobResult.error;
     if (bucketResult.error) throw bucketResult.error;
 
     if (shuttleResult.data.route_id !== route.id) throw new Error('Shuttle route_id was not persisted.');
@@ -297,18 +302,22 @@ async function main() {
     if (tourResult.data.tour_id !== tour.id) throw new Error('Tour id was not persisted.');
     if (tourResult.data.email_delivery_status !== 'sent') throw new Error('Tour email status was not sent.');
     if ((notificationResult.data?.length ?? 0) !== 6) throw new Error('Expected 6 internal notifications.');
+    if ((jobResult.data?.length ?? 0) !== 6) throw new Error('Expected 6 notification jobs.');
+    if (jobResult.data?.some((job) => job.status !== 'sent')) throw new Error('Expected notification jobs to be marked sent.');
     if (bucketResult.data.count !== 2) throw new Error('Expected the Supabase rate limit bucket to count 2 requests.');
 
     console.log('Booking E2E passed');
     console.log(`- Shuttle booking: ${createdIds.shuttle}`);
     console.log(`- Tour reservation: ${createdIds.tour}`);
     console.log('- Internal notifications: 6');
+    console.log('- Notification jobs: 6');
     console.log(`- Rate limit bucket: ${testIp} count=2`);
   } finally {
     if (!KEEP_RECORDS) {
       const ids = [createdIds.shuttle, createdIds.tour].filter(Boolean) as string[];
       if (ids.length > 0) {
         await supabase.from('internal_request_notifications').delete().in('request_id', ids);
+        await supabase.from('notification_jobs').delete().in('request_id', ids);
       }
       if (createdIds.shuttle) {
         await supabase.from('shuttle_bookings').delete().eq('id', createdIds.shuttle);

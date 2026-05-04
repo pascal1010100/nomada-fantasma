@@ -7,6 +7,7 @@ import { getLocaleFromRequest } from '@/app/lib/locale';
 import logger from '@/app/lib/logger';
 import { buildRequestMetadataNote } from '@/app/lib/request-metadata';
 import { recordInternalNotification } from '@/app/lib/internal-notifications';
+import { recordNotificationJobsForRecipients } from '@/app/lib/notification-jobs';
 import { ShuttleRequestSchema, mapZodErrorToTranslationKey } from '@/app/lib/validations';
 import type { Database } from '@/types/database.types';
 
@@ -292,6 +293,20 @@ export async function POST(request: Request) {
         }
 
         if (booking?.id) {
+            await recordNotificationJobsForRecipients({
+                requestKind: 'shuttle',
+                requestId: booking.id,
+                recipients: result.recipients,
+                templateForRecipient: (recipient) =>
+                    recipient.label.endsWith('_customer') ? 'booking_received_customer' : 'booking_received_ops',
+                triggeredBy: 'system',
+                payload: {
+                    locale,
+                    route_id: routeId,
+                    agency_id: agencyId,
+                },
+            });
+
             for (const recipient of result.recipients) {
                 const recipientType =
                     recipient.label.endsWith('_customer')

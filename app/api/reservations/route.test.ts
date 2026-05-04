@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   getClientIP: vi.fn(),
   sendTourConfirmationEmails: vi.fn(),
   recordInternalNotification: vi.fn(),
+  recordNotificationJobsForRecipients: vi.fn(),
   from: vi.fn(),
 }));
 
@@ -24,6 +25,10 @@ vi.mock('@/app/lib/email', () => ({
 
 vi.mock('@/app/lib/internal-notifications', () => ({
   recordInternalNotification: mocks.recordInternalNotification,
+}));
+
+vi.mock('@/app/lib/notification-jobs', () => ({
+  recordNotificationJobsForRecipients: mocks.recordNotificationJobsForRecipients,
 }));
 
 vi.mock('@/app/lib/admin-auth', () => ({
@@ -161,6 +166,7 @@ describe('POST /api/reservations', () => {
       ],
     });
     mocks.recordInternalNotification.mockResolvedValue({ error: null });
+    mocks.recordNotificationJobsForRecipients.mockResolvedValue(undefined);
   });
 
   it('creates a tour reservation, sends email, and tracks delivery', async () => {
@@ -206,6 +212,18 @@ describe('POST /api/reservations', () => {
       totalPrice: 700,
     }));
     expect(mocks.recordInternalNotification).toHaveBeenCalledTimes(3);
+    expect(mocks.recordNotificationJobsForRecipients).toHaveBeenCalledWith(expect.objectContaining({
+      requestKind: 'tour',
+      requestId: 'reservation-1',
+      recipients: expect.arrayContaining([
+        expect.objectContaining({ label: 'tour_customer', to: 'tour-unit@example.com' }),
+      ]),
+      triggeredBy: 'system',
+      payload: expect.objectContaining({
+        locale: 'es',
+        reservation_type: 'tour',
+      }),
+    }));
     expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({
       email_delivery_status: 'sent',
       email_attempts: 1,

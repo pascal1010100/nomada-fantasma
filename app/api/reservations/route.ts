@@ -9,6 +9,7 @@ import logger from '@/app/lib/logger';
 import { buildRequestMetadataNote } from '@/app/lib/request-metadata';
 import { getAuthorizedAdminContext } from '@/app/lib/admin-auth';
 import { recordInternalNotification } from '@/app/lib/internal-notifications';
+import { recordNotificationJobsForRecipients } from '@/app/lib/notification-jobs';
 import {
     CreateReservationSchema,
     sanitizeReservationInput,
@@ -535,6 +536,19 @@ export async function POST(request: Request) {
                             : 'Unknown email error';
                 logger.warn('Email failed but reservation was saved to DB');
             }
+
+            await recordNotificationJobsForRecipients({
+                requestKind: reservationType === 'guide' ? 'guide' : 'tour',
+                requestId: newReservation.id,
+                recipients: emailResult.recipients,
+                templateForRecipient: (recipient) =>
+                    recipient.label.endsWith('_customer') ? 'booking_received_customer' : 'booking_received_ops',
+                triggeredBy: 'system',
+                payload: {
+                    locale,
+                    reservation_type: reservationType,
+                },
+            });
 
             for (const recipient of emailResult.recipients) {
                 const recipientType =
