@@ -631,6 +631,23 @@ export default function RecepcionRequestsPage() {
                 (count, item) => count + item.notificationJobs.filter((job) => job.status === 'failed').length,
                 0
             ),
+            notificationJobsSent: filteredItems.reduce(
+                (count, item) => count + item.notificationJobs.filter((job) => job.status === 'sent').length,
+                0
+            ),
+            notificationJobsTotal: filteredItems.reduce(
+                (count, item) => count + item.notificationJobs.length,
+                0
+            ),
+            lastNotificationProcessedAt: filteredItems.reduce<string | null>((latest, item) => {
+                const processedJobs = item.notificationJobs
+                    .map((job) => job.processed_at)
+                    .filter((value): value is string => Boolean(value));
+                if (processedJobs.length === 0) return latest;
+                const itemLatest = processedJobs.sort().at(-1) ?? null;
+                if (!itemLatest) return latest;
+                return !latest || itemLatest > latest ? itemLatest : latest;
+            }, null),
         }),
         [filteredItems]
     );
@@ -1052,7 +1069,7 @@ export default function RecepcionRequestsPage() {
                     </div>
                 ))}
             </div>
-            <h1 className="text-2xl font-bold mb-2">Panel Operativo Nomada</h1>
+            <h1 className="text-2xl font-bold mb-2">Panel Operativo Nómada</h1>
             <p className="text-sm text-muted-foreground mb-6">
                 Vista interna para operar solicitudes de tours, guias y shuttles sin salir del flujo.
             </p>
@@ -1281,20 +1298,48 @@ export default function RecepcionRequestsPage() {
                         <p className="mt-1 text-[11px] text-fuchsia-100/70">Fallidos</p>
                     </div>
                 </div>
-                <div className="grid gap-2 px-4 pb-4 sm:px-5 sm:grid-cols-2">
-                    <div className="rounded-xl border border-amber-400/15 bg-amber-500/8 px-3 py-2.5">
-                        <div className="flex items-center justify-between gap-3">
-                            <p className="text-[11px] uppercase tracking-wide text-amber-200/80">Jobs pendientes</p>
-                            <p className="text-xl font-semibold text-white">{summary.notificationJobsPending}</p>
+                <div className="px-4 pb-4 sm:px-5">
+                    <div className="rounded-2xl border border-fuchsia-400/12 bg-fuchsia-500/[0.035] p-3.5">
+                        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                            <div>
+                                <p className="text-[11px] uppercase tracking-[0.16em] text-fuchsia-200/75">Notificaciones</p>
+                                <h3 className="mt-0.5 text-sm font-semibold text-white">Cola de emails operativos</h3>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Último procesamiento: {summary.lastNotificationProcessedAt ? formatTimestamp(summary.lastNotificationProcessedAt) : 'Sin envíos procesados'}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={processNotificationJobs}
+                                disabled={!canFetch || notificationJobsLoading || authLoading}
+                                className="rounded-xl border border-fuchsia-400/30 bg-fuchsia-500/15 px-4 py-2 text-sm font-medium text-fuchsia-100 transition hover:border-fuchsia-300/50 hover:bg-fuchsia-500/20 disabled:opacity-50"
+                            >
+                                {notificationJobsLoading
+                                    ? 'Procesando...'
+                                    : summary.notificationJobsFailed > 0
+                                        ? 'Reintentar fallidas'
+                                        : 'Procesar pendientes'}
+                            </button>
                         </div>
-                        <p className="mt-1 text-[11px] text-amber-100/70">Emails por procesar o en curso</p>
-                    </div>
-                    <div className="rounded-xl border border-rose-400/15 bg-rose-500/8 px-3 py-2.5">
-                        <div className="flex items-center justify-between gap-3">
-                            <p className="text-[11px] uppercase tracking-wide text-rose-200/85">Jobs fallidos</p>
-                            <p className="text-xl font-semibold text-white">{summary.notificationJobsFailed}</p>
+
+                        <div className="mt-3 grid gap-2 sm:grid-cols-4">
+                            <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5">
+                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Total</p>
+                                <p className="mt-1 text-xl font-semibold text-white">{summary.notificationJobsTotal}</p>
+                            </div>
+                            <div className="rounded-xl border border-amber-400/15 bg-amber-500/8 px-3 py-2.5">
+                                <p className="text-[11px] uppercase tracking-wide text-amber-200/80">Pendientes</p>
+                                <p className="mt-1 text-xl font-semibold text-white">{summary.notificationJobsPending}</p>
+                            </div>
+                            <div className="rounded-xl border border-emerald-400/15 bg-emerald-500/8 px-3 py-2.5">
+                                <p className="text-[11px] uppercase tracking-wide text-emerald-200/80">Enviadas</p>
+                                <p className="mt-1 text-xl font-semibold text-white">{summary.notificationJobsSent}</p>
+                            </div>
+                            <div className="rounded-xl border border-rose-400/15 bg-rose-500/8 px-3 py-2.5">
+                                <p className="text-[11px] uppercase tracking-wide text-rose-200/85">Fallidas</p>
+                                <p className="mt-1 text-xl font-semibold text-white">{summary.notificationJobsFailed}</p>
+                            </div>
                         </div>
-                        <p className="mt-1 text-[11px] text-rose-100/70">Emails listos para reintentar</p>
                     </div>
                 </div>
             </section>
