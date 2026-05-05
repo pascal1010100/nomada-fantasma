@@ -488,7 +488,7 @@ export default function ReservarClient() {
                                                 onClick={() => setCurrentStep('details')}
                                                 className={`shimmer ripple-container relative px-8 py-4 rounded-xl font-semibold transition-all ${selectedType
                                                     ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40'
-                                                    : 'bg-muted text-muted-foreground cursor-not-allowed'
+                                                    : 'cursor-not-allowed border border-border bg-muted text-foreground/70 dark:text-slate-200/80'
                                                     }`}
                                             >
                                                 Continuar

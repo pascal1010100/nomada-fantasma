@@ -93,7 +93,7 @@ export default function RouteCard({ route }: RouteCardProps) {
       className={cn(
         "group relative overflow-hidden rounded-2xl glass-enhanced h-full flex flex-col",
         !route.isComingSoon && "cursor-pointer hover-lift border border-white/10 dark:border-white/5",
-        route.isComingSoon && "opacity-80 border-dashed border-white/20 filter grayscale-[0.3]",
+        route.isComingSoon && "border border-dashed border-border/80 dark:border-white/20",
         route.isRecommended && "ring-2 ring-primary/50 shadow-lg shadow-primary/10",
       )}
       initial="hidden"
@@ -250,7 +250,7 @@ export default function RouteCard({ route }: RouteCardProps) {
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col">
               {route.isComingSoon ? (
-                <span className="text-sm font-bold text-muted-foreground uppercase opacity-70 tracking-widest">{t('comingSoon')}</span>
+                <span className="text-sm font-bold uppercase tracking-widest text-foreground/70 dark:text-slate-200/80">{t('comingSoon')}</span>
               ) : vibe ? (
                 <span className="text-xs text-muted-foreground">{t('viewFullGuide')}</span>
               ) : (
@@ -270,9 +270,12 @@ export default function RouteCard({ route }: RouteCardProps) {
               <button
                 type="button"
                 className={cn(
-                  "btn-cta group whitespace-nowrap rounded-2xl px-4 py-2 text-xs font-semibold tracking-[0.01em] shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02]",
-                  route.isComingSoon && "cursor-not-allowed border border-white/20 bg-transparent text-muted-foreground shadow-none opacity-60"
+                  "group whitespace-nowrap rounded-2xl px-4 py-2 text-xs font-semibold tracking-[0.01em] transition-all duration-300",
+                  route.isComingSoon
+                    ? "cursor-not-allowed border border-border bg-muted text-foreground/75 shadow-none dark:border-white/15 dark:bg-slate-800/80 dark:text-slate-100"
+                    : "btn-cta shadow-lg shadow-primary/20 hover:scale-[1.02]"
                 )}
+                disabled={route.isComingSoon}
               >
                 {route.isComingSoon ? t('comingSoon') : t('viewDestination')}
                 {!route.isComingSoon && <ArrowRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-0.5" />}

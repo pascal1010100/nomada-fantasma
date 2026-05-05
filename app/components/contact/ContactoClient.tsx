@@ -128,7 +128,7 @@ const ContactoClient = () => {
           {contactCards.map((card, index) => (
             <motion.div
               key={index}
-              className="glass-enhanced p-8 rounded-3xl border border-white/10 hover:border-primary/30 transition-all group relative overflow-hidden"
+              className="glass-enhanced group relative overflow-hidden rounded-3xl border border-border p-8 transition-all hover:border-primary/30"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + index * 0.1 }}
@@ -157,7 +157,7 @@ const ContactoClient = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           {/* Contact Form */}
           <motion.div
-            className="glass-enhanced p-8 md:p-10 rounded-3xl border border-white/10"
+            className="glass-enhanced rounded-3xl border border-border p-8 md:p-10"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6 }}
@@ -216,7 +216,7 @@ const ContactoClient = () => {
                       value={formData.message}
                       onChange={handleChange}
                       required
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all resize-none"
+                      className="w-full resize-none rounded-2xl border border-border bg-background p-4 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/30"
                     ></textarea>
                   </div>
                 </div>
@@ -246,7 +246,7 @@ const ContactoClient = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.7 }}
           >
-            <div className="glass-enhanced p-8 rounded-3xl border border-white/10 space-y-8">
+            <div className="glass-enhanced space-y-8 rounded-3xl border border-border p-8">
               <h3 className="text-2xl font-bold mb-6">{t('infoTitle')}</h3>
 
               <div className="flex items-start gap-4">
@@ -291,7 +291,7 @@ const ContactoClient = () => {
               </div>
             </div>
 
-            <div className="glass-enhanced p-8 rounded-3xl border border-white/10">
+            <div className="glass-enhanced rounded-3xl border border-border p-8">
               <h3 className="text-xl font-bold mb-6">{t('infoSocial')}</h3>
               <div className="flex gap-4">
                 {[
@@ -302,7 +302,7 @@ const ContactoClient = () => {
                 ].map((social, i) => (
                   <button
                     key={i}
-                    className={`w-12 h-12 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center transition-all ${social.color} hover:text-white hover:scale-110 active:scale-95`}
+                    className={`flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-background/70 transition-all ${social.color} hover:scale-110 hover:text-white active:scale-95`}
                   >
                     {social.icon}
                   </button>
@@ -316,14 +316,14 @@ const ContactoClient = () => {
                 <Globe className="w-24 h-24 rotate-12" />
               </div>
               <h3 className="text-xl font-bold mb-2">Ghost Nomad Syndicate</h3>
-              <p className="text-sm text-primary-foreground/70 mb-4">Recibe actualizaciones tácticas y nuevas rutas antes que nadie.</p>
+              <p className="mb-4 text-sm text-foreground/75">Recibe actualizaciones tácticas y nuevas rutas antes que nadie.</p>
               <div className="flex gap-2">
                 <input
                   type="email"
                   placeholder="Tu correo de élite..."
-                  className="bg-white/10 border border-white/10 rounded-xl px-4 text-sm w-full outline-none focus:bg-white/20 transition-all"
+                  className="w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary/40"
                 />
-                <button className="bg-white text-primary p-2 rounded-xl hover:scale-105 active:scale-95 transition-all">
+                <button className="rounded-xl bg-foreground p-2 text-background transition-all hover:scale-105 active:scale-95">
                   <ChevronRight className="h-5 w-5" />
                 </button>
               </div>

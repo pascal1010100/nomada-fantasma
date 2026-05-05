@@ -13,7 +13,7 @@ import { recordInternalNotification } from '@/app/lib/internal-notifications';
 import { normalizeLocale } from '@/app/lib/locale';
 import logger from '@/app/lib/logger';
 import { parseRequestMetadata } from '@/app/lib/request-metadata';
-import { getShuttleCustomerPriceDetails } from '@/app/lib/shuttle-pricing';
+import { calculateShuttleTotal, getShuttleCustomerPriceDetails } from '@/app/lib/shuttle-pricing';
 import type { Database } from '@/types/database.types';
 
 type ReservationRow = Database['public']['Tables']['reservations']['Row'];
@@ -703,7 +703,14 @@ export async function PATCH(request: Request) {
                 status: nextStatusRaw,
             };
 
-            if (nextStatusRaw === 'confirmed') updatePayload.confirmed_at = new Date().toISOString();
+            if (nextStatusRaw === 'confirmed') {
+                const now = new Date().toISOString();
+                updatePayload.confirmed_at = now;
+                updatePayload.payment_status = 'paid';
+                updatePayload.payment_amount = reservationResult.data.payment_amount ?? reservationResult.data.total_price;
+                updatePayload.payment_confirmed_at = reservationResult.data.payment_confirmed_at ?? now;
+                updatePayload.payment_updated_at = now;
+            }
             if (nextStatusRaw === 'cancelled') updatePayload.cancelled_at = new Date().toISOString();
             updatePayload.admin_notes = appendStatusNote(reservationResult.data.admin_notes, actor, nextStatusRaw, note);
 
@@ -856,7 +863,14 @@ export async function PATCH(request: Request) {
             status: nextStatusRaw,
         };
 
-        if (nextStatusRaw === 'confirmed') updatePayload.confirmed_at = new Date().toISOString();
+        if (nextStatusRaw === 'confirmed') {
+            const now = new Date().toISOString();
+            updatePayload.confirmed_at = now;
+            updatePayload.payment_status = 'paid';
+            updatePayload.payment_amount = shuttleResult.data.payment_amount ?? calculateShuttleTotal(shuttleResult.data.price, shuttleResult.data.passengers, shuttleResult.data.type);
+            updatePayload.payment_confirmed_at = shuttleResult.data.payment_confirmed_at ?? now;
+            updatePayload.payment_updated_at = now;
+        }
         if (nextStatusRaw === 'cancelled') updatePayload.cancelled_at = new Date().toISOString();
         updatePayload.admin_notes = appendStatusNote(shuttleResult.data.admin_notes, actor, nextStatusRaw, note);
 

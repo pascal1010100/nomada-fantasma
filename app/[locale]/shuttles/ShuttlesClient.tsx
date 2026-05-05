@@ -74,7 +74,7 @@ export default function ShuttlesClient({
         <div className="min-h-screen bg-background pb-32">
             {/* Hero Section */}
             <section className="nf-page-safe-loose px-4 sm:px-6">
-                <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[30px] border border-white/10 bg-card/70 shadow-2xl shadow-black/30">
+                <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[30px] border border-border bg-card shadow-2xl shadow-black/10 dark:border-white/10 dark:shadow-black/30">
                     <div className="absolute inset-0 z-0 overflow-hidden">
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(53,237,255,0.24),transparent_28%),radial-gradient(circle_at_50%_28%,rgba(170,109,255,0.18),transparent_24%)]" />
                         <div
@@ -88,7 +88,7 @@ export default function ShuttlesClient({
                         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background/80 to-transparent" />
                     </div>
 
-                    <div className="relative z-20 px-4 py-14 text-center sm:px-8 sm:py-16 md:px-12 md:py-20">
+                    <div className="relative z-20 px-4 py-12 text-center sm:px-8 sm:py-16 md:px-12 md:py-20">
                         <div className="mx-auto max-w-4xl space-y-7">
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
@@ -105,7 +105,7 @@ export default function ShuttlesClient({
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="text-5xl font-bold tracking-tight leading-[1.04] text-white sm:text-6xl md:text-7xl lg:text-[5.2rem]"
+                                className="text-4xl font-bold tracking-tight leading-[1.04] text-foreground sm:text-6xl md:text-7xl lg:text-[5.2rem]"
                             >
                                 <span className="block">{t('title')}</span>
                                 <span className="mt-2 block bg-gradient-to-r from-[#37EAFF] via-[#7AB8FF] to-[#C86CFF] bg-clip-text text-transparent">
@@ -116,7 +116,7 @@ export default function ShuttlesClient({
                             <motion.p
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="mx-auto max-w-2xl text-lg leading-relaxed text-white/72 md:text-xl"
+                                className="mx-auto max-w-2xl text-lg leading-relaxed text-foreground/75 md:text-xl"
                             >
                                 {t('description')}
                             </motion.p>
@@ -129,7 +129,7 @@ export default function ShuttlesClient({
                                 {heroHighlights.map(({ icon: Icon, label }) => (
                                     <span
                                         key={label}
-                                        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold tracking-[0.18em] text-white/80 backdrop-blur-sm uppercase"
+                                        className="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-foreground/75 backdrop-blur-sm dark:border-white/10 dark:bg-white/5 dark:text-white/80"
                                     >
                                         <Icon className="h-3.5 w-3.5 text-primary" />
                                         {label}
@@ -139,35 +139,35 @@ export default function ShuttlesClient({
                         </div>
                     </div>
 
-                    <div className="relative z-20 border-t border-white/8 bg-black/10 px-4 py-4 backdrop-blur-sm sm:px-6 md:px-8">
+                    <div className="relative z-20 border-t border-border bg-muted/45 px-4 py-4 backdrop-blur-sm sm:px-6 md:px-8 dark:border-white/8 dark:bg-black/10">
                         <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
                             <select
-                                className="w-full rounded-2xl border border-white/8 bg-white/5 px-8 py-5 font-black text-[10px] uppercase tracking-widest outline-none transition-all focus:border-primary/30"
+                                className="w-full rounded-2xl border border-border bg-background px-6 py-4 text-[11px] font-black uppercase tracking-widest text-foreground outline-none transition-all focus:border-primary/40 dark:border-white/8 dark:bg-white/5"
                                 value={selectedOrigin}
                                 onChange={(e) => setSelectedOrigin(e.target.value)}
                             >
-                                <option value="" className="bg-card">{t('originPlaceholder')}</option>
-                                {origins.map(o => <option key={o} value={o} className="bg-card">{o}</option>)}
+                                <option value="" className="bg-background text-foreground">{t('originPlaceholder')}</option>
+                                {origins.map(o => <option key={o} value={o} className="bg-background text-foreground">{o}</option>)}
                             </select>
 
                             <select
-                                className="w-full rounded-2xl border border-white/8 bg-white/5 px-8 py-5 font-black text-[10px] uppercase tracking-widest outline-none transition-all focus:border-primary/30"
+                                className="w-full rounded-2xl border border-border bg-background px-6 py-4 text-[11px] font-black uppercase tracking-widest text-foreground outline-none transition-all focus:border-primary/40 dark:border-white/8 dark:bg-white/5"
                                 value={selectedDestination}
                                 onChange={(e) => setSelectedDestination(e.target.value)}
                             >
-                                <option value="" className="bg-card">{t('destinationPlaceholder')}</option>
-                                {destinations.map(d => <option key={d} value={d} className="bg-card">{d}</option>)}
+                                <option value="" className="bg-background text-foreground">{t('destinationPlaceholder')}</option>
+                                {destinations.map(d => <option key={d} value={d} className="bg-background text-foreground">{d}</option>)}
                             </select>
 
                             <div className="relative">
                                 <input
                                     type="text"
                                     placeholder={t('searchPlaceholder')}
-                                    className="w-full rounded-2xl border border-white/8 bg-white/5 px-8 py-5 pr-14 font-black text-[10px] uppercase tracking-widest outline-none transition-all focus:border-primary/30"
+                                    className="w-full rounded-2xl border border-border bg-background px-6 py-4 pr-12 text-[11px] font-black uppercase tracking-widest text-foreground placeholder:text-muted-foreground outline-none transition-all focus:border-primary/40 dark:border-white/8 dark:bg-white/5"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
-                                <Search className="absolute right-6 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25" />
+                                <Search className="absolute right-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             </div>
                         </div>
                     </div>
@@ -188,11 +188,11 @@ export default function ShuttlesClient({
                                 <DatabaseZap className="mt-0.5 h-5 w-5 text-cyan-300" />
                             )}
                             <div className="space-y-1">
-                                <p className="text-sm font-semibold text-white">
+                                <p className="text-sm font-semibold text-foreground">
                                     {operationalMessage}
                                 </p>
                                 {fetchWarning === 'db_error' && (
-                                    <p className="text-xs text-white/70">
+                                    <p className="text-xs text-muted-foreground">
                                         {isEnglish
                                             ? 'The server could not read shuttle_routes from Supabase during SSR.'
                                             : 'El servidor no pudo leer shuttle_routes desde Supabase durante el SSR.'}
@@ -207,14 +207,14 @@ export default function ShuttlesClient({
 
             {/* Routes Grid */}
             <div className="max-w-6xl mx-auto px-4 mt-14 md:mt-16">
-                <div className="flex items-end justify-between mb-14 md:mb-16 border-b border-white/5 pb-10">
+                <div className="flex flex-col gap-4 border-b border-border pb-8 md:mb-16 md:flex-row md:items-end md:justify-between md:pb-10">
                     <div className="space-y-4">
-                        <h2 className="text-5xl font-black tracking-tight text-white mb-2">{t('sectionTitle')}</h2>
-                        <p className="text-muted-foreground/40 text-lg font-medium max-w-xl">
+                        <h2 className="mb-2 text-3xl font-black tracking-tight text-foreground sm:text-5xl">{t('sectionTitle')}</h2>
+                        <p className="max-w-xl text-base font-medium text-muted-foreground md:text-lg">
                             {t('sectionDesc')}
                         </p>
                     </div>
-                    <div className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 bg-white/[0.02] px-6 py-3 rounded-full border border-white/5">
+                    <div className="w-fit rounded-full border border-border bg-card px-6 py-3 text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">
                         {filteredShuttles.length} {t('availableRoutes')}
                     </div>
                 </div>
@@ -230,11 +230,11 @@ export default function ShuttlesClient({
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-48 rounded-[3rem] border border-dashed border-white/5 bg-white/[0.01]">
-                        <p className="text-2xl font-black text-muted-foreground/20 mb-6 uppercase tracking-widest">{t('noRoutesTitle')}</p>
+                    <div className="rounded-[3rem] border border-dashed border-border bg-card px-6 py-36 text-center shadow-xl shadow-black/5 md:py-48">
+                        <p className="mb-6 text-2xl font-black uppercase tracking-widest text-muted-foreground">{t('noRoutesTitle')}</p>
                         <button
                             onClick={() => { setSelectedOrigin(''); setSelectedDestination(''); setSearchTerm('') }}
-                            className="text-primary text-[10px] font-black uppercase tracking-[0.4em] hover:text-white transition-colors"
+                            className="text-[10px] font-black uppercase tracking-[0.4em] text-primary transition-colors hover:text-foreground"
                         >
                             {t('noRoutesAction')}
                         </button>
@@ -244,7 +244,7 @@ export default function ShuttlesClient({
 
             {/* Private Section */}
             <div className="max-w-6xl mx-auto px-4 mt-32 md:mt-48 mb-32">
-                <div className="relative overflow-hidden rounded-[3rem] border border-white/8 bg-card/90 px-8 py-12 shadow-3xl shadow-black/40 transition-all duration-700 hover:border-primary/20 md:px-16 md:py-16">
+                <div className="relative overflow-hidden rounded-[3rem] border border-border bg-card/90 px-8 py-12 shadow-2xl shadow-black/10 transition-all duration-700 hover:border-primary/30 md:px-16 md:py-16 dark:border-white/8 dark:shadow-black/40">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,232,255,0.12),transparent_28%),radial-gradient(circle_at_85%_15%,rgba(182,102,255,0.12),transparent_24%)]" />
                     <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 42px), repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 42px)' }} />
 
@@ -253,24 +253,24 @@ export default function ShuttlesClient({
                             {t('conciergeService') || 'Concierge Service'}
                         </div>
 
-                        <h3 className="mx-auto max-w-4xl text-4xl font-black leading-[1.06] tracking-tight text-white md:text-6xl">
+                        <h3 className="mx-auto max-w-4xl text-4xl font-black leading-[1.06] tracking-tight text-foreground md:text-6xl">
                             {t('privateTransferTitle')}
                         </h3>
 
-                        <p className="mx-auto max-w-2xl pt-4 text-lg font-medium leading-relaxed text-white/65">
+                        <p className="mx-auto max-w-2xl pt-4 text-lg font-medium leading-relaxed text-muted-foreground">
                             {t('privateTransferDesc')}
                         </p>
 
                         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-foreground/75 dark:border-white/10 dark:bg-white/5 dark:text-white/80">
                                 <ShieldCheck className="h-3.5 w-3.5 text-primary" />
                                 {t('privateTransferChip1')}
                             </span>
-                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-foreground/75 dark:border-white/10 dark:bg-white/5 dark:text-white/80">
                                 <Bus className="h-3.5 w-3.5 text-primary" />
                                 {t('privateTransferChip2')}
                             </span>
-                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-foreground/75 dark:border-white/10 dark:bg-white/5 dark:text-white/80">
                                 <Sparkles className="h-3.5 w-3.5 text-primary" />
                                 {t('privateTransferChip3')}
                             </span>

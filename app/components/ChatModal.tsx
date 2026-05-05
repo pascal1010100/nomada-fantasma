@@ -154,7 +154,7 @@ export default function ChatModal({
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <Icon className="h-4 w-4 text-primary" />
                       </div>
-                      <div className="glass-enhanced rounded-2xl p-4 text-sm leading-relaxed border border-white/5 shadow-xl">
+                      <div className="glass-enhanced rounded-2xl border border-border p-4 text-sm leading-relaxed shadow-xl">
                         {t('welcomeMessage')}
                       </div>
                     </div>
@@ -165,7 +165,7 @@ export default function ChatModal({
                         <button
                           key={i}
                           onClick={() => handleSuggestion(suggestion.query)}
-                          className="text-[10px] uppercase font-black tracking-widest px-3 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-primary/20 hover:border-primary/50 transition-all duration-300"
+                          className="rounded-xl border border-border bg-background/70 px-3 py-2 text-[10px] font-black uppercase tracking-widest transition-all duration-300 hover:border-primary/50 hover:bg-primary/20"
                         >
                           {suggestion.text}
                         </button>
@@ -183,7 +183,7 @@ export default function ChatModal({
                           max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed
                           ${m.role === "user"
                             ? "bg-primary text-primary-foreground font-medium shadow-lg shadow-primary/20"
-                            : "glass-enhanced border border-white/10 shadow-xl"
+                            : "glass-enhanced border border-border shadow-xl"
                           }
                         `}
                       >
@@ -297,8 +297,8 @@ export default function ChatModal({
                     onChange={(e) => setInput(e.target.value)}
                     aria-disabled={loading}
                     className="
-                      w-full rounded-2xl border border-white/10 bg-white/5 pl-4 pr-12 py-3 text-sm outline-none
-                      focus:ring-2 focus:ring-primary/30 focus:bg-white/10 focus:border-primary/50
+                      w-full rounded-2xl border border-border bg-background pl-4 pr-12 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground
+                      focus:ring-2 focus:ring-primary/30 focus:border-primary/50
                       transition-all duration-300
                     "
                   />
@@ -311,7 +311,7 @@ export default function ChatModal({
                           abortRef.current = null;
                           setLoading(false);
                         }}
-                        className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
+                        className="rounded-xl bg-muted p-2 text-foreground transition-colors hover:bg-muted/80"
                       >
                         <X className="h-4 w-4" />
                       </button>

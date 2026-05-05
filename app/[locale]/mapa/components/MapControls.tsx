@@ -20,7 +20,7 @@ const MapControlButton = ({ label, Icon, onClick, active }: MapControlButtonProp
       "h-10 w-10 rounded-full border backdrop-blur shadow-md p-0",
       active
         ? "bg-purple-600/90 border-purple-400 text-white shadow-purple-500/20"
-        : "bg-[color:var(--card,rgba(17,24,39,0.7))] border-[color:var(--border,#334155)] text-slate-100/90",
+        : "border-border bg-card/90 text-foreground",
       "hover:scale-[1.03] active:scale-95 focus-visible:ring-cyan-400/60"
     )}
     title={label}

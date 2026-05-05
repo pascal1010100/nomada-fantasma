@@ -460,6 +460,11 @@ export type Database = {
           id: string
           notes: string | null
           number_of_people: number
+          payment_amount: number | null
+          payment_confirmed_at: string | null
+          payment_method: string | null
+          payment_status: string
+          payment_updated_at: string | null
           requested_time: string | null
           reservation_type: string | null
           status: string | null
@@ -489,6 +494,11 @@ export type Database = {
           id?: string
           notes?: string | null
           number_of_people: number
+          payment_amount?: number | null
+          payment_confirmed_at?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          payment_updated_at?: string | null
           requested_time?: string | null
           reservation_type?: string | null
           status?: string | null
@@ -518,6 +528,11 @@ export type Database = {
           id?: string
           notes?: string | null
           number_of_people?: number
+          payment_amount?: number | null
+          payment_confirmed_at?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          payment_updated_at?: string | null
           requested_time?: string | null
           reservation_type?: string | null
           status?: string | null
@@ -560,6 +575,11 @@ export type Database = {
           email_last_error: string | null
           id: string
           passengers: number
+          payment_amount: number | null
+          payment_confirmed_at: string | null
+          payment_method: string | null
+          payment_status: string
+          payment_updated_at: string | null
           pickup_location: string
           agency_id: string | null
           price: number | null
@@ -586,6 +606,11 @@ export type Database = {
           email_last_error?: string | null
           id?: string
           passengers?: number
+          payment_amount?: number | null
+          payment_confirmed_at?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          payment_updated_at?: string | null
           pickup_location: string
           agency_id?: string | null
           price?: number | null
@@ -612,6 +637,11 @@ export type Database = {
           email_last_error?: string | null
           id?: string
           passengers?: number
+          payment_amount?: number | null
+          payment_confirmed_at?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          payment_updated_at?: string | null
           pickup_location?: string
           agency_id?: string | null
           price?: number | null

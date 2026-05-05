@@ -138,12 +138,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                         setIsOpen(!isOpen);
                         setSelectingCheckOut(false);
                     }}
-                    className="relative group/input bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-3 text-sm text-white hover:bg-white/10 transition-all text-left"
+                    className="group/input relative rounded-xl border border-border bg-background py-2.5 pl-10 pr-3 text-left text-sm text-foreground transition-all hover:bg-muted"
                 >
-                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500 group-hover/input:text-purple-400 transition-colors">
+                    <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground transition-colors group-hover/input:text-purple-500">
                         <Calendar className="w-4 h-4" />
                     </div>
-                    <span className={checkIn ? 'text-white' : 'text-gray-500'}>
+                    <span className={checkIn ? 'text-foreground' : 'text-muted-foreground'}>
                         {formatDisplayDate(checkIn)}
                     </span>
                 </button>
@@ -157,12 +157,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                         }
                     }}
                     disabled={!checkIn}
-                    className="relative group/input bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-3 text-sm text-white hover:bg-white/10 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="group/input relative rounded-xl border border-border bg-background py-2.5 pl-10 pr-3 text-left text-sm text-foreground transition-all hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500 group-hover/input:text-purple-400 transition-colors">
+                    <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground transition-colors group-hover/input:text-purple-500">
                         <Calendar className="w-4 h-4" />
                     </div>
-                    <span className={checkOut ? 'text-white' : 'text-gray-500'}>
+                    <span className={checkOut ? 'text-foreground' : 'text-muted-foreground'}>
                         {formatDisplayDate(checkOut)}
                     </span>
                 </button>
@@ -182,7 +182,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
                     {/* Calendar */}
                     <div
-                        className="fixed z-[70] w-80 bg-gray-900 border border-white/10 rounded-xl p-3 shadow-2xl shadow-purple-500/20 animate-in fade-in slide-in-from-top-2 duration-200 overflow-y-auto"
+                        className="fixed z-[70] w-80 overflow-y-auto rounded-xl border border-border bg-card p-3 shadow-2xl shadow-purple-500/10 animate-in fade-in slide-in-from-top-2 duration-200 dark:border-white/10 dark:shadow-purple-500/20"
                         style={{
                             top: `${calendarPosition.top}px`,
                             left: `${calendarPosition.left}px`,
@@ -194,24 +194,24 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                             <button
                                 type="button"
                                 onClick={prevMonth}
-                                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                                className="rounded-lg p-1.5 transition-colors hover:bg-muted"
                             >
-                                <ChevronLeft className="w-4 h-4 text-gray-400" />
+                                <ChevronLeft className="w-4 h-4 text-muted-foreground" />
                             </button>
-                            <h3 className="text-xs font-bold text-white capitalize">{monthName}</h3>
+                            <h3 className="text-xs font-bold capitalize text-foreground">{monthName}</h3>
                             <button
                                 type="button"
                                 onClick={nextMonth}
-                                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                                className="rounded-lg p-1.5 transition-colors hover:bg-muted"
                             >
-                                <ChevronRight className="w-4 h-4 text-gray-400" />
+                                <ChevronRight className="w-4 h-4 text-muted-foreground" />
                             </button>
                         </div>
 
                         {/* Weekday Headers */}
                         <div className="grid grid-cols-7 gap-1 mb-1.5">
                             {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map((day, i) => (
-                                <div key={i} className="text-center text-[10px] font-bold text-gray-500 py-0.5">
+                                <div key={i} className="py-0.5 text-center text-[10px] font-bold text-muted-foreground">
                                     {day}
                                 </div>
                             ))}
@@ -237,7 +237,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                         disabled={disabled}
                                         className={`
                                             aspect-square rounded-lg text-xs font-medium transition-all
-                                            ${disabled ? 'text-gray-700 cursor-not-allowed' : 'text-white hover:bg-white/10'}
+                                            ${disabled ? 'text-muted-foreground/35 cursor-not-allowed' : 'text-foreground hover:bg-muted'}
                                             ${inRange && !isCheckIn && !isCheckOut ? 'bg-purple-500/20' : ''}
                                             ${isCheckIn || isCheckOut ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white font-bold shadow-[0_0_10px_rgba(168,85,247,0.5)]' : ''}
                                         `}
@@ -249,7 +249,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                         </div>
 
                         {/* Footer Hint */}
-                        <div className="mt-3 pt-2 border-t border-white/10 text-center text-[10px] text-gray-500">
+                        <div className="mt-3 border-t border-border pt-2 text-center text-[10px] text-muted-foreground">
                             {!checkIn && 'Selecciona fecha de entrada'}
                             {checkIn && !checkOut && 'Ahora selecciona fecha de salida'}
                             {checkIn && checkOut && 'Rango seleccionado ✓'}

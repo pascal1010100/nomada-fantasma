@@ -64,6 +64,10 @@ type InternalRequestItem = {
     partySize: number | null;
     locationLabel: string | null;
     totalPrice: number | null;
+    paymentStatus: string;
+    paymentMethod: string | null;
+    paymentAmount: number | null;
+    paymentConfirmedAt: string | null;
     details: string;
     status: string | null;
     emailStatus: string | null;
@@ -140,6 +144,10 @@ function mapReservation(
         partySize: isModern ? (row.number_of_people ?? null) : null,
         locationLabel: reservationKind === 'tour' ? (relatedTour?.meeting_point ?? null) : null,
         totalPrice: isModern ? (row.total_price ?? null) : null,
+        paymentStatus: isModern ? (row.payment_status ?? 'unpaid') : 'unpaid',
+        paymentMethod: isModern ? (row.payment_method ?? null) : null,
+        paymentAmount: isModern ? (row.payment_amount ?? row.total_price ?? null) : null,
+        paymentConfirmedAt: isModern ? (row.payment_confirmed_at ?? null) : null,
         details,
         status: row.status ?? null,
         emailStatus: row.email_delivery_status ?? null,
@@ -174,6 +182,10 @@ function mapShuttle(row: ShuttleBookingRow, provider: ProviderInfo | null = null
         partySize: row.passengers ?? null,
         locationLabel: row.pickup_location ?? null,
         totalPrice,
+        paymentStatus: row.payment_status ?? 'unpaid',
+        paymentMethod: row.payment_method ?? null,
+        paymentAmount: row.payment_amount ?? totalPrice,
+        paymentConfirmedAt: row.payment_confirmed_at ?? null,
         details: `${shuttleType} · ${row.route_origin ?? ''} -> ${row.route_destination ?? ''}`,
         status: row.status,
         emailStatus: row.email_delivery_status,

@@ -386,7 +386,7 @@ export default function BookingModal({
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto p-4 sm:p-6">
+        <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto p-3 sm:p-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -399,63 +399,63 @@ export default function BookingModal({
             initial={{ opacity: 0, scale: 0.96, y: 18 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 18 }}
-            className="relative z-10 my-6 flex w-full max-w-4xl flex-col overflow-hidden rounded-[30px] border border-cyan-500/15 bg-slate-950/95 shadow-2xl shadow-black/50 sm:my-8 sm:max-h-[calc(100vh-4rem)]"
+            className="relative z-10 my-3 flex max-h-[calc(100dvh-1.5rem)] w-full max-w-4xl flex-col overflow-hidden rounded-[24px] border border-border bg-card shadow-2xl shadow-black/15 sm:my-8 sm:max-h-[calc(100vh-4rem)] sm:rounded-[30px] dark:border-cyan-500/15 dark:shadow-black/50"
           >
-            <div className="border-b border-white/6 bg-white/[0.02] px-6 py-5 sm:px-7">
+            <div className="border-b border-border bg-card/95 px-5 py-5 sm:px-7">
               <button
                 onClick={onClose}
-                className="absolute right-4 top-4 rounded-full border border-white/10 bg-white/5 p-2 text-gray-400 transition-colors hover:text-white"
+                className="absolute right-4 top-4 rounded-full border border-border bg-background/80 p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
               </button>
               <div className="space-y-2">
                 {guideTown ? (
-                  <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/15 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-300">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
                     <MapPin className="h-3.5 w-3.5" />
                     {copy.townLabel} {guideTown}
                   </div>
                 ) : null}
                 <div className="flex items-start gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] border border-white/10 bg-[radial-gradient(circle_at_30%_30%,rgba(103,232,249,0.28),transparent_32%),linear-gradient(135deg,rgba(56,189,248,0.14),rgba(168,85,247,0.16))] text-2xl font-bold text-cyan-100">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] border border-border bg-[radial-gradient(circle_at_30%_30%,rgba(103,232,249,0.28),transparent_32%),linear-gradient(135deg,rgba(56,189,248,0.14),rgba(168,85,247,0.16))] text-2xl font-bold text-primary dark:border-white/10">
                     {guideInitial}
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-bold text-white sm:text-[2rem]">{copy.title}</h3>
-                    <p className="max-w-2xl text-sm leading-6 text-slate-300">{copy.subtitle}</p>
+                    <h3 className="text-2xl font-bold text-foreground sm:text-[2rem]">{copy.title}</h3>
+                    <p className="max-w-2xl text-sm leading-6 text-muted-foreground">{copy.subtitle}</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-6 sm:px-7">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-5 py-6 sm:px-7">
               <div className="space-y-6">
-                <section className="rounded-2xl border border-cyan-400/10 bg-cyan-500/[0.05] p-5">
+                <section className="rounded-2xl border border-cyan-400/25 bg-cyan-500/10 p-5">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-medium text-slate-400">
+                      <p className="text-sm font-medium text-muted-foreground">
                         {isEnglish ? 'Estimated price' : 'Precio estimado'}
                       </p>
-                      <div className="mt-1 text-2xl font-bold text-cyan-200">
+                      <div className="mt-1 text-2xl font-bold text-primary">
                         {selectedService?.priceLabel || copy.noPrice}
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-slate-400">{copy.guests}</p>
-                      <div className="mt-1 text-lg font-semibold text-white">{formData.guests}</div>
+                      <p className="text-sm font-medium text-muted-foreground">{copy.guests}</p>
+                      <div className="mt-1 text-lg font-semibold text-foreground">{formData.guests}</div>
                     </div>
                   </div>
-                  <div className="mt-4 rounded-xl border border-white/6 bg-white/[0.03] px-4 py-3">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <div className="mt-4 rounded-xl border border-border bg-background/70 px-4 py-3">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                       {copy.nextStep}
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-slate-300">{copy.nextStepBody}</p>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{copy.nextStepBody}</p>
                   </div>
                 </section>
 
                 <section className="space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-cyan-300" />
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                     {copy.experience}
                   </div>
                   <div className="grid gap-3">
@@ -467,7 +467,7 @@ export default function BookingModal({
                           className={`cursor-pointer rounded-2xl border px-4 py-4 transition-all ${
                             selected
                               ? 'border-cyan-400/35 bg-cyan-500/10 shadow-[0_0_0_1px_rgba(34,211,238,0.16)]'
-                              : 'border-white/8 bg-white/[0.03] hover:border-cyan-400/18'
+                              : 'border-border bg-background/70 hover:border-cyan-400/30'
                           }`}
                         >
                           <input
@@ -480,9 +480,9 @@ export default function BookingModal({
                           />
                           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div className="min-w-0">
-                              <p className="font-semibold text-white">{service.title}</p>
+                              <p className="font-semibold text-foreground">{service.title}</p>
                               {service.description ? (
-                                <p className="mt-1 text-sm leading-6 text-slate-400">{service.description}</p>
+                                <p className="mt-1 text-sm leading-6 text-muted-foreground">{service.description}</p>
                               ) : null}
                             </div>
                             <div className="shrink-0 self-start rounded-full border border-emerald-400/15 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
@@ -497,26 +497,26 @@ export default function BookingModal({
                 </section>
 
                 <div className="grid gap-6 lg:grid-cols-2">
-                  <section className="space-y-4 rounded-2xl border border-white/8 bg-white/[0.03] p-5">
-                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-cyan-300" />
+                  <section className="space-y-4 rounded-2xl border border-border bg-background/70 p-5">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                       {copy.bookingDetails}
                     </div>
-                    <div className="rounded-2xl border border-cyan-400/12 bg-cyan-500/[0.05] p-4">
+                    <div className="rounded-2xl border border-cyan-400/25 bg-cyan-500/10 p-4">
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                             {copy.serviceSummary}
                           </p>
-                          <p className="mt-2 text-lg font-semibold text-white">
+                          <p className="mt-2 text-lg font-semibold text-foreground">
                             {selectedService?.title ?? '-'}
                           </p>
                           {selectedService?.description ? (
-                            <p className="mt-2 text-sm leading-6 text-slate-400">
+                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
                               {selectedService.description}
                             </p>
                           ) : (
-                            <p className="mt-2 text-sm leading-6 text-slate-400">
+                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
                               {copy.serviceStatus}
                             </p>
                           )}
@@ -528,24 +528,24 @@ export default function BookingModal({
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <label className="space-y-2 text-sm text-slate-300">
+                      <label className="space-y-2 text-sm text-foreground">
                         <span>{copy.date}</span>
                         <div className="relative">
-                          <Calendar className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-slate-500" />
+                          <Calendar className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                           <input
                             type="date"
                             value={formData.date}
                             onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
-                            className="w-full rounded-xl border border-white/10 bg-slate-900/80 py-3 pl-10 pr-4 text-white outline-none transition focus:border-cyan-400/40"
+                            className="w-full rounded-xl border border-border bg-background py-3 pl-10 pr-4 text-foreground outline-none transition focus:border-cyan-400/40"
                           />
                         </div>
                         {errors.date ? <span className="text-xs text-rose-300">{errors.date}</span> : null}
                       </label>
 
-                      <label className="space-y-2 text-sm text-slate-300">
+                      <label className="space-y-2 text-sm text-foreground">
                         <span>{copy.guests}</span>
                         <div className="relative">
-                          <Users className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-slate-500" />
+                          <Users className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                           <input
                             type="number"
                             min={1}
@@ -557,20 +557,20 @@ export default function BookingModal({
                                 guests: Number.parseInt(e.target.value || '1', 10),
                               }))
                             }
-                            className="w-full rounded-xl border border-white/10 bg-slate-900/80 py-3 pl-10 pr-4 text-white outline-none transition focus:border-cyan-400/40"
+                            className="w-full rounded-xl border border-border bg-background py-3 pl-10 pr-4 text-foreground outline-none transition focus:border-cyan-400/40"
                           />
                         </div>
                         {errors.guests ? <span className="text-xs text-rose-300">{errors.guests}</span> : null}
                       </label>
 
-                      <label className="space-y-2 text-sm text-slate-300 sm:col-span-2">
+                      <label className="space-y-2 text-sm text-foreground sm:col-span-2">
                         <span>{copy.time}</span>
                         <div className="relative">
-                          <Clock3 className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-slate-500" />
+                          <Clock3 className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                           <select
                             value={formData.timePreference}
                             onChange={(e) => setFormData((prev) => ({ ...prev, timePreference: e.target.value }))}
-                            className="w-full rounded-xl border border-white/10 bg-slate-900/80 py-3 pl-10 pr-4 text-white outline-none transition focus:border-cyan-400/40"
+                            className="w-full rounded-xl border border-border bg-background py-3 pl-10 pr-4 text-foreground outline-none transition focus:border-cyan-400/40"
                           >
                             <option value={copy.morning}>{copy.morning}</option>
                             <option value={copy.afternoon}>{copy.afternoon}</option>
@@ -583,61 +583,61 @@ export default function BookingModal({
                     </div>
                   </section>
 
-                  <section className="space-y-4 rounded-2xl border border-white/8 bg-white/[0.03] p-5">
-                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                      <User className="h-3.5 w-3.5 text-cyan-300" />
+                  <section className="space-y-4 rounded-2xl border border-border bg-background/70 p-5">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      <User className="h-3.5 w-3.5 text-primary" />
                       {copy.contactDetails}
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
-                      <label className="space-y-2 text-sm text-slate-300 sm:col-span-2">
+                      <label className="space-y-2 text-sm text-foreground sm:col-span-2">
                         <span>{copy.name}</span>
                         <div className="relative">
-                          <User className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-slate-500" />
+                          <User className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                           <input
                             type="text"
                             value={formData.name}
                             onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                            className="w-full rounded-xl border border-white/10 bg-slate-900/80 py-3 pl-10 pr-4 text-white outline-none transition focus:border-cyan-400/40"
+                            className="w-full rounded-xl border border-border bg-background py-3 pl-10 pr-4 text-foreground outline-none transition focus:border-cyan-400/40"
                           />
                         </div>
                         {errors.name ? <span className="text-xs text-rose-300">{errors.name}</span> : null}
                       </label>
-                      <label className="space-y-2 text-sm text-slate-300">
+                      <label className="space-y-2 text-sm text-foreground">
                         <span>{copy.email}</span>
                         <div className="relative">
-                          <Mail className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-slate-500" />
+                          <Mail className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                           <input
                             type="email"
                             value={formData.email}
                             onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                            className="w-full rounded-xl border border-white/10 bg-slate-900/80 py-3 pl-10 pr-4 text-white outline-none transition focus:border-cyan-400/40"
+                            className="w-full rounded-xl border border-border bg-background py-3 pl-10 pr-4 text-foreground outline-none transition focus:border-cyan-400/40"
                           />
                         </div>
                         {errors.email ? <span className="text-xs text-rose-300">{errors.email}</span> : null}
                       </label>
-                      <label className="space-y-2 text-sm text-slate-300">
+                      <label className="space-y-2 text-sm text-foreground">
                         <span>{copy.phone}</span>
                         <div className="relative">
-                          <Phone className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-slate-500" />
+                          <Phone className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                           <input
                             type="tel"
                             value={formData.phone}
                             onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-                            className="w-full rounded-xl border border-white/10 bg-slate-900/80 py-3 pl-10 pr-4 text-white outline-none transition focus:border-cyan-400/40"
+                            className="w-full rounded-xl border border-border bg-background py-3 pl-10 pr-4 text-foreground outline-none transition focus:border-cyan-400/40"
                           />
                         </div>
                         {errors.phone ? <span className="text-xs text-rose-300">{errors.phone}</span> : null}
                       </label>
-                      <label className="space-y-2 text-sm text-slate-300 sm:col-span-2">
+                      <label className="space-y-2 text-sm text-foreground sm:col-span-2">
                         <span>
-                          {copy.notes} <span className="text-slate-500">({copy.optional})</span>
+                          {copy.notes} <span className="text-muted-foreground">({copy.optional})</span>
                         </span>
                         <div className="relative">
-                          <MessageSquare className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-slate-500" />
+                          <MessageSquare className="pointer-events-none absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                           <textarea
                             value={formData.notes}
                             onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
-                            className="min-h-[120px] w-full rounded-xl border border-white/10 bg-slate-900/80 py-3 pl-10 pr-4 text-white outline-none transition focus:border-cyan-400/40"
+                            className="min-h-[120px] w-full rounded-xl border border-border bg-background py-3 pl-10 pr-4 text-foreground placeholder:text-muted-foreground outline-none transition focus:border-cyan-400/40"
                             placeholder={
                               isEnglish
                                 ? 'Level, preferences, allergies, special context...'
@@ -650,35 +650,35 @@ export default function BookingModal({
                   </section>
                 </div>
 
-                <section className="space-y-4 rounded-2xl border border-white/8 bg-white/[0.03] p-5">
-                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <section className="space-y-4 rounded-2xl border border-border bg-background/70 p-5">
+                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     {copy.summary}
                   </div>
-                  <div className="space-y-3 text-sm text-slate-300">
+                  <div className="space-y-3 text-sm text-foreground">
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-slate-500">{copy.experience}</span>
-                      <span className="text-right text-white">{selectedService?.title ?? '-'}</span>
+                      <span className="text-muted-foreground">{copy.experience}</span>
+                      <span className="text-right text-foreground">{selectedService?.title ?? '-'}</span>
                     </div>
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-slate-500">{copy.date}</span>
-                      <span className="text-right text-white">{formData.date || '-'}</span>
+                      <span className="text-muted-foreground">{copy.date}</span>
+                      <span className="text-right text-foreground">{formData.date || '-'}</span>
                     </div>
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-slate-500">{copy.guests}</span>
-                      <span className="text-right text-white">{formData.guests}</span>
+                      <span className="text-muted-foreground">{copy.guests}</span>
+                      <span className="text-right text-foreground">{formData.guests}</span>
                     </div>
                     <div className="flex items-center justify-between gap-4">
-                      <span className="text-slate-500">{copy.time}</span>
-                      <span className="text-right text-white">{formData.timePreference}</span>
+                      <span className="text-muted-foreground">{copy.time}</span>
+                      <span className="text-right text-foreground">{formData.timePreference}</span>
                     </div>
                   </div>
 
                   {successMessage ? (
-                    <p className="rounded-xl border border-cyan-400/15 bg-cyan-500/10 px-4 py-3 text-sm leading-6 text-cyan-100">
+                    <p className="rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-3 text-sm leading-6 text-foreground">
                       {successMessage}
                     </p>
                   ) : (
-                    <p className="text-sm leading-6 text-slate-400">
+                    <p className="text-sm leading-6 text-muted-foreground">
                       {canUseInternalReservation ? copy.nextStepBody : copy.fallbackNote}
                     </p>
                   )}

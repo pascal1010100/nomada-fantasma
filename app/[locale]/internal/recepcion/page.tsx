@@ -20,6 +20,10 @@ type InternalRequestItem = {
     partySize: number | null;
     locationLabel: string | null;
     totalPrice: number | null;
+    paymentStatus: PaymentStatus;
+    paymentMethod: PaymentMethod | null;
+    paymentAmount: number | null;
+    paymentConfirmedAt: string | null;
     details: string;
     status: string | null;
     emailStatus: string | null;
@@ -68,6 +72,8 @@ type InternalRequestItem = {
     }>;
 };
 type RequestStatus = 'pending' | 'processing' | 'confirmed' | 'cancelled' | 'completed';
+type PaymentStatus = 'unpaid' | 'payment_requested' | 'proof_received' | 'paid' | 'failed' | 'refunded';
+type PaymentMethod = 'bank_transfer' | 'cash' | 'card' | 'other';
 
 type InternalResponse = {
     success: boolean;
@@ -154,11 +160,11 @@ function parseRequestDate(item: InternalRequestItem): Date | null {
 }
 
 function getStatusBadgeClasses(status: RequestStatus): string {
-    if (status === 'pending') return 'bg-amber-500/15 text-amber-300 border-amber-400/30';
-    if (status === 'processing') return 'bg-sky-500/15 text-sky-300 border-sky-400/30';
-    if (status === 'confirmed') return 'bg-emerald-500/15 text-emerald-300 border-emerald-400/30';
-    if (status === 'cancelled') return 'bg-rose-500/15 text-rose-300 border-rose-400/30';
-    return 'bg-slate-500/15 text-slate-300 border-slate-400/30';
+    if (status === 'pending') return 'bg-amber-500/15 text-amber-700 border-amber-400/35 dark:text-amber-300';
+    if (status === 'processing') return 'bg-sky-500/15 text-sky-700 border-sky-400/35 dark:text-sky-300';
+    if (status === 'confirmed') return 'bg-emerald-500/15 text-emerald-700 border-emerald-400/35 dark:text-emerald-300';
+    if (status === 'cancelled') return 'bg-rose-500/15 text-rose-700 border-rose-400/35 dark:text-rose-300';
+    return 'bg-slate-500/15 text-slate-700 border-slate-400/35 dark:text-slate-300';
 }
 
 function getStatusLabel(status: RequestStatus): string {
@@ -184,10 +190,36 @@ function getEmailStatusLabel(status: string | null): string {
 }
 
 function getEmailStatusClasses(status: string | null): string {
-    if (status === 'sent') return 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300';
-    if (status === 'failed') return 'border-rose-400/30 bg-rose-500/10 text-rose-300';
-    if (status === 'pending') return 'border-amber-400/30 bg-amber-500/10 text-amber-300';
-    return 'border-white/10 bg-white/5 text-muted-foreground';
+    if (status === 'sent') return 'border-emerald-400/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300';
+    if (status === 'failed') return 'border-rose-400/30 bg-rose-500/10 text-rose-700 dark:text-rose-300';
+    if (status === 'pending') return 'border-amber-400/30 bg-amber-500/10 text-amber-700 dark:text-amber-300';
+    return 'border-border bg-background/70 text-muted-foreground';
+}
+
+function getPaymentStatusLabel(status: PaymentStatus): string {
+    if (status === 'payment_requested') return 'Pago solicitado';
+    if (status === 'proof_received') return 'Comprobante recibido';
+    if (status === 'paid') return 'Pago confirmado';
+    if (status === 'failed') return 'Pago con problema';
+    if (status === 'refunded') return 'Reembolsado';
+    return 'Sin pago';
+}
+
+function getPaymentStatusClasses(status: PaymentStatus): string {
+    if (status === 'paid') return 'border-emerald-400/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200';
+    if (status === 'payment_requested') return 'border-cyan-400/30 bg-cyan-500/10 text-cyan-700 dark:text-cyan-200';
+    if (status === 'proof_received') return 'border-violet-400/30 bg-violet-500/10 text-violet-700 dark:text-violet-200';
+    if (status === 'failed') return 'border-rose-400/30 bg-rose-500/10 text-rose-700 dark:text-rose-200';
+    if (status === 'refunded') return 'border-slate-400/30 bg-slate-500/10 text-slate-700 dark:text-slate-200';
+    return 'border-amber-400/30 bg-amber-500/10 text-amber-700 dark:text-amber-200';
+}
+
+function getPaymentMethodLabel(method: PaymentMethod | null): string {
+    if (method === 'bank_transfer') return 'Transferencia';
+    if (method === 'cash') return 'Efectivo';
+    if (method === 'card') return 'Tarjeta';
+    if (method === 'other') return 'Otro';
+    return 'Sin método';
 }
 
 function getNotificationRecipientLabel(type: InternalRequestItem['notifications'][number]['recipient_type']): string {
@@ -208,8 +240,8 @@ function getNotificationTemplateLabel(template: string): string {
 
 function getNotificationStatusClasses(status: 'sent' | 'failed'): string {
     return status === 'sent'
-        ? 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200'
-        : 'border-rose-400/20 bg-rose-500/10 text-rose-200';
+        ? 'border-emerald-400/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200'
+        : 'border-rose-400/25 bg-rose-500/10 text-rose-700 dark:text-rose-200';
 }
 
 function getNotificationJobStatusLabel(status: InternalRequestItem['notificationJobs'][number]['status']): string {
@@ -221,11 +253,11 @@ function getNotificationJobStatusLabel(status: InternalRequestItem['notification
 }
 
 function getNotificationJobStatusClasses(status: InternalRequestItem['notificationJobs'][number]['status']): string {
-    if (status === 'sent') return 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200';
-    if (status === 'failed') return 'border-rose-400/20 bg-rose-500/10 text-rose-200';
-    if (status === 'processing') return 'border-sky-400/20 bg-sky-500/10 text-sky-200';
-    if (status === 'cancelled') return 'border-slate-400/20 bg-slate-500/10 text-slate-300';
-    return 'border-amber-400/20 bg-amber-500/10 text-amber-200';
+    if (status === 'sent') return 'border-emerald-400/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200';
+    if (status === 'failed') return 'border-rose-400/25 bg-rose-500/10 text-rose-700 dark:text-rose-200';
+    if (status === 'processing') return 'border-sky-400/25 bg-sky-500/10 text-sky-700 dark:text-sky-200';
+    if (status === 'cancelled') return 'border-slate-400/25 bg-slate-500/10 text-slate-700 dark:text-slate-300';
+    return 'border-amber-400/25 bg-amber-500/10 text-amber-700 dark:text-amber-200';
 }
 
 function getChecklist(status: RequestStatus): string {
@@ -256,9 +288,9 @@ function isTestEmail(email: string | null | undefined): boolean {
 function getProviderStatusClasses(item: InternalRequestItem): string {
     const latest = getLatestProviderNotification(item);
     if (!item.provider?.email || !item.provider.isActive) {
-        return 'border-amber-400/25 bg-amber-500/10 text-amber-200';
+        return 'border-amber-400/25 bg-amber-500/10 text-amber-700 dark:text-amber-200';
     }
-    if (!latest) return 'border-white/10 bg-white/5 text-muted-foreground';
+    if (!latest) return 'border-border bg-background/70 text-muted-foreground';
     return getNotificationStatusClasses(latest.delivery_status);
 }
 
@@ -473,6 +505,7 @@ export default function RecepcionRequestsPage() {
     const [loading, setLoading] = useState(false);
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
     const [emailActionLoadingId, setEmailActionLoadingId] = useState<string | null>(null);
+    const [paymentActionLoadingId, setPaymentActionLoadingId] = useState<string | null>(null);
     const [notificationJobsLoading, setNotificationJobsLoading] = useState(false);
 
     // Modern Modal State
@@ -983,6 +1016,55 @@ export default function RecepcionRequestsPage() {
         }
     };
 
+    const updatePaymentStatus = async (
+        item: InternalRequestItem,
+        paymentStatus: PaymentStatus,
+        paymentMethod?: PaymentMethod
+    ) => {
+        const loadingKey = `${item.kind}-${item.id}-${paymentStatus}`;
+        setPaymentActionLoadingId(loadingKey);
+        setError('');
+
+        try {
+            const response = await fetch('/api/internal/requests/payment', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-admin-actor': actor.trim() || 'recepcion',
+                },
+                body: JSON.stringify({
+                    kind: item.kind,
+                    id: item.id,
+                    paymentStatus,
+                    paymentMethod: paymentMethod ?? item.paymentMethod ?? undefined,
+                    paymentAmount: item.paymentAmount ?? item.totalPrice ?? undefined,
+                }),
+            });
+
+            const payload = await response.json();
+            if (!response.ok) {
+                if (response.status === 401) {
+                    await supabase.auth.signOut();
+                    router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}&error=auth-required`);
+                    return;
+                }
+                const message = payload?.error || 'No se pudo actualizar el pago.';
+                setError(message);
+                pushToast('error', 'No se pudo actualizar el pago', message);
+                return;
+            }
+
+            pushToast('success', 'Pago actualizado', getPaymentStatusLabel(paymentStatus));
+            await fetchRequests();
+        } catch (requestError) {
+            const message = requestError instanceof Error ? requestError.message : 'Error de red';
+            setError(message);
+            pushToast('error', 'Error de red', message);
+        } finally {
+            setPaymentActionLoadingId(null);
+        }
+    };
+
     const sendProviderEmail = async (item: InternalRequestItem, template: ProviderEmailTemplate) => {
         const loadingKey = `${item.kind}-${item.id}-${template}`;
         setEmailActionLoadingId(loadingKey);
@@ -1086,10 +1168,10 @@ export default function RecepcionRequestsPage() {
                         key={toast.id}
                         className={`pointer-events-auto rounded-xl border px-3 py-2 text-sm shadow-lg backdrop-blur-sm transition-all ${
                             toast.kind === 'success'
-                                ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald-100'
+                                ? 'border-emerald-400/40 bg-emerald-50 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-100'
                                 : toast.kind === 'error'
-                                    ? 'border-rose-400/40 bg-rose-500/15 text-rose-100'
-                                    : 'border-sky-400/40 bg-sky-500/15 text-sky-100'
+                                    ? 'border-rose-400/40 bg-rose-50 text-rose-900 dark:bg-rose-500/15 dark:text-rose-100'
+                                    : 'border-sky-400/40 bg-sky-50 text-sky-900 dark:bg-sky-500/15 dark:text-sky-100'
                         }`}
                     >
                         <p className="break-words font-medium">{toast.title}</p>
@@ -1101,7 +1183,7 @@ export default function RecepcionRequestsPage() {
             <p className="text-sm text-muted-foreground mb-6">
                 Gestiona reservas, correos y seguimiento de tours, guías y shuttles.
             </p>
-            <section className="mb-6 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-slate-900/88 via-slate-900/72 to-cyan-950/30 shadow-[0_16px_50px_rgba(8,15,30,0.28)]">
+            <section className="mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_16px_50px_rgba(8,15,30,0.08)] dark:border-white/10 dark:bg-gradient-to-r dark:from-slate-900/88 dark:via-slate-900/72 dark:to-cyan-950/30 dark:shadow-[0_16px_50px_rgba(8,15,30,0.28)]">
                 <div className="flex flex-col gap-4 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
@@ -1111,11 +1193,11 @@ export default function RecepcionRequestsPage() {
                             </span>
                             {!authLoading ? (
                                 <>
-                                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                                    <span className="rounded-full border border-border bg-background/70 px-3 py-1 text-xs text-foreground">
                                         Opera: {operatorName || operatorEmail}
                                     </span>
                                     {operatorRole ? (
-                                        <span className="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-100">
+                                        <span className="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-700 dark:text-cyan-100">
                                             {operatorRole === 'admin' ? 'Admin' : 'Ops'}
                                         </span>
                                     ) : null}
@@ -1123,8 +1205,8 @@ export default function RecepcionRequestsPage() {
                                         <span
                                             className={`rounded-full px-3 py-1 text-xs ${
                                                 accessSource === 'directory'
-                                                    ? 'border border-emerald-400/20 bg-emerald-500/10 text-emerald-100'
-                                                    : 'border border-amber-400/20 bg-amber-500/10 text-amber-100'
+                                                    ? 'border border-emerald-400/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-100'
+                                                    : 'border border-amber-400/20 bg-amber-500/10 text-amber-700 dark:text-amber-100'
                                             }`}
                                         >
                                             {accessSource === 'directory' ? 'Acceso del equipo' : 'Acceso temporal'}
@@ -1135,28 +1217,28 @@ export default function RecepcionRequestsPage() {
                         </div>
 
                         <div className="mt-3 flex flex-col gap-3 xl:flex-row xl:items-center">
-                            <label htmlFor="admin-actor" className="flex items-center gap-2 text-sm text-slate-300">
-                                <span className="text-xs uppercase tracking-wide text-slate-400">Nombre del operador</span>
+                            <label htmlFor="admin-actor" className="flex items-center gap-2 text-sm text-foreground">
+                                <span className="text-xs uppercase tracking-wide text-muted-foreground">Nombre del operador</span>
                                 <input
                                     id="admin-actor"
                                     type="text"
                                     value={actor}
                                     onChange={(event) => setActor(event.target.value)}
                                     placeholder="Nombre de quien opera"
-                                    className="w-full min-w-0 rounded-xl border border-white/10 bg-slate-950/35 px-3 py-2 text-sm text-white shadow-inner sm:w-72"
+                                    className="w-full min-w-0 rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground shadow-inner sm:w-72"
                                 />
                             </label>
                             {!authLoading ? (
-                                <span className="truncate text-xs text-slate-400">{operatorEmail}</span>
+                                <span className="truncate text-xs text-muted-foreground">{operatorEmail}</span>
                             ) : null}
                         </div>
 
                         {accessSource === 'env_fallback' ? (
-                            <p className="mt-3 text-xs text-amber-200">
+                            <p className="mt-3 text-xs text-amber-700 dark:text-amber-200">
                                 Este usuario todavía tiene acceso temporal. Agrégalo al equipo interno cuando puedas.
                             </p>
                         ) : null}
-                        {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
+                        {error ? <p className="mt-3 text-sm text-rose-700 dark:text-rose-300">{error}</p> : null}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 lg:justify-end">
@@ -1164,7 +1246,7 @@ export default function RecepcionRequestsPage() {
                             type="button"
                             onClick={fetchRequests}
                             disabled={!canFetch || loading}
-                            className="rounded-xl border border-cyan-400/30 bg-cyan-500/15 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:border-cyan-300/50 hover:bg-cyan-500/20 disabled:opacity-50"
+                            className="rounded-xl border border-cyan-400/30 bg-cyan-500/15 px-4 py-2 text-sm font-medium text-cyan-800 transition hover:border-cyan-300/50 hover:bg-cyan-500/20 disabled:opacity-50 dark:text-cyan-100"
                         >
                             {loading ? 'Cargando...' : 'Actualizar reservas'}
                         </button>
@@ -1172,20 +1254,20 @@ export default function RecepcionRequestsPage() {
                             type="button"
                             onClick={processNotificationJobs}
                             disabled={!canFetch || notificationJobsLoading || authLoading}
-                            className="rounded-xl border border-fuchsia-400/30 bg-fuchsia-500/15 px-4 py-2 text-sm font-medium text-fuchsia-100 transition hover:border-fuchsia-300/50 hover:bg-fuchsia-500/20 disabled:opacity-50"
+                            className="rounded-xl border border-fuchsia-400/30 bg-fuchsia-500/15 px-4 py-2 text-sm font-medium text-fuchsia-800 transition hover:border-fuchsia-300/50 hover:bg-fuchsia-500/20 disabled:opacity-50 dark:text-fuchsia-100"
                         >
                             {notificationJobsLoading ? 'Reintentando...' : 'Reintentar correos pendientes'}
                         </button>
                         <button
                             type="button"
                             onClick={signOutOperator}
-                            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-white/20 hover:text-white"
+                            className="rounded-xl border border-border bg-background/70 px-4 py-2 text-sm text-foreground transition hover:border-primary/30 hover:text-primary"
                         >
                             Cerrar sesión
                         </button>
                         <a
                             href={`/${locale}`}
-                            className="rounded-xl border border-white/10 bg-transparent px-4 py-2 text-sm text-slate-400 transition hover:border-white/20 hover:text-slate-200"
+                            className="rounded-xl border border-border bg-transparent px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/30 hover:text-foreground"
                         >
                             Volver
                         </a>
@@ -1193,24 +1275,24 @@ export default function RecepcionRequestsPage() {
                 </div>
             </section>
 
-            <section className="mb-4 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/55 shadow-[0_14px_42px_rgba(8,15,30,0.28)]">
-                <div className="border-b border-white/10 px-4 py-3 sm:px-5">
+            <section className="mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_14px_42px_rgba(8,15,30,0.08)] dark:border-white/10 dark:bg-slate-950/55 dark:shadow-[0_14px_42px_rgba(8,15,30,0.28)]">
+                <div className="border-b border-border px-4 py-3 sm:px-5 dark:border-white/10">
                     <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                         <div>
                             <p className="text-[11px] uppercase tracking-[0.16em] text-cyan-200/75">Operación</p>
-                            <h2 className="mt-0.5 text-base font-semibold text-white">Reservas y filtros</h2>
+                            <h2 className="mt-0.5 text-base font-semibold text-foreground">Reservas y filtros</h2>
                         </div>
                         <div className="flex flex-wrap gap-2 text-xs">
-                            <span className="rounded-full border border-cyan-400/15 bg-cyan-500/10 px-3 py-1.5 text-cyan-100">
+                            <span className="rounded-full border border-cyan-400/15 bg-cyan-500/10 px-3 py-1.5 text-cyan-700 dark:text-cyan-100">
                                 {summary.total} visibles
                             </span>
-                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-300">
+                            <span className="rounded-full border border-border bg-background/70 px-3 py-1.5 text-muted-foreground">
                                 Tours {summary.tours}
                             </span>
-                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-300">
+                            <span className="rounded-full border border-border bg-background/70 px-3 py-1.5 text-muted-foreground">
                                 Guías {summary.guides}
                             </span>
-                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-300">
+                            <span className="rounded-full border border-border bg-background/70 px-3 py-1.5 text-muted-foreground">
                                 Shuttles {summary.shuttles}
                             </span>
                         </div>
@@ -1218,21 +1300,21 @@ export default function RecepcionRequestsPage() {
 
                     <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_160px_160px_170px_170px_auto] lg:items-end">
                         <label className="text-sm">
-                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Buscar</span>
+                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-muted-foreground">Buscar</span>
                             <input
                                 type="search"
                                 value={searchQuery}
                                 onChange={(event) => setSearchQuery(event.target.value)}
                                 placeholder="Cliente, correo, servicio o ID"
-                                className="w-full rounded-xl border border-white/10 bg-slate-950/45 px-3 py-2 text-sm text-white shadow-inner placeholder:text-slate-500"
+                                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground shadow-inner placeholder:text-muted-foreground"
                             />
                         </label>
                         <label className="text-sm">
-                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Estado</span>
+                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-muted-foreground">Estado</span>
                             <select
                                 value={statusFilter}
                                 onChange={(event) => setStatusFilter(event.target.value as 'all' | RequestStatus)}
-                                className="w-full rounded-xl border border-white/10 bg-slate-950/45 px-3 py-2 text-sm text-white shadow-inner"
+                                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground shadow-inner"
                             >
                                 <option value="all">Todos</option>
                                 <option value="pending">Nuevas</option>
@@ -1243,11 +1325,11 @@ export default function RecepcionRequestsPage() {
                             </select>
                         </label>
                         <label className="text-sm">
-                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Tipo</span>
+                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-muted-foreground">Tipo</span>
                             <select
                                 value={kindFilter}
                                 onChange={(event) => setKindFilter(event.target.value as 'all' | InternalRequestItem['kind'])}
-                                className="w-full rounded-xl border border-white/10 bg-slate-950/45 px-3 py-2 text-sm text-white shadow-inner"
+                                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground shadow-inner"
                             >
                                 <option value="all">Todos</option>
                                 <option value="tour">Tours</option>
@@ -1256,21 +1338,21 @@ export default function RecepcionRequestsPage() {
                             </select>
                         </label>
                         <label className="text-sm">
-                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Desde</span>
+                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-muted-foreground">Desde</span>
                             <input
                                 type="date"
                                 value={dateFrom}
                                 onChange={(event) => setDateFrom(event.target.value)}
-                                className="w-full rounded-xl border border-white/10 bg-slate-950/45 px-3 py-2 text-sm text-white shadow-inner"
+                                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground shadow-inner"
                             />
                         </label>
                         <label className="text-sm">
-                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-slate-400">Hasta</span>
+                            <span className="mb-1 block text-[11px] uppercase tracking-wide text-muted-foreground">Hasta</span>
                             <input
                                 type="date"
                                 value={dateTo}
                                 onChange={(event) => setDateTo(event.target.value)}
-                                className="w-full rounded-xl border border-white/10 bg-slate-950/45 px-3 py-2 text-sm text-white shadow-inner"
+                                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground shadow-inner"
                             />
                         </label>
                         <button
@@ -1282,7 +1364,7 @@ export default function RecepcionRequestsPage() {
                                 setDateFrom('');
                                 setDateTo('');
                             }}
-                            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300 transition hover:border-cyan-400/30 hover:text-cyan-100"
+                            className="rounded-xl border border-border bg-background/70 px-3 py-2 text-sm text-muted-foreground transition hover:border-cyan-400/30 hover:text-cyan-700 dark:hover:text-cyan-100"
                         >
                             Limpiar
                         </button>
@@ -1290,40 +1372,40 @@ export default function RecepcionRequestsPage() {
                 </div>
 
                 <div className="grid gap-2 px-4 py-3 sm:px-5 sm:grid-cols-2 xl:grid-cols-5">
-                    <div className="rounded-xl border border-amber-400/15 bg-amber-500/8 px-3 py-2.5">
+                    <div className="rounded-xl border border-amber-400/20 bg-amber-500/10 px-3 py-2.5">
                         <div className="flex items-center justify-between gap-3">
-                            <p className="text-[11px] uppercase tracking-wide text-amber-200/80">Nuevas</p>
-                            <p className="text-xl font-semibold text-white">{queueSummary.pending}</p>
+                            <p className="text-[11px] uppercase tracking-wide text-amber-700 dark:text-amber-200/80">Nuevas</p>
+                            <p className="text-xl font-semibold text-foreground">{queueSummary.pending}</p>
                         </div>
-                        <p className="mt-1 text-[11px] text-amber-100/70">Pendientes por iniciar</p>
+                        <p className="mt-1 text-[11px] text-amber-700/80 dark:text-amber-100/70">Pendientes por iniciar</p>
                     </div>
-                    <div className="rounded-xl border border-sky-400/15 bg-sky-500/8 px-3 py-2.5">
+                    <div className="rounded-xl border border-sky-400/20 bg-sky-500/10 px-3 py-2.5">
                         <div className="flex items-center justify-between gap-3">
-                            <p className="text-[11px] uppercase tracking-wide text-sky-200/80">En gestión</p>
-                            <p className="text-xl font-semibold text-white">{queueSummary.processing}</p>
+                            <p className="text-[11px] uppercase tracking-wide text-sky-700 dark:text-sky-200/80">En gestión</p>
+                            <p className="text-xl font-semibold text-foreground">{queueSummary.processing}</p>
                         </div>
-                        <p className="mt-1 text-[11px] text-sky-100/70">{operations.processingStale} con más de {PROCESSING_STALE_HOURS}h</p>
+                        <p className="mt-1 text-[11px] text-sky-700/80 dark:text-sky-100/70">{operations.processingStale} con más de {PROCESSING_STALE_HOURS}h</p>
                     </div>
-                    <div className="rounded-xl border border-emerald-400/15 bg-emerald-500/8 px-3 py-2.5">
+                    <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-3 py-2.5">
                         <div className="flex items-center justify-between gap-3">
-                            <p className="text-[11px] uppercase tracking-wide text-emerald-200/80">Confirmadas</p>
-                            <p className="text-xl font-semibold text-white">{queueSummary.confirmed}</p>
+                            <p className="text-[11px] uppercase tracking-wide text-emerald-700 dark:text-emerald-200/80">Confirmadas</p>
+                            <p className="text-xl font-semibold text-foreground">{queueSummary.confirmed}</p>
                         </div>
-                        <p className="mt-1 text-[11px] text-emerald-100/70">{operations.pendingToday} nuevas hoy</p>
+                        <p className="mt-1 text-[11px] text-emerald-700/80 dark:text-emerald-100/70">{operations.pendingToday} nuevas hoy</p>
                     </div>
-                    <div className="rounded-xl border border-rose-400/15 bg-rose-500/8 px-3 py-2.5">
+                    <div className="rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2.5">
                         <div className="flex items-center justify-between gap-3">
-                            <p className="text-[11px] uppercase tracking-wide text-rose-200/85">Urgentes</p>
-                            <p className="text-xl font-semibold text-white">{operations.confirmedOverdue}</p>
+                            <p className="text-[11px] uppercase tracking-wide text-rose-700 dark:text-rose-200/85">Urgentes</p>
+                            <p className="text-xl font-semibold text-foreground">{operations.confirmedOverdue}</p>
                         </div>
-                        <p className="mt-1 text-[11px] text-rose-100/70">Confirmadas vencidas</p>
+                        <p className="mt-1 text-[11px] text-rose-700/80 dark:text-rose-100/70">Confirmadas vencidas</p>
                     </div>
-                    <div className="rounded-xl border border-fuchsia-400/15 bg-fuchsia-500/8 px-3 py-2.5">
+                    <div className="rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 py-2.5">
                         <div className="flex items-center justify-between gap-3">
-                            <p className="text-[11px] uppercase tracking-wide text-fuchsia-200/85">Correos</p>
-                            <p className="text-xl font-semibold text-white">{summary.emailFailed}</p>
+                            <p className="text-[11px] uppercase tracking-wide text-fuchsia-700 dark:text-fuchsia-200/85">Correos</p>
+                            <p className="text-xl font-semibold text-foreground">{summary.emailFailed}</p>
                         </div>
-                        <p className="mt-1 text-[11px] text-fuchsia-100/70">Fallidos</p>
+                        <p className="mt-1 text-[11px] text-fuchsia-700/80 dark:text-fuchsia-100/70">Fallidos</p>
                     </div>
                 </div>
                 <div className="px-4 pb-4 sm:px-5">
@@ -1331,7 +1413,7 @@ export default function RecepcionRequestsPage() {
                         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                             <div>
                                 <p className="text-[11px] uppercase tracking-[0.16em] text-fuchsia-200/75">Notificaciones</p>
-                                <h3 className="mt-0.5 text-sm font-semibold text-white">Correos de seguimiento</h3>
+                                <h3 className="mt-0.5 text-sm font-semibold text-foreground">Correos de seguimiento</h3>
                                 <p className="mt-1 text-xs text-muted-foreground">
                                     Último intento: {summary.lastNotificationProcessedAt ? formatTimestamp(summary.lastNotificationProcessedAt) : 'Sin envíos registrados'}
                                 </p>
@@ -1340,7 +1422,7 @@ export default function RecepcionRequestsPage() {
                                 type="button"
                                 onClick={processNotificationJobs}
                                 disabled={!canFetch || notificationJobsLoading || authLoading}
-                                className="rounded-xl border border-fuchsia-400/30 bg-fuchsia-500/15 px-4 py-2 text-sm font-medium text-fuchsia-100 transition hover:border-fuchsia-300/50 hover:bg-fuchsia-500/20 disabled:opacity-50"
+                                className="rounded-xl border border-fuchsia-400/30 bg-fuchsia-500/15 px-4 py-2 text-sm font-medium text-fuchsia-800 transition hover:border-fuchsia-300/50 hover:bg-fuchsia-500/20 disabled:opacity-50 dark:text-fuchsia-100"
                             >
                                 {notificationJobsLoading
                                     ? 'Procesando...'
@@ -1351,21 +1433,21 @@ export default function RecepcionRequestsPage() {
                         </div>
 
                         <div className="mt-3 grid gap-2 sm:grid-cols-4">
-                            <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5">
+                            <div className="rounded-xl border border-border bg-background/70 px-3 py-2.5">
                                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Total</p>
-                                <p className="mt-1 text-xl font-semibold text-white">{summary.notificationJobsTotal}</p>
+                                <p className="mt-1 text-xl font-semibold text-foreground">{summary.notificationJobsTotal}</p>
                             </div>
-                            <div className="rounded-xl border border-amber-400/15 bg-amber-500/8 px-3 py-2.5">
-                                <p className="text-[11px] uppercase tracking-wide text-amber-200/80">Pendientes</p>
-                                <p className="mt-1 text-xl font-semibold text-white">{summary.notificationJobsPending}</p>
+                            <div className="rounded-xl border border-amber-400/20 bg-amber-500/10 px-3 py-2.5">
+                                <p className="text-[11px] uppercase tracking-wide text-amber-700 dark:text-amber-200/80">Pendientes</p>
+                                <p className="mt-1 text-xl font-semibold text-foreground">{summary.notificationJobsPending}</p>
                             </div>
-                            <div className="rounded-xl border border-emerald-400/15 bg-emerald-500/8 px-3 py-2.5">
-                                <p className="text-[11px] uppercase tracking-wide text-emerald-200/80">Enviadas</p>
-                                <p className="mt-1 text-xl font-semibold text-white">{summary.notificationJobsSent}</p>
+                            <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-3 py-2.5">
+                                <p className="text-[11px] uppercase tracking-wide text-emerald-700 dark:text-emerald-200/80">Enviadas</p>
+                                <p className="mt-1 text-xl font-semibold text-foreground">{summary.notificationJobsSent}</p>
                             </div>
-                            <div className="rounded-xl border border-rose-400/15 bg-rose-500/8 px-3 py-2.5">
-                                <p className="text-[11px] uppercase tracking-wide text-rose-200/85">Fallidas</p>
-                                <p className="mt-1 text-xl font-semibold text-white">{summary.notificationJobsFailed}</p>
+                            <div className="rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2.5">
+                                <p className="text-[11px] uppercase tracking-wide text-rose-700 dark:text-rose-200/85">Fallidas</p>
+                                <p className="mt-1 text-xl font-semibold text-foreground">{summary.notificationJobsFailed}</p>
                             </div>
                         </div>
                     </div>
@@ -1394,12 +1476,12 @@ export default function RecepcionRequestsPage() {
                         (normalizedStatus === 'confirmed' || normalizedStatus === 'completed');
 
                     return (
-                        <article key={itemKey} className="overflow-hidden rounded-2xl border border-white/10 bg-card/35 shadow-sm transition hover:border-cyan-400/30 hover:shadow-cyan-500/5">
+                        <article key={itemKey} className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:border-cyan-400/30 hover:shadow-cyan-500/5 dark:border-white/10 dark:bg-card/35">
                             <div className="flex flex-col gap-4">
                                 <div className="grid gap-5 p-4 sm:p-5 xl:grid-cols-[minmax(0,1fr)_390px] xl:items-start">
                                     <div className="min-w-0">
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <span className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-[11px] font-medium text-cyan-100">
+                                            <span className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-[11px] font-medium text-cyan-700 dark:text-cyan-100">
                                                 {getKindLabel(item.kind)}
                                             </span>
                                             <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${getStatusBadgeClasses(normalizedStatus)}`}>
@@ -1413,6 +1495,9 @@ export default function RecepcionRequestsPage() {
                                             <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${getEmailStatusClasses(item.emailStatus)}`}>
                                                 {getEmailStatusLabel(item.emailStatus)}
                                             </span>
+                                            <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${getPaymentStatusClasses(item.paymentStatus)}`}>
+                                                {getPaymentStatusLabel(item.paymentStatus)}
+                                            </span>
                                         </div>
 
                                         <div className="mt-3">
@@ -1420,19 +1505,19 @@ export default function RecepcionRequestsPage() {
                                                 {item.serviceName}
                                             </h2>
                                             <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                                                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">
+                                                <span className="rounded-full border border-border bg-background/70 px-2 py-1">
                                                     ID #{item.id.slice(0, 8)}
                                                 </span>
-                                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                                                <span className="rounded-full border border-border bg-background/70 px-2.5 py-1">
                                                     {formatServiceDate(item.date)}
                                                 </span>
                                                 {item.partySize ? (
-                                                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                                                    <span className="rounded-full border border-border bg-background/70 px-2.5 py-1">
                                                         {getPartySizeLabel(item.kind, item.partySize)}
                                                     </span>
                                                 ) : null}
                                                 {showTiming ? (
-                                                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                                                    <span className="rounded-full border border-border bg-background/70 px-2.5 py-1">
                                                         {timingLabel}
                                                     </span>
                                                 ) : null}
@@ -1445,19 +1530,19 @@ export default function RecepcionRequestsPage() {
                                         </div>
 
                                         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                                            <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
+                                            <div className="rounded-xl border border-border bg-background px-3 py-2.5 dark:border-white/10 dark:bg-background/40">
                                                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Cliente</p>
                                                 <p className="mt-1 text-sm font-medium">{item.customerName}</p>
                                             </div>
-                                            <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
+                                            <div className="rounded-xl border border-border bg-background px-3 py-2.5 dark:border-white/10 dark:bg-background/40">
                                                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Contacto</p>
                                                 <p className="mt-1 truncate text-sm text-muted-foreground">{item.customerEmail}</p>
                                                 {item.customerWhatsapp ? (
-                                                    <p className="mt-0.5 text-xs text-cyan-200">{item.customerWhatsapp}</p>
+                                                    <p className="mt-0.5 text-xs text-cyan-700 dark:text-cyan-200">{item.customerWhatsapp}</p>
                                                 ) : null}
                                             </div>
                                             {locationSummary ? (
-                                                <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5 sm:col-span-2">
+                                                <div className="rounded-xl border border-border bg-background px-3 py-2.5 sm:col-span-2 dark:border-white/10 dark:bg-background/40">
                                                     <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                                                         {item.kind === 'shuttle' ? 'Recogida' : 'Encuentro'}
                                                     </p>
@@ -1467,7 +1552,7 @@ export default function RecepcionRequestsPage() {
                                         </div>
                                     </div>
 
-                                    <aside className="space-y-3 rounded-2xl border border-white/10 bg-background/35 p-3.5">
+                                    <aside className="space-y-3 rounded-2xl border border-border bg-background/70 p-3.5 dark:border-white/10 dark:bg-background/35">
                                         <div className="flex flex-wrap gap-2">
                                             {primaryActions.map((action) => {
                                                 const actionKey = `${item.kind}-${item.id}-${action.to}`;
@@ -1477,7 +1562,7 @@ export default function RecepcionRequestsPage() {
                                                         type="button"
                                                         onClick={() => updateStatus(item, action.to)}
                                                         disabled={Boolean(actionLoadingId) || authLoading}
-                                                        className="rounded-lg border px-3 py-1.5 text-sm transition hover:border-cyan-400/40 hover:text-cyan-100 disabled:opacity-50"
+                                                        className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-foreground transition hover:border-cyan-400/40 hover:text-cyan-700 disabled:opacity-50 dark:border-white/10 dark:hover:text-cyan-100"
                                                     >
                                                         {actionLoadingId === actionKey ? 'Procesando...' : action.label}
                                                     </button>
@@ -1487,12 +1572,12 @@ export default function RecepcionRequestsPage() {
                                         <button
                                             type="button"
                                             onClick={() => toggleCard(item)}
-                                            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-left text-sm text-muted-foreground transition hover:border-cyan-400/30 hover:text-cyan-100"
+                                            className="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-left text-sm text-muted-foreground transition hover:border-cyan-400/30 hover:text-cyan-700 dark:border-white/10 dark:bg-white/5 dark:hover:text-cyan-100"
                                         >
                                             {isExpanded ? 'Ocultar detalle' : 'Ver detalle'}
                                         </button>
 
-                                        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                                        <div className="rounded-2xl border border-border bg-card p-3 dark:border-white/10 dark:bg-white/[0.03]">
                                             <div className="flex items-center justify-between gap-3">
                                                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Correos al usuario</p>
                                                 <span className={`rounded-full border px-2 py-0.5 text-[11px] ${getEmailStatusClasses(item.emailStatus)}`}>
@@ -1510,7 +1595,7 @@ export default function RecepcionRequestsPage() {
                                                             onClick={() => sendCustomerEmail(item, action.template)}
                                                             disabled={Boolean(emailActionLoadingId) || authLoading || hasTestEmail}
                                                             title={hasTestEmail ? 'Esta reserva usa un correo de prueba. Usa un correo real para enviar.' : undefined}
-                                                            className="min-w-[118px] rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-3 py-2 text-left text-sm leading-snug transition hover:border-emerald-400/40 hover:text-emerald-100 disabled:opacity-50"
+                                                            className="min-w-[118px] rounded-xl border border-emerald-400/25 bg-emerald-500/10 px-3 py-2 text-left text-sm leading-snug text-emerald-800 transition hover:border-emerald-400/40 disabled:opacity-50 dark:text-emerald-100"
                                                         >
                                                             {emailActionLoadingId === emailKey ? 'Enviando...' : action.label}
                                                         </button>
@@ -1520,9 +1605,57 @@ export default function RecepcionRequestsPage() {
                                                     <span className="text-sm text-muted-foreground">No hay correos sugeridos en este paso.</span>
                                                 ) : null}
                                                 {isTestEmail(item.customerEmail) ? (
-                                                    <span className="text-sm text-amber-200">
+                                                    <span className="text-sm text-amber-700 dark:text-amber-200">
                                                         Correo de prueba: usa un correo real para enviar.
                                                     </span>
+                                                ) : null}
+                                            </div>
+                                        </div>
+
+                                        <div className="rounded-2xl border border-emerald-400/10 bg-emerald-500/[0.04] p-3">
+                                            <div className="flex items-center justify-between gap-3">
+                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Pago</p>
+                                                <span className={`rounded-full border px-2 py-0.5 text-[11px] ${getPaymentStatusClasses(item.paymentStatus)}`}>
+                                                    {getPaymentStatusLabel(item.paymentStatus)}
+                                                </span>
+                                            </div>
+                                            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                                                <div className="rounded-xl border border-border bg-background/70 px-3 py-2 dark:border-white/10 dark:bg-white/5">
+                                                    <p className="text-muted-foreground">Monto</p>
+                                                    <p className="mt-1 font-medium text-foreground">
+                                                        {formatMoney(item.paymentAmount ?? item.totalPrice) ?? 'Por confirmar'}
+                                                    </p>
+                                                </div>
+                                                <div className="rounded-xl border border-border bg-background/70 px-3 py-2 dark:border-white/10 dark:bg-white/5">
+                                                    <p className="text-muted-foreground">Método</p>
+                                                    <p className="mt-1 font-medium text-foreground">{getPaymentMethodLabel(item.paymentMethod)}</p>
+                                                </div>
+                                            </div>
+                                            {item.paymentConfirmedAt ? (
+                                                <p className="mt-2 text-[11px] text-muted-foreground">
+                                                    Confirmado: {formatTimestamp(item.paymentConfirmedAt)}
+                                                </p>
+                                            ) : null}
+                                            <div className="mt-3 flex flex-wrap gap-2">
+                                                {item.paymentStatus !== 'paid' && item.paymentStatus !== 'proof_received' ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => updatePaymentStatus(item, 'proof_received')}
+                                                        disabled={Boolean(paymentActionLoadingId) || authLoading}
+                                                        className="rounded-xl border border-violet-400/25 bg-violet-500/10 px-3 py-2 text-left text-sm leading-snug text-violet-800 transition hover:border-violet-400/40 disabled:opacity-50 dark:text-violet-100"
+                                                    >
+                                                        {paymentActionLoadingId === `${item.kind}-${item.id}-proof_received` ? 'Guardando...' : 'Comprobante recibido'}
+                                                    </button>
+                                                ) : null}
+                                                {item.paymentStatus !== 'paid' ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => updatePaymentStatus(item, 'paid')}
+                                                        disabled={Boolean(paymentActionLoadingId) || authLoading}
+                                                        className="rounded-xl border border-emerald-400/25 bg-emerald-500/10 px-3 py-2 text-left text-sm leading-snug text-emerald-800 transition hover:border-emerald-400/40 disabled:opacity-50 dark:text-emerald-100"
+                                                    >
+                                                        {paymentActionLoadingId === `${item.kind}-${item.id}-paid` ? 'Guardando...' : 'Marcar pagado'}
+                                                    </button>
                                                 ) : null}
                                             </div>
                                         </div>
@@ -1551,7 +1684,7 @@ export default function RecepcionRequestsPage() {
                                                 type="button"
                                                 onClick={() => sendProviderEmail(item, 'provider_confirmation')}
                                                 disabled={!canSendProviderConfirmation || Boolean(emailActionLoadingId) || authLoading}
-                                                className="mt-3 w-full rounded-xl border border-cyan-400/20 bg-cyan-500/5 px-3 py-2 text-left text-sm text-cyan-100 transition hover:border-cyan-400/40 disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="mt-3 w-full rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-3 py-2 text-left text-sm text-cyan-800 transition hover:border-cyan-400/40 disabled:cursor-not-allowed disabled:opacity-50 dark:text-cyan-100"
                                             >
                                                 {emailActionLoadingId === providerEmailKey
                                                     ? 'Enviando...'
@@ -1564,11 +1697,11 @@ export default function RecepcionRequestsPage() {
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-2 text-xs">
-                                            <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                                            <div className="rounded-xl border border-border bg-background/70 px-3 py-2 dark:border-white/10 dark:bg-white/5">
                                                 <p className="text-muted-foreground">Intentos de correo</p>
                                                 <p className="mt-1 font-medium text-foreground">{item.emailAttempts}</p>
                                             </div>
-                                            <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                                            <div className="rounded-xl border border-border bg-background/70 px-3 py-2 dark:border-white/10 dark:bg-white/5">
                                                 <p className="text-muted-foreground">Tipo</p>
                                                 <p className="mt-1 font-medium text-foreground">{getKindLabel(item.kind)}</p>
                                             </div>
@@ -1581,35 +1714,35 @@ export default function RecepcionRequestsPage() {
                                 </div>
 
                                 {isExpanded ? (
-                                    <div className="space-y-4 border-t border-white/10 p-4 pt-4 sm:p-5 sm:pt-4">
+                                    <div className="space-y-4 border-t border-border p-4 pt-4 sm:p-5 sm:pt-4 dark:border-white/10">
                                         <div className="min-w-0 space-y-4">
                                                 <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
-                                                    <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
+                                                    <div className="rounded-xl border border-border bg-background px-3 py-2.5 dark:border-white/10 dark:bg-background/40">
                                                         <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Siguiente paso</p>
                                                         <p className="mt-1 text-sm text-muted-foreground">{getChecklist(normalizedStatus)}</p>
                                                     </div>
-                                                    <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
+                                                    <div className="rounded-xl border border-border bg-background px-3 py-2.5 dark:border-white/10 dark:bg-background/40">
                                                         <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Registro del caso</p>
                                                         <div className="mt-2">{renderQualityBadge(normalizedStatus, item.adminNotes)}</div>
                                                     </div>
                                                 </div>
 
                                                 <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                                                    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                    <span className="inline-flex items-center rounded-full border border-border bg-background/70 px-3 py-1 dark:border-white/10 dark:bg-white/5">
                                                         Creada: {formatTimestamp(item.createdAt)}
                                                     </span>
                                                     {normalizedStatus === 'confirmed' ? (
-                                                        <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                        <span className="inline-flex items-center rounded-full border border-border bg-background/70 px-3 py-1 dark:border-white/10 dark:bg-white/5">
                                                             Confirmado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Pendiente'}
                                                         </span>
                                                     ) : null}
                                                     {normalizedStatus === 'cancelled' ? (
-                                                        <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                        <span className="inline-flex items-center rounded-full border border-border bg-background/70 px-3 py-1 dark:border-white/10 dark:bg-white/5">
                                                             Cancelado: {item.cancelledAt ? formatTimestamp(item.cancelledAt) : 'Pendiente'}
                                                         </span>
                                                     ) : null}
                                                     {normalizedStatus === 'completed' ? (
-                                                        <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                                                        <span className="inline-flex items-center rounded-full border border-border bg-background/70 px-3 py-1 dark:border-white/10 dark:bg-white/5">
                                                             Servicio cerrado: {item.confirmedAt ? formatTimestamp(item.confirmedAt) : 'Sin registro'}
                                                         </span>
                                                     ) : null}
@@ -1618,7 +1751,7 @@ export default function RecepcionRequestsPage() {
                                                 {(normalizedStatus === 'confirmed' ||
                                                     normalizedStatus === 'cancelled' ||
                                                     normalizedStatus === 'completed') ? (
-                                                    <div className="rounded-xl border border-white/10 bg-background/40 p-3">
+                                                    <div className="rounded-xl border border-border bg-background p-3 dark:border-white/10 dark:bg-background/40">
                                                         <div className="flex items-center justify-between gap-3">
                                                             <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Nota interna</p>
                                                             {item.adminNotes && item.adminNotes.length > 110 ? (
@@ -1640,7 +1773,7 @@ export default function RecepcionRequestsPage() {
                                                 ) : null}
                                         </div>
 
-                                        <section className="rounded-2xl border border-white/10 bg-background/40 p-3.5">
+                                        <section className="rounded-2xl border border-border bg-background p-3.5 dark:border-white/10 dark:bg-background/40">
                                             <div className="flex items-center justify-between gap-3">
                                                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Notificaciones</p>
                                                 <span className="text-[11px] text-muted-foreground">
@@ -1651,13 +1784,13 @@ export default function RecepcionRequestsPage() {
                                                 {notifications.length > 0 ? notifications.slice(0, 6).map((notification) => (
                                                     <div
                                                         key={notification.id}
-                                                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs"
+                                                        className="rounded-xl border border-border bg-card px-3 py-2 text-xs dark:border-white/10 dark:bg-white/5"
                                                     >
                                                         <div className="flex flex-wrap items-center gap-2">
                                                             <span className={`rounded-full border px-2 py-0.5 ${getNotificationStatusClasses(notification.delivery_status)}`}>
                                                                 {notification.delivery_status === 'sent' ? 'Enviado' : 'Falló'}
                                                             </span>
-                                                            <span className="rounded-full border border-white/10 bg-black/10 px-2 py-0.5 text-muted-foreground">
+                                                            <span className="rounded-full border border-border bg-background/70 px-2 py-0.5 text-muted-foreground dark:border-white/10 dark:bg-black/10">
                                                                 {getNotificationRecipientLabel(notification.recipient_type)}
                                                             </span>
                                                             <span className="text-foreground/90">{getNotificationTemplateLabel(notification.template)}</span>
@@ -1681,13 +1814,13 @@ export default function RecepcionRequestsPage() {
                                                 {notificationJobs.length > 0 ? notificationJobs.slice(0, 6).map((job) => (
                                                     <div
                                                         key={job.id}
-                                                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs"
+                                                        className="rounded-xl border border-border bg-card px-3 py-2 text-xs dark:border-white/10 dark:bg-white/5"
                                                     >
                                                         <div className="flex flex-wrap items-center gap-2">
                                                             <span className={`rounded-full border px-2 py-0.5 ${getNotificationJobStatusClasses(job.status)}`}>
                                                                 {getNotificationJobStatusLabel(job.status)}
                                                             </span>
-                                                            <span className="rounded-full border border-white/10 bg-black/10 px-2 py-0.5 text-muted-foreground">
+                                                            <span className="rounded-full border border-border bg-background/70 px-2 py-0.5 text-muted-foreground dark:border-white/10 dark:bg-black/10">
                                                                 {getNotificationRecipientLabel(job.recipient_type)}
                                                             </span>
                                                             <span className="text-foreground/90">{getNotificationTemplateLabel(job.template)}</span>

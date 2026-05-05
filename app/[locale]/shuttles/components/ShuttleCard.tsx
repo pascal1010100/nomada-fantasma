@@ -68,7 +68,7 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             whileHover={{ y: -8 }}
-            className="group relative overflow-hidden rounded-[2.5rem] bg-card border border-white/5 hover:border-primary/40 transition-all duration-500 shadow-2xl hover:shadow-primary/5 flex flex-col h-full"
+            className="group relative flex h-full flex-col overflow-hidden rounded-[2.5rem] border border-border bg-card shadow-2xl shadow-black/5 transition-all duration-500 hover:border-primary/40 hover:shadow-primary/5 dark:border-white/5"
         >
             {/* Image Section */}
             <div className="relative h-64 overflow-hidden">
@@ -107,18 +107,18 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
             </div>
 
             {/* Content Section */}
-            <div className="p-10 space-y-7 flex-1 flex flex-col justify-between bg-card">
+            <div className="flex flex-1 flex-col justify-between space-y-7 bg-card p-8 md:p-10">
                 <div className="space-y-4">
                     <div className="space-y-3">
                         <span className="text-[10px] font-black uppercase tracking-[0.24em] text-primary/70">
                             {locale.startsWith('en') ? 'Route' : 'Ruta'}
                         </span>
                         <div className="flex items-start justify-start gap-3 text-left">
-                            <p className="min-w-0 flex-1 font-semibold text-sm text-muted-foreground/85 leading-snug break-words">
+                            <p className="min-w-0 flex-1 break-words text-sm font-semibold leading-snug text-muted-foreground">
                             {shuttle.origin}
                             </p>
                             <ArrowRight className="mt-0.5 w-4 h-4 text-primary/60 flex-shrink-0" />
-                            <p className="min-w-0 flex-1 font-semibold text-sm text-white leading-snug break-words">
+                            <p className="min-w-0 flex-1 break-words text-sm font-semibold leading-snug text-foreground">
                             {shuttle.destination}
                             </p>
                         </div>
@@ -144,14 +144,14 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
                     </div>
                 </div>
 
-                <div className="pt-6 border-t border-white/5 grid grid-cols-2 gap-6 text-left">
+                <div className="grid grid-cols-2 gap-6 border-t border-border pt-6 text-left">
                     <div className="space-y-1">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">{t('durationLabel')}</span>
-                        <p className="font-bold text-sm text-muted-foreground/80">{translateDuration(shuttle.duration)}</p>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{t('durationLabel')}</span>
+                        <p className="text-sm font-bold text-foreground/80">{translateDuration(shuttle.duration)}</p>
                     </div>
                     <div className="space-y-1">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">{t('scheduleLabel')}</span>
-                        <p className="font-bold text-sm text-muted-foreground/80 leading-snug">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{t('scheduleLabel')}</span>
+                        <p className="text-sm font-bold leading-snug text-foreground/80">
                             {summarizeSchedule(shuttle.schedule[0] || '')}
                             {extraOptions > 0 && (
                                 <span className="text-[10px] opacity-50 ml-1">
@@ -166,7 +166,7 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => onBook(shuttle)}
-                    className="w-full mt-4 py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.3em] bg-white text-black hover:bg-primary hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group/btn shadow-xl shadow-black/20"
+                    className="group/btn mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-foreground py-4 text-[10px] font-black uppercase tracking-[0.3em] text-background shadow-xl shadow-black/10 transition-all duration-300 hover:bg-primary hover:text-primary-foreground"
                 >
                     {t('bookNow')}
                     <ArrowRight className="w-3.5 h-3.5 transition-transform duration-500 group-hover/btn:translate-x-1.5" />

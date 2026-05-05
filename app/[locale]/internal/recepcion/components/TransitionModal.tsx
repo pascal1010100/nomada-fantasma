@@ -121,15 +121,15 @@ export default function TransitionModal({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className={`relative w-full max-w-lg bg-gray-900/90 border-t ${config.border} border-x border-x-white/5 border-b border-b-white/5 rounded-3xl shadow-2xl ${config.glow} overflow-hidden`}
+                        className={`relative w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-card shadow-2xl ${config.glow} dark:border-x-white/5 dark:border-b-white/5 dark:bg-gray-900/90 ${config.border}`}
                     >
                         {/* Status Header with subtle glass vibe */}
                         <div className="p-8 pb-4 text-center space-y-4">
                             <div className={`inline-flex p-3 rounded-2xl ${config.bg} border ${config.border} mb-2`}>
                                 {config.icon}
                             </div>
-                            <h3 className="text-2xl font-bold text-white tracking-tight">{title}</h3>
-                            <p className="text-gray-400 text-sm leading-relaxed px-4">
+                            <h3 className="text-2xl font-bold tracking-tight text-foreground">{title}</h3>
+                            <p className="px-4 text-sm leading-relaxed text-muted-foreground">
                                 {description}
                             </p>
                         </div>
@@ -139,15 +139,15 @@ export default function TransitionModal({
                             {showNoteInput && (
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between px-1">
-                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">
+                                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
                                             Nota operativa
                                         </label>
-                                        <span className="text-[10px] text-gray-600 font-medium">
+                                        <span className="text-[10px] font-medium text-muted-foreground">
                                             {noteRequired ? 'Obligatoria' : 'Opcional'}
                                         </span>
                                     </div>
                                     {noteHelper ? (
-                                        <p className="px-1 text-xs text-gray-500">{noteHelper}</p>
+                                        <p className="px-1 text-xs text-muted-foreground">{noteHelper}</p>
                                     ) : null}
                                     <div className="group relative">
                                         <textarea
@@ -160,7 +160,7 @@ export default function TransitionModal({
                                             }}
                                             disabled={isLoading}
                                             rows={4}
-                                            className="w-full bg-black/40 border border-white/5 group-hover:border-white/10 focus:border-cyan-500/40 rounded-2xl px-5 py-4 text-sm text-gray-200 transition-all outline-none resize-none placeholder:text-gray-700 shadow-inner"
+                                            className="w-full resize-none rounded-2xl border border-border bg-background px-5 py-4 text-sm text-foreground shadow-inner outline-none transition-all placeholder:text-muted-foreground group-hover:border-primary/30 focus:border-cyan-500/40 dark:border-white/5 dark:bg-black/40 dark:group-hover:border-white/10"
                                             placeholder="Detalla cualquier ajuste operativo aquí..."
                                         />
                                         <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-transparent via-cyan-500/20 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity rounded-full" />
@@ -177,7 +177,7 @@ export default function TransitionModal({
                                     type="button"
                                     onClick={onClose}
                                     disabled={isLoading}
-                                    className="flex-1 px-6 py-4 rounded-2xl border border-white/5 text-gray-400 text-sm font-semibold hover:bg-white/5 transition-all disabled:opacity-50 active:scale-95"
+                                    className="flex-1 rounded-2xl border border-border px-6 py-4 text-sm font-semibold text-muted-foreground transition-all hover:bg-muted hover:text-foreground disabled:opacity-50 active:scale-95 dark:border-white/5 dark:hover:bg-white/5"
                                 >
                                     Volver
                                 </button>

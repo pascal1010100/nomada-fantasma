@@ -62,9 +62,9 @@ export default function InternalLoginClient({ locale }: { locale: string }) {
 
     return (
         <div className="min-h-[calc(100vh-6rem)] bg-background px-4 pb-10 nf-page-safe-loose">
-            <div className="mx-auto max-w-md rounded-3xl border border-white/10 bg-card/70 p-6 shadow-2xl backdrop-blur">
+            <div className="mx-auto max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl shadow-black/10 backdrop-blur dark:border-white/10 dark:bg-card/70">
                 <div className="mb-6">
-                    <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Nómada Fantasma Ops</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-cyan-700 dark:text-cyan-300">Nómada Fantasma Ops</p>
                     <h1 className="mt-2 text-2xl font-semibold text-foreground">Acceso interno</h1>
                     <p className="mt-2 text-sm text-muted-foreground">
                         Usa tu cuenta autorizada de Supabase Auth para entrar al panel operativo.
@@ -72,13 +72,13 @@ export default function InternalLoginClient({ locale }: { locale: string }) {
                 </div>
 
                 {incomingError ? (
-                    <div className="mb-4 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                    <div className="mb-4 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-100">
                         {incomingError}
                     </div>
                 ) : null}
 
                 {error ? (
-                    <div className="mb-4 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+                    <div className="mb-4 rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-800 dark:text-rose-100">
                         {error}
                     </div>
                 ) : null}
@@ -92,7 +92,7 @@ export default function InternalLoginClient({ locale }: { locale: string }) {
                             required
                             value={email}
                             onChange={(event) => setEmail(event.target.value)}
-                            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan-400/40"
+                            className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-cyan-400/40 dark:border-white/10 dark:bg-black/20"
                             placeholder="operaciones@tu-dominio.com"
                         />
                     </label>
@@ -105,7 +105,7 @@ export default function InternalLoginClient({ locale }: { locale: string }) {
                             required
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
-                            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-foreground outline-none transition focus:border-cyan-400/40"
+                            className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-cyan-400/40 dark:border-white/10 dark:bg-black/20"
                             placeholder="Tu contraseña"
                         />
                     </label>

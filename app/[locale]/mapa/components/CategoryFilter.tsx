@@ -45,11 +45,13 @@ export const CategoryFilter = ({
               buttonClassNames("ghost", "sm"),
               "group rounded-full px-3 py-1.5 text-xs transition-all backdrop-blur border",
               active
-                ? "bg-white/10 dark:bg-white/10 border-white/30 text-white"
+                ? "border-primary/40 bg-primary/15 text-primary dark:bg-white/10 dark:border-white/30 dark:text-white"
                 : isUnavailable
-                  ? "bg-[color:var(--card,rgba(17,24,39,0.35))] border-[color:var(--border,#334155)] text-slate-400/60"
-                  : "bg-[color:var(--card,rgba(17,24,39,0.55))] border-[color:var(--border,#334155)] text-slate-200/80",
-              (isUnavailable && !active) ? "cursor-not-allowed opacity-60" : "hover:scale-[1.02] active:scale-95",
+                  ? "border-border bg-card/70 text-muted-foreground"
+                  : "border-border bg-card/90 text-foreground/80",
+              (isUnavailable && !active)
+                ? "cursor-not-allowed border-dashed text-foreground/65 dark:text-slate-300/80"
+                : "hover:scale-[1.02] active:scale-95",
               "focus-visible:ring-cyan-400/60"
             )}
             title={`${localizedLabel} (${count})`}
@@ -60,7 +62,7 @@ export const CategoryFilter = ({
             />
             <Icon className="h-3.5 w-3.5 opacity-90" />
             <span className="opacity-90">{localizedLabel}</span>
-            <span className="rounded-full bg-black/20 px-1.5 py-0.5 text-[10px] leading-none">
+            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] leading-none">
               {count}
             </span>
           </button>

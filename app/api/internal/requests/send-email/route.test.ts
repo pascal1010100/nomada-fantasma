@@ -203,6 +203,8 @@ describe('POST /api/internal/requests/send-email', () => {
     expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({
       admin_notes: expect.stringContaining('email:payment_instructions'),
       email_delivery_status: 'sent',
+      payment_status: 'payment_requested',
+      payment_amount: 300,
     }));
   });
 

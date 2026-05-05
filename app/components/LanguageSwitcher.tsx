@@ -25,7 +25,7 @@ export default function LanguageSwitcher() {
     return (
         <Link
             href={href}
-            className="group relative flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 transition-all duration-300 hover:border-primary/50 hover:bg-white/10 active:scale-95 max-[430px]:gap-0 max-[430px]:px-2"
+            className="group relative flex shrink-0 items-center gap-2 rounded-xl border border-border bg-card/80 px-3 py-1.5 text-foreground transition-all duration-300 hover:border-primary/50 hover:bg-muted active:scale-95 max-[430px]:gap-0 max-[430px]:px-2 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
             title={t('switch')}
         >
             {/* The "文" symbol - represents language/literature across many cultures */}
@@ -37,10 +37,10 @@ export default function LanguageSwitcher() {
             </span>
 
             <div className="flex flex-col items-start leading-none max-[430px]:sr-only">
-                <span className="text-[10px] uppercase font-bold tracking-widest opacity-50">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/65">
                     {locale.toUpperCase()}
                 </span>
-                <span className="text-[8px] uppercase font-medium opacity-30 group-hover:opacity-60 transition-opacity">
+                <span className="text-[8px] font-medium uppercase text-muted-foreground transition-colors group-hover:text-foreground/70">
                     {t('other')}
                 </span>
             </div>

@@ -225,15 +225,15 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
     return (
         <AnimatePresence>
             <div className="fixed inset-0 z-[9999] overflow-y-auto bg-black/80 backdrop-blur-md">
-                <div className="flex min-h-full items-start justify-center p-4 md:p-12">
+                <div className="flex min-h-full items-start justify-center px-3 py-4 sm:p-6 md:p-12">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className="bg-card border border-white/10 w-full max-w-lg rounded-[2.5rem] shadow-2xl relative my-auto"
+                        className="relative my-0 w-full max-w-lg overflow-hidden rounded-[1.5rem] border border-border bg-card shadow-2xl sm:rounded-[2rem] md:my-auto md:rounded-[2.5rem] dark:border-white/10"
                     >
                         {isSuccess ? (
-                            <div className="p-8 md:p-16 text-center space-y-8 flex flex-col items-center">
+                                <div className="flex flex-col items-center space-y-6 p-6 text-center md:space-y-8 md:p-16">
                                 <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
@@ -276,10 +276,10 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                         ) : (
                             <>
                                 {/* Header */}
-                                <div className="p-8 pb-4 flex items-center justify-between border-b border-white/5">
+                                <div className="sticky top-0 z-20 flex items-start justify-between gap-4 border-b border-border bg-card/95 p-5 pb-4 backdrop-blur md:p-8 md:pb-4 dark:border-white/5">
                                     <div className="space-y-1">
-                                        <h3 className="text-xl font-black tracking-tighter">{isCustom ? t('titlePrivate') : t('title')}</h3>
-                                        <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest">
+                                        <h3 className="text-lg font-black tracking-tighter text-foreground md:text-xl">{isCustom ? t('titlePrivate') : t('title')}</h3>
+                                        <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary">
                                             {isCustom ? (
                                                 <span className="text-muted-foreground opacity-50">{t('customRoute')}</span>
                                             ) : (
@@ -293,50 +293,50 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                     </div>
                                     <button
                                         onClick={onClose}
-                                        className="p-2.5 transition-all text-muted-foreground hover:text-white"
+                                        className="rounded-full p-2.5 text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
                                     >
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
 
                                 {/* Form */}
-                                <form onSubmit={handleSubmit} className="p-10 md:p-16 pt-8 md:pt-12 space-y-10">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <form onSubmit={handleSubmit} className="max-h-[calc(100dvh-96px)] space-y-6 overflow-y-auto p-5 pt-5 md:max-h-[calc(100dvh-120px)] md:space-y-8 md:p-12 md:pt-8">
+                                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 pl-1">
+                                            <label className="pl-1 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
                                                 {t('nameLabel')}
                                             </label>
                                             <input
                                                 required
                                                 type="text"
                                                 placeholder="John Doe"
-                                                className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none transition-all placeholder:text-muted-foreground/20 font-bold text-sm"
+                                                className="w-full rounded-2xl border border-border bg-background p-4 text-sm font-bold text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary/40"
                                                 value={name}
                                                 onChange={(e) => setName(e.target.value)}
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 pl-1">
+                                            <label className="pl-1 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
                                                 {t('emailLabel')}
                                             </label>
                                             <input
                                                 required
                                                 type="email"
                                                 placeholder="john@example.com"
-                                                className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none transition-all placeholder:text-muted-foreground/20 font-bold text-sm"
+                                                className="w-full rounded-2xl border border-border bg-background p-4 text-sm font-bold text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary/40"
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
                                             />
                                         </div>
                                         <div className="space-y-2 md:col-span-2">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 pl-1">
+                                            <label className="pl-1 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
                                                 {t('whatsappLabel')}
                                             </label>
                                             <input
                                                 required
                                                 type="tel"
                                                 placeholder={t('whatsappPlaceholder')}
-                                                className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none transition-all placeholder:text-muted-foreground/20 font-bold text-sm"
+                                                className="w-full rounded-2xl border border-border bg-background p-4 text-sm font-bold text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary/40"
                                                 value={whatsapp}
                                                 onChange={(e) => setWhatsapp(e.target.value)}
                                             />
@@ -344,29 +344,29 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                     </div>
 
                                     {isCustom && (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-white/5 pt-10">
+                                        <div className="grid grid-cols-1 gap-5 border-t border-border pt-6 md:grid-cols-2 md:gap-6">
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 pl-1">
+                                                <label className="pl-1 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
                                                     {t('originLabel')}
                                                 </label>
                                                 <input
                                                     required
                                                     type="text"
                                                     placeholder="Ej: Panajachel"
-                                                    className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none transition-all placeholder:text-muted-foreground/20 font-bold text-sm"
+                                                    className="w-full rounded-2xl border border-border bg-background p-4 text-sm font-bold text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary/40"
                                                     value={customOrigin}
                                                     onChange={(e) => setCustomOrigin(e.target.value)}
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 pl-1">
+                                                <label className="pl-1 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
                                                     {t('destinationLabel')}
                                                 </label>
                                                 <input
                                                     required
                                                     type="text"
                                                     placeholder="Ej: El Paredón"
-                                                    className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none transition-all placeholder:text-muted-foreground/20 font-bold text-sm"
+                                                    className="w-full rounded-2xl border border-border bg-background p-4 text-sm font-bold text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary/40"
                                                     value={customDestination}
                                                     onChange={(e) => setCustomDestination(e.target.value)}
                                                 />
@@ -374,91 +374,91 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                         </div>
                                     )}
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 pl-1">
+                                            <label className="pl-1 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
                                                 {t('dateLabel')}
                                             </label>
                                             <input
                                                 required
                                                 type="date"
-                                                className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none transition-all font-bold text-sm"
+                                                className="w-full rounded-2xl border border-border bg-background p-4 text-sm font-bold text-foreground outline-none transition-all focus:border-primary/40"
                                                 value={date}
                                                 min={minDate}
                                                 onChange={(e) => setDate(e.target.value)}
                                             />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-2 gap-3">
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 pl-1">
+                                                <label className="pl-1 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
                                                     {t('timeLabel')}
                                                 </label>
                                                 {isCustom ? (
                                                     <input
                                                         required
                                                         type="time"
-                                                        className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none transition-all font-bold text-sm"
+                                                        className="w-full rounded-2xl border border-border bg-background p-4 text-sm font-bold text-foreground outline-none transition-all focus:border-primary/40"
                                                         value={time}
                                                         onChange={(e) => setTime(e.target.value)}
                                                     />
                                                 ) : (
                                                     <select
                                                         required
-                                                        className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none appearance-none cursor-pointer font-bold text-sm"
+                                                        className="w-full cursor-pointer appearance-none rounded-2xl border border-border bg-background p-4 text-sm font-bold text-foreground outline-none transition-all focus:border-primary/40"
                                                         value={time}
                                                         onChange={(e) => setTime(e.target.value)}
                                                     >
-                                                        <option value="" className="bg-card">{t('timePlaceholder')}</option>
+                                                        <option value="" className="bg-background text-foreground">{t('timePlaceholder')}</option>
                                                         {shuttle.schedule.map((t) => (
-                                                            <option key={t} value={t} className="bg-card">{compactSchedule(t)}</option>
+                                                            <option key={t} value={t} className="bg-background text-foreground">{compactSchedule(t)}</option>
                                                         ))}
                                                     </select>
                                                 )}
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 pl-1">
+                                                <label className="pl-1 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
                                                     {t('passengersLabel')}
                                                 </label>
                                                 <select
-                                                    className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none appearance-none cursor-pointer font-bold text-sm"
+                                                    className="w-full cursor-pointer appearance-none rounded-2xl border border-border bg-background p-4 text-sm font-bold text-foreground outline-none transition-all focus:border-primary/40"
                                                     value={passengers}
                                                     onChange={(e) => setPassengers(Number(e.target.value))}
                                                 >
                                                     {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                                                        <option key={n} value={n} className="bg-card">{n} Pax</option>
+                                                        <option key={n} value={n} className="bg-background text-foreground">{n} Pax</option>
                                                     ))}
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-                                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50">
+                                    <div className="rounded-2xl border border-border bg-muted/30 p-4 md:p-5">
+                                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
                                             <span>{locale.startsWith('en') ? 'Route details' : 'Detalle del shuttle'}</span>
-                                            <span className="text-primary/80">{shuttle.type === 'shared' ? 'Shared' : 'Private'}</span>
+                                            <span className="text-primary">{shuttle.type === 'shared' ? 'Shared' : 'Private'}</span>
                                         </div>
-                                        <div className="mt-4 flex items-center gap-3 text-sm font-semibold text-white/90">
+                                        <div className="mt-4 flex items-center gap-3 text-sm font-semibold text-foreground">
                                             <span className="truncate">{shuttle.origin}</span>
-                                            <span className="text-primary/60">→</span>
+                                            <span className="text-primary">→</span>
                                             <span className="truncate">{shuttle.destination}</span>
                                         </div>
-                                        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground/80">
+                                        <div className="mt-4 grid grid-cols-1 gap-4 text-sm text-muted-foreground md:grid-cols-2">
                                             <div>
-                                                <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 font-black">
+                                                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
                                                     {t('durationLabel')}
                                                 </div>
-                                                <div className="mt-1 font-semibold text-white/80">
+                                                <div className="mt-1 font-semibold text-foreground">
                                                     {translateDuration(shuttle.duration)}
                                                 </div>
                                             </div>
                                             <div>
-                                                <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 font-black">
+                                                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
                                                     {t('scheduleLabel')}
                                                 </div>
                                                 <ul className="mt-1 space-y-2">
                                                     {shuttle.schedule.map((item) => (
-                                                        <li key={item} className="font-semibold text-white/80 leading-snug">
-                                                            <span className="mr-2 text-primary/70">•</span>
+                                                        <li key={item} className="font-semibold leading-snug text-foreground">
+                                                            <span className="mr-2 text-primary">•</span>
                                                             <span dangerouslySetInnerHTML={{ __html: emphasizeTimes(item) }} />
                                                         </li>
                                                     ))}
@@ -466,7 +466,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                             </div>
                                         </div>
                                         {shuttle.description && (
-                                            <p className="mt-4 text-xs text-muted-foreground/80">
+                                            <p className="mt-4 text-xs text-muted-foreground">
                                                 {translateDescription(shuttle.description)}
                                             </p>
                                         )}
@@ -481,14 +481,14 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                     )}
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 pl-1">
+                                        <label className="pl-1 text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground">
                                             {t('pickupLabel')}
                                         </label>
                                         <input
                                             required
                                             type="text"
                                             placeholder={t('pickupPlaceholder')}
-                                            className="w-full p-5 rounded-2xl bg-white/[0.03] border border-white/5 focus:border-white/10 outline-none transition-all placeholder:text-muted-foreground/20 font-bold text-sm"
+                                            className="w-full rounded-2xl border border-border bg-background p-4 text-sm font-bold text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-primary/40"
                                             value={pickup}
                                             onChange={(e) => setPickup(e.target.value)}
                                         />
@@ -500,13 +500,13 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                         </p>
                                     )}
 
-                                    <div className="pt-10">
+                                    <div className="pt-2 md:pt-6">
                                         <motion.button
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
                                             type="submit"
                                             disabled={isSubmitting}
-                                            className="w-full py-6 rounded-2xl font-black text-[12px] uppercase tracking-[0.4em] bg-white text-black hover:bg-primary hover:text-white transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 shadow-2xl shadow-black/40"
+                                            className="flex w-full items-center justify-center gap-3 rounded-2xl bg-foreground py-5 text-[12px] font-black uppercase tracking-[0.28em] text-background shadow-xl transition-all duration-300 hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
                                         >
                                             {isSubmitting ? (
                                                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -517,7 +517,7 @@ export default function ShuttleBookingModal({ isOpen, onClose, shuttle }: Shuttl
                                                 </>
                                             )}
                                         </motion.button>
-                                        <p className="text-center text-[9px] text-muted-foreground/20 mt-8 uppercase tracking-[0.4em] font-black">
+                                        <p className="mt-5 text-center text-[9px] font-black uppercase tracking-[0.28em] text-muted-foreground">
                                             {t('footerInfo')}
                                         </p>
                                     </div>
