@@ -175,10 +175,98 @@ function getStatusLabel(status: RequestStatus): string {
     return 'Completada';
 }
 
+function getStatusTheme(status: RequestStatus) {
+    if (status === 'pending') {
+        return {
+            rail: 'bg-amber-400',
+            focus: 'border-amber-300/45 bg-amber-100/70 text-amber-900 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-100',
+            dot: 'bg-amber-400',
+            label: 'Revisar y asignar siguiente paso',
+            action: 'border-amber-400/35 bg-amber-500/15 text-amber-800 hover:border-amber-400/55 hover:bg-amber-500/20 dark:text-amber-100',
+        };
+    }
+
+    if (status === 'processing') {
+        return {
+            rail: 'bg-sky-400',
+            focus: 'border-sky-300/45 bg-sky-100/70 text-sky-900 dark:border-sky-400/20 dark:bg-sky-500/10 dark:text-sky-100',
+            dot: 'bg-sky-400',
+            label: 'Seguimiento activo',
+            action: 'border-sky-400/35 bg-sky-500/15 text-sky-800 hover:border-sky-400/55 hover:bg-sky-500/20 dark:text-sky-100',
+        };
+    }
+
+    if (status === 'confirmed') {
+        return {
+            rail: 'bg-emerald-400',
+            focus: 'border-emerald-300/45 bg-emerald-100/70 text-emerald-900 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-100',
+            dot: 'bg-emerald-400',
+            label: 'Servicio listo para ejecutar',
+            action: 'border-emerald-400/35 bg-emerald-500/15 text-emerald-800 hover:border-emerald-400/55 hover:bg-emerald-500/20 dark:text-emerald-100',
+        };
+    }
+
+    if (status === 'cancelled') {
+        return {
+            rail: 'bg-rose-400',
+            focus: 'border-rose-300/45 bg-rose-100/70 text-rose-900 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-100',
+            dot: 'bg-rose-400',
+            label: 'Caso cancelado',
+            action: 'border-rose-400/35 bg-rose-500/15 text-rose-800 hover:border-rose-400/55 hover:bg-rose-500/20 dark:text-rose-100',
+        };
+    }
+
+    return {
+        rail: 'bg-slate-400',
+        focus: 'border-slate-300/45 bg-slate-100/80 text-slate-800 dark:border-slate-400/20 dark:bg-slate-500/10 dark:text-slate-100',
+        dot: 'bg-slate-400',
+        label: 'Servicio cerrado',
+        action: 'border-slate-400/35 bg-slate-500/15 text-slate-800 hover:border-slate-400/55 hover:bg-slate-500/20 dark:text-slate-100',
+    };
+}
+
+function getActionButtonClasses(currentStatus: RequestStatus, nextStatus: RequestStatus): string {
+    if (nextStatus === 'cancelled') {
+        return 'border-rose-400/30 bg-rose-500/10 text-rose-800 hover:border-rose-400/45 hover:bg-rose-500/15 dark:text-rose-100';
+    }
+
+    return getStatusTheme(currentStatus).action;
+}
+
 function getKindLabel(kind: InternalRequestItem['kind']): string {
     if (kind === 'tour') return 'Tour';
     if (kind === 'guide') return 'Guía';
     return 'Shuttle';
+}
+
+function getKindTheme(kind: InternalRequestItem['kind']) {
+    if (kind === 'tour') {
+        return {
+            accent: 'bg-gradient-to-r from-violet-500 via-fuchsia-400 to-pink-400',
+            card: 'border-violet-300/50 bg-violet-50/65 hover:border-violet-400/60 hover:shadow-violet-500/10 dark:border-violet-400/25 dark:bg-violet-950/[0.16] dark:hover:border-violet-300/45',
+            badge: 'border-violet-400/35 bg-violet-500/12 text-violet-800 dark:text-violet-100',
+            panel: 'border-violet-300/30 bg-violet-50/70 dark:border-violet-400/15 dark:bg-violet-950/[0.18]',
+            chip: 'border-violet-300/45 bg-violet-100/70 text-violet-800 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-100',
+        };
+    }
+
+    if (kind === 'guide') {
+        return {
+            accent: 'bg-gradient-to-r from-emerald-500 via-teal-400 to-lime-300',
+            card: 'border-emerald-300/50 bg-emerald-50/65 hover:border-emerald-400/60 hover:shadow-emerald-500/10 dark:border-emerald-400/25 dark:bg-emerald-950/[0.16] dark:hover:border-emerald-300/45',
+            badge: 'border-emerald-400/35 bg-emerald-500/12 text-emerald-800 dark:text-emerald-100',
+            panel: 'border-emerald-300/30 bg-emerald-50/70 dark:border-emerald-400/15 dark:bg-emerald-950/[0.18]',
+            chip: 'border-emerald-300/45 bg-emerald-100/70 text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-100',
+        };
+    }
+
+    return {
+        accent: 'bg-gradient-to-r from-cyan-500 via-sky-400 to-blue-400',
+        card: 'border-cyan-300/50 bg-cyan-50/65 hover:border-cyan-400/60 hover:shadow-cyan-500/10 dark:border-cyan-400/25 dark:bg-cyan-950/[0.16] dark:hover:border-cyan-300/45',
+        badge: 'border-cyan-400/35 bg-cyan-500/12 text-cyan-800 dark:text-cyan-100',
+        panel: 'border-cyan-300/30 bg-cyan-50/70 dark:border-cyan-400/15 dark:bg-cyan-950/[0.18]',
+        chip: 'border-cyan-300/45 bg-cyan-100/70 text-cyan-800 dark:border-cyan-400/20 dark:bg-cyan-500/10 dark:text-cyan-100',
+    };
 }
 
 function getEmailStatusLabel(status: string | null): string {
@@ -335,6 +423,30 @@ function shouldShowTiming(item: InternalRequestItem): boolean {
     return Boolean(item.requestedTime);
 }
 
+function getCriticalAlerts(item: InternalRequestItem, status: RequestStatus): string[] {
+    const alerts: string[] = [];
+    const requestDate = parseRequestDate(item);
+    const today = toStartOfDay(new Date());
+
+    if (requestDate && requestDate < today && status === 'confirmed') {
+        alerts.push('Servicio confirmado con fecha vencida');
+    }
+
+    if (item.emailStatus === 'failed') {
+        alerts.push('Correo al cliente falló');
+    }
+
+    if (item.paymentStatus === 'failed') {
+        alerts.push('Pago con problema');
+    }
+
+    if (item.notificationJobs.some((job) => job.status === 'failed')) {
+        alerts.push('Hay correos programados fallidos');
+    }
+
+    return alerts;
+}
+
 function getServiceWindowBadge(item: InternalRequestItem, status: RequestStatus) {
     const requestDate = parseRequestDate(item);
     if (!requestDate || status === 'cancelled' || status === 'completed') return null;
@@ -346,7 +458,7 @@ function getServiceWindowBadge(item: InternalRequestItem, status: RequestStatus)
     if (requestDate < today && status === 'confirmed') {
         return {
             label: 'Vencida',
-            className: 'border-rose-400/30 bg-rose-500/15 text-rose-300',
+            className: 'border-rose-400/30 bg-rose-500/15 text-rose-700 dark:text-rose-300',
         };
     }
 
@@ -483,12 +595,12 @@ function getNoteQuality(status: RequestStatus, note: string | null): NoteQuality
 function renderQualityBadge(status: RequestStatus, note: string | null) {
     const quality = getNoteQuality(status, note);
     if (quality === 'strong') {
-        return <span className="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-300">Confiable</span>;
+        return <span className="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2 py-0.5 text-xs text-emerald-700 dark:text-emerald-300">Confiable</span>;
     }
     if (quality === 'weak') {
-        return <span className="inline-flex items-center rounded-full border border-amber-400/30 bg-amber-500/15 px-2 py-0.5 text-xs text-amber-300">Debil</span>;
+        return <span className="inline-flex items-center rounded-full border border-amber-400/30 bg-amber-500/15 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300">Débil</span>;
     }
-    return <span className="inline-flex items-center rounded-full border border-rose-400/30 bg-rose-500/15 px-2 py-0.5 text-xs text-rose-300">Riesgo</span>;
+    return <span className="inline-flex items-center rounded-full border border-rose-400/30 bg-rose-500/15 px-2 py-0.5 text-xs text-rose-700 dark:text-rose-300">Riesgo</span>;
 }
 
 export default function RecepcionRequestsPage() {
@@ -1187,7 +1299,7 @@ export default function RecepcionRequestsPage() {
                 <div className="flex flex-col gap-4 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
                     <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-200">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-700 dark:text-cyan-200">
                                 <span className="h-2 w-2 rounded-full bg-cyan-300 animate-pulse" />
                                 <span>{lastSyncAt ? `Actualizado ${lastSyncAt}` : 'Sincronización pendiente'}</span>
                             </span>
@@ -1279,20 +1391,20 @@ export default function RecepcionRequestsPage() {
                 <div className="border-b border-border px-4 py-3 sm:px-5 dark:border-white/10">
                     <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                         <div>
-                            <p className="text-[11px] uppercase tracking-[0.16em] text-cyan-200/75">Operación</p>
+                            <p className="text-[11px] uppercase tracking-[0.16em] text-cyan-700/75 dark:text-cyan-200/75">Operación</p>
                             <h2 className="mt-0.5 text-base font-semibold text-foreground">Reservas y filtros</h2>
                         </div>
                         <div className="flex flex-wrap gap-2 text-xs">
                             <span className="rounded-full border border-cyan-400/15 bg-cyan-500/10 px-3 py-1.5 text-cyan-700 dark:text-cyan-100">
                                 {summary.total} visibles
                             </span>
-                            <span className="rounded-full border border-border bg-background/70 px-3 py-1.5 text-muted-foreground">
+                            <span className="rounded-full border border-violet-300/45 bg-violet-100/70 px-3 py-1.5 text-violet-800 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-100">
                                 Tours {summary.tours}
                             </span>
-                            <span className="rounded-full border border-border bg-background/70 px-3 py-1.5 text-muted-foreground">
+                            <span className="rounded-full border border-emerald-300/45 bg-emerald-100/70 px-3 py-1.5 text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-100">
                                 Guías {summary.guides}
                             </span>
-                            <span className="rounded-full border border-border bg-background/70 px-3 py-1.5 text-muted-foreground">
+                            <span className="rounded-full border border-cyan-300/45 bg-cyan-100/70 px-3 py-1.5 text-cyan-800 dark:border-cyan-400/20 dark:bg-cyan-500/10 dark:text-cyan-100">
                                 Shuttles {summary.shuttles}
                             </span>
                         </div>
@@ -1400,19 +1512,19 @@ export default function RecepcionRequestsPage() {
                         </div>
                         <p className="mt-1 text-[11px] text-rose-700/80 dark:text-rose-100/70">Confirmadas vencidas</p>
                     </div>
-                    <div className="rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 py-2.5">
+                    <div className="rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2.5">
                         <div className="flex items-center justify-between gap-3">
-                            <p className="text-[11px] uppercase tracking-wide text-fuchsia-700 dark:text-fuchsia-200/85">Correos</p>
+                            <p className="text-[11px] uppercase tracking-wide text-rose-700 dark:text-rose-200/85">Correos</p>
                             <p className="text-xl font-semibold text-foreground">{summary.emailFailed}</p>
                         </div>
-                        <p className="mt-1 text-[11px] text-fuchsia-700/80 dark:text-fuchsia-100/70">Fallidos</p>
+                        <p className="mt-1 text-[11px] text-rose-700/80 dark:text-rose-100/70">Fallidos</p>
                     </div>
                 </div>
                 <div className="px-4 pb-4 sm:px-5">
                     <div className="rounded-2xl border border-fuchsia-400/12 bg-fuchsia-500/[0.035] p-3.5">
                         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                             <div>
-                                <p className="text-[11px] uppercase tracking-[0.16em] text-fuchsia-200/75">Notificaciones</p>
+                                <p className="text-[11px] uppercase tracking-[0.16em] text-fuchsia-700/75 dark:text-fuchsia-200/75">Notificaciones</p>
                                 <h3 className="mt-0.5 text-sm font-semibold text-foreground">Correos de seguimiento</h3>
                                 <p className="mt-1 text-xs text-muted-foreground">
                                     Último intento: {summary.lastNotificationProcessedAt ? formatTimestamp(summary.lastNotificationProcessedAt) : 'Sin envíos registrados'}
@@ -1470,18 +1582,24 @@ export default function RecepcionRequestsPage() {
                     const manualEmailActions = getEmailActions(item, normalizedStatus);
                     const providerNotification = getLatestProviderNotification(item);
                     const providerEmailKey = `${item.kind}-${item.id}-provider_confirmation`;
+                    const kindTheme = getKindTheme(item.kind);
+                    const statusTheme = getStatusTheme(normalizedStatus);
+                    const criticalAlerts = getCriticalAlerts(item, normalizedStatus);
+                    const hasCriticalAlerts = criticalAlerts.length > 0;
                     const canSendProviderConfirmation =
                         Boolean(item.provider?.email) &&
                         item.provider?.isActive !== false &&
                         (normalizedStatus === 'confirmed' || normalizedStatus === 'completed');
 
                     return (
-                        <article key={itemKey} className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:border-cyan-400/30 hover:shadow-cyan-500/5 dark:border-white/10 dark:bg-card/35">
+                        <article key={itemKey} className={`relative overflow-hidden rounded-2xl border bg-card shadow-sm transition ${hasCriticalAlerts ? 'border-rose-400/45 shadow-rose-500/10 dark:border-rose-400/35' : kindTheme.card}`}>
+                            <div className={`h-1.5 w-full ${kindTheme.accent}`} aria-hidden="true" />
+                            <div className={`absolute bottom-0 left-0 top-1.5 w-1 ${hasCriticalAlerts ? 'bg-rose-500' : statusTheme.rail}`} aria-hidden="true" />
                             <div className="flex flex-col gap-4">
-                                <div className="grid gap-5 p-4 sm:p-5 xl:grid-cols-[minmax(0,1fr)_390px] xl:items-start">
+                                <div className="grid gap-5 p-4 pl-5 sm:p-5 sm:pl-6 xl:grid-cols-[minmax(0,1fr)_390px] xl:items-start">
                                     <div className="min-w-0">
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <span className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-[11px] font-medium text-cyan-700 dark:text-cyan-100">
+                                            <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${kindTheme.badge}`}>
                                                 {getKindLabel(item.kind)}
                                             </span>
                                             <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${getStatusBadgeClasses(normalizedStatus)}`}>
@@ -1522,12 +1640,28 @@ export default function RecepcionRequestsPage() {
                                                     </span>
                                                 ) : null}
                                                 {priceLabel ? (
-                                                    <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-emerald-200">
+                                                    <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-emerald-700 dark:text-emerald-200">
                                                         {priceLabel}
                                                     </span>
                                                 ) : null}
                                             </div>
                                         </div>
+
+                                        {hasCriticalAlerts ? (
+                                            <div className="mt-3 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-3 py-2.5 text-rose-800 dark:text-rose-100">
+                                                <p className="text-[11px] font-semibold uppercase tracking-[0.14em]">Atención requerida</p>
+                                                <div className="mt-1 flex flex-wrap gap-1.5">
+                                                    {criticalAlerts.map((alert) => (
+                                                        <span
+                                                            key={alert}
+                                                            className="rounded-full border border-rose-400/25 bg-background/60 px-2 py-0.5 text-[11px] dark:bg-rose-950/25"
+                                                        >
+                                                            {alert}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : null}
 
                                         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                                             <div className="rounded-xl border border-border bg-background px-3 py-2.5 dark:border-white/10 dark:bg-background/40">
@@ -1552,7 +1686,14 @@ export default function RecepcionRequestsPage() {
                                         </div>
                                     </div>
 
-                                    <aside className="space-y-3 rounded-2xl border border-border bg-background/70 p-3.5 dark:border-white/10 dark:bg-background/35">
+                                    <aside className={`space-y-3 rounded-2xl border p-3.5 ${kindTheme.panel}`}>
+                                        <div className={`rounded-2xl border px-3 py-2.5 ${statusTheme.focus}`}>
+                                            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em]">
+                                                <span className={`h-2 w-2 rounded-full ${statusTheme.dot}`} aria-hidden="true" />
+                                                Foco operativo
+                                            </p>
+                                            <p className="mt-1 text-sm font-medium">{statusTheme.label}</p>
+                                        </div>
                                         <div className="flex flex-wrap gap-2">
                                             {primaryActions.map((action) => {
                                                 const actionKey = `${item.kind}-${item.id}-${action.to}`;
@@ -1562,7 +1703,7 @@ export default function RecepcionRequestsPage() {
                                                         type="button"
                                                         onClick={() => updateStatus(item, action.to)}
                                                         disabled={Boolean(actionLoadingId) || authLoading}
-                                                        className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-foreground transition hover:border-cyan-400/40 hover:text-cyan-700 disabled:opacity-50 dark:border-white/10 dark:hover:text-cyan-100"
+                                                        className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition disabled:opacity-50 ${getActionButtonClasses(normalizedStatus, action.to)}`}
                                                     >
                                                         {actionLoadingId === actionKey ? 'Procesando...' : action.label}
                                                     </button>
@@ -1703,7 +1844,9 @@ export default function RecepcionRequestsPage() {
                                             </div>
                                             <div className="rounded-xl border border-border bg-background/70 px-3 py-2 dark:border-white/10 dark:bg-white/5">
                                                 <p className="text-muted-foreground">Tipo</p>
-                                                <p className="mt-1 font-medium text-foreground">{getKindLabel(item.kind)}</p>
+                                                <p className={`mt-1 inline-flex rounded-full border px-2 py-0.5 font-medium ${kindTheme.chip}`}>
+                                                    {getKindLabel(item.kind)}
+                                                </p>
                                             </div>
                                         </div>
 
@@ -1758,7 +1901,7 @@ export default function RecepcionRequestsPage() {
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => toggleNote(item)}
-                                                                    className="text-xs text-cyan-300 transition hover:text-cyan-200"
+                                                                    className="text-xs text-cyan-700 transition hover:text-cyan-600 dark:text-cyan-300 dark:hover:text-cyan-200"
                                                                 >
                                                                     {expandedNotes[itemKey] ? 'Ver menos' : 'Ver mas'}
                                                                 </button>
@@ -1830,7 +1973,7 @@ export default function RecepcionRequestsPage() {
                                                             Intentos {job.attempts}/{job.max_attempts} · próximo {formatTimestamp(job.scheduled_at)}
                                                         </p>
                                                         {job.last_error ? (
-                                                            <p className="mt-1 text-[11px] text-rose-300">{job.last_error}</p>
+                                                            <p className="mt-1 text-[11px] text-rose-700 dark:text-rose-300">{job.last_error}</p>
                                                         ) : null}
                                                     </div>
                                                 )) : (
