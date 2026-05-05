@@ -248,6 +248,11 @@ function getProviderStatusLabel(item: InternalRequestItem): string {
     return latest.delivery_status === 'sent' ? 'Enviado' : 'Falló';
 }
 
+function isTestEmail(email: string | null | undefined): boolean {
+    const normalized = email?.trim().toLowerCase() ?? '';
+    return normalized.endsWith('@example.com') || normalized.endsWith('@example.org') || normalized.endsWith('@example.net');
+}
+
 function getProviderStatusClasses(item: InternalRequestItem): string {
     const latest = getLatestProviderNotification(item);
     if (!item.provider?.email || !item.provider.isActive) {
@@ -914,6 +919,13 @@ export default function RecepcionRequestsPage() {
     };
 
     const sendCustomerEmail = async (item: InternalRequestItem, template: ManualEmailTemplate) => {
+        if (isTestEmail(item.customerEmail)) {
+            const message = 'Esta reserva usa un correo de prueba. Cambia el cliente a un correo real antes de enviar.';
+            setError(message);
+            pushToast('error', 'Correo de prueba', message);
+            return;
+        }
+
         const loadingKey = `${item.kind}-${item.id}-${template}`;
         setEmailActionLoadingId(loadingKey);
         setError('');
@@ -1490,12 +1502,14 @@ export default function RecepcionRequestsPage() {
                                             <div className="mt-3 flex flex-wrap gap-2">
                                                 {manualEmailActions.map((action) => {
                                                     const emailKey = `${item.kind}-${item.id}-${action.template}`;
+                                                    const hasTestEmail = isTestEmail(item.customerEmail);
                                                     return (
                                                         <button
                                                             key={emailKey}
                                                             type="button"
                                                             onClick={() => sendCustomerEmail(item, action.template)}
-                                                            disabled={Boolean(emailActionLoadingId) || authLoading}
+                                                            disabled={Boolean(emailActionLoadingId) || authLoading || hasTestEmail}
+                                                            title={hasTestEmail ? 'Esta reserva usa un correo de prueba. Usa un correo real para enviar.' : undefined}
                                                             className="min-w-[118px] rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-3 py-2 text-left text-sm leading-snug transition hover:border-emerald-400/40 hover:text-emerald-100 disabled:opacity-50"
                                                         >
                                                             {emailActionLoadingId === emailKey ? 'Enviando...' : action.label}
@@ -1504,6 +1518,11 @@ export default function RecepcionRequestsPage() {
                                                 })}
                                                 {manualEmailActions.length === 0 ? (
                                                     <span className="text-sm text-muted-foreground">No hay correos sugeridos en este paso.</span>
+                                                ) : null}
+                                                {isTestEmail(item.customerEmail) ? (
+                                                    <span className="text-sm text-amber-200">
+                                                        Correo de prueba: usa un correo real para enviar.
+                                                    </span>
                                                 ) : null}
                                             </div>
                                         </div>

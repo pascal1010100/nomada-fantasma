@@ -51,6 +51,11 @@ function normalizeEmail(value: string | null | undefined): string | null {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate) ? candidate : null;
 }
 
+function isTestEmail(email: string): boolean {
+  const normalized = email.trim().toLowerCase();
+  return normalized.endsWith('@example.com') || normalized.endsWith('@example.org') || normalized.endsWith('@example.net');
+}
+
 function getFallbackAgencyEmail(): string | null {
   return normalizeEmail(process.env.DEFAULT_AGENCY_EMAIL) ?? normalizeEmail(process.env.ADMIN_EMAIL);
 }
@@ -510,6 +515,9 @@ export async function POST(request: Request) {
       if (!customerEmail) {
         return NextResponse.json({ error: 'Falta un correo válido del cliente para enviar este mensaje.' }, { status: 400 });
       }
+      if (isTestEmail(customerEmail)) {
+        return NextResponse.json({ error: 'Esta reserva usa un correo de prueba. Cambia el cliente a un correo real antes de enviar.' }, { status: 400 });
+      }
 
       const { subject, react } = buildCustomerActionEmail({
         template,
@@ -685,6 +693,9 @@ export async function POST(request: Request) {
     const customerEmail = normalizeEmail(shuttle.customer_email);
     if (!customerEmail) {
       return NextResponse.json({ error: 'Falta un correo válido del cliente para enviar este mensaje.' }, { status: 400 });
+    }
+    if (isTestEmail(customerEmail)) {
+      return NextResponse.json({ error: 'Esta reserva usa un correo de prueba. Cambia el cliente a un correo real antes de enviar.' }, { status: 400 });
     }
 
     const emailResult = await sendManualCustomerEmail({

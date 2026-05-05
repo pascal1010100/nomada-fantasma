@@ -141,7 +141,7 @@ describe('POST /api/internal/requests/send-email', () => {
     const shuttle = {
       id: 'shuttle-1',
       customer_name: 'Shuttle Customer',
-      customer_email: 'customer@example.com',
+      customer_email: 'customer@nomadafantasma.com',
       route_origin: 'Panajachel',
       route_destination: 'Antigua Guatemala',
       travel_date: '2099-05-05',
@@ -186,7 +186,7 @@ describe('POST /api/internal/requests/send-email', () => {
       pickupLocation: 'Hotel Unit',
     }));
     expect(mocks.sendManualCustomerEmail).toHaveBeenCalledWith(expect.objectContaining({
-      to: 'customer@example.com',
+      to: 'customer@nomadafantasma.com',
       subject: 'Instrucciones de pago',
       label: 'manual_payment_instructions_shuttle',
     }));
