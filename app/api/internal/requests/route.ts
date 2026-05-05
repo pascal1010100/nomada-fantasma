@@ -115,7 +115,7 @@ function mapReservation(
     const fallbackDate = createdAt ? createdAt.slice(0, 10) : '';
     const serviceName = isModern
         ? reservationKind === 'guide'
-            ? row.guide_service_name || row.tour_name || 'Servicio de guia sin nombre'
+            ? row.guide_service_name || row.tour_name || 'Servicio de guía sin nombre'
             : relatedTour?.title || row.tour_name || 'Tour sin nombre'
         : row.tour_name || relatedTour?.title || 'Tour sin nombre';
     const details = isModern

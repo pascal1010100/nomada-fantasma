@@ -45,18 +45,18 @@ export default function ShuttleCancellationNotice({
     return (
         <Html>
             <Head />
-            <Preview>Shuttle cancelado: {origin} → {destination}</Preview>
+            <Preview>Reserva de shuttle cancelada: {origin} → {destination}</Preview>
             <Body style={{ backgroundColor: '#f8fafc', fontFamily: 'Arial, sans-serif', margin: 0, padding: '24px 0' }}>
                 <Container style={{ maxWidth: '620px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '20px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
                     <Section style={{ background: 'linear-gradient(135deg, #164e63 0%, #0f766e 100%)', padding: '32px 36px' }}>
                         <Text style={{ color: '#ccfbf1', fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-                            Aviso operativo
+                            Reserva cancelada
                         </Text>
                         <Heading style={{ color: '#ffffff', fontSize: '28px', lineHeight: '1.2', margin: 0 }}>
                             Shuttle cancelado
                         </Heading>
                         <Text style={{ color: '#cffafe', fontSize: '15px', lineHeight: '1.7', margin: '12px 0 0' }}>
-                            Esta solicitud ya no requiere confirmación ni asignación operativa.
+                            Esta reserva fue cancelada y ya no requiere confirmación del proveedor.
                         </Text>
                     </Section>
 

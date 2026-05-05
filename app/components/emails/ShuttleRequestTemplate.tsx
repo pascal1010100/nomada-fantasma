@@ -107,7 +107,7 @@ export const ShuttleRequestTemplate = ({
                 <Container style={styles.container}>
                     <Section>
                         <Heading style={styles.title}>Nomada Fantasma</Heading>
-                        <Text style={styles.subtitle}>Nueva solicitud de transporte</Text>
+                        <Text style={styles.subtitle}>Nueva reserva de transporte</Text>
                     </Section>
 
                     <Section style={styles.card}>
@@ -139,7 +139,7 @@ export const ShuttleRequestTemplate = ({
                     <Hr style={{ borderColor: '#e5e7eb', margin: '16px 0' }} />
 
                     <Text style={styles.footer}>
-                        Procesa esta solicitud con la agencia correspondiente lo antes posible.
+                        Revisa esta reserva con la agencia correspondiente lo antes posible.
                     </Text>
                 </Container>
             </Body>

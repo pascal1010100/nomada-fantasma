@@ -49,18 +49,18 @@ export default function ShuttleProviderConfirmationEmail({
     return (
         <Html>
             <Head />
-            <Preview>Shuttle confirmado para operar: {routeLabel}</Preview>
+            <Preview>Reserva de shuttle confirmada: {routeLabel}</Preview>
             <Body style={{ backgroundColor: '#f8fafc', fontFamily: 'Arial, sans-serif', margin: 0, padding: '24px 0' }}>
                 <Container style={{ maxWidth: '620px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '22px', overflow: 'hidden', border: '1px solid #dbe7f0' }}>
                     <Section style={{ background: 'linear-gradient(135deg, #0f766e 0%, #0f172a 100%)', padding: '32px 36px' }}>
                         <Text style={{ color: '#a7f3d0', fontSize: '12px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-                            Confirmacion operativa
+                            Reserva confirmada
                         </Text>
                         <Heading style={{ color: '#ffffff', fontSize: '30px', lineHeight: '1.15', margin: 0 }}>
-                            Shuttle confirmado para operar
+                            Shuttle confirmado
                         </Heading>
                         <Text style={{ color: '#ccfbf1', fontSize: '15px', lineHeight: '1.7', margin: '14px 0 0' }}>
-                            Esta reserva ya fue confirmada por Nómada Fantasma. Favor coordinar el traslado con base en la informacion siguiente.
+                            Esta reserva ya fue confirmada por Nómada Fantasma. Por favor coordinen el traslado con la información siguiente.
                         </Text>
                     </Section>
 
@@ -94,7 +94,7 @@ export default function ShuttleProviderConfirmationEmail({
                         </Section>
 
                         <Text style={{ color: '#64748b', fontSize: '13px', lineHeight: '1.7', margin: 0 }}>
-                            Este correo es operativo. Si necesitan coordinar algun ajuste de logistica, respondan directamente al equipo de Nómada Fantasma.
+                            Si necesitan coordinar algún ajuste, respondan directamente al equipo de Nómada Fantasma.
                         </Text>
                     </Section>
                 </Container>

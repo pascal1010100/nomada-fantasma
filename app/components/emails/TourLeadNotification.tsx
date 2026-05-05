@@ -71,10 +71,10 @@ export const TourLeadNotification = ({
 }: TourLeadNotificationProps) => {
     const normalizedOperationsEmail = (operationsEmail || 'hola@nomadafantasma.com').trim();
     const normalizedWhatsapp = customerWhatsapp?.replace(/[^0-9]/g, '') || '';
-    const kindLabel = serviceKind === 'guide' ? 'guia' : 'tour';
-    const kindLabelCapitalized = serviceKind === 'guide' ? 'guia' : 'tour';
-    const headingTitle = serviceKind === 'guide' ? 'Nueva solicitud de guia' : 'Nueva solicitud de tour';
-    const tableKindLabel = serviceKind === 'guide' ? 'GUIA' : 'TOUR';
+    const kindLabel = serviceKind === 'guide' ? 'guía' : 'tour';
+    const kindLabelCapitalized = serviceKind === 'guide' ? 'guía' : 'tour';
+    const headingTitle = serviceKind === 'guide' ? 'Nueva reserva de guía' : 'Nueva reserva de tour';
+    const tableKindLabel = serviceKind === 'guide' ? 'GUÍA' : 'TOUR';
 
     const confirmSubject = `Disponible ${kindLabel} ${reservationId} · ${tourName}`;
     const denySubject = `No disponible ${kindLabel} ${reservationId} · ${tourName}`;
@@ -89,7 +89,7 @@ export const TourLeadNotification = ({
         requestedTime ? `Hora: ${requestedTime}` : null,
         guests ? `Viajeros: ${guests}` : null,
         '',
-        'Notas operativas:',
+        'Notas para el equipo:',
         '- ',
         '',
         'Saludos,'
@@ -130,14 +130,14 @@ export const TourLeadNotification = ({
                     fontStyle="normal"
                 />
             </Head>
-            <Preview>Nuevo Lead: {customerName} - {tourName}</Preview>
+            <Preview>Nueva reserva: {customerName} - {tourName}</Preview>
             <Body style={{ backgroundColor: '#f3f7fb', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: '24px 0' }}>
                 <Container style={{ maxWidth: '620px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '24px', overflow: 'hidden', border: '1px solid #dbe7f0', boxShadow: '0 18px 50px rgba(15, 23, 42, 0.08)' }}>
 
                     {/* Header Operativo (Elite Red Style) */}
                     <Section style={{ background: 'linear-gradient(135deg, #7f1d1d 0%, #b91c1c 55%, #dc2626 100%)', padding: '34px 36px 30px' }}>
                         <Text style={{ color: '#fecaca', fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: '700', margin: '0 0 14px' }}>
-                            {roleLabel || 'Lead de Operaciones'}
+                            {roleLabel || 'Equipo de reservas'}
                         </Text>
                         <Heading style={{ color: '#ffffff', fontSize: '30px', lineHeight: '1.15', fontWeight: 700, margin: 0 }}>
                             {headingTitle}
@@ -193,7 +193,7 @@ export const TourLeadNotification = ({
 
                         <Section style={{ backgroundColor: '#f8fbfd', border: '1px solid #e2edf5', borderRadius: '18px', padding: '22px', margin: '0 0 24px' }}>
                             <Heading style={{ color: '#0f172a', fontSize: '18px', fontWeight: 700, margin: '0 0 16px' }}>
-                                Detalles de la solicitud
+                            Detalles de la reserva
                             </Heading>
                             <table width="100%" cellPadding="0" cellSpacing="0" role="presentation">
                                 <tbody>
@@ -236,7 +236,7 @@ export const TourLeadNotification = ({
                                         </tr>
                                     ) : null}
                                     <tr>
-                                        <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingTop: '12px', borderTop: '1px solid #dbe7f0' }}>ID solicitud</td>
+                                        <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingTop: '12px', borderTop: '1px solid #dbe7f0' }}>ID reserva</td>
                                         <td style={{ color: '#0f172a', fontSize: '14px', fontWeight: 700, fontFamily: 'Menlo, Monaco, Consolas, monospace', textAlign: 'right', paddingTop: '12px', borderTop: '1px solid #dbe7f0' }}>{reservationId}</td>
                                     </tr>
                                 </tbody>
@@ -286,7 +286,7 @@ export const TourLeadNotification = ({
                                     href={adminPanelUrl}
                                     style={{ backgroundColor: '#f1f5f9', color: '#64748b', padding: '12px 24px', borderRadius: '999px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', display: 'inline-block', width: '100%', marginTop: '10px', border: '1px solid #e2e8f0' }}
                                 >
-                                    Abrir panel operativo
+                                    Abrir panel de reservas
                                 </Link>
                             )}
                         </Section>
@@ -298,7 +298,7 @@ export const TourLeadNotification = ({
                         )}
 
                         <Text style={{ color: '#94a3b8', fontSize: '12px', textAlign: 'center', margin: 0 }}>
-                            Este es un email automático del sistema de reservas de Nomada Fantasma.
+                            Este correo fue enviado por el sistema de reservas de Nomada Fantasma.
                         </Text>
                     </Section>
                 </Container>

@@ -89,7 +89,7 @@ describe('processDueNotificationJobs', () => {
     mocks.sendShuttleInitialNotificationEmail.mockResolvedValue({
       label: 'shuttle_agency',
       to: 'agency@example.com',
-      subject: 'Shuttle asignado',
+      subject: '¿Puedes operar este shuttle?',
       success: true,
       id: 'mail_2',
     });
@@ -147,7 +147,7 @@ describe('processDueNotificationJobs', () => {
     }));
     expect(resultUpdate).toHaveBeenCalledWith(expect.objectContaining({
       status: 'sent',
-      subject: 'Shuttle asignado',
+      subject: '¿Puedes operar este shuttle?',
       provider_message_id: 'mail_2',
       last_error: null,
     }));

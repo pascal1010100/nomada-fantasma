@@ -118,7 +118,7 @@ export default function CustomerActionEmail({
                     <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingBottom: '12px' }}>
                       {serviceLabel}
                     </td>
-                    <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 700, textAlign: 'right', paddingBottom: '12px' }}>
+                    <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 700, textAlign: 'right', paddingBottom: '12px', wordBreak: 'break-word' }}>
                       {serviceValue}
                     </td>
                   </tr>
@@ -127,7 +127,7 @@ export default function CustomerActionEmail({
                       <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingBottom: '12px' }}>
                         {optionLabel}
                       </td>
-                      <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 700, textAlign: 'right', paddingBottom: '12px' }}>
+                      <td style={{ color: '#0f172a', fontSize: '15px', fontWeight: 700, textAlign: 'right', paddingBottom: '12px', wordBreak: 'break-word' }}>
                         {optionValue}
                       </td>
                     </tr>
@@ -164,7 +164,7 @@ export default function CustomerActionEmail({
                     <td style={{ color: '#94a3b8', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
                       {requestIdLabel}
                     </td>
-                    <td style={{ color: '#64748b', fontSize: '13px', fontWeight: 700, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', textAlign: 'right', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+                    <td style={{ color: '#64748b', fontSize: '13px', fontWeight: 700, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', textAlign: 'right', paddingTop: '16px', borderTop: '1px solid #f1f5f9', wordBreak: 'break-word' }}>
                       {requestId}
                     </td>
                   </tr>
@@ -222,7 +222,10 @@ export default function CustomerActionEmail({
                           fontWeight: 700, 
                           padding: '12px 24px', 
                           marginTop: '16px',
-                          display: 'inline-block' 
+                          display: 'inline-block',
+                          maxWidth: '100%',
+                          boxSizing: 'border-box',
+                          whiteSpace: 'normal',
                         }}
                       >
                         {option.ctaLabel}

@@ -83,7 +83,7 @@ describe('Elite Voucher Logic (buildCustomerActionEmail)', () => {
                 locale: 'en-US',
             });
 
-            expect(result.subject).toBe('Payment instructions: Test Adventure');
+            expect(result.subject).toBe('How to pay for your booking: Test Adventure');
         });
 
         it('should handle not available subject correctly', () => {
@@ -94,7 +94,7 @@ describe('Elite Voucher Logic (buildCustomerActionEmail)', () => {
                 locale: 'es-GT',
             });
 
-            expect(result.subject).toBe('Actualización de disponibilidad: Test Adventure');
+            expect(result.subject).toBe('Necesitamos ajustar tu reserva: Test Adventure');
         });
     });
 });

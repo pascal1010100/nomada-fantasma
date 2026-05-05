@@ -16,7 +16,7 @@ import logger from './logger';
 // Initialize Resend only if API key is present
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
-const RESEND_FROM = process.env.RESEND_FROM || process.env.FROM_EMAIL || 'onboarding@resend.dev';
+const RESEND_FROM = (process.env.RESEND_FROM || process.env.FROM_EMAIL || 'onboarding@resend.dev').trim();
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://nomadafantasma.com';
 const EMAIL_SEND_SPACING_MS = 650;
 const EMAIL_RATE_LIMIT_RETRY_MS = 1200;
@@ -297,7 +297,7 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
     const isEnglish = data.locale.startsWith('en');
     const serviceKindLabel = isEnglish
         ? data.kind === 'tour' ? 'Tour' : data.kind === 'guide' ? 'Guide' : 'Shuttle'
-        : data.kind === 'tour' ? 'Tour' : data.kind === 'guide' ? 'Guia' : 'Shuttle';
+        : data.kind === 'tour' ? 'Tour' : data.kind === 'guide' ? 'Guía' : 'Shuttle';
     const formattedDate = formatEmailDate(data.date, data.locale);
     const travelerValue =
         typeof data.travelers === 'number'
@@ -329,16 +329,16 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
         : 'Si tienes preguntas, responde a este correo o contacta directamente a nuestro equipo.';
     const contactWhatsAppLabel = isEnglish ? 'Open WhatsApp' : 'Abrir WhatsApp';
     const footerNote = isEnglish
-        ? 'This is an operational email from the Nómada Fantasma team.'
-        : 'Este es un correo operativo enviado por el equipo de Nómada Fantasma.';
+        ? 'This email was sent by the Nómada Fantasma team.'
+        : 'Este correo fue enviado por el equipo de Nómada Fantasma.';
     const footerSignature = isEnglish
         ? 'Nómada Fantasma - Epic Travels in Guatemala'
         : 'Nómada Fantasma - Viajes Épicos en Guatemala';
 
     if (data.template === 'payment_instructions') {
         const subject = isEnglish
-            ? `Payment instructions: ${data.serviceName}`
-            : `Instrucciones de pago: ${data.serviceName}`;
+            ? `How to pay for your booking: ${data.serviceName}`
+            : `Cómo pagar tu reserva: ${data.serviceName}`;
 
         return {
             subject,
@@ -347,12 +347,12 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
                 eyebrow,
                 title: isEnglish ? 'Your spot is ready to be secured' : 'Tu espacio está listo para asegurarse',
                 subtitle: isEnglish
-                    ? 'Availability is confirmed. Complete the payment using one of the methods below to finish your booking.'
-                    : 'La disponibilidad ya está confirmada. Completa el pago con uno de los métodos indicados abajo para cerrar tu reserva.',
+                    ? 'We confirmed availability. Use one of the payment methods below to secure your booking.'
+                    : 'Confirmamos disponibilidad. Usa uno de los métodos de pago de abajo para asegurar tu reserva.',
                 greeting: isEnglish ? `Hi ${data.customerName},` : `Hola ${data.customerName},`,
                 intro: isEnglish
-                    ? 'We have already validated your reservation with operations. To complete the booking, please send the payment and share the proof with our team.'
-                    : 'Ya validamos tu reserva con operaciones. Para completar la reserva, por favor realiza el pago y comparte el comprobante con nuestro equipo.',
+                    ? 'Your date is available. To finish the booking, please make the payment and share the receipt with our team.'
+                    : 'Tu fecha está disponible. Para terminar la reserva, realiza el pago y comparte el comprobante con nuestro equipo.',
                 summaryTitle,
                 serviceLabel,
                 serviceValue: data.serviceName,
@@ -368,8 +368,8 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
                 requestId: data.requestId,
                 infoTitle: isEnglish ? 'Next step' : 'Siguiente paso',
                 infoBody: isEnglish
-                    ? 'Once the payment is confirmed, we will send your final booking confirmation with the operational details.'
-                    : 'Una vez confirmado el pago, te enviaremos la confirmación final de tu reserva con los detalles operativos.',
+                    ? 'Once we confirm the payment, we will send the final details for your experience.'
+                    : 'Cuando confirmemos el pago, te enviaremos los detalles finales de tu experiencia.',
                 paymentTitle: isEnglish ? 'Available payment methods' : 'Métodos de pago disponibles',
                 paymentOptions: data.paymentOptions,
                 contactTitle,
@@ -383,21 +383,21 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
 
     if (data.template === 'not_available') {
         const subject = isEnglish
-            ? `Availability update: ${data.serviceName}`
-            : `Actualización de disponibilidad: ${data.serviceName}`;
+            ? `We need to adjust your booking: ${data.serviceName}`
+            : `Necesitamos ajustar tu reserva: ${data.serviceName}`;
         return {
             subject,
             react: CustomerActionEmail({
                 preview: subject,
                 eyebrow,
-                title: isEnglish ? 'This booking is not available' : 'Esta reserva no está disponible',
+                title: isEnglish ? 'This option is not available' : 'Esta opción no está disponible',
                 subtitle: isEnglish
-                    ? 'We could not confirm the requested date or operational conditions for this booking.'
-                    : 'No pudimos confirmar la fecha o las condiciones operativas solicitadas para esta reserva.',
+                    ? 'We could not confirm the requested date or conditions for this booking.'
+                    : 'No pudimos confirmar la fecha o las condiciones solicitadas para esta reserva.',
                 greeting: isEnglish ? `Hi ${data.customerName},` : `Hola ${data.customerName},`,
                 intro: isEnglish
-                    ? 'Our team reviewed the request with operations and we cannot confirm this booking exactly as requested.'
-                    : 'Nuestro equipo revisó la solicitud con operaciones y no podemos confirmar esta reserva exactamente como fue solicitada.',
+                    ? 'Our team reviewed your booking and we cannot confirm it exactly as requested.'
+                    : 'Revisamos tu reserva y no podemos confirmarla exactamente como fue solicitada.',
                 summaryTitle,
                 serviceLabel,
                 serviceValue: data.serviceName,
@@ -480,7 +480,7 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
         : 'Guarda este correo como referencia de confirmación. Si existe algún ajuste final, nuestro equipo te contactará directamente.';
 
     // Elite logistics for voucher
-    const infoTitle = isEnglish ? 'Travel Logistics' : 'Logística de viaje';
+    const infoTitle = isEnglish ? 'Trip details' : 'Detalles del viaje';
     let eliteInfoBody = infoBody;
 
     if (data.kind === 'shuttle' && (data.travelTime || data.pickupLocation)) {
@@ -504,8 +504,8 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
                 : 'Ya recibimos tu pago y la reserva quedó confirmada.',
             greeting: isEnglish ? `Hi ${data.customerName},` : `Hola ${data.customerName},`,
             intro: isEnglish
-                ? 'Thank you for completing the process. Your booking is now confirmed and our team will support you with any final operational details if needed.'
-                : 'Gracias por completar el proceso. Tu reserva ya está confirmada y nuestro equipo te apoyará con cualquier detalle operativo final si hace falta.',
+                ? 'Thank you for completing the process. Your booking is confirmed and our team will contact you if anything else is needed.'
+                : 'Gracias por completar el proceso. Tu reserva ya está confirmada y nuestro equipo te contactará si hace falta algo más.',
             summaryTitle,
             serviceLabel,
             serviceValue: data.serviceName,
@@ -591,7 +591,7 @@ type TourProviderConfirmationEmailProps = {
 
 export async function sendTourCancellationAgencyEmail(data: TourCancellationAgencyEmailProps): Promise<SendEmailResult> {
     const serviceKind = data.serviceKind ?? 'tour';
-    const subjectPrefix = serviceKind === 'guide' ? 'Servicio de guia cancelado' : 'Tour cancelado';
+    const subjectPrefix = serviceKind === 'guide' ? 'Reserva de guía cancelada' : 'Reserva de tour cancelada';
     const retryLabel = serviceKind === 'guide' ? 'guide_provider_cancellation' : 'tour_agency_cancellation';
 
     if (!resend) {
@@ -619,7 +619,7 @@ export async function sendTourCancellationAgencyEmail(data: TourCancellationAgen
 
 export async function sendTourProviderConfirmationEmail(data: TourProviderConfirmationEmailProps): Promise<SendEmailResult> {
     const serviceKind = data.serviceKind ?? 'tour';
-    const subjectPrefix = serviceKind === 'guide' ? 'Servicio de guia confirmado para operar' : 'Tour confirmado para operar';
+    const subjectPrefix = serviceKind === 'guide' ? 'Reserva confirmada para guía' : 'Reserva confirmada para tour';
     const retryLabel = serviceKind === 'guide' ? 'guide_provider_booking_confirmed' : 'tour_agency_booking_confirmed';
 
     if (!resend) {
@@ -650,7 +650,7 @@ export async function sendShuttleProviderConfirmationEmail(data: ShuttleProvider
     if (!resend) {
         logger.info('📧 [SHUTTLE PROVIDER CONFIRMATION SIMULATION] --------------------');
         logger.info(`To Agency: ${data.to}`);
-        logger.info(`Subject: Shuttle confirmado para operar: ${data.origin} -> ${data.destination}`);
+        logger.info(`Subject: Reserva de shuttle confirmada: ${data.origin} -> ${data.destination}`);
         logger.info('Agency Template Data:', JSON.stringify(redactForLog(data), null, 2));
         logger.info('----------------------------------------------------------------');
         return { success: true, id: 'simulated_' + Date.now() };
@@ -661,7 +661,7 @@ export async function sendShuttleProviderConfirmationEmail(data: ShuttleProvider
             resend.emails.send({
                 from: RESEND_FROM,
                 to: [data.to],
-                subject: `Shuttle confirmado para operar: ${data.origin} -> ${data.destination}`,
+                subject: `Reserva de shuttle confirmada: ${data.origin} -> ${data.destination}`,
                 react: ShuttleProviderConfirmationEmail(data),
             })
         );
@@ -675,7 +675,7 @@ export async function sendShuttleCancellationAgencyEmail(data: ShuttleCancellati
     if (!resend) {
         logger.info('📧 [SHUTTLE CANCELLATION AGENCY EMAIL SIMULATION] -----------------');
         logger.info(`To: ${data.to}`);
-        logger.info(`Subject: Shuttle cancelado: ${data.origin} -> ${data.destination}`);
+        logger.info(`Subject: Reserva de shuttle cancelada: ${data.origin} -> ${data.destination}`);
         logger.info('----------------------------------------------------------------');
         return { success: true, id: 'simulated_' + Date.now() };
     }
@@ -685,7 +685,7 @@ export async function sendShuttleCancellationAgencyEmail(data: ShuttleCancellati
             resend.emails.send({
                 from: RESEND_FROM,
                 to: [data.to],
-                subject: `Shuttle cancelado: ${data.origin} -> ${data.destination}`,
+                subject: `Reserva de shuttle cancelada: ${data.origin} -> ${data.destination}`,
                 react: ShuttleCancellationNotice(data),
             })
         );
@@ -726,11 +726,11 @@ export async function sendTourInitialNotificationEmail(
     const adminEmail = process.env.ADMIN_EMAIL || 'operaciones@nomadafantasma.com';
     const requestKind = data.requestKind ?? 'tour';
     const isGuide = requestKind === 'guide';
-    const requestLabel = isGuide ? 'guia' : 'tour';
+    const requestLabel = isGuide ? 'guía' : 'tour';
     const adminLabel = isGuide ? 'guide_admin' : 'tour_admin';
     const agencyLabel = isGuide ? 'guide_agency' : 'tour_agency';
-    const adminSubject = `Nueva solicitud de ${requestLabel}: ${data.tourName}`;
-    const agencySubject = `Solicitud de ${requestLabel} asignada: ${data.tourName}`;
+    const adminSubject = `Nueva reserva de ${requestLabel}: ${data.tourName}`;
+    const agencySubject = `¿Puedes operar esta reserva de ${requestLabel}?: ${data.tourName}`;
     const isCustomer = data.label.endsWith('_customer');
     const subject = isCustomer
         ? data.t('preview', { tourName: data.tourName })
@@ -813,8 +813,8 @@ export async function sendShuttleInitialNotificationEmail(
     const subject = data.label === 'shuttle_customer'
         ? data.t('subject', { origin: data.origin, destination: data.destination })
         : data.label === 'shuttle_admin'
-            ? buildShuttleOpsSubject('Shuttle pendiente', data.origin, data.destination, data.travelDate)
-            : buildShuttleOpsSubject('Shuttle asignado', data.origin, data.destination, data.travelDate);
+            ? buildShuttleOpsSubject('Nueva reserva de shuttle', data.origin, data.destination, data.travelDate)
+            : buildShuttleOpsSubject('¿Puedes operar este shuttle?', data.origin, data.destination, data.travelDate);
 
     if (!resend) {
         logger.info('📧 [SHUTTLE INITIAL NOTIFICATION SIMULATION] -----------------------');
@@ -905,12 +905,12 @@ export async function sendTourConfirmationEmails(data: SendConfirmationEmailProp
     const agencyEmail = data.agencyEmail?.trim() || null;
     const requestKind = data.requestKind ?? 'tour';
     const isGuide = requestKind === 'guide';
-    const requestLabel = isGuide ? 'guia' : 'tour';
+    const requestLabel = isGuide ? 'guía' : 'tour';
     const customerLabel = isGuide ? 'guide_customer' : 'tour_customer';
     const adminLabel = isGuide ? 'guide_admin' : 'tour_admin';
     const agencyLabel = isGuide ? 'guide_agency' : 'tour_agency';
-    const adminSubject = `Nueva solicitud de ${requestLabel}: ${data.tourName}`;
-    const agencySubject = `Solicitud de ${requestLabel} asignada: ${data.tourName}`;
+    const adminSubject = `Nueva reserva de ${requestLabel}: ${data.tourName}`;
+    const agencySubject = `¿Puedes operar esta reserva de ${requestLabel}?: ${data.tourName}`;
 
     if (!resend) {
         logger.info('📧 [TOUR CONFIRMATION SIMULATION] --------------------------------------');
@@ -1063,14 +1063,14 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
     if (!resend) {
         logger.info('📧 [SHUTTLE CONFIRMATION SIMULATION] ----------------------------');
         logger.info(`To Customer: ${data.customerEmail}`);
-        logger.info(`Subject: Confirmacion de Shuttle`);
+        logger.info(`Subject: ${data.t('subject', { origin: data.origin, destination: data.destination })}`);
         logger.info('Customer Template Data:', JSON.stringify(redactForLog(data), null, 2));
         logger.info(`To Admin: ${adminEmail}`);
-        logger.info(`Subject: Nueva Solicitud de Shuttle`);
+        logger.info(`Subject: ${buildShuttleOpsSubject('Nueva reserva de shuttle', data.origin, data.destination, data.travelDate)}`);
         logger.info('Admin Template Data:', JSON.stringify(redactForLog(data), null, 2));
         if (agencyEmail) {
             logger.info(`To Agency: ${agencyEmail}`);
-            logger.info('Subject: Nueva Solicitud de Shuttle Asignada');
+            logger.info(`Subject: ${buildShuttleOpsSubject('¿Puedes operar este shuttle?', data.origin, data.destination, data.travelDate)}`);
             logger.info('Agency Template Data:', JSON.stringify(redactForLog(data), null, 2));
         }
         logger.info('----------------------------------------------------------------');
@@ -1085,7 +1085,7 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
             {
                 label: 'shuttle_admin',
                 to: adminEmail,
-                subject: buildShuttleOpsSubject('Shuttle pendiente', data.origin, data.destination, data.travelDate),
+                subject: buildShuttleOpsSubject('Nueva reserva de shuttle', data.origin, data.destination, data.travelDate),
                 success: true,
                 id: 'simulated_' + Date.now(),
             },
@@ -1094,7 +1094,7 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
             simulatedRecipients.push({
                 label: 'shuttle_agency',
                 to: agencyEmail,
-                subject: buildShuttleOpsSubject('Shuttle asignado', data.origin, data.destination, data.travelDate),
+                subject: buildShuttleOpsSubject('¿Puedes operar este shuttle?', data.origin, data.destination, data.travelDate),
                 success: true,
                 id: 'simulated_' + Date.now(),
             });
@@ -1118,7 +1118,7 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
                 {
                     label: 'shuttle_admin',
                     to: adminEmail,
-                    subject: buildShuttleOpsSubject('Shuttle pendiente', data.origin, data.destination, data.travelDate),
+                    subject: buildShuttleOpsSubject('Nueva reserva de shuttle', data.origin, data.destination, data.travelDate),
                     kind: 'operations',
                 },
             ];
@@ -1127,7 +1127,7 @@ export async function sendShuttleConfirmationEmails(data: SendShuttleConfirmatio
             queue.push({
                 label: 'shuttle_agency',
                 to: agencyEmail,
-                subject: buildShuttleOpsSubject('Shuttle asignado', data.origin, data.destination, data.travelDate),
+                subject: buildShuttleOpsSubject('¿Puedes operar este shuttle?', data.origin, data.destination, data.travelDate),
                 kind: 'operations',
             });
         }

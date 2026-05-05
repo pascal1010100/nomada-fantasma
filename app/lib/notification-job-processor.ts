@@ -85,7 +85,7 @@ async function sendTourOrGuideJob(job: NotificationJobRow) {
     (typeof reservation.guide_service_name === 'string' && reservation.guide_service_name.trim()) ||
     (typeof reservation.tour_name === 'string' && reservation.tour_name.trim()) ||
     tourResult?.data?.title ||
-    (job.request_kind === 'guide' ? 'Servicio de guia' : 'Tour Nómada Fantasma');
+    (job.request_kind === 'guide' ? 'Servicio de guía' : 'Tour Nómada Fantasma');
 
   return sendTourInitialNotificationEmail({
     requestKind: job.request_kind === 'guide' ? 'guide' : 'tour',

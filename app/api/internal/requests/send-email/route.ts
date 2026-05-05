@@ -58,6 +58,15 @@ function getFallbackAgencyEmail(): string | null {
 function getErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error && error.message) return error.message;
   if (typeof error === 'string' && error.trim()) return error;
+  if (error && typeof error === 'object') {
+    const typed = error as { message?: unknown; error?: unknown; details?: unknown; name?: unknown; statusCode?: unknown };
+    const message = [typed.message, typed.error, typed.details]
+      .find((value) => typeof value === 'string' && value.trim());
+    if (typeof message === 'string') return message;
+    if (typeof typed.name === 'string' && typeof typed.statusCode === 'number') {
+      return `${typed.name} (${typed.statusCode})`;
+    }
+  }
   return fallback;
 }
 
@@ -94,7 +103,7 @@ function getPaymentOptions(locale: string, requestId: string, serviceName: strin
             isEnglish ? `Name: ${bankAccountName}` : `Nombre: ${bankAccountName}`,
             `${bankCurrency} (GTQ)`
         ],
-        ctaLabel: isEnglish ? 'I have made the transfer' : 'Ya realicé la transferencia',
+        ctaLabel: isEnglish ? 'Send transfer receipt' : 'Enviar comprobante',
         ctaHref: `${whatsappBase}?text=${encodeURIComponent(waTransferMessage)}`,
         isPrimary: true
     });
@@ -109,13 +118,13 @@ function getPaymentOptions(locale: string, requestId: string, serviceName: strin
     title: isEnglish ? 'Credit/Debit Card' : 'Tarjeta de Crédito/Débito',
     details: [
         isEnglish 
-            ? 'We use TAB for secure card payments. Request your payment link or QR code below.'
-            : 'Usamos TAB para pagos seguros con tarjeta. Solicita tu link de pago o código QR abajo.',
+            ? 'We use TAB for secure card payments. Ask us for your payment link or QR code.'
+            : 'Usamos TAB para pagos seguros con tarjeta. Pídenos tu link o código QR de pago.',
         isEnglish
             ? '⚠️ Note: Card payments include a 10% administrative fee.'
             : '⚠️ Nota: Los pagos con tarjeta incluyen un 10% de recargo por comisión administrativa.'
     ],
-    ctaLabel: isEnglish ? 'Request Payment Link (QR)' : 'Solicitar Link de Pago (QR)',
+    ctaLabel: isEnglish ? 'Request card link' : 'Pedir link de pago',
     ctaHref: `${whatsappBase}?text=${encodeURIComponent(waCardMessage)}`
   });
 
@@ -386,7 +395,7 @@ export async function POST(request: Request) {
       const locale = normalizeLocale(reservation.customer_locale ?? metadata.locale);
       const fallbackService =
         kind === 'guide'
-          ? reservation.guide_service_name || reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma guide service' : 'Servicio de guia Nómada Fantasma')
+          ? reservation.guide_service_name || reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma guide service' : 'Servicio de guía Nómada Fantasma')
           : reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma tour' : 'Tour Nómada Fantasma');
       let serviceName = fallbackService;
       if (kind === 'tour') {
@@ -405,7 +414,7 @@ export async function POST(request: Request) {
           : await getTourAgencyEmail(reservation.tour_id);
 
         if (!providerEmail) {
-          return NextResponse.json({ error: 'No hay correo de proveedor configurado para esta solicitud.' }, { status: 400 });
+          return NextResponse.json({ error: 'Falta el correo del proveedor para esta reserva.' }, { status: 400 });
         }
 
         let meetingPoint: string | null = null;
@@ -440,7 +449,7 @@ export async function POST(request: Request) {
           customerNotes: reservation.notes,
           guests: reservation.number_of_people,
         });
-        const subject = `${kind === 'guide' ? 'Servicio de guia confirmado para operar' : 'Tour confirmado para operar'}: ${fallbackService}`;
+        const subject = `${kind === 'guide' ? 'Reserva confirmada para guía' : 'Reserva confirmada para tour'}: ${fallbackService}`;
 
         await recordInternalNotification({
           requestKind: kind,
@@ -469,7 +478,12 @@ export async function POST(request: Request) {
           } as Database['public']['Tables']['reservations']['Update'])
           .eq('id', reservation.id);
 
-        return NextResponse.json({ success: true, subject, recipientEmail: providerEmail });
+        return NextResponse.json({
+          success: true,
+          subject,
+          recipientEmail: providerEmail,
+          simulated: providerResult.id?.startsWith('simulated_') ?? false,
+        });
       }
 
       const guidePriceDetails =
@@ -490,6 +504,11 @@ export async function POST(request: Request) {
               pickupTime = tourData.pickup_time ? tourData.pickup_time.toString().slice(0, 5) : undefined;
               meetingPoint = tourData.meeting_point || undefined;
           }
+      }
+
+      const customerEmail = normalizeEmail(reservation.email);
+      if (!customerEmail) {
+        return NextResponse.json({ error: 'Falta un correo válido del cliente para enviar este mensaje.' }, { status: 400 });
       }
 
       const { subject, react } = buildCustomerActionEmail({
@@ -516,7 +535,7 @@ export async function POST(request: Request) {
       });
 
       const emailResult = await sendManualCustomerEmail({
-        to: reservation.email,
+        to: customerEmail,
         subject,
         react,
         label: `manual_${template}_${kind}`,
@@ -528,7 +547,7 @@ export async function POST(request: Request) {
           requestKind: kind,
           requestId: reservation.id,
           recipientType: 'customer',
-          recipientEmail: reservation.email,
+          recipientEmail: customerEmail,
           template,
           deliveryStatus: 'failed',
           subject,
@@ -543,7 +562,7 @@ export async function POST(request: Request) {
         requestKind: kind,
         requestId: reservation.id,
         recipientType: 'customer',
-        recipientEmail: reservation.email,
+        recipientEmail: customerEmail,
         template,
         deliveryStatus: 'sent',
         subject,
@@ -559,7 +578,11 @@ export async function POST(request: Request) {
         } as Database['public']['Tables']['reservations']['Update'])
         .eq('id', reservation.id);
 
-      return NextResponse.json({ success: true, subject });
+      return NextResponse.json({
+        success: true,
+        subject,
+        simulated: emailResult.id?.startsWith('simulated_') ?? false,
+      });
     }
 
     const shuttleResult = await supabaseAdmin
@@ -600,7 +623,7 @@ export async function POST(request: Request) {
         customerEmail: shuttle.customer_email,
         customerWhatsapp: shuttle.customer_whatsapp,
       });
-      const subject = `Shuttle confirmado para operar: ${shuttle.route_origin} -> ${shuttle.route_destination}`;
+      const subject = `Reserva de shuttle confirmada: ${shuttle.route_origin} -> ${shuttle.route_destination}`;
 
       await recordInternalNotification({
         requestKind: 'shuttle',
@@ -629,7 +652,11 @@ export async function POST(request: Request) {
         } as Database['public']['Tables']['shuttle_bookings']['Update'])
         .eq('id', shuttle.id);
 
-      return NextResponse.json({ success: true, subject });
+      return NextResponse.json({
+        success: true,
+        subject,
+        simulated: providerResult.id?.startsWith('simulated_') ?? false,
+      });
     }
 
     const metadata = parseRequestMetadata(shuttle.admin_notes);
@@ -655,8 +682,13 @@ export async function POST(request: Request) {
       pickupLocation: shuttle.pickup_location,
     });
 
+    const customerEmail = normalizeEmail(shuttle.customer_email);
+    if (!customerEmail) {
+      return NextResponse.json({ error: 'Falta un correo válido del cliente para enviar este mensaje.' }, { status: 400 });
+    }
+
     const emailResult = await sendManualCustomerEmail({
-      to: shuttle.customer_email,
+      to: customerEmail,
       subject,
       react,
       label: `manual_${template}_shuttle`,
@@ -668,7 +700,7 @@ export async function POST(request: Request) {
         requestKind: 'shuttle',
         requestId: shuttle.id,
         recipientType: 'customer',
-        recipientEmail: shuttle.customer_email,
+        recipientEmail: customerEmail,
         template,
         deliveryStatus: 'failed',
         subject,
@@ -683,7 +715,7 @@ export async function POST(request: Request) {
       requestKind: 'shuttle',
       requestId: shuttle.id,
       recipientType: 'customer',
-      recipientEmail: shuttle.customer_email,
+      recipientEmail: customerEmail,
       template,
       deliveryStatus: 'sent',
       subject,
@@ -699,7 +731,11 @@ export async function POST(request: Request) {
       } as Database['public']['Tables']['shuttle_bookings']['Update'])
       .eq('id', shuttle.id);
 
-    return NextResponse.json({ success: true, subject });
+    return NextResponse.json({
+      success: true,
+      subject,
+      simulated: emailResult.id?.startsWith('simulated_') ?? false,
+    });
   } catch (error) {
     logger.error('Unexpected error sending manual customer email:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

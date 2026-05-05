@@ -162,8 +162,8 @@ function getStatusBadgeClasses(status: RequestStatus): string {
 }
 
 function getStatusLabel(status: RequestStatus): string {
-    if (status === 'pending') return 'Nueva solicitud';
-    if (status === 'processing') return 'En gestion';
+    if (status === 'pending') return 'Nueva reserva';
+    if (status === 'processing') return 'En gestión';
     if (status === 'confirmed') return 'Confirmada';
     if (status === 'cancelled') return 'Cancelada';
     return 'Completada';
@@ -171,7 +171,7 @@ function getStatusLabel(status: RequestStatus): string {
 
 function getKindLabel(kind: InternalRequestItem['kind']): string {
     if (kind === 'tour') return 'Tour';
-    if (kind === 'guide') return 'Guia';
+    if (kind === 'guide') return 'Guía';
     return 'Shuttle';
 }
 
@@ -229,9 +229,9 @@ function getNotificationJobStatusClasses(status: InternalRequestItem['notificati
 }
 
 function getChecklist(status: RequestStatus): string {
-    if (status === 'pending') return 'Validar datos e iniciar gestion con agencia.';
-    if (status === 'processing') return 'Esperando respuesta de agencia y resolver confirmacion/cancelacion.';
-    if (status === 'confirmed') return 'Confirmar logistica final y cerrar al completar servicio.';
+    if (status === 'pending') return 'Revisar datos e iniciar seguimiento con el proveedor.';
+    if (status === 'processing') return 'Esperar respuesta del proveedor y decidir si se confirma o se cancela.';
+    if (status === 'confirmed') return 'Revisar detalles finales y cerrar cuando el servicio termine.';
     if (status === 'cancelled') return 'Caso cancelado. Verificar motivo en nota.';
     return 'Caso finalizado. Sin acciones pendientes.';
 }
@@ -349,13 +349,13 @@ function getReadableAdminNote(note: string | null | undefined): string {
                 .replace(/^\[[^\]]+\]\s*/, '')
                 .replace(/^\([^)]+\)\s*/, '')
                 .replace(/^(pending|processing|confirmed|cancelled|completed):\s*/i, '')
-                .replace(/^email:booking_confirmed\s*$/i, 'Se envio la confirmacion final al cliente')
+                .replace(/^email:booking_confirmed\s*$/i, 'Se envió la confirmación final al cliente')
                 .replace(/^email:payment_instructions\s*$/i, 'Se enviaron instrucciones de pago al cliente')
-                .replace(/^email:not_available\s*$/i, 'Se notifico no disponibilidad al cliente')
-                .replace(/^email:auto_booking_cancelled_customer:sent\s*$/i, 'Se notifico la cancelacion al cliente')
-                .replace(/^email:auto_booking_cancelled_agency:sent\s*$/i, 'Se notifico la cancelacion a la agencia')
-                .replace(/^email:auto_booking_cancelled_customer:failed\s*$/i, 'Fallo la notificacion de cancelacion al cliente')
-                .replace(/^email:auto_booking_cancelled_agency:failed\s*$/i, 'Fallo la notificacion de cancelacion a la agencia')
+                .replace(/^email:not_available\s*$/i, 'Se avisó al cliente que no hay disponibilidad')
+                .replace(/^email:auto_booking_cancelled_customer:sent\s*$/i, 'Se avisó la cancelación al cliente')
+                .replace(/^email:auto_booking_cancelled_agency:sent\s*$/i, 'Se avisó la cancelación al proveedor')
+                .replace(/^email:auto_booking_cancelled_customer:failed\s*$/i, 'Falló el correo de cancelación al cliente')
+                .replace(/^email:auto_booking_cancelled_agency:failed\s*$/i, 'Falló el correo de cancelación al proveedor')
                 .replace(/^email:[^:]+:\w+\s*/i, '')
                 .trim()
         )
@@ -724,7 +724,7 @@ export default function RecepcionRequestsPage() {
 
             setData(payload as InternalResponse);
             setLastSyncAt(new Date().toLocaleString());
-            pushToast('success', 'Panel actualizado', 'Solicitudes sincronizadas correctamente.');
+            pushToast('success', 'Panel actualizado', 'Reservas sincronizadas correctamente.');
         } catch (requestError) {
             setData(null);
             const message = requestError instanceof Error ? requestError.message : 'Error de red';
@@ -739,7 +739,7 @@ export default function RecepcionRequestsPage() {
         await supabase.auth.signOut();
         setData(null);
         setError('');
-        pushToast('info', 'Sesión cerrada', 'La sesión operativa fue cerrada.');
+        pushToast('info', 'Sesión cerrada', 'Tu sesión fue cerrada.');
         router.replace(`/${locale}/internal/login`);
     };
 
@@ -753,12 +753,12 @@ export default function RecepcionRequestsPage() {
     const getEmailActions = (item: InternalRequestItem, status: RequestStatus): Array<{ label: string; template: ManualEmailTemplate }> => {
         if (status === 'processing') {
             return [
-                { label: 'Enviar métodos de pago', template: 'payment_instructions' },
-                { label: 'Enviar no disponibilidad', template: 'not_available' },
+                { label: 'Enviar pago', template: 'payment_instructions' },
+                { label: 'No disponible', template: 'not_available' },
             ];
         }
         if (status === 'confirmed') {
-            return [{ label: 'Enviar confirmación final', template: 'booking_confirmed' }];
+            return [{ label: 'Enviar confirmación', template: 'booking_confirmed' }];
         }
         return [];
     };
@@ -789,12 +789,12 @@ export default function RecepcionRequestsPage() {
                 isOpen: true,
                 item,
                 nextStatus,
-                title: 'Confirmar Pago',
-                description: `Estás a punto de confirmar el pago de ${item.customerName}. Esto notificará al proveedor y enviará automáticamente el voucher de reserva al cliente.`,
-                confirmLabel: 'Finalizar y Notificar',
+                title: 'Confirmar reserva',
+                description: `Estás a punto de confirmar la reserva de ${item.customerName}. Se avisará al proveedor y se enviará el correo final al cliente.`,
+                confirmLabel: 'Confirmar y enviar correo',
                 modalStatus: 'confirmed',
                 showNoteInput: true,
-                initialNote: 'Pago confirmado (Voucher enviado automáticamente)',
+                initialNote: 'Reserva confirmada y correo final enviado automáticamente',
                 noteRequired: false,
                 noteMinLength: 0,
             });
@@ -806,9 +806,9 @@ export default function RecepcionRequestsPage() {
                 isOpen: true,
                 item,
                 nextStatus,
-                title: 'Servicio Completado',
-                description: 'Confirma que el servicio se realizó con éxito para cerrar este caso operativamente.',
-                confirmLabel: 'Cerrar Caso',
+                title: 'Cerrar reserva completada',
+                description: 'Confirma que el servicio se realizó con éxito para cerrar este caso.',
+                confirmLabel: 'Cerrar reserva',
                 modalStatus: 'completed',
                 showNoteInput: true,
                 initialNote: 'Servicio ejecutado y finalizado correctamente',
@@ -824,15 +824,15 @@ export default function RecepcionRequestsPage() {
                 isOpen: true,
                 item,
                 nextStatus,
-                title: 'Cancelar Solicitud',
+                title: 'Cancelar reserva',
                 description: helper,
-                confirmLabel: 'Confirmar Cancelación',
+                confirmLabel: 'Confirmar cancelación',
                 modalStatus: 'cancelled',
                 showNoteInput: true,
                 initialNote: '',
                 noteRequired: true,
                 noteMinLength: 5,
-                noteHelper: 'Explica el motivo de la cancelación para dejar rastro operativo claro.',
+                noteHelper: 'Explica el motivo de la cancelación para que el equipo lo entienda después.',
             });
             return;
         }
@@ -876,7 +876,7 @@ export default function RecepcionRequestsPage() {
                     return;
                 }
                 if (response.status === 409) {
-                    setError('Este caso fue actualizado por otro operador. Actualiza solicitudes.');
+                    setError('Otro operador actualizó este caso. Actualiza la lista.');
                     pushToast('error', 'Conflicto de actualización', 'Otro operador ya cambió este caso.');
                     return;
                 }
@@ -886,7 +886,7 @@ export default function RecepcionRequestsPage() {
                 return;
             }
 
-            pushToast('success', `Estado actualizado a ${nextStatus}`, 'Cambio guardado correctamente.');
+            pushToast('success', 'Reserva actualizada', 'El cambio se guardó correctamente.');
             if (typeof payload?.warning === 'string' && payload.warning.trim()) {
                 pushToast('info', 'Notificación pendiente de revisión', payload.warning);
             }
@@ -894,11 +894,11 @@ export default function RecepcionRequestsPage() {
             // Elite Automation: Send voucher if confirmed
             if (nextStatus === 'confirmed') {
                 try {
-                    pushToast('info', 'Generando Voucher...', 'Enviando confirmación al cliente.');
+                    pushToast('info', 'Enviando confirmación...', 'Estamos enviando el correo final al cliente.');
                     await sendCustomerEmail(item, 'booking_confirmed');
                 } catch (emailErr) {
                     console.error('Failed to auto-send voucher:', emailErr);
-                    pushToast('error', 'Error enviando Voucher', 'El estado se cambió pero el correo falló.');
+                    pushToast('error', 'No se pudo enviar la confirmación', 'La reserva se actualizó, pero el correo falló.');
                 }
             }
 
@@ -939,7 +939,7 @@ export default function RecepcionRequestsPage() {
                     router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}&error=auth-required`);
                     return;
                 }
-                const message = payload?.error || 'No se pudo enviar el correo.';
+                const message = payload?.error || payload?.detail || 'No se pudo enviar el correo.';
                 setError(message);
                 pushToast('error', 'No se pudo enviar el correo', message);
                 return;
@@ -952,7 +952,15 @@ export default function RecepcionRequestsPage() {
                       ? 'Correo de no disponibilidad enviado'
                       : 'Correo de confirmación enviado';
 
-            pushToast('success', successTitle, item.customerEmail);
+            if (payload?.simulated) {
+                pushToast(
+                    'info',
+                    'Correo simulado',
+                    'En local no se envió un correo real porque RESEND_API_KEY está vacío.'
+                );
+            } else {
+                pushToast('success', successTitle, item.customerEmail);
+            }
             await fetchRequests();
         } catch (requestError) {
             const message = requestError instanceof Error ? requestError.message : 'Error de red';
@@ -995,7 +1003,15 @@ export default function RecepcionRequestsPage() {
                 return;
             }
 
-            pushToast('success', 'Proveedor notificado', payload?.recipientEmail || item.provider?.email || 'Correo enviado');
+            if (payload?.simulated) {
+                pushToast(
+                    'info',
+                    'Correo simulado',
+                    'En local no se envió un correo real porque RESEND_API_KEY está vacío.'
+                );
+            } else {
+                pushToast('success', 'Proveedor notificado', payload?.recipientEmail || item.provider?.email || 'Correo enviado');
+            }
             await fetchRequests();
         } catch (requestError) {
             const message = requestError instanceof Error ? requestError.message : 'Error de red';
@@ -1027,17 +1043,17 @@ export default function RecepcionRequestsPage() {
                     return;
                 }
                 const baseMessage =
-                    'error' in payload ? payload.error || 'No se pudieron procesar las notificaciones.' : 'No se pudieron procesar las notificaciones.';
+                    'error' in payload ? payload.error || 'No se pudieron enviar los correos pendientes.' : 'No se pudieron enviar los correos pendientes.';
                 const message = 'detail' in payload && payload.detail ? `${baseMessage} ${payload.detail}` : baseMessage;
                 setError(message);
-                pushToast('error', 'No se pudieron procesar notificaciones', message);
+                pushToast('error', 'No se pudieron enviar correos pendientes', message);
                 return;
             }
 
             const summaryPayload = (payload as ProcessNotificationsResponse).summary;
             pushToast(
                 'success',
-                'Notificaciones procesadas',
+                'Correos pendientes revisados',
                 `${summaryPayload.sent} enviadas, ${summaryPayload.failed} fallidas, ${summaryPayload.skipped} omitidas.`
             );
             await fetchRequests();
@@ -1052,7 +1068,7 @@ export default function RecepcionRequestsPage() {
 
     return (
         <div className="relative mx-auto max-w-7xl px-4 pb-8 nf-page-safe-loose">
-            <div className="pointer-events-none fixed right-4 top-4 z-50 flex w-full max-w-sm flex-col gap-2">
+            <div className="pointer-events-none fixed left-1/2 top-24 z-[120] flex w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 flex-col gap-2">
                 {toasts.map((toast) => (
                     <div
                         key={toast.id}
@@ -1064,14 +1080,14 @@ export default function RecepcionRequestsPage() {
                                     : 'border-sky-400/40 bg-sky-500/15 text-sky-100'
                         }`}
                     >
-                        <p className="font-medium">{toast.title}</p>
-                        {toast.message ? <p className="text-xs opacity-90 mt-0.5">{toast.message}</p> : null}
+                        <p className="break-words font-medium">{toast.title}</p>
+                        {toast.message ? <p className="mt-0.5 break-words text-xs opacity-90">{toast.message}</p> : null}
                     </div>
                 ))}
             </div>
-            <h1 className="text-2xl font-bold mb-2">Panel Operativo Nómada</h1>
+            <h1 className="text-2xl font-bold mb-2">Panel de reservas Nómada</h1>
             <p className="text-sm text-muted-foreground mb-6">
-                Vista interna para operar solicitudes de tours, guias y shuttles sin salir del flujo.
+                Gestiona reservas, correos y seguimiento de tours, guías y shuttles.
             </p>
             <section className="mb-6 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-slate-900/88 via-slate-900/72 to-cyan-950/30 shadow-[0_16px_50px_rgba(8,15,30,0.28)]">
                 <div className="flex flex-col gap-4 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
@@ -1099,7 +1115,7 @@ export default function RecepcionRequestsPage() {
                                                     : 'border border-amber-400/20 bg-amber-500/10 text-amber-100'
                                             }`}
                                         >
-                                            {accessSource === 'directory' ? 'Directorio interno' : 'Allowlist temporal'}
+                                            {accessSource === 'directory' ? 'Acceso del equipo' : 'Acceso temporal'}
                                         </span>
                                     ) : null}
                                 </>
@@ -1108,7 +1124,7 @@ export default function RecepcionRequestsPage() {
 
                         <div className="mt-3 flex flex-col gap-3 xl:flex-row xl:items-center">
                             <label htmlFor="admin-actor" className="flex items-center gap-2 text-sm text-slate-300">
-                                <span className="text-xs uppercase tracking-wide text-slate-400">Operador visible</span>
+                                <span className="text-xs uppercase tracking-wide text-slate-400">Nombre del operador</span>
                                 <input
                                     id="admin-actor"
                                     type="text"
@@ -1125,7 +1141,7 @@ export default function RecepcionRequestsPage() {
 
                         {accessSource === 'env_fallback' ? (
                             <p className="mt-3 text-xs text-amber-200">
-                                Este operador todavía depende del fallback por email. Conviene darlo de alta en `internal_admin_users`.
+                                Este usuario todavía tiene acceso temporal. Agrégalo al equipo interno cuando puedas.
                             </p>
                         ) : null}
                         {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
@@ -1138,7 +1154,7 @@ export default function RecepcionRequestsPage() {
                             disabled={!canFetch || loading}
                             className="rounded-xl border border-cyan-400/30 bg-cyan-500/15 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:border-cyan-300/50 hover:bg-cyan-500/20 disabled:opacity-50"
                         >
-                            {loading ? 'Cargando...' : 'Actualizar solicitudes'}
+                            {loading ? 'Cargando...' : 'Actualizar reservas'}
                         </button>
                         <button
                             type="button"
@@ -1146,7 +1162,7 @@ export default function RecepcionRequestsPage() {
                             disabled={!canFetch || notificationJobsLoading || authLoading}
                             className="rounded-xl border border-fuchsia-400/30 bg-fuchsia-500/15 px-4 py-2 text-sm font-medium text-fuchsia-100 transition hover:border-fuchsia-300/50 hover:bg-fuchsia-500/20 disabled:opacity-50"
                         >
-                            {notificationJobsLoading ? 'Procesando...' : 'Procesar notificaciones'}
+                            {notificationJobsLoading ? 'Reintentando...' : 'Reintentar correos pendientes'}
                         </button>
                         <button
                             type="button"
@@ -1170,7 +1186,7 @@ export default function RecepcionRequestsPage() {
                     <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                         <div>
                             <p className="text-[11px] uppercase tracking-[0.16em] text-cyan-200/75">Operación</p>
-                            <h2 className="mt-0.5 text-base font-semibold text-white">Solicitudes y filtros</h2>
+                            <h2 className="mt-0.5 text-base font-semibold text-white">Reservas y filtros</h2>
                         </div>
                         <div className="flex flex-wrap gap-2 text-xs">
                             <span className="rounded-full border border-cyan-400/15 bg-cyan-500/10 px-3 py-1.5 text-cyan-100">
@@ -1180,7 +1196,7 @@ export default function RecepcionRequestsPage() {
                                 Tours {summary.tours}
                             </span>
                             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-300">
-                                Guias {summary.guides}
+                                Guías {summary.guides}
                             </span>
                             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-300">
                                 Shuttles {summary.shuttles}
@@ -1195,7 +1211,7 @@ export default function RecepcionRequestsPage() {
                                 type="search"
                                 value={searchQuery}
                                 onChange={(event) => setSearchQuery(event.target.value)}
-                                placeholder="Cliente, email, servicio o ID"
+                                placeholder="Cliente, correo, servicio o ID"
                                 className="w-full rounded-xl border border-white/10 bg-slate-950/45 px-3 py-2 text-sm text-white shadow-inner placeholder:text-slate-500"
                             />
                         </label>
@@ -1223,7 +1239,7 @@ export default function RecepcionRequestsPage() {
                             >
                                 <option value="all">Todos</option>
                                 <option value="tour">Tours</option>
-                                <option value="guide">Guias</option>
+                                <option value="guide">Guías</option>
                                 <option value="shuttle">Shuttles</option>
                             </select>
                         </label>
@@ -1292,7 +1308,7 @@ export default function RecepcionRequestsPage() {
                     </div>
                     <div className="rounded-xl border border-fuchsia-400/15 bg-fuchsia-500/8 px-3 py-2.5">
                         <div className="flex items-center justify-between gap-3">
-                            <p className="text-[11px] uppercase tracking-wide text-fuchsia-200/85">Email</p>
+                            <p className="text-[11px] uppercase tracking-wide text-fuchsia-200/85">Correos</p>
                             <p className="text-xl font-semibold text-white">{summary.emailFailed}</p>
                         </div>
                         <p className="mt-1 text-[11px] text-fuchsia-100/70">Fallidos</p>
@@ -1303,9 +1319,9 @@ export default function RecepcionRequestsPage() {
                         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                             <div>
                                 <p className="text-[11px] uppercase tracking-[0.16em] text-fuchsia-200/75">Notificaciones</p>
-                                <h3 className="mt-0.5 text-sm font-semibold text-white">Cola de emails operativos</h3>
+                                <h3 className="mt-0.5 text-sm font-semibold text-white">Correos de seguimiento</h3>
                                 <p className="mt-1 text-xs text-muted-foreground">
-                                    Último procesamiento: {summary.lastNotificationProcessedAt ? formatTimestamp(summary.lastNotificationProcessedAt) : 'Sin envíos procesados'}
+                                    Último intento: {summary.lastNotificationProcessedAt ? formatTimestamp(summary.lastNotificationProcessedAt) : 'Sin envíos registrados'}
                                 </p>
                             </div>
                             <button
@@ -1317,8 +1333,8 @@ export default function RecepcionRequestsPage() {
                                 {notificationJobsLoading
                                     ? 'Procesando...'
                                     : summary.notificationJobsFailed > 0
-                                        ? 'Reintentar fallidas'
-                                        : 'Procesar pendientes'}
+                                        ? 'Reintentar correos fallidos'
+                                        : 'Enviar correos pendientes'}
                             </button>
                         </div>
 
@@ -1480,14 +1496,14 @@ export default function RecepcionRequestsPage() {
                                                             type="button"
                                                             onClick={() => sendCustomerEmail(item, action.template)}
                                                             disabled={Boolean(emailActionLoadingId) || authLoading}
-                                                            className="rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-3 py-2 text-sm transition hover:border-emerald-400/40 hover:text-emerald-100 disabled:opacity-50"
+                                                            className="min-w-[118px] rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-3 py-2 text-left text-sm leading-snug transition hover:border-emerald-400/40 hover:text-emerald-100 disabled:opacity-50"
                                                         >
                                                             {emailActionLoadingId === emailKey ? 'Enviando...' : action.label}
                                                         </button>
                                                     );
                                                 })}
                                                 {manualEmailActions.length === 0 ? (
-                                                    <span className="text-sm text-muted-foreground">Sin correos manuales para este estado.</span>
+                                                    <span className="text-sm text-muted-foreground">No hay correos sugeridos en este paso.</span>
                                                 ) : null}
                                             </div>
                                         </div>
@@ -1504,7 +1520,7 @@ export default function RecepcionRequestsPage() {
                                                     {item.provider?.name || 'Sin proveedor asignado'}
                                                 </p>
                                                 <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                                                    {item.provider?.email || 'Falta correo operativo'}
+                                                    {item.provider?.email || 'Falta el correo del proveedor'}
                                                 </p>
                                                 {providerNotification ? (
                                                     <p className="mt-1 text-[11px] text-muted-foreground">
@@ -1523,14 +1539,14 @@ export default function RecepcionRequestsPage() {
                                                     : canSendProviderConfirmation
                                                         ? 'Reenviar confirmación al proveedor'
                                                         : normalizedStatus === 'confirmed' || normalizedStatus === 'completed'
-                                                            ? 'Proveedor sin correo disponible'
-                                                            : 'Se notificará al confirmar pago'}
+                                                            ? 'Falta el correo del proveedor'
+                                                            : 'Se avisará al proveedor al confirmar'}
                                             </button>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-2 text-xs">
                                             <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-                                                <p className="text-muted-foreground">Intentos email</p>
+                                                <p className="text-muted-foreground">Intentos de correo</p>
                                                 <p className="mt-1 font-medium text-foreground">{item.emailAttempts}</p>
                                             </div>
                                             <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
@@ -1554,7 +1570,7 @@ export default function RecepcionRequestsPage() {
                                                         <p className="mt-1 text-sm text-muted-foreground">{getChecklist(normalizedStatus)}</p>
                                                     </div>
                                                     <div className="rounded-xl border border-white/10 bg-background/40 px-3 py-2.5">
-                                                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Registro operativo</p>
+                                                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Registro del caso</p>
                                                         <div className="mt-2">{renderQualityBadge(normalizedStatus, item.adminNotes)}</div>
                                                     </div>
                                                 </div>
@@ -1585,7 +1601,7 @@ export default function RecepcionRequestsPage() {
                                                     normalizedStatus === 'completed') ? (
                                                     <div className="rounded-xl border border-white/10 bg-background/40 p-3">
                                                         <div className="flex items-center justify-between gap-3">
-                                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Nota operativa</p>
+                                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Nota interna</p>
                                                             {item.adminNotes && item.adminNotes.length > 110 ? (
                                                                 <button
                                                                     type="button"
@@ -1598,8 +1614,8 @@ export default function RecepcionRequestsPage() {
                                                         </div>
                                                         <p className="mt-2 text-sm text-muted-foreground">
                                                             {item.adminNotes
-                                                                ? (expandedNotes[itemKey] ? getReadableAdminNote(item.adminNotes) || 'Sin nota operativa registrada.' : getNotePreview(item.adminNotes))
-                                                                : 'Sin nota operativa relevante.'}
+                                                                ? (expandedNotes[itemKey] ? getReadableAdminNote(item.adminNotes) || 'Sin nota interna registrada.' : getNotePreview(item.adminNotes))
+                                                                : 'Sin nota interna relevante.'}
                                                         </p>
                                                     </div>
                                                 ) : null}
@@ -1637,9 +1653,9 @@ export default function RecepcionRequestsPage() {
 
                                         <section className="rounded-2xl border border-fuchsia-400/10 bg-fuchsia-500/[0.035] p-3.5">
                                             <div className="flex items-center justify-between gap-3">
-                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Jobs de email</p>
+                                                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Correos programados</p>
                                                 <span className="text-[11px] text-muted-foreground">
-                                                    {notificationJobs.length} job{notificationJobs.length === 1 ? '' : 's'}
+                                                    {notificationJobs.length} correo{notificationJobs.length === 1 ? '' : 's'}
                                                 </span>
                                             </div>
                                             <div className="mt-3 grid gap-2 lg:grid-cols-2 2xl:grid-cols-3">
@@ -1666,7 +1682,7 @@ export default function RecepcionRequestsPage() {
                                                         ) : null}
                                                     </div>
                                                 )) : (
-                                                    <span className="text-sm text-muted-foreground">Aún no hay jobs de email registrados.</span>
+                                                    <span className="text-sm text-muted-foreground">Aún no hay correos programados registrados.</span>
                                                 )}
                                             </div>
                                         </section>
@@ -1679,7 +1695,7 @@ export default function RecepcionRequestsPage() {
 
                 {!loading && filteredItems.length === 0 ? (
                     <div className="rounded-2xl border p-8 text-center text-muted-foreground">
-                        Sin solicitudes para mostrar.
+                        Sin reservas para mostrar.
                     </div>
                 ) : null}
             </div>

@@ -77,18 +77,18 @@ export default function ShuttleAdminNotification({
           fontStyle="normal"
         />
       </Head>
-      <Preview>Operaciones: {routeLabel} · {travelDate}</Preview>
+      <Preview>Nueva reserva de shuttle: {routeLabel} · {travelDate}</Preview>
       <Body style={{ backgroundColor: '#f3f7fb', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: '24px 0' }}>
         <Container style={{ maxWidth: '620px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '24px', overflow: 'hidden', border: '1px solid #dbe7f0', boxShadow: '0 18px 50px rgba(15, 23, 42, 0.08)' }}>
           <Section style={{ background: 'linear-gradient(135deg, #7f1d1d 0%, #b91c1c 55%, #dc2626 100%)', padding: '34px 36px 30px' }}>
             <Text style={{ color: '#fecaca', fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: '700', margin: '0 0 14px' }}>
-              Operaciones Shuttle
+              Equipo de reservas
             </Text>
             <Heading style={{ color: '#ffffff', fontSize: '30px', lineHeight: '1.15', fontWeight: 700, margin: 0 }}>
               Nueva reserva por validar
             </Heading>
             <Text style={{ color: '#fee2e2', fontSize: '15px', lineHeight: '1.7', margin: '14px 0 0' }}>
-              Hay una nueva reserva de shuttle que requiere validación operativa y seguimiento con el cliente.
+              Hay una nueva reserva de shuttle. Revisa disponibilidad y define el siguiente paso con el cliente.
             </Text>
             <Text style={{ display: 'inline-block', marginTop: '18px', backgroundColor: '#fff1f2', color: '#9f1239', borderRadius: '999px', padding: '8px 14px', fontSize: '12px', fontWeight: 700 }}>
               Pendiente de revisión
@@ -152,7 +152,7 @@ export default function ShuttleAdminNotification({
                   ) : null}
                   {bookingId ? (
                     <tr>
-                      <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingTop: '12px', borderTop: unitPrice !== null ? undefined : '1px solid #dbe7f0' }}>ID solicitud</td>
+                      <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingTop: '12px', borderTop: unitPrice !== null ? undefined : '1px solid #dbe7f0' }}>ID reserva</td>
                       <td style={{ color: '#0f172a', fontSize: '14px', fontWeight: 700, fontFamily: 'Menlo, Monaco, Consolas, monospace', textAlign: 'right', paddingTop: '12px', borderTop: unitPrice !== null ? undefined : '1px solid #dbe7f0' }}>{bookingId}</td>
                     </tr>
                   ) : null}
@@ -181,7 +181,7 @@ export default function ShuttleAdminNotification({
               <Heading style={{ color: '#854d0e', fontSize: '17px', fontWeight: 700, margin: '0 0 10px' }}>
                 Acción recomendada
               </Heading>
-              <Text style={{ color: '#713f12', fontSize: '14px', lineHeight: '1.75', margin: '0 0 8px' }}>1. Verifica disponibilidad operativa y ventana real de salida.</Text>
+              <Text style={{ color: '#713f12', fontSize: '14px', lineHeight: '1.75', margin: '0 0 8px' }}>1. Verifica disponibilidad y hora real de salida.</Text>
               <Text style={{ color: '#713f12', fontSize: '14px', lineHeight: '1.75', margin: '0 0 8px' }}>2. Confirma si el pickup es viable o si requiere ajuste.</Text>
               <Text style={{ color: '#713f12', fontSize: '14px', lineHeight: '1.75', margin: 0 }}>3. Cierra seguimiento en el panel y comparte el siguiente paso con el cliente.</Text>
             </Section>
@@ -198,13 +198,13 @@ export default function ShuttleAdminNotification({
                   href={adminPanelUrl}
                   style={{ backgroundColor: '#e2e8f0', color: '#0f172a', padding: '12px 24px', borderRadius: '999px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', display: 'inline-block', marginBottom: '10px' }}
                 >
-                  Abrir panel operativo
+                  Abrir panel de reservas
                 </Link>
               ) : null}
             </Section>
 
             <Text style={{ color: '#94a3b8', fontSize: '12px', textAlign: 'center', margin: 0 }}>
-              Solicitud registrada: {formatTimestamp(createdAt)}
+              Reserva registrada: {formatTimestamp(createdAt)}
             </Text>
           </Section>
         </Container>

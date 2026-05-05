@@ -248,7 +248,7 @@ describe('POST /api/internal/requests/send-email', () => {
     expect(response.status).toBe(200);
     expect(json).toMatchObject({
       success: true,
-      subject: 'Shuttle confirmado para operar: Panajachel -> Antigua Guatemala',
+      subject: 'Reserva de shuttle confirmada: Panajachel -> Antigua Guatemala',
     });
     expect(mocks.sendShuttleProviderConfirmationEmail).toHaveBeenCalledWith(expect.objectContaining({
       to: 'agency@example.com',

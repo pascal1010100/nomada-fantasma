@@ -79,7 +79,7 @@ export default function ShuttleAgencyNotification({
     `Pasajeros: ${passengers}`,
     `Pickup viable: ${pickupLocation}`,
     '',
-    'Notas operativas:',
+    'Notas para el equipo:',
     '- ',
     '',
     'Saludos,'
@@ -119,7 +119,7 @@ export default function ShuttleAgencyNotification({
           fontStyle="normal"
         />
       </Head>
-      <Preview>Agencia asignada: {routeLabel} · {travelDate}</Preview>
+      <Preview>¿Puedes operar este shuttle?: {routeLabel} · {travelDate}</Preview>
       <Body style={{ backgroundColor: '#f3f7fb', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: '24px 0' }}>
         <Container style={{ maxWidth: '620px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '24px', overflow: 'hidden', border: '1px solid #dbe7f0', boxShadow: '0 18px 50px rgba(15, 23, 42, 0.08)' }}>
           <Section style={{ background: 'linear-gradient(135deg, #164e63 0%, #0f766e 55%, #14b8a6 100%)', padding: '34px 36px 30px' }}>
@@ -130,7 +130,7 @@ export default function ShuttleAgencyNotification({
               Nueva reserva por confirmar
             </Heading>
             <Text style={{ color: '#cffafe', fontSize: '15px', lineHeight: '1.7', margin: '14px 0 0' }}>
-              Necesitamos validar disponibilidad operativa de esta ruta para continuar el cierre con el viajero.
+              Necesitamos confirmar si esta ruta está disponible para continuar con el viajero.
             </Text>
             <Text style={{ display: 'inline-block', marginTop: '18px', backgroundColor: '#ecfeff', color: '#155e75', borderRadius: '999px', padding: '8px 14px', fontSize: '12px', fontWeight: 700 }}>
               Respuesta requerida
@@ -140,7 +140,7 @@ export default function ShuttleAgencyNotification({
           <Section style={{ padding: '32px 36px 36px' }}>
             <Section style={{ margin: '0 0 24px' }}>
               <Text style={{ color: '#475569', fontSize: '13px', textAlign: 'center', margin: '0 0 14px' }}>
-                Responde en segundos con una de estas opciones y el sistema abrirá un correo ya preparado para operaciones.
+                Responde en segundos con una de estas opciones y se abrirá un correo listo para nuestro equipo.
               </Text>
               <table width="100%" cellPadding="0" cellSpacing="0" role="presentation">
                 <tbody>
@@ -264,7 +264,7 @@ export default function ShuttleAgencyNotification({
                   </tr>
                   {bookingId ? (
                     <tr>
-                      <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingTop: '12px', borderTop: '1px solid #dbe7f0' }}>ID solicitud</td>
+                      <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingTop: '12px', borderTop: '1px solid #dbe7f0' }}>ID reserva</td>
                       <td style={{ color: '#0f172a', fontSize: '14px', fontWeight: 700, fontFamily: 'Menlo, Monaco, Consolas, monospace', textAlign: 'right', paddingTop: '12px', borderTop: '1px solid #dbe7f0' }}>{bookingId}</td>
                     </tr>
                   ) : null}

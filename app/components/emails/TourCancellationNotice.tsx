@@ -51,13 +51,13 @@ export default function TourCancellationNotice({
                 <Container style={{ maxWidth: '620px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '20px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
                     <Section style={{ background: 'linear-gradient(135deg, #7f1d1d 0%, #be123c 100%)', padding: '32px 36px' }}>
                         <Text style={{ color: '#fecdd3', fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-                            Aviso operativo
+                            Reserva cancelada
                         </Text>
                         <Heading style={{ color: '#ffffff', fontSize: '28px', lineHeight: '1.2', margin: 0 }}>
                             Reserva cancelada
                         </Heading>
                         <Text style={{ color: '#ffe4e6', fontSize: '15px', lineHeight: '1.7', margin: '12px 0 0' }}>
-                            Esta solicitud ya no requiere gestión operativa por parte del proveedor.
+                            Esta reserva fue cancelada y ya no requiere seguimiento del proveedor.
                         </Text>
                     </Section>
 

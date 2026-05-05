@@ -72,18 +72,18 @@ export default function TourProviderConfirmationEmail({
                     fontStyle="normal"
                 />
             </Head>
-            <Preview>Reserva confirmada para operar: {tourName}</Preview>
+            <Preview>Reserva confirmada: {tourName}</Preview>
             <Body style={{ backgroundColor: '#f8fafc', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: '24px 0' }}>
                 <Container style={{ maxWidth: '620px', margin: '0 auto', backgroundColor: '#ffffff', borderRadius: '24px', overflow: 'hidden', border: '1px solid #dbe7f0' }}>
                     <Section style={{ background: 'linear-gradient(135deg, #0f766e 0%, #0f172a 100%)', padding: '32px 36px' }}>
                         <Text style={{ color: '#a7f3d0', fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700, margin: '0 0 12px' }}>
-                            Confirmacion operativa
+                            Reserva confirmada
                         </Text>
                         <Heading style={{ color: '#ffffff', fontSize: '30px', lineHeight: '1.15', fontWeight: 700, margin: 0 }}>
-                            {serviceLabel} confirmado para operar
+                            {serviceLabel} confirmado
                         </Heading>
                         <Text style={{ color: '#ccfbf1', fontSize: '15px', lineHeight: '1.7', margin: '14px 0 0' }}>
-                            Esta reserva ya fue confirmada con pago recibido. Favor coordinar la experiencia con base en la informacion siguiente.
+                            Esta reserva ya fue confirmada con pago recibido. Por favor coordinen la experiencia con la información siguiente.
                         </Text>
                     </Section>
 
@@ -157,7 +157,7 @@ export default function TourProviderConfirmationEmail({
                         ) : null}
 
                         <Text style={{ color: '#475569', fontSize: '13px', lineHeight: '1.75', margin: 0 }}>
-                            Este correo es solo operativo y no incluye precios. Si necesitan confirmar un ajuste final de logistica, respondan directamente al equipo de Nómada Fantasma.
+                            Este correo confirma la reserva y no incluye precios. Si necesitan confirmar algún ajuste final, respondan directamente al equipo de Nómada Fantasma.
                         </Text>
                     </Section>
                 </Container>

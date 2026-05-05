@@ -231,7 +231,7 @@ async function notifyTourCancellation(
     const locale = normalizeLocale(reservation.customer_locale ?? metadata.locale);
     const serviceName =
         requestKind === 'guide'
-            ? reservation.guide_service_name || reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma guide service' : 'Servicio de guia Nómada Fantasma')
+            ? reservation.guide_service_name || reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma guide service' : 'Servicio de guía Nómada Fantasma')
             : reservation.tour_name || (locale.startsWith('en') ? 'Nomada Fantasma tour' : 'Tour Nómada Fantasma');
     const { subject, react } = buildCustomerActionEmail({
         template: 'booking_cancelled',
@@ -305,7 +305,7 @@ async function notifyTourCancellation(
             recipientEmail: agencyEmail,
             template: 'booking_cancelled',
             deliveryStatus: agencyResult.success ? 'sent' : 'failed',
-            subject: `${requestKind === 'guide' ? 'Servicio de guia cancelado' : 'Tour cancelado'}: ${serviceName}`,
+            subject: `${requestKind === 'guide' ? 'Reserva de guía cancelada' : 'Reserva de tour cancelada'}: ${serviceName}`,
             providerMessageId: agencyResult.id,
             errorMessage: agencyResult.success ? null : getErrorMessage(agencyResult.error, 'No se pudo notificar la cancelación a la agencia.'),
             triggeredBy: actor,
@@ -373,7 +373,7 @@ async function notifyTourConfirmed(
 
     const serviceName =
         requestKind === 'guide'
-            ? reservation.guide_service_name || reservation.tour_name || 'Servicio de guia Nómada Fantasma'
+            ? reservation.guide_service_name || reservation.tour_name || 'Servicio de guía Nómada Fantasma'
             : reservation.tour_name || 'Tour Nómada Fantasma';
     const metadata = parseRequestMetadata(reservation.admin_notes);
     const agencyResult = await sendTourProviderConfirmationEmail({
@@ -399,7 +399,7 @@ async function notifyTourConfirmed(
         recipientEmail: agencyEmail,
         template: 'booking_confirmed_provider',
         deliveryStatus: agencyResult.success ? 'sent' : 'failed',
-        subject: `${requestKind === 'guide' ? 'Servicio de guia confirmado para operar' : 'Tour confirmado para operar'}: ${serviceName}`,
+        subject: `${requestKind === 'guide' ? 'Reserva confirmada para guía' : 'Reserva confirmada para tour'}: ${serviceName}`,
         providerMessageId: agencyResult.id,
         errorMessage: agencyResult.success ? null : getErrorMessage(agencyResult.error, 'No se pudo enviar la confirmación final al proveedor.'),
         triggeredBy: actor,
@@ -464,7 +464,7 @@ async function notifyShuttleConfirmed(
         recipientEmail: agencyEmail,
         template: 'booking_confirmed_provider',
         deliveryStatus: agencyResult.success ? 'sent' : 'failed',
-        subject: `Shuttle confirmado para operar: ${shuttle.route_origin} -> ${shuttle.route_destination}`,
+        subject: `Reserva de shuttle confirmada: ${shuttle.route_origin} -> ${shuttle.route_destination}`,
         providerMessageId: agencyResult.id,
         errorMessage: agencyResult.success ? null : getErrorMessage(agencyResult.error, 'No se pudo enviar la confirmación final al proveedor del shuttle.'),
         triggeredBy: actor,
@@ -565,7 +565,7 @@ async function notifyShuttleCancellation(
             recipientEmail: agencyEmail,
             template: 'booking_cancelled',
             deliveryStatus: agencyResult.success ? 'sent' : 'failed',
-            subject: `Shuttle cancelado: ${shuttle.route_origin} -> ${shuttle.route_destination}`,
+            subject: `Reserva de shuttle cancelada: ${shuttle.route_origin} -> ${shuttle.route_destination}`,
             providerMessageId: agencyResult.id,
             errorMessage: agencyResult.success ? null : getErrorMessage(agencyResult.error, 'No se pudo notificar la cancelación a la agencia.'),
             triggeredBy: actor,
