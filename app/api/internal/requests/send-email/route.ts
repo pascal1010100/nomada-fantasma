@@ -12,6 +12,7 @@ import {
 import { recordInternalNotification } from '@/app/lib/internal-notifications';
 import { normalizeLocale } from '@/app/lib/locale';
 import { parseRequestMetadata } from '@/app/lib/request-metadata';
+import { getShuttleCustomerPriceDetails } from '@/app/lib/shuttle-pricing';
 import type { Database } from '@/types/database.types';
 
 type RequestKind = 'tour' | 'guide' | 'shuttle';
@@ -83,7 +84,11 @@ type PaymentOption = {
   isPrimary?: boolean;
 };
 
-function getPaymentOptions(locale: string, requestId: string, serviceName: string): PaymentOption[] {
+function formatMoney(value: number): string {
+  return `Q${value.toFixed(2)}`;
+}
+
+function getPaymentOptions(locale: string, requestId: string, serviceName: string, totalToPay?: number): PaymentOption[] {
   const isEnglish = locale.startsWith('en');
   const bankName = process.env.BANK_BANK_NAME || 'Banrural';
   const bankAccountName = process.env.BANK_ACCOUNT_NAME || 'José Manuel Aguilar Cruz';
@@ -103,6 +108,9 @@ function getPaymentOptions(locale: string, requestId: string, serviceName: strin
     options.push({
         title: isEnglish ? 'Bank Transfer' : 'Transferencia Bancaria',
         details: [
+            ...(typeof totalToPay === 'number'
+                ? [isEnglish ? `Amount to transfer: ${formatMoney(totalToPay)}` : `Monto a transferir: ${formatMoney(totalToPay)}`]
+                : []),
             bankName,
             isEnglish ? `Account: ${bankAccountNumber}` : `Cuenta: ${bankAccountNumber}`,
             isEnglish ? `Name: ${bankAccountName}` : `Nombre: ${bankAccountName}`,
@@ -119,15 +127,20 @@ function getPaymentOptions(locale: string, requestId: string, serviceName: strin
     ? `Hi! I want to pay my booking ${requestId} (${serviceName}) with card. Please send me the TAB QR/Link.`
     : `¡Hola! Quiero pagar mi reserva ${requestId} (${serviceName}) con tarjeta. Por favor envíenme el link/QR de TAB.`;
 
+  const cardTotal = typeof totalToPay === 'number' ? totalToPay * 1.1 : null;
   options.push({
     title: isEnglish ? 'Credit/Debit Card' : 'Tarjeta de Crédito/Débito',
     details: [
         isEnglish 
             ? 'We use TAB for secure card payments. Ask us for your payment link or QR code.'
             : 'Usamos TAB para pagos seguros con tarjeta. Pídenos tu link o código QR de pago.',
-        isEnglish
-            ? '⚠️ Note: Card payments include a 10% administrative fee.'
-            : '⚠️ Nota: Los pagos con tarjeta incluyen un 10% de recargo por comisión administrativa.'
+        cardTotal !== null
+            ? isEnglish
+                ? `Card total: ${formatMoney(cardTotal)} including the 10% card fee.`
+                : `Total con tarjeta: ${formatMoney(cardTotal)} incluyendo el 10% de comisión.`
+            : isEnglish
+                ? 'Card payments include a 10% administrative fee.'
+                : 'Los pagos con tarjeta incluyen un 10% de comisión administrativa.'
     ],
     ctaLabel: isEnglish ? 'Request card link' : 'Pedir link de pago',
     ctaHref: `${whatsappBase}?text=${encodeURIComponent(waCardMessage)}`
@@ -137,6 +150,9 @@ function getPaymentOptions(locale: string, requestId: string, serviceName: strin
   options.push({
     title: isEnglish ? 'Cash Payment' : 'Pago en Efectivo',
     details: [
+        ...(typeof totalToPay === 'number'
+            ? [isEnglish ? `Amount to pay in cash: ${formatMoney(totalToPay)}` : `Monto a pagar en efectivo: ${formatMoney(totalToPay)}`]
+            : []),
         isEnglish
             ? 'You can pay directly at the reception of Hostal Mandalas or Hostal Mandalas Hideout in San Pedro La Laguna.'
             : 'Puedes pagar directamente en la recepción de Hostal Mandalas o Hostal Mandalas Hideout en San Pedro La Laguna.'
@@ -519,6 +535,12 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Esta reserva usa un correo de prueba. Cambia el cliente a un correo real antes de enviar.' }, { status: 400 });
       }
 
+      const customerTotal =
+        kind === 'guide'
+          ? guidePriceDetails.price
+          : typeof reservation.total_price === 'number'
+            ? reservation.total_price
+            : metadata.price;
       const { subject, react } = buildCustomerActionEmail({
         template,
         locale,
@@ -528,16 +550,11 @@ export async function POST(request: Request) {
         bookingOptionName: metadata.bookingOptionName,
         date: reservation.date,
         travelers: reservation.number_of_people,
-        price:
-          kind === 'guide'
-            ? guidePriceDetails.price
-            : typeof reservation.total_price === 'number'
-              ? reservation.total_price
-              : metadata.price,
+        price: customerTotal,
         priceText: kind === 'guide' ? guidePriceDetails.priceText : undefined,
         priceLabelOverride: kind === 'guide' ? guidePriceDetails.priceLabelOverride : undefined,
         requestId: reservation.id,
-        paymentOptions: getPaymentOptions(locale, reservation.id, serviceName),
+        paymentOptions: getPaymentOptions(locale, reservation.id, serviceName, customerTotal),
         pickupTime,
         meetingPoint,
       });
@@ -675,6 +692,7 @@ export async function POST(request: Request) {
       : typeof metadata.price === 'number'
       ? metadata.price
       : await getShuttleRoutePrice(shuttle.route_origin, shuttle.route_destination, shuttle.type ?? 'shared');
+    const priceDetails = getShuttleCustomerPriceDetails(price, shuttle.passengers, shuttle.type, locale);
     const { subject, react } = buildCustomerActionEmail({
       template,
       locale,
@@ -683,9 +701,12 @@ export async function POST(request: Request) {
       serviceName,
       date: shuttle.travel_date,
       travelers: shuttle.passengers,
-      price,
+      price: priceDetails.price,
+      priceText: priceDetails.priceText,
+      priceBreakdown: priceDetails.priceBreakdown,
+      priceLabelOverride: priceDetails.priceLabelOverride,
       requestId: shuttle.id,
-      paymentOptions: getPaymentOptions(locale, shuttle.id, serviceName),
+      paymentOptions: getPaymentOptions(locale, shuttle.id, serviceName, priceDetails.price),
       travelTime: shuttle.travel_time,
       pickupLocation: shuttle.pickup_location,
     });

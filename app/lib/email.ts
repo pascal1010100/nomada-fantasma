@@ -267,6 +267,7 @@ type BuildCustomerActionEmailInput = {
     travelers?: number;
     price?: number;
     priceText?: string;
+    priceBreakdown?: string[];
     priceLabelOverride?: string;
     requestId: string;
     paymentOptions?: PaymentOption[];
@@ -364,6 +365,7 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
                 travelersValue: travelerValue,
                 priceLabel,
                 priceValue,
+                priceBreakdown: data.priceBreakdown,
                 requestIdLabel,
                 requestId: data.requestId,
                 infoTitle: isEnglish ? 'Next step' : 'Siguiente paso',
@@ -409,6 +411,7 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
                 travelersValue: travelerValue,
                 priceLabel,
                 priceValue,
+                priceBreakdown: data.priceBreakdown,
                 requestIdLabel,
                 requestId: data.requestId,
                 infoTitle: isEnglish ? 'What happens next' : 'Qué sigue ahora',
@@ -452,6 +455,7 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
                 travelersValue: travelerValue,
                 priceLabel,
                 priceValue,
+                priceBreakdown: data.priceBreakdown,
                 requestIdLabel,
                 requestId: data.requestId,
                 infoTitle: isEnglish ? 'Cancellation details' : 'Detalle de la cancelación',
@@ -517,6 +521,7 @@ export function buildCustomerActionEmail(data: BuildCustomerActionEmailInput): C
             travelersValue: travelerValue,
             priceLabel,
             priceValue,
+            priceBreakdown: data.priceBreakdown,
             requestIdLabel,
             requestId: data.requestId,
             infoTitle: infoTitle,

@@ -82,6 +82,22 @@ function createInsertQuery(result: unknown, insertSpy = vi.fn()) {
   };
 }
 
+function createSimpleUpdateQuery(result: unknown, updateSpy = vi.fn()) {
+  return {
+    update: updateSpy.mockReturnValue({
+      eq: vi.fn().mockResolvedValue(result),
+    }),
+  };
+}
+
+function createMaybeSingleSelectQuery(result: unknown) {
+  return {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn().mockResolvedValue(result),
+  };
+}
+
 describe('PATCH /api/internal/requests/status', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -93,6 +109,19 @@ describe('PATCH /api/internal/requests/status', () => {
       source: 'env_fallback',
       user: {},
     });
+    mocks.buildCustomerActionEmail.mockReturnValue({
+      subject: 'Reserva cancelada',
+      react: 'email-template',
+    });
+    mocks.sendManualCustomerEmail.mockResolvedValue({
+      success: true,
+      id: 'customer-email-1',
+    });
+    mocks.sendShuttleCancellationAgencyEmail.mockResolvedValue({
+      success: true,
+      id: 'agency-email-1',
+    });
+    mocks.recordInternalNotification.mockResolvedValue({ error: null });
   });
 
   it('rejects unauthenticated internal status changes', async () => {
@@ -192,5 +221,73 @@ describe('PATCH /api/internal/requests/status', () => {
 
     expect(response.status).toBe(400);
     expect(json.error).toBe('Nota requerida para mover a cancelled.');
+  });
+
+  it('uses the full shared shuttle total when sending cancellation email', async () => {
+    const shuttle = {
+      id: 'shuttle-1',
+      status: 'processing',
+      admin_notes: null,
+      confirmed_at: null,
+      cancelled_at: null,
+      agency_id: 'agency-1',
+      customer_name: 'Shuttle Customer',
+      customer_email: 'customer@nomadafantasma.com',
+      customer_whatsapp: '50255550000',
+      route_origin: 'San Pedro La Laguna',
+      route_destination: 'Antigua Guatemala',
+      travel_date: '2099-05-05',
+      travel_time: '09:00',
+      passengers: 2,
+      pickup_location: 'Hotel Unit',
+      type: 'shared',
+      price: 200,
+      customer_locale: 'es',
+      email_attempts: 0,
+    };
+    const statusUpdate = createStatusUpdateQuery({
+      data: { id: 'shuttle-1', status: 'cancelled' },
+      error: null,
+    });
+    const notificationUpdate = createSimpleUpdateQuery({ error: null });
+    const transitionInsert = createInsertQuery({ error: null });
+    let shuttleCalls = 0;
+
+    mocks.from.mockImplementation((table: string) => {
+      if (table === 'shuttle_bookings') {
+        shuttleCalls += 1;
+        if (shuttleCalls === 1) return createSingleSelectQuery({ data: shuttle, error: null });
+        if (shuttleCalls === 2) return statusUpdate.query;
+        return notificationUpdate;
+      }
+      if (table === 'internal_request_transitions') return transitionInsert;
+      if (table === 'agencies') {
+        return createMaybeSingleSelectQuery({
+          data: { email: 'agency@example.com', is_active: true },
+          error: null,
+        });
+      }
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    const response = await PATCH(createRequest({
+      kind: 'shuttle',
+      id: 'shuttle-1',
+      currentStatus: 'processing',
+      nextStatus: 'cancelled',
+      note: 'Cliente pidió cancelar.',
+    }));
+
+    expect(response.status).toBe(200);
+    expect(mocks.buildCustomerActionEmail).toHaveBeenCalledWith(expect.objectContaining({
+      template: 'booking_cancelled',
+      kind: 'shuttle',
+      serviceName: 'San Pedro La Laguna → Antigua Guatemala',
+      price: 400,
+      priceText: 'Q400.00',
+      priceBreakdown: ['Q200.00 por persona x 2 pasajeros'],
+      priceLabelOverride: 'Total a pagar',
+      travelers: 2,
+    }));
   });
 });

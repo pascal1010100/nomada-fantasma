@@ -26,6 +26,7 @@ interface CustomerActionEmailProps {
   travelersValue?: string;
   priceLabel?: string;
   priceValue?: string;
+  priceBreakdown?: string[];
   requestIdLabel: string;
   requestId: string;
   infoTitle: string;
@@ -58,6 +59,7 @@ export default function CustomerActionEmail({
   travelersValue,
   priceLabel,
   priceValue,
+  priceBreakdown,
   requestIdLabel,
   requestId,
   infoTitle,
@@ -157,6 +159,13 @@ export default function CustomerActionEmail({
                       </td>
                       <td style={{ fontSize: '16px', fontWeight: 800, textAlign: 'right', paddingBottom: '12px', color: '#0891b2' }}>
                         {priceValue}
+                        {priceBreakdown && priceBreakdown.length > 0 ? (
+                          <div style={{ color: '#64748b', fontSize: '12px', fontWeight: 600, lineHeight: '1.45', marginTop: '4px' }}>
+                            {priceBreakdown.map((line, idx) => (
+                              <div key={idx}>{line}</div>
+                            ))}
+                          </div>
+                        ) : null}
                       </td>
                     </tr>
                   ) : null}

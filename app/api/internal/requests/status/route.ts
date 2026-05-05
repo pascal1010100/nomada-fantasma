@@ -13,6 +13,7 @@ import { recordInternalNotification } from '@/app/lib/internal-notifications';
 import { normalizeLocale } from '@/app/lib/locale';
 import logger from '@/app/lib/logger';
 import { parseRequestMetadata } from '@/app/lib/request-metadata';
+import { getShuttleCustomerPriceDetails } from '@/app/lib/shuttle-pricing';
 import type { Database } from '@/types/database.types';
 
 type ReservationRow = Database['public']['Tables']['reservations']['Row'];
@@ -494,6 +495,12 @@ async function notifyShuttleCancellation(
     const metadata = parseRequestMetadata(shuttle.admin_notes);
     const locale = normalizeLocale(shuttle.customer_locale ?? metadata.locale);
     const serviceName = `${shuttle.route_origin} → ${shuttle.route_destination}`;
+    const unitOrTotalPrice = typeof shuttle.price === 'number'
+        ? shuttle.price
+        : typeof metadata.price === 'number'
+            ? metadata.price
+            : undefined;
+    const priceDetails = getShuttleCustomerPriceDetails(unitOrTotalPrice, shuttle.passengers, shuttle.type, locale);
     const { subject, react } = buildCustomerActionEmail({
         template: 'booking_cancelled',
         locale,
@@ -502,11 +509,10 @@ async function notifyShuttleCancellation(
         serviceName,
         date: shuttle.travel_date,
         travelers: shuttle.passengers,
-        price: typeof shuttle.price === 'number'
-            ? shuttle.price
-            : typeof metadata.price === 'number'
-                ? metadata.price
-                : undefined,
+        price: priceDetails.price,
+        priceText: priceDetails.priceText,
+        priceBreakdown: priceDetails.priceBreakdown,
+        priceLabelOverride: priceDetails.priceLabelOverride,
         requestId: shuttle.id,
         cancellationReason: note,
     });

@@ -181,7 +181,10 @@ describe('POST /api/internal/requests/send-email', () => {
       template: 'payment_instructions',
       kind: 'shuttle',
       serviceName: 'Panajachel → Antigua Guatemala',
-      price: 150,
+      price: 300,
+      priceText: 'Q300.00',
+      priceBreakdown: ['Q150.00 por persona x 2 pasajeros'],
+      priceLabelOverride: 'Total a pagar',
       travelTime: '09:00',
       pickupLocation: 'Hotel Unit',
     }));

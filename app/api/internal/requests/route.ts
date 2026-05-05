@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/app/lib/supabase/server';
 import { getAuthorizedAdminContext } from '@/app/lib/admin-auth';
 import { listInternalNotificationsForRequests, type InternalNotificationRecord } from '@/app/lib/internal-notifications';
 import logger from '@/app/lib/logger';
+import { calculateShuttleTotal } from '@/app/lib/shuttle-pricing';
 import type { Database } from '@/types/database.types';
 
 type ReservationRow = Database['public']['Tables']['reservations']['Row'];
@@ -157,6 +158,8 @@ function mapShuttle(row: ShuttleBookingRow, provider: ProviderInfo | null = null
     const createdAt = row.created_at ?? '';
     const serviceName = `${row.route_origin ?? ''} → ${row.route_destination ?? ''}`;
     const shuttleType = row.type === 'private' ? 'Privado' : row.type === 'shared' ? 'Compartido' : 'Shuttle';
+    const unitOrTotalPrice = typeof row.price === 'number' ? row.price : null;
+    const totalPrice = calculateShuttleTotal(unitOrTotalPrice, row.passengers, row.type);
     return {
         id: row.id,
         kind: 'shuttle',
@@ -170,7 +173,7 @@ function mapShuttle(row: ShuttleBookingRow, provider: ProviderInfo | null = null
         requestedTime: row.travel_time ?? null,
         partySize: row.passengers ?? null,
         locationLabel: row.pickup_location ?? null,
-        totalPrice: row.price ?? null,
+        totalPrice,
         details: `${shuttleType} · ${row.route_origin ?? ''} -> ${row.route_destination ?? ''}`,
         status: row.status,
         emailStatus: row.email_delivery_status,
