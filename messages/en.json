@@ -1311,9 +1311,15 @@
         }
     },
     "Chat": {
-        "title": "Tactical Advisor AI",
-        "buttonLabel": "Speak with AI",
-        "tooltip": "Chat with our AI",
+        "title": "Nomada Concierge",
+        "buttonLabel": "Open help options",
+        "tooltip": "Contact the concierge",
+        "quickMenuLabel": "Contact options",
+        "quickTitle": "Need help?",
+        "quickDescription": "Choose your preferred channel for planning or booking support.",
+        "whatsappAction": "WhatsApp",
+        "whatsappHint": "Fastest response for bookings",
+        "emailAction": "Email",
         "statusOnline": "Link Active",
         "statusWait": "Awaiting Command...",
         "statusActive": "Ghost Link Active...",

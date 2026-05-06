@@ -1311,9 +1311,15 @@
         }
     },
     "Chat": {
-        "title": "Asesor Táctico IA",
-        "buttonLabel": "Hablar con la IA",
-        "tooltip": "Chatea con nuestra IA",
+        "title": "Concierge Nómada",
+        "buttonLabel": "Abrir opciones de ayuda",
+        "tooltip": "Contactar al concierge",
+        "quickMenuLabel": "Opciones de contacto",
+        "quickTitle": "¿Necesitas ayuda?",
+        "quickDescription": "Elige el canal que prefieras para planificar o resolver una reserva.",
+        "whatsappAction": "WhatsApp",
+        "whatsappHint": "Respuesta más rápida para reservas",
+        "emailAction": "Correo",
         "statusOnline": "Enlace Activo",
         "statusWait": "Esperando Comando...",
         "statusActive": "Enlace Ghost Activo...",
