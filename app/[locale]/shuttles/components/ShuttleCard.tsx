@@ -68,15 +68,15 @@ export default function ShuttleCard({ shuttle, onBook }: ShuttleCardProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             whileHover={{ y: -8 }}
-            className="group relative flex h-full flex-col overflow-hidden rounded-[2.5rem] border border-border bg-card shadow-2xl shadow-black/5 transition-all duration-500 hover:border-primary/40 hover:shadow-primary/5 dark:border-white/5"
+            className="group relative isolate flex h-full flex-col overflow-hidden rounded-[2.5rem] border border-border bg-card shadow-2xl shadow-black/5 transition-all duration-500 [backface-visibility:hidden] [clip-path:inset(0_round_2.5rem)] [transform:translateZ(0)] hover:border-primary/40 hover:shadow-primary/5 dark:border-white/5"
         >
             {/* Image Section */}
-            <div className="relative h-64 overflow-hidden">
+            <div className="relative h-64 overflow-hidden rounded-t-[2.5rem] [backface-visibility:hidden] [clip-path:inset(0_round_2.5rem_2.5rem_0_0)] [transform:translateZ(0)]">
                 <Image
                     src={imageError ? '/images/shuttles/default-shuttle.svg' : destinationImage}
                     alt={`${shuttle.origin} a ${shuttle.destination}`}
                     fill
-                    className={`transition-transform duration-700 group-hover:scale-105 object-cover ${isFallback && !isSVG ? 'filter brightness-[1.25] contrast-[1.1]' : ''}`}
+                    className={`rounded-t-[2.5rem] transition-transform duration-700 group-hover:scale-105 object-cover [backface-visibility:hidden] [transform:translateZ(0)] ${isFallback && !isSVG ? 'filter brightness-[1.25] contrast-[1.1]' : ''}`}
                     style={{ filter: 'saturate(1.05) contrast(1.08)' }}
                     onError={handleImageError}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

@@ -13,21 +13,27 @@ async function getGuideServicesByGuideIds(guideIds: string[]): Promise<Map<strin
     return new Map();
   }
 
-  const { data, error } = await supabaseAdmin
-    .from('guide_services')
-    .select('*')
-    .in('guide_id', guideIds)
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: true });
+  let data: SupabaseGuideService[] | null = null;
+  try {
+    const result = await supabaseAdmin
+      .from('guide_services')
+      .select('*')
+      .in('guide_id', guideIds)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true });
 
-  if (error) {
-    console.error('Error fetching guide services:', error);
+    if (result.error) {
+      return new Map();
+    }
+
+    data = (result.data ?? []) as SupabaseGuideService[];
+  } catch {
     return new Map();
   }
 
   const grouped = new Map<string, SupabaseGuideService[]>();
-  for (const service of (data ?? []) as SupabaseGuideService[]) {
+  for (const service of data ?? []) {
     const current = grouped.get(service.guide_id) ?? [];
     current.push(service);
     grouped.set(service.guide_id, current);
@@ -36,20 +42,26 @@ async function getGuideServicesByGuideIds(guideIds: string[]): Promise<Map<strin
 }
 
 export async function getActiveGuidesByTownSlugFromDB(townSlug: string): Promise<GuideWithServices[]> {
-  const { data, error } = await supabaseAdmin
-    .from('guides')
-    .select('*')
-    .eq('town_slug', townSlug)
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: true });
+  let data: SupabaseGuide[] | null = null;
+  try {
+    const result = await supabaseAdmin
+      .from('guides')
+      .select('*')
+      .eq('town_slug', townSlug)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true });
 
-  if (error) {
-    console.error(`Error fetching guides for town '${townSlug}':`, error);
+    if (result.error) {
+      return [];
+    }
+
+    data = (result.data ?? []) as SupabaseGuide[];
+  } catch {
     return [];
   }
 
-  const guides = (data ?? []) as SupabaseGuide[];
+  const guides = data ?? [];
   const servicesByGuide = await getGuideServicesByGuideIds(guides.map((guide) => guide.id));
 
   return guides.map((guide) => ({
@@ -59,20 +71,26 @@ export async function getActiveGuidesByTownSlugFromDB(townSlug: string): Promise
 }
 
 export async function getActiveGuidesForLakeFromDB(limit = 12): Promise<GuideWithServices[]> {
-  const { data, error } = await supabaseAdmin
-    .from('guides')
-    .select('*')
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: true })
-    .limit(limit);
+  let data: SupabaseGuide[] | null = null;
+  try {
+    const result = await supabaseAdmin
+      .from('guides')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true })
+      .limit(limit);
 
-  if (error) {
-    console.error('Error fetching active guides for lake:', error);
+    if (result.error) {
+      return [];
+    }
+
+    data = (result.data ?? []) as SupabaseGuide[];
+  } catch {
     return [];
   }
 
-  const guides = (data ?? []) as SupabaseGuide[];
+  const guides = data ?? [];
   const servicesByGuide = await getGuideServicesByGuideIds(guides.map((guide) => guide.id));
 
   return guides.map((guide) => ({
@@ -82,15 +100,21 @@ export async function getActiveGuidesForLakeFromDB(limit = 12): Promise<GuideWit
 }
 
 export async function getGuideBySlugFromDB(slug: string): Promise<GuideWithServices | null> {
-  const { data, error } = await supabaseAdmin
-    .from('guides')
-    .select('*')
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .maybeSingle();
+  let data: SupabaseGuide | null = null;
+  try {
+    const result = await supabaseAdmin
+      .from('guides')
+      .select('*')
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .maybeSingle();
 
-  if (error) {
-    console.error(`Error fetching guide by slug '${slug}':`, error);
+    if (result.error) {
+      return null;
+    }
+
+    data = result.data as SupabaseGuide | null;
+  } catch {
     return null;
   }
 

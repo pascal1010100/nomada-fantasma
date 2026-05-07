@@ -85,14 +85,18 @@ function isEmailAllowed(email: string | null | undefined): email is string {
 }
 
 export async function getAdminAccessResult(request?: Request): Promise<AdminAccessResult> {
-    const supabase = await createClient();
-    const {
-        data: { user },
-        error,
-    } = await supabase.auth.getUser();
+    let user: User | null = null;
 
-    if (error) {
-        logger.warn('Unable to resolve Supabase auth user for internal access:', error);
+    try {
+        const supabase = await createClient();
+        const result = await supabase.auth.getUser();
+
+        if (result.error) {
+            return { status: 'unauthenticated' };
+        }
+
+        user = result.data.user;
+    } catch {
         return { status: 'unauthenticated' };
     }
 

@@ -37,66 +37,65 @@ export async function getTourBySlugFromDB(slug?: string, puebloSlug?: string) {
     return null;
   }
 
-  let slugQuery = supabaseAdmin
-    .from('tours')
-    .select('*')
-    .eq('slug', normalizedSlug);
+  try {
+    let slugQuery = supabaseAdmin
+      .from('tours')
+      .select('*')
+      .eq('slug', normalizedSlug);
 
-  if (puebloSlug) {
-    slugQuery = slugQuery.eq('pueblo_slug', puebloSlug);
-  }
+    if (puebloSlug) {
+      slugQuery = slugQuery.eq('pueblo_slug', puebloSlug);
+    }
 
-  const { data, error } = await slugQuery.single();
+    const { data } = await slugQuery.single();
 
-  if (data) {
-    return data;
-  }
+    if (data) {
+      return data;
+    }
 
-  if (error && error.code !== 'PGRST116') {
-    console.error(`Error fetching tour by slug '${slug}':`, error);
-  }
+    let idQuery = supabaseAdmin
+      .from('tours')
+      .select('*')
+      .eq('id', normalizedSlug);
 
-  let idQuery = supabaseAdmin
-    .from('tours')
-    .select('*')
-    .eq('id', normalizedSlug);
+    if (puebloSlug) {
+      idQuery = idQuery.eq('pueblo_slug', puebloSlug);
+    }
 
-  if (puebloSlug) {
-    idQuery = idQuery.eq('pueblo_slug', puebloSlug);
-  }
+    const { data: byId } = await idQuery.single();
 
-  const { data: byId, error: byIdError } = await idQuery.single();
-
-  if (byId) {
-    return byId;
-  }
-
-  if (byIdError && byIdError.code !== 'PGRST116') {
-    console.error(`Error fetching tour by id '${slug}':`, byIdError);
+    if (byId) {
+      return byId;
+    }
+  } catch {
+    return null;
   }
 
   return null;
 }
 
 export async function getToursByPuebloFromDB(puebloSlug: string) {
-  const { data, error } = await supabaseAdmin
-    .from('tours')
-    .select('*')
-    .eq('pueblo_slug', puebloSlug)
-    .eq('is_active', true)
-    .order('is_featured', { ascending: false })
-    .order('rating', { ascending: false })
-    .order('created_at', { ascending: false });
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('tours')
+      .select('*')
+      .eq('pueblo_slug', puebloSlug)
+      .eq('is_active', true)
+      .order('is_featured', { ascending: false })
+      .order('rating', { ascending: false })
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error(`Error fetching tours for pueblo '${puebloSlug}':`, error);
+    if (error) {
+      return [];
+    }
+
+    const tours: SupabaseTour[] = data ?? [];
+    return tours
+      .map((tour) => mapSupabaseTourToUi(tour))
+      .filter((tour) => Boolean(normalizeSlug(tour.slug) ?? normalizeId(tour.id)));
+  } catch {
     return [];
   }
-
-  const tours: SupabaseTour[] = data ?? [];
-  return tours
-    .map((tour) => mapSupabaseTourToUi(tour))
-    .filter((tour) => Boolean(normalizeSlug(tour.slug) ?? normalizeId(tour.id)));
 }
 
 export async function getRecommendedToursFromDB(excludeSlug?: string, limit = 3): Promise<SupabaseTour[]> {
@@ -138,17 +137,20 @@ export async function getRecommendedToursFromDB(excludeSlug?: string, limit = 3)
 }
 
 export async function getActiveToursFromDB(): Promise<SupabaseTour[]> {
-  const { data, error } = await supabaseAdmin
-    .from('tours')
-    .select('*')
-    .eq('is_active', true)
-    .order('is_featured', { ascending: false })
-    .order('rating', { ascending: false });
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('tours')
+      .select('*')
+      .eq('is_active', true)
+      .order('is_featured', { ascending: false })
+      .order('rating', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching active tours:', error);
+    if (error) {
+      return [];
+    }
+
+    return data ?? [];
+  } catch {
     return [];
   }
-
-  return data ?? [];
 }

@@ -663,11 +663,26 @@ export default function RecepcionRequestsPage() {
         let active = true;
 
         const loadUser = async () => {
-            const {
-                data: { user },
-            } = await supabase.auth.getUser();
+            let authResult: Awaited<ReturnType<typeof supabase.auth.getUser>>;
+
+            try {
+                authResult = await supabase.auth.getUser();
+            } catch {
+                if (!active) return;
+                router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}&error=auth-required`);
+                return;
+            }
+
+            const { data, error: authError } = authResult;
 
             if (!active) return;
+
+            if (authError) {
+                router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}&error=auth-required`);
+                return;
+            }
+
+            const user = data.user;
 
             if (!user?.email) {
                 router.replace(`/${locale}/internal/login?next=${encodeURIComponent(`/${locale}/internal/recepcion`)}`);

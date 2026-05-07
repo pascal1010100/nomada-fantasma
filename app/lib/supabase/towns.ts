@@ -159,50 +159,59 @@ function mapTownRow(row: TownRow): TownContentRecord {
 }
 
 export async function getTownBySlugFromDB(slug: string): Promise<TownContentRecord | null> {
-    const result = await supabaseAdmin
-        .from('towns' as never)
-        .select('id, slug, title, summary, cover_image, wifi_rating, rating, vibe, highlights, full_description, weather, activities, transport_schedule, services, guides, is_active, sort_order')
-        .eq('slug', slug)
-        .eq('is_active', true)
-        .maybeSingle<TownRow>();
+    try {
+        const result = await supabaseAdmin
+            .from('towns' as never)
+            .select('id, slug, title, summary, cover_image, wifi_rating, rating, vibe, highlights, full_description, weather, activities, transport_schedule, services, guides, is_active, sort_order')
+            .eq('slug', slug)
+            .eq('is_active', true)
+            .maybeSingle<TownRow>();
 
-    if (result.error) {
-        console.error(`Error fetching town by slug '${slug}':`, result.error);
+        if (result.error) {
+            return null;
+        }
+
+        return result.data ? mapTownRow(result.data) : null;
+    } catch {
         return null;
     }
-
-    return result.data ? mapTownRow(result.data) : null;
 }
 
 export async function getNearbyTownsFromDB(currentSlug: string): Promise<TownContentRecord[]> {
-    const result = await supabaseAdmin
-        .from('towns' as never)
-        .select('id, slug, title, summary, cover_image, wifi_rating, rating, vibe, highlights, full_description, weather, activities, transport_schedule, services, guides, is_active, sort_order')
-        .neq('slug', currentSlug)
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true })
-        .returns<TownRow[]>();
+    try {
+        const result = await supabaseAdmin
+            .from('towns' as never)
+            .select('id, slug, title, summary, cover_image, wifi_rating, rating, vibe, highlights, full_description, weather, activities, transport_schedule, services, guides, is_active, sort_order')
+            .neq('slug', currentSlug)
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true })
+            .returns<TownRow[]>();
 
-    if (result.error) {
-        console.error(`Error fetching nearby towns for '${currentSlug}':`, result.error);
+        if (result.error) {
+            return [];
+        }
+
+        return (result.data ?? []).map(mapTownRow);
+    } catch {
         return [];
     }
-
-    return (result.data ?? []).map(mapTownRow);
 }
 
 export async function getActiveTownsFromDB(): Promise<TownContentRecord[]> {
-    const result = await supabaseAdmin
-        .from('towns' as never)
-        .select('id, slug, title, summary, cover_image, wifi_rating, rating, vibe, highlights, full_description, weather, activities, transport_schedule, services, guides, is_active, sort_order')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true })
-        .returns<TownRow[]>();
+    try {
+        const result = await supabaseAdmin
+            .from('towns' as never)
+            .select('id, slug, title, summary, cover_image, wifi_rating, rating, vibe, highlights, full_description, weather, activities, transport_schedule, services, guides, is_active, sort_order')
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true })
+            .returns<TownRow[]>();
 
-    if (result.error) {
-        console.error('Error fetching active towns:', result.error);
+        if (result.error) {
+            return [];
+        }
+
+        return (result.data ?? []).map(mapTownRow);
+    } catch {
         return [];
     }
-
-    return (result.data ?? []).map(mapTownRow);
 }
