@@ -602,14 +602,7 @@ export async function POST(request: Request) {
               payment_amount: customerTotal,
               payment_updated_at: new Date().toISOString(),
             }
-          : template === 'booking_confirmed'
-            ? {
-                payment_status: 'paid',
-                payment_amount: customerTotal,
-                payment_confirmed_at: new Date().toISOString(),
-                payment_updated_at: new Date().toISOString(),
-              }
-            : {};
+          : {};
 
       await supabaseAdmin
         .from('reservations')
@@ -779,14 +772,7 @@ export async function POST(request: Request) {
             payment_amount: priceDetails.price,
             payment_updated_at: new Date().toISOString(),
           }
-        : template === 'booking_confirmed'
-          ? {
-              payment_status: 'paid',
-              payment_amount: priceDetails.price,
-              payment_confirmed_at: new Date().toISOString(),
-              payment_updated_at: new Date().toISOString(),
-            }
-          : {};
+        : {};
 
     await supabaseAdmin
       .from('shuttle_bookings')

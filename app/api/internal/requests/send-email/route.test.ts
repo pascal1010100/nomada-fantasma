@@ -275,4 +275,53 @@ describe('POST /api/internal/requests/send-email', () => {
       admin_notes: expect.stringContaining('email:provider_confirmation'),
     }));
   });
+
+  it('sends a booking confirmation without marking the shuttle as paid', async () => {
+    const updateSpy = vi.fn();
+    const shuttle = {
+      id: 'shuttle-1',
+      customer_name: 'Shuttle Customer',
+      customer_email: 'customer@nomadafantasma.com',
+      route_origin: 'San Pedro La Laguna',
+      route_destination: 'Antigua Guatemala',
+      travel_date: '2099-05-05',
+      travel_time: '09:00',
+      passengers: 2,
+      pickup_location: 'Hotel Unit',
+      type: 'shared',
+      price: 200,
+      payment_status: 'payment_requested',
+      payment_amount: 400,
+      payment_confirmed_at: null,
+      customer_locale: 'es',
+      admin_notes: null,
+    };
+    let shuttleCalls = 0;
+
+    mocks.from.mockImplementation((table: string) => {
+      if (table === 'shuttle_bookings') {
+        shuttleCalls += 1;
+        return shuttleCalls === 1
+          ? createSingleSelectQuery({ data: shuttle, error: null })
+          : createUpdateQuery({ error: null }, updateSpy);
+      }
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    const response = await POST(createRequest({
+      kind: 'shuttle',
+      id: 'shuttle-1',
+      template: 'booking_confirmed',
+    }));
+
+    expect(response.status).toBe(200);
+    expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({
+      admin_notes: expect.stringContaining('email:booking_confirmed'),
+      email_delivery_status: 'sent',
+    }));
+    const updatePayload = updateSpy.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(updatePayload.payment_status).toBeUndefined();
+    expect(updatePayload.payment_amount).toBeUndefined();
+    expect(updatePayload.payment_confirmed_at).toBeUndefined();
+  });
 });

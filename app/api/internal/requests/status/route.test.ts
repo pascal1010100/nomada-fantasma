@@ -121,6 +121,14 @@ describe('PATCH /api/internal/requests/status', () => {
       success: true,
       id: 'agency-email-1',
     });
+    mocks.sendShuttleProviderConfirmationEmail.mockResolvedValue({
+      success: true,
+      id: 'provider-confirmation-1',
+    });
+    mocks.sendTourProviderConfirmationEmail.mockResolvedValue({
+      success: true,
+      id: 'tour-provider-confirmation-1',
+    });
     mocks.recordInternalNotification.mockResolvedValue({ error: null });
   });
 
@@ -221,6 +229,77 @@ describe('PATCH /api/internal/requests/status', () => {
 
     expect(response.status).toBe(400);
     expect(json.error).toBe('Nota requerida para mover a cancelled.');
+  });
+
+  it('confirms a shuttle without marking it as paid', async () => {
+    const updateSpy = vi.fn();
+    const transitionInsert = createInsertQuery({ error: null });
+    const statusUpdate = createStatusUpdateQuery({
+      data: { id: 'shuttle-1', status: 'confirmed' },
+      error: null,
+    }, updateSpy);
+    const providerNoteUpdate = createSimpleUpdateQuery({ error: null });
+    const shuttle = {
+      id: 'shuttle-1',
+      status: 'processing',
+      admin_notes: null,
+      confirmed_at: null,
+      cancelled_at: null,
+      agency_id: 'agency-1',
+      customer_name: 'Shuttle Customer',
+      customer_email: 'customer@nomadafantasma.com',
+      customer_whatsapp: '50255550000',
+      route_origin: 'San Pedro La Laguna',
+      route_destination: 'Antigua Guatemala',
+      travel_date: '2099-05-05',
+      travel_time: '09:00',
+      passengers: 2,
+      pickup_location: 'Hotel Unit',
+      type: 'shared',
+      price: 200,
+      payment_status: 'payment_requested',
+      payment_amount: 400,
+      payment_confirmed_at: null,
+    };
+    let shuttleCalls = 0;
+
+    mocks.from.mockImplementation((table: string) => {
+      if (table === 'shuttle_bookings') {
+        shuttleCalls += 1;
+        if (shuttleCalls === 1) return createSingleSelectQuery({ data: shuttle, error: null });
+        if (shuttleCalls === 2) return statusUpdate.query;
+        return providerNoteUpdate;
+      }
+      if (table === 'internal_request_transitions') return transitionInsert;
+      if (table === 'agencies') {
+        return createMaybeSingleSelectQuery({
+          data: { email: 'agency@example.com', is_active: true },
+          error: null,
+        });
+      }
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    const response = await PATCH(createRequest({
+      kind: 'shuttle',
+      id: 'shuttle-1',
+      currentStatus: 'processing',
+      nextStatus: 'confirmed',
+    }));
+
+    expect(response.status).toBe(200);
+    expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({
+      status: 'confirmed',
+      confirmed_at: expect.any(String),
+    }));
+    const updatePayload = updateSpy.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(updatePayload.payment_status).toBeUndefined();
+    expect(updatePayload.payment_amount).toBeUndefined();
+    expect(updatePayload.payment_confirmed_at).toBeUndefined();
+    expect(mocks.sendShuttleProviderConfirmationEmail).toHaveBeenCalledWith(expect.objectContaining({
+      to: 'agency@example.com',
+      bookingId: 'shuttle-1',
+    }));
   });
 
   it('uses the full shared shuttle total when sending cancellation email', async () => {
